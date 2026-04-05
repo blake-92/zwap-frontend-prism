@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   ZWAP PRISM UI — Global Styles
+   Design System: Glass Morphism + Inter + JetBrains Mono
+   ============================================================ */
+
+:root {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Brand */
+  --color-brand:        #7C3AED;
+  --color-brand-hover:  #561BAF;
+  --color-brand-light:  #DBD3FB;
+  --color-brand-subtle: #B9A4F8;
+
+  /* Dark tokens */
+  --dark-bg:        #111113;
+  --dark-surface:   #252429;
+  --dark-border:    rgba(255,255,255,0.10);
+  --dark-text:      #D8D7D9;
+  --dark-muted:     #888991;
+
+  /* Light tokens */
+  --light-bg:       #F4F4F6;
+  --light-surface:  rgba(255,255,255,0.40);
+  --light-border:   rgba(255,255,255,1);
+  --light-text:     #111113;
+  --light-muted:    #67656E;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Scrollbar Prism ─────────────────────────────────────── */
+::-webkit-scrollbar             { width: 6px; height: 6px; }
+::-webkit-scrollbar-track       { background: transparent; margin: 12px; }
+::-webkit-scrollbar-thumb       {
+  background: rgba(124,58,237,0.30);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(124,58,237,0.55); border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-button      { display:none; width:0; height:0; }
+::-webkit-scrollbar-corner      { background: transparent; }
+*  { scrollbar-width: thin; scrollbar-color: rgba(124,58,237,0.30) transparent; }
+
+.no-scrollbar::-webkit-scrollbar { display:none; }
+.no-scrollbar                     { -ms-overflow-style:none; scrollbar-width:none; }
+
+/* ─── Font utilities ─────────────────────────────────────── */
+.font-sans  { font-family: var(--font-sans);  }
+.font-mono  { font-family: var(--font-mono);  }
+
+/* ─── Time input icon theme ──────────────────────────────── */
+.dark input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+
+/* ─── Receipt jagged edge ────────────────────────────────── */
+.receipt-edge {
+  height: 16px;
+  background:
+    radial-gradient(circle at 50% 0, #fff 8px, transparent 9px) repeat-x 0 0 / 18px 16px,
+    linear-gradient(#fff, #fff);
+}
+
+/* ─── Animations ─────────────────────────────────────────── */
+@keyframes fadeIn      { from { opacity:0; }                       to { opacity:1; } }
+@keyframes slideUp     { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+@keyframes scaleIn     { from { opacity:0; transform:scale(.96); } to { opacity:1; transform:scale(1); } }
+@keyframes spinSlow    { from { transform:rotate(0deg); }           to { transform:rotate(360deg); } }
+@keyframes pulseGlow   {
+  0%,100% { box-shadow: 0 0 8px rgba(124,58,237,0.40); }
+  50%     { box-shadow: 0 0 20px rgba(124,58,237,0.80); }
+}
+
+.animate-fade-in  { animation: fadeIn  .4s ease both; }
+.animate-slide-up { animation: slideUp .4s ease both; }
+.animate-scale-in { animation: scaleIn .3s ease both; }
+.animate-spin-slow{ animation: spinSlow 2s linear infinite; }
+.animate-pulse-glow{ animation: pulseGlow 2s ease-in-out infinite; }
