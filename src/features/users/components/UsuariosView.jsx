@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import {
-  Search, Download, UserPlus,
-  Pencil, Trash2,
+  Download, UserPlus,
+  Pencil, Trash2, SearchX,
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, Toggle } from '@/shared/ui'
+import { Card, Button, Badge, Toggle, SearchInput } from '@/shared/ui'
 import { USERS } from '@/services/mocks/mockData'
 import NewUserModal from './NewUserModal'
 
@@ -61,22 +61,11 @@ export default function UsuariosView() {
       }`}>
         <div className="flex items-center gap-2 flex-1">
           {/* Search */}
-          <div className={`flex items-center px-4 py-2 rounded-xl w-72 transition-all ${
-            isDarkMode
-              ? 'bg-[#111113]/50 border border-white/5 focus-within:border-[#7C3AED]/40'
-              : 'bg-white/60 border border-white focus-within:border-[#7C3AED]/30'
-          }`}>
-            <Search size={14} className={isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'} />
-            <input
-              type="text"
-              placeholder="Buscar por nombre o email..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className={`bg-transparent border-none outline-none text-xs ml-2 w-full font-medium ${
-                isDarkMode ? 'text-[#D8D7D9] placeholder:text-[#888991]' : 'text-[#111113] placeholder:text-[#B0AFB4]'
-              }`}
-            />
-          </div>
+          <SearchInput
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Buscar por nombre o email..."
+          />
           {/* Role filter pills */}
           <div className="flex items-center gap-1.5">
             {roles.map(r => (
@@ -121,7 +110,30 @@ export default function UsuariosView() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((user) => (
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="px-8 py-16 text-center">
+                    <div className="flex flex-col items-center justify-center animate-fade-in">
+                      <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 ${
+                        isDarkMode
+                          ? 'bg-[#111113]/50 border border-white/10 text-[#888991]'
+                          : 'bg-gray-50 border border-gray-200 text-[#B0AFB4]'
+                      }`}>
+                        <SearchX size={32} strokeWidth={1.5} />
+                      </div>
+                      <h3 className={`text-lg font-bold mb-2 tracking-tight ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+                        No se encontraron resultados
+                      </h3>
+                      <p className={`text-sm font-medium max-w-[300px] mx-auto mb-6 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                        No pudimos encontrar ningún usuario que coincida con &quot;{search}&quot;.
+                      </p>
+                      <Button variant="outline" onClick={() => setSearch('')}>
+                        Limpiar búsqueda
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ) : filtered.map((user) => (
                 <tr
                   key={user.id}
                   className={`group transition-colors duration-200 ${

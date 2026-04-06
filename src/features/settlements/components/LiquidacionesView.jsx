@@ -1,11 +1,11 @@
 import { useState, useMemo } from 'react'
 import {
-  Download, Search, Calendar,
+  Download, Calendar, Search,
   CheckCircle2, Landmark, AlertOctagon,
-  CalendarDays, Clock, ArrowDownToLine, Filter
+  CalendarDays, Clock, ArrowDownToLine, Filter, SearchX
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, DropdownFilter, Pagination } from '@/shared/ui'
+import { Card, Button, Badge, DropdownFilter, Pagination, SearchInput } from '@/shared/ui'
 import { PAYOUTS } from '@/services/mocks/mockData'
 
 /* ─────────────────────────────────────────────────────────────
@@ -124,22 +124,11 @@ export default function LiquidacionesView() {
           : 'bg-white/40 backdrop-blur-xl border-white shadow-sm'
       }`}>
         <div className="flex items-center gap-2 flex-1">
-          <div className={`flex items-center px-4 py-2 rounded-xl w-72 transition-all ${
-            isDarkMode
-              ? 'bg-[#111113]/50 border border-white/5 focus-within:border-[#7C3AED]/40'
-              : 'bg-white/60 border border-white focus-within:border-[#7C3AED]/30'
-          }`}>
-            <Search size={14} className={isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'} />
-            <input
-              type="text"
-              placeholder="Buscar concepto o fecha..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className={`bg-transparent border-none outline-none text-xs ml-2 w-full font-medium ${
-                isDarkMode ? 'text-[#D8D7D9] placeholder:text-[#888991]' : 'text-[#111113] placeholder:text-[#B0AFB4]'
-              }`}
-            />
-          </div>
+          <SearchInput
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Buscar concepto o fecha..."
+          />
           <DropdownFilter
             label="Fecha"
             icon={Calendar}
@@ -175,7 +164,30 @@ export default function LiquidacionesView() {
               </tr>
             </thead>
             <tbody>
-              {paginatedData.map((lote, idx) => {
+              {paginatedData.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="px-8 py-16 text-center">
+                    <div className="flex flex-col items-center justify-center animate-fade-in">
+                      <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 ${
+                        isDarkMode
+                          ? 'bg-[#111113]/50 border border-white/10 text-[#888991]'
+                          : 'bg-gray-50 border border-gray-200 text-[#B0AFB4]'
+                      }`}>
+                        <SearchX size={32} strokeWidth={1.5} />
+                      </div>
+                      <h3 className={`text-lg font-bold mb-2 tracking-tight ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+                        No se encontraron resultados
+                      </h3>
+                      <p className={`text-sm font-medium max-w-[300px] mx-auto mb-6 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                        No pudimos encontrar ninguna liquidación que coincida con &quot;{search}&quot;.
+                      </p>
+                      <Button variant="outline" onClick={() => setSearch('')}>
+                        Limpiar búsqueda
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ) : paginatedData.map((lote, idx) => {
                 const isDebt = lote.net < 0
                 return (
                   <tr

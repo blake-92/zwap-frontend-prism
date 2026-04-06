@@ -1,12 +1,12 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Search, Calendar, Download,
+  Calendar, Download,
   LinkIcon, Clock, CreditCard, Globe2, User,
   FileText, RotateCcw, SearchX, Filter
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, DropdownFilter, Pagination } from '@/shared/ui'
+import { Card, Button, Badge, DropdownFilter, Pagination, SearchInput } from '@/shared/ui'
 import { TRANSACTIONS } from '@/services/mocks/mockData'
 import { ROUTES } from '@/router/routes'
 import ReceiptModal from './ReceiptModal'
@@ -72,22 +72,11 @@ export default function TransaccionesView() {
           : 'bg-white/40 backdrop-blur-xl border-white shadow-sm'
       }`}>
         <div className="flex items-center gap-2 flex-1">
-          <div className={`flex items-center px-4 py-2 rounded-xl w-72 transition-all ${
-            isDarkMode
-              ? 'bg-[#111113]/50 border border-white/5 focus-within:border-[#7C3AED]/40'
-              : 'bg-white/60 border border-white focus-within:border-[#7C3AED]/30'
-          }`}>
-            <Search size={14} className={isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'} />
-            <input
-              type="text"
-              placeholder="Buscar por cliente o email..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className={`bg-transparent border-none outline-none text-xs ml-2 w-full font-medium ${
-                isDarkMode ? 'text-[#D8D7D9] placeholder:text-[#888991]' : 'text-[#111113] placeholder:text-[#B0AFB4]'
-              }`}
-            />
-          </div>
+          <SearchInput
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Buscar por cliente o email..."
+          />
           <DropdownFilter
             label="Fecha"
             icon={Calendar}

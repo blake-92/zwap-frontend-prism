@@ -2,10 +2,10 @@ import { useState } from 'react'
 import {
   ArrowUpFromLine, Landmark, TrendingUp,
   CheckCircle2, RefreshCcw, FileText, CircleDot,
-  Search
+  SearchX
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, Pagination } from '@/shared/ui'
+import { Card, Button, Badge, Pagination, SearchInput } from '@/shared/ui'
 import { WITHDRAWALS } from '@/services/mocks/mockData'
 import WithdrawModal from './WithdrawModal'
 
@@ -227,22 +227,12 @@ export default function WalletView() {
           <h3 className={`font-bold text-sm ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
             Historial de Retiros
           </h3>
-          <div className={`flex items-center px-3 py-1.5 rounded-xl transition-all ${
-            isDarkMode
-              ? 'bg-[#111113]/50 border border-white/5 focus-within:border-[#7C3AED]/40'
-              : 'bg-white/60 border border-white focus-within:border-[#7C3AED]/30 shadow-sm'
-          }`}>
-            <Search size={13} className={isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'} />
-            <input
-              type="text"
-              placeholder="Buscar por ID o monto..."
-              value={search}
-              onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
-              className={`bg-transparent border-none outline-none text-xs ml-2 w-48 font-medium ${
-                isDarkMode ? 'text-[#D8D7D9] placeholder:text-[#888991]' : 'text-[#111113] placeholder:text-[#B0AFB4]'
-              }`}
-            />
-          </div>
+          <SearchInput
+            value={search}
+            onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
+            placeholder="Buscar por ID o monto..."
+            className="w-56"
+          />
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[680px]">
@@ -261,7 +251,30 @@ export default function WalletView() {
               </tr>
             </thead>
             <tbody>
-              {paginatedWithdrawals.map((w, idx) => (
+              {paginatedWithdrawals.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="px-8 py-16 text-center">
+                    <div className="flex flex-col items-center justify-center animate-fade-in">
+                      <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 ${
+                        isDarkMode
+                          ? 'bg-[#111113]/50 border border-white/10 text-[#888991]'
+                          : 'bg-gray-50 border border-gray-200 text-[#B0AFB4]'
+                      }`}>
+                        <SearchX size={32} strokeWidth={1.5} />
+                      </div>
+                      <h3 className={`text-lg font-bold mb-2 tracking-tight ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+                        No se encontraron resultados
+                      </h3>
+                      <p className={`text-sm font-medium max-w-[300px] mx-auto mb-6 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                        No pudimos encontrar ningún retiro que coincida con &quot;{search}&quot;.
+                      </p>
+                      <Button variant="outline" onClick={() => { setSearch(''); setCurrentPage(1) }}>
+                        Limpiar búsqueda
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ) : paginatedWithdrawals.map((w, idx) => (
                 <tr
                   key={idx}
                   className={`group transition-colors duration-200 ${
