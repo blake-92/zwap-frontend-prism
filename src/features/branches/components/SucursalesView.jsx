@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import {
   Building2, MapPin, Users, Pencil, Trash2,
   PlusCircle, Star,
@@ -88,8 +89,22 @@ export default function SucursalesView() {
   const { isDarkMode }                = useTheme()
   const [newBranchOpen, setNewBranchOpen] = useState(false)
 
+  const listVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.05 } }
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+  }
+
   return (
-    <div className="animate-fade-in">
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+    >
 
       {/* Page header */}
       <div className="flex justify-between items-end mb-8">
@@ -107,14 +122,18 @@ export default function SucursalesView() {
       </div>
 
       {/* Cards grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <motion.div variants={listVariants} initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {BRANCH_LIST.map(b => (
-          <BranchCard key={b.id} branch={b} />
+          <motion.div key={b.id} variants={itemVariants}>
+            <BranchCard branch={b} />
+          </motion.div>
         ))}
-        <AddBranchCard onClick={() => setNewBranchOpen(true)} />
-      </div>
+        <motion.div variants={itemVariants}>
+          <AddBranchCard onClick={() => setNewBranchOpen(true)} />
+        </motion.div>
+      </motion.div>
 
       {newBranchOpen && <NewBranchModal onClose={() => setNewBranchOpen(false)} />}
-    </div>
+    </motion.div>
   )
 }

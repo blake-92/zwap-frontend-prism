@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import {
   User, Shield, CreditCard, Bell, Save,
   Smartphone, KeyRound, MonitorSmartphone, Mail, Lock
@@ -46,7 +47,12 @@ export default function SettingsView() {
   ]
 
   return (
-    <div className="animate-fade-in max-w-4xl mx-auto">
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="max-w-4xl mx-auto"
+    >
 
       {/* Page header */}
       <div className="mb-8">
@@ -66,18 +72,31 @@ export default function SettingsView() {
           <button
             key={id}
             onClick={() => setActiveTab(id)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 ${
+            className={`relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-colors duration-300 ${
               activeTab === id
                 ? isDarkMode
-                  ? 'bg-[#252429] text-white shadow-[0_2px_10px_rgba(0,0,0,0.5)] border border-white/10'
-                  : 'bg-white text-[#7C3AED] shadow-sm border border-[#7C3AED]/20'
+                  ? 'text-white'
+                  : 'text-[#7C3AED]'
                 : isDarkMode
                   ? 'text-[#888991] hover:text-white'
                   : 'text-[#67656E] hover:text-[#111113]'
             }`}
           >
-            <Icon size={16} />
-            {label}
+            {activeTab === id && (
+              <motion.div
+                layoutId="settingsTabIndicator"
+                className={`absolute inset-0 rounded-lg ${
+                  isDarkMode
+                    ? 'bg-[#252429] border border-white/10 shadow-[0_2px_10px_rgba(0,0,0,0.5)]'
+                    : 'bg-white border border-[#7C3AED]/20 shadow-sm'
+                }`}
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              />
+            )}
+            <span className="relative z-10 flex items-center gap-2">
+              <Icon size={16} />
+              {label}
+            </span>
           </button>
         ))}
       </div>
@@ -241,6 +260,6 @@ export default function SettingsView() {
         )}
 
       </div>
-    </div>
+    </motion.div>
   )
 }

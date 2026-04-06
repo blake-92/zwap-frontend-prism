@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import {
   Download, UserPlus,
   Pencil, Trash2, SearchX,
@@ -35,8 +36,22 @@ export default function UsuariosView() {
   const toggleUser = id =>
     setUsers(prev => prev.map(u => u.id === id ? { ...u, active: !u.active } : u))
 
+  const listVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.05 } }
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -10 },
+    show: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+  }
+
   return (
-    <div className="animate-fade-in">
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+    >
 
       {/* Page header */}
       <div className="flex justify-between items-end mb-8">
@@ -109,7 +124,7 @@ export default function UsuariosView() {
                 <th className="px-8 py-4 text-right min-w-[120px]">Acciones</th>
               </tr>
             </thead>
-            <tbody>
+            <motion.tbody variants={listVariants} initial="hidden" animate="show">
               {filtered.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="px-8 py-16 text-center">
@@ -134,7 +149,8 @@ export default function UsuariosView() {
                   </td>
                 </tr>
               ) : filtered.map((user) => (
-                <tr
+                <motion.tr
+                  variants={itemVariants}
                   key={user.id}
                   className={`group transition-colors duration-200 ${
                     isDarkMode
@@ -216,14 +232,14 @@ export default function UsuariosView() {
                       </Button>
                     </div>
                   </td>
-                </tr>
+                </motion.tr>
               ))}
-            </tbody>
+            </motion.tbody>
           </table>
         </div>
       </Card>
 
       {newUserOpen && <NewUserModal onClose={() => setNewUserOpen(false)} />}
-    </div>
+    </motion.div>
   )
 }

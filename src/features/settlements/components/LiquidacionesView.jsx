@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { motion } from 'framer-motion'
 import {
   Download, Calendar, Search,
   CheckCircle2, Landmark, AlertOctagon,
@@ -76,8 +77,22 @@ export default function LiquidacionesView() {
     currentPage * ITEMS_PER_PAGE
   )
 
+  const listVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.05 } }
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -10 },
+    show: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+  }
+
   return (
-    <div className="animate-fade-in">
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+    >
 
       {/* Page header */}
       <div className="flex justify-between items-end mb-8">
@@ -163,7 +178,7 @@ export default function LiquidacionesView() {
                 <th className="px-8 py-4 text-right">Acciones</th>
               </tr>
             </thead>
-            <tbody>
+            <motion.tbody variants={listVariants} initial="hidden" animate="show">
               {paginatedData.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="px-8 py-16 text-center">
@@ -190,7 +205,8 @@ export default function LiquidacionesView() {
               ) : paginatedData.map((lote, idx) => {
                 const isDebt = lote.net < 0
                 return (
-                  <tr
+                  <motion.tr
+                    variants={itemVariants}
                     key={idx}
                     className={`group transition-colors duration-200 ${
                       isDarkMode
@@ -294,10 +310,10 @@ export default function LiquidacionesView() {
                         </Button>
                       </div>
                     </td>
-                  </tr>
+                  </motion.tr>
                 )
               })}
-            </tbody>
+            </motion.tbody>
           </table>
         </div>
         <div className="px-6 pb-2">
@@ -308,6 +324,6 @@ export default function LiquidacionesView() {
           />
         </div>
       </Card>
-    </div>
+    </motion.div>
   )
 }
