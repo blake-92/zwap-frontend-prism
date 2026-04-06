@@ -1,8 +1,8 @@
-import { X, Printer, ArrowRightLeft, CheckCircle2, Download } from 'lucide-react'
+import { X, Printer, Download, Landmark, CheckCircle2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '@/shared/context/ThemeContext'
 
-export default function ReceiptModal({ trx, onClose }) {
+export default function WithdrawReceiptModal({ trx, onClose }) {
   const { isDarkMode } = useTheme()
   if (!trx) return null
 
@@ -61,38 +61,34 @@ export default function ReceiptModal({ trx, onClose }) {
               : 'bg-white/90 border-white shadow-[0_30px_80px_rgba(124,58,237,0.15)]'
           }`}>
             {/* Header Glow */}
-            <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#7C3AED]/20 to-transparent pointer-events-none" />
+            <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-emerald-500/20 to-transparent pointer-events-none" />
 
             <div className="px-8 pt-10 pb-8 relative z-10">
               {/* Brand icon */}
               <div className={`w-16 h-16 mx-auto mb-5 rounded-2xl flex items-center justify-center shadow-lg ${
                 isDarkMode 
-                  ? 'bg-[#7C3AED]/20 text-[#7C3AED] border border-[#7C3AED]/30 shadow-[0_0_20px_rgba(124,58,237,0.3)]' 
-                  : 'bg-gradient-to-tr from-[#7C3AED] to-[#B9A4F8] text-white shadow-[0_10px_20px_rgba(124,58,237,0.3)]'
+                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.3)]' 
+                  : 'bg-gradient-to-tr from-emerald-400 to-emerald-600 text-white shadow-[0_10px_20px_rgba(16,185,129,0.3)]'
               }`}>
-                <ArrowRightLeft size={28} strokeWidth={2} />
+                <Landmark size={28} strokeWidth={2} />
               </div>
               
               <div className="text-center mb-8">
                 <h2 className={`text-xl font-bold mb-1 tracking-tight ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-                  ZWAP Hotel
+                  Liquidación Bancaria
                 </h2>
                 <p className={`text-xs font-medium uppercase tracking-widest ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                  Comprobante de Pago
+                  Comprobante de Transferencia
                 </p>
               </div>
 
               {/* Status Badge */}
               <div className="flex justify-center mb-8">
                 <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
-                  trx.status === 'Completado'
-                    ? isDarkMode ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                    : trx.status === 'Reembolsado'
-                      ? isDarkMode ? 'bg-rose-500/15 text-rose-400 border border-rose-500/20' : 'bg-rose-100 text-rose-700 border border-rose-200'
-                      : isDarkMode ? 'bg-amber-500/15 text-amber-400 border border-amber-500/20' : 'bg-amber-100 text-amber-700 border border-amber-200'
+                  isDarkMode ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
                 }`}>
                   <CheckCircle2 size={14} />
-                  {trx.status.toUpperCase()}
+                  FONDOS TRANSFERIDOS
                 </div>
               </div>
 
@@ -100,13 +96,9 @@ export default function ReceiptModal({ trx, onClose }) {
 
               {/* Total Amount */}
               <div className="text-center my-6">
-                <p className={`text-xs font-bold tracking-widest uppercase mb-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>Monto Total</p>
-                <div className={`text-4xl font-mono font-bold tracking-tighter ${
-                  trx.status === 'Reembolsado' 
-                    ? 'text-rose-500 line-through opacity-70' 
-                    : isDarkMode ? 'text-white' : 'text-[#111113]'
-                }`}>
-                  ${trx.amount} <span className="text-lg text-[#888991] font-sans">USD</span>
+                <p className={`text-xs font-bold tracking-widest uppercase mb-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>Monto Liquidado</p>
+                <div className={`text-4xl font-mono font-bold tracking-tighter ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                  ${trx.amount} <span className="text-lg opacity-70 font-sans">USD</span>
                 </div>
               </div>
 
@@ -115,29 +107,25 @@ export default function ReceiptModal({ trx, onClose }) {
               {/* Data rows */}
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className={`text-xs font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>Fecha y Hora</span>
-                  <span className={`text-sm font-bold ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`}>{trx.date}, {trx.time}</span>
+                  <span className={`text-xs font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>Fecha de Ejecución</span>
+                  <span className={`text-sm font-bold ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`}>{trx.date}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className={`text-xs font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>ID Transacción</span>
+                  <span className={`text-xs font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>ID Transferencia</span>
                   <span className={`text-sm font-mono font-bold ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`}>{trx.id}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className={`text-xs font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>Método de Pago</span>
+                  <span className={`text-xs font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>Cuenta Destino</span>
                   <span className={`text-sm font-bold flex items-center gap-1.5 ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`}>
-                    <span className="capitalize">{trx.card || 'Tarjeta'}</span> •••• {trx.last4}
+                    {trx.bank}
                   </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className={`text-xs font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>Cliente</span>
-                  <span className={`text-sm font-bold ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`}>{trx.client || 'Cliente Anónimo'}</span>
                 </div>
               </div>
 
               {/* Footer text */}
               <div className={`mt-8 pt-6 border-t border-dashed text-center ${isDarkMode ? 'border-white/10' : 'border-gray-200'}`}>
                 <p className={`text-xs font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                  Procesado de forma segura por <span className={`font-bold ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>Zwap</span>
+                  Documento generado por <span className={`font-bold ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>Zwap Settlements</span>
                 </p>
               </div>
             </div>

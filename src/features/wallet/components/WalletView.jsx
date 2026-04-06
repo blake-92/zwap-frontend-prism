@@ -9,6 +9,7 @@ import { Card, Button, Badge, Pagination, SearchInput, EmptySearchState, Tooltip
 import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
 import { WITHDRAWALS } from '@/services/mocks/mockData'
 import WithdrawModal from './WithdrawModal'
+import WithdrawReceiptModal from './WithdrawReceiptModal'
 
 /* ─── Stepper horizontal ──────────────────────────────────── */
 const STEPS = [
@@ -96,6 +97,7 @@ function Stepper() {
 export default function WalletView() {
   const { isDarkMode } = useTheme()
   const [modalOpen, setModalOpen] = useState(false)
+  const [receiptTrx, setReceiptTrx] = useState(null)
   const [search, setSearch] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
 
@@ -311,6 +313,7 @@ export default function WalletView() {
                           variant="action" size="sm"
                           className="!px-2.5 !py-1.5"
                           disabled={w.status !== 'Completado'}
+                          onClick={() => setReceiptTrx(w)}
                         >
                           <FileText size={13} />
                         </Button>
@@ -332,6 +335,7 @@ export default function WalletView() {
       </Card>
 
       {modalOpen && <WithdrawModal onClose={() => setModalOpen(false)} />}
+      {receiptTrx && <WithdrawReceiptModal trx={receiptTrx} onClose={() => setReceiptTrx(null)} />}
     </motion.div>
   )
 }
