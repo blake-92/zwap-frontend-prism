@@ -1,6 +1,8 @@
 node_modules/
 dist/
 .claude/
+.opencode/
+screenshots/
 .env
 .env.local
 .env.*.local

@@ -1,0 +1,276 @@
+import { useState } from 'react'
+import {
+  X, Plus, Trash2, Mail, User, ListTree,
+  Star, Receipt, Link as LinkIcon,
+  CalendarDays,
+} from 'lucide-react'
+import { useTheme } from '@/shared/context/ThemeContext'
+import { Card, Button, Input, SegmentControl, MiniCalendar } from '@/shared/ui'
+
+export default function NewLinkModal({ onClose }) {
+  const { isDarkMode } = useTheme()
+
+  const [items, setItems]             = useState([{ desc: '', amount: '' }])
+  const [feeBearer, setFeeBearer]     = useState('hotel')
+  const [selectedDate, setSelectedDate] = useState(null)
+  const [timeValue, setTimeValue]     = useState('14:00')
+  const [calendarOpen, setCalendarOpen] = useState(false)
+  const [showConfirmClose, setShowConfirmClose] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
+
+  const hasData = () => {
+    const hasItems = items.some(it => it.desc.trim() !== '' || it.amount.trim() !== '')
+    return hasItems || selectedDate !== null || feeBearer !== 'hotel' || timeValue !== '14:00'
+  }
+
+  const handleBackdropClick = () => {
+    if (hasData()) {
+      setShowConfirmClose(true)
+    } else {
+      onClose()
+    }
+  }
+
+  const addItem    = () => setItems(prev => [...prev, { desc: '', amount: '' }])
+  const removeItem = i  => setItems(prev => prev.filter((_, idx) => idx !== i))
+  const updateItem = (i, field, val) => setItems(prev => prev.map((it, idx) => idx === i ? { ...it, [field]: val } : it))
+
+  const handleGenerateLink = () => {
+    setIsGenerating(true)
+    setTimeout(() => {
+      setIsGenerating(false)
+      onClose()
+    }, 1500)
+  }
+
+  const subtotal = items.reduce((sum, it) => sum + (parseFloat(it.amount) || 0), 0)
+  const fee      = feeBearer === 'cliente' ? subtotal * 0.03 : 0
+  const total    = subtotal + fee
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div
+        className={`absolute inset-0 backdrop-blur-md backdrop-saturate-200 transition-colors ${isDarkMode ? 'bg-black/70' : 'bg-[#111113]/40'}`}
+        onClick={handleBackdropClick}
+      />
+
+      {/* Confirmation Modal */}
+      {showConfirmClose && (
+        <div className="absolute inset-0 z-[60] flex items-center justify-center p-4 backdrop-blur-md bg-black/60">
+          <div className={`p-6 rounded-2xl border shadow-2xl max-w-[360px] animate-scale-in ${
+            isDarkMode ? 'bg-[#252429] border-white/20' : 'bg-white border-gray-200'
+          }`}>
+            <h3 className={`text-lg font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+              ¿Descartar cambios?
+            </h3>
+            <p className={`text-sm mb-6 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+              Tienes datos sin guardar. Si cierras ahora, perderás toda la información ingresada.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <Button variant="ghost" onClick={() => setShowConfirmClose(false)}>
+                Cancelar
+              </Button>
+              <Button variant="danger" onClick={onClose}>
+                Sí, descartar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal */}
+      <div className={`relative w-full max-w-[1000px] rounded-[24px] border overflow-hidden shadow-2xl animate-scale-in flex flex-col max-h-[90vh] ${
+        isDarkMode
+          ? 'bg-[#252429]/95 backdrop-blur-3xl border-white/20 border-t-white/30 shadow-[0_40px_100px_rgba(0,0,0,0.9)]'
+          : 'bg-white/95 backdrop-blur-3xl border-white shadow-[0_20px_60px_rgba(0,0,0,0.15)]'
+      }`}>
+
+        {/* Modal header */}
+        <div className={`px-8 py-5 border-b flex justify-between items-center flex-shrink-0 ${isDarkMode ? 'border-white/10' : 'border-black/5'}`}>
+          <div>
+            <h2 className={`text-xl font-bold tracking-tight ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+              Crear Link de Reserva
+            </h2>
+            <p className={`text-xs mt-0.5 font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+              Genera un enlace de cobro con vencimiento e ítems detallados.
+            </p>
+          </div>
+          <Button variant="ghost" size="icon" onClick={onClose}><X size={20} /></Button>
+        </div>
+
+        {/* Body: 60% left + 40% right */}
+        <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
+
+          {/* ── LEFT: Cliente + Items ── */}
+          <div className={`p-8 flex-[1.5] md:border-r overflow-y-auto ${isDarkMode ? 'border-white/10' : 'border-black/5'}`}>
+
+            {/* Cliente */}
+            <div className="mb-8">
+              <h3 className={`text-xs font-bold tracking-widest mb-4 flex items-center gap-2 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
+                <User size={14} /> DATOS DEL CLIENTE
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className={`block text-xs font-bold tracking-wide mb-2 ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
+                    Nombre del Titular
+                  </label>
+                  <Input type="text" placeholder="Ej: Alice Smith" />
+                </div>
+                <div>
+                  <label className={`block text-xs font-bold tracking-wide mb-2 ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
+                    Correo Electrónico
+                  </label>
+                  <Input icon={Mail} type="email" placeholder="alice@example.com" />
+                </div>
+              </div>
+            </div>
+
+            {/* Items */}
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className={`text-xs font-bold tracking-widest flex items-center gap-2 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
+                  <ListTree size={14} /> CONSTRUCTOR DE ÍTEMS
+                </h3>
+                <Button variant="outline" size="sm" onClick={addItem} className="!h-8 !px-3">
+                  <Plus size={14} /> Añadir Ítem
+                </Button>
+              </div>
+
+              <div className={`p-5 rounded-2xl border space-y-4 ${isDarkMode ? 'bg-[#111113]/30 border-white/5' : 'bg-gray-50/50 border-black/5'}`}>
+                {items.map((item, idx) => (
+                  <div key={idx} className="flex gap-3 items-start animate-fade-in">
+                    <div className="flex-1">
+                      <Input
+                        type="text"
+                        placeholder="Concepto (Ej: Habitación Simple x2 noches)"
+                        value={item.desc}
+                        onChange={e => updateItem(idx, 'desc', e.target.value)}
+                      />
+                    </div>
+                    <div className="w-32">
+                      <Input
+                        type="number"
+                        placeholder="Precio ($)"
+                        value={item.amount}
+                        onChange={e => updateItem(idx, 'amount', e.target.value)}
+                      />
+                    </div>
+                    {items.length > 1 ? (
+                      <Button variant="danger" size="icon" onClick={() => removeItem(idx)} className="flex-shrink-0 mt-1">
+                        <Trash2 size={16} />
+                      </Button>
+                    ) : (
+                      <Button variant="ghost" size="icon" disabled className="flex-shrink-0 mt-1 opacity-20 cursor-not-allowed">
+                        <Trash2 size={16} />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* ── RIGHT: Config + Summary ── */}
+          <div className={`flex-1 flex flex-col relative overflow-hidden ${
+            isDarkMode ? 'bg-gradient-to-b from-[#7C3AED]/10 to-transparent' : 'bg-gradient-to-b from-[#DBD3FB]/20 to-transparent'
+          }`}>
+            <div className="p-8 flex-1 overflow-y-auto">
+              <h3 className={`text-xs font-bold tracking-widest mb-6 flex items-center gap-2 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
+                <Star size={14} /> CONFIGURACIÓN
+              </h3>
+
+              <div className="space-y-6">
+                {/* Fecha */}
+                <div>
+                  <label className={`block text-xs font-bold tracking-wide mb-2 ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
+                    Fecha/Hora de Expiración
+                  </label>
+                  <div className="relative">
+                    <Button
+                      variant="outline"
+                      className={`w-full justify-start text-left font-normal ${!selectedDate && (isDarkMode ? '!text-[#888991]' : '!text-[#B0AFB4]')}`}
+                      onClick={e => { e.stopPropagation(); setCalendarOpen(v => !v) }}
+                    >
+                      <CalendarDays size={16} className={`mr-2 ${selectedDate ? 'text-[#7C3AED]' : 'opacity-50'}`} />
+                      {selectedDate ? `${selectedDate} a las ${timeValue}` : 'Seleccionar fecha y hora...'}
+                    </Button>
+
+                    {calendarOpen && (
+                      <MiniCalendar
+                        selectedDate={selectedDate}
+                        onSelect={setSelectedDate}
+                        timeValue={timeValue}
+                        onTimeChange={setTimeValue}
+                        onConfirm={() => setCalendarOpen(false)}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* Fee bearer */}
+                <div>
+                  <label className={`block text-xs font-bold tracking-wide mb-2 ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
+                    Comisión Bancaria (3%)
+                  </label>
+                  <SegmentControl
+                    options={[{ value: 'hotel', label: 'El Hotel' }, { value: 'cliente', label: 'El Cliente' }]}
+                    value={feeBearer}
+                    onChange={setFeeBearer}
+                  />
+                </div>
+              </div>
+
+              {/* Summary ticket */}
+              <Card className={`mt-8 !rounded-2xl ${isDarkMode ? '!bg-[#111113]/50 border-white/5' : '!bg-white/80 border-white'}`}>
+                <div className="p-5">
+                  <h3 className={`text-xs font-bold tracking-widest mb-4 flex items-center gap-2 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
+                    <Receipt size={14} /> RESUMEN DEL LINK
+                  </h3>
+                  <div className="space-y-3 font-mono text-sm">
+                    <div className={`flex justify-between ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                      <span>Subtotal ({items.length} ítems):</span>
+                      <span className={isDarkMode ? 'text-white' : 'text-[#111113]'}>${subtotal.toFixed(2)}</span>
+                    </div>
+                    <div className={`flex justify-between ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                      <span>Comisión Stripe:</span>
+                      <span>{feeBearer === 'cliente' ? `+$${fee.toFixed(2)}` : 'Absorbida'}</span>
+                    </div>
+                    <div className={`flex justify-between items-end pt-4 mt-4 border-t ${isDarkMode ? 'border-white/10' : 'border-gray-200'}`}>
+                      <span className={`font-sans font-bold text-sm ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+                        Total a cobrar:
+                      </span>
+                      <span className="text-3xl font-bold tracking-tighter text-[#7C3AED]">
+                        ${total.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* Footer CTA */}
+            <div className={`p-6 border-t flex-shrink-0 backdrop-blur-xl ${isDarkMode ? 'border-white/10 bg-[#111113]/80' : 'border-black/5 bg-white/50'}`}>
+              <Button
+                className="w-full !py-4 shadow-lg relative overflow-hidden"
+                onClick={handleGenerateLink}
+                disabled={isGenerating || !selectedDate || subtotal === 0}
+              >
+                {isGenerating ? (
+                  <span className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin-slow"></div>
+                    Generando...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <LinkIcon size={18} /> Generar Link de Reserva
+                  </span>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

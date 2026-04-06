@@ -1,0 +1,269 @@
+import { useState } from 'react'
+import {
+  Plus, QrCode, Copy, ExternalLink, Search,
+  Download, ChevronDown, Edit2, Mail, Eye,
+  Timer, CheckCircle2, XCircle, ListTree,
+  CalendarDays,
+} from 'lucide-react'
+import { useTheme } from '@/shared/context/ThemeContext'
+import { Card, Button, Badge, Toggle } from '@/shared/ui'
+import { PERMANENT_LINKS, CUSTOM_LINKS } from '@/services/mocks/mockData'
+import NewLinkModal from './NewLinkModal'
+
+/* ─────────────────────────────────────────────────────────────
+   Permanent Link Card
+───────────────────────────────────────────────────────────── */
+function PermanentCard({ link, onToggle }) {
+  const { isDarkMode } = useTheme()
+
+  return (
+    <Card className="p-6 relative group">
+      {/* Icon + Toggle */}
+      <div className="flex justify-between items-start mb-4">
+        <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors duration-300 ${
+          link.active
+            ? isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/60 text-[#561BAF]'
+            : isDarkMode ? 'bg-[#252429] text-[#888991]'    : 'bg-gray-100 text-[#67656E]'
+        }`}>
+          <QrCode size={22} />
+        </div>
+        <Toggle active={link.active} onToggle={onToggle} />
+      </div>
+
+      {/* Info */}
+      <h4 className={`text-lg font-bold tracking-tight mb-1 ${
+        link.active
+          ? isDarkMode ? 'text-white' : 'text-[#111113]'
+          : isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'
+      }`}>
+        {link.name}
+      </h4>
+      <p className={`text-xs font-medium mb-6 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+        {link.desc}
+      </p>
+
+      {/* Actions */}
+      <div className={`pt-4 border-t flex justify-between items-center ${isDarkMode ? 'border-white/10' : 'border-black/5'}`}>
+        <div className="flex gap-2">
+          <Button variant="ghost" size="icon" className="!p-1.5" disabled={!link.active} title="Ver QR">
+            <QrCode size={16} />
+          </Button>
+          <Button variant="ghost" size="icon" className="!p-1.5" disabled={!link.active} title="Copiar enlace">
+            <Copy size={16} />
+          </Button>
+        </div>
+        <Button variant="outline" size="sm" disabled={!link.active} className="!py-1.5 !px-3 !text-xs">
+          Abrir <ExternalLink size={12} />
+        </Button>
+      </div>
+    </Card>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Custom Links Table
+───────────────────────────────────────────────────────────── */
+function CustomLinksTable() {
+  const { isDarkMode } = useTheme()
+  const [search, setSearch] = useState('')
+
+  const filtered = CUSTOM_LINKS.filter(l =>
+    !search || l.client.toLowerCase().includes(search.toLowerCase()) || l.id.toLowerCase().includes(search.toLowerCase())
+  )
+
+  return (
+    <>
+      {/* Toolbar */}
+      <div className={`relative z-20 mb-6 p-2 rounded-2xl border flex justify-between items-center ${
+        isDarkMode
+          ? 'bg-[#252429]/20 backdrop-blur-xl border-white/10'
+          : 'bg-white/40 backdrop-blur-xl border-white shadow-sm'
+      }`}>
+        <div className="flex items-center gap-2 flex-1">
+          <div className={`flex items-center px-4 py-2 rounded-xl w-72 transition-all ${
+            isDarkMode
+              ? 'bg-[#111113]/50 border border-white/5 focus-within:border-[#7C3AED]/40'
+              : 'bg-white/60 border border-white focus-within:border-[#7C3AED]/30'
+          }`}>
+            <Search size={14} className={isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'} />
+            <input
+              type="text"
+              placeholder="Buscar por cliente o ID..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className={`bg-transparent border-none outline-none text-xs ml-2 w-full font-medium ${
+                isDarkMode ? 'text-[#D8D7D9] placeholder:text-[#888991]' : 'text-[#111113] placeholder:text-[#B0AFB4]'
+              }`}
+            />
+          </div>
+          <Button variant="outline" size="sm">
+            Estado <ChevronDown size={12} />
+          </Button>
+        </div>
+        <Button variant="successExport" size="sm">
+          <Download size={14} /> Exportar CSV
+        </Button>
+      </div>
+
+      {/* Table */}
+      <Card className="pb-2">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[900px]">
+            <thead>
+              <tr className={`text-[10px] uppercase font-bold tracking-widest ${
+                isDarkMode ? 'text-[#888991] border-b border-white/10 bg-[#111113]/40' : 'text-[#67656E] border-b border-black/5 bg-white/50'
+              }`}>
+                <th className="px-6 py-4">ID & Cliente</th>
+                <th className="px-6 py-4">Detalle / Items</th>
+                <th className="px-6 py-4">Tiempos</th>
+                <th className="px-6 py-4 text-center">Estado</th>
+                <th className="px-8 py-4 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((link, idx) => (
+                <tr
+                  key={idx}
+                  className={`group transition-colors duration-200 ${
+                    isDarkMode
+                      ? 'border-b border-white/5 hover:bg-[#7C3AED]/5 last:border-0'
+                      : 'border-b border-black/5 hover:bg-[#DBD3FB]/20 last:border-0'
+                  }`}
+                >
+                  {/* ID & Cliente */}
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${
+                        isDarkMode
+                          ? 'bg-[#7C3AED]/15 text-[#7C3AED] border border-[#7C3AED]/30'
+                          : 'bg-[#DBD3FB]/60 border border-white text-[#561BAF] shadow-sm'
+                      }`}>
+                        {link.initials}
+                      </div>
+                      <div>
+                        <p className={`font-bold text-sm ${isDarkMode ? 'text-[#D8D7D9] group-hover:text-white' : 'text-[#111113]'}`}>
+                          {link.client}{' '}
+                          <span className="font-mono text-[10px] text-[#888991] ml-1">({link.id})</span>
+                        </p>
+                        <p className={`text-xs mt-0.5 font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                          {link.email}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+
+                  {/* Detalle */}
+                  <td className="px-6 py-4">
+                    <p className={`font-mono font-bold text-[15px] tracking-tight ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+                      ${link.amount}
+                    </p>
+                    <p className={`text-[11px] font-medium flex items-center gap-1.5 mt-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                      <ListTree size={12} className="opacity-70" /> {link.items} Items
+                    </p>
+                  </td>
+
+                  {/* Tiempos */}
+                  <td className="px-6 py-4">
+                    <p className={`text-xs font-bold flex items-center gap-1.5 ${
+                      link.status === 'Expirado' ? 'text-rose-500' : isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'
+                    }`}>
+                      <Timer size={14} className="opacity-70" />
+                      {link.expires !== '-' ? `Expira: ${link.expires}` : 'Sin expiración'}
+                    </p>
+                    <p className={`text-[10px] font-medium flex items-center gap-1.5 mt-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                      <CalendarDays size={12} className="opacity-70" /> Creado: {link.createdAt}
+                    </p>
+                  </td>
+
+                  {/* Estado */}
+                  <td className="px-6 py-4 text-center">
+                    <div className="flex flex-col items-center gap-1.5">
+                      <Badge variant={link.statusVariant} icon={link.StatusIcon}>
+                        {link.status}
+                      </Badge>
+                      <p className={`text-[10px] font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                        <Eye size={10} /> {link.views} vistas
+                      </p>
+                    </div>
+                  </td>
+
+                  {/* Acciones */}
+                  <td className="px-8 py-4 text-right">
+                    <div className="flex items-center justify-end gap-1 opacity-40 group-hover:opacity-100 transition-opacity duration-200">
+                      <Button variant="ghost" size="sm" className="!px-2" disabled={link.status === 'Pagado'} title="Editar">
+                        <Edit2 size={15} />
+                        <span className="hidden xl:inline text-xs">Editar</span>
+                      </Button>
+                      <Button variant="ghost" size="sm" className="!px-2" disabled={link.status === 'Expirado'} title="Copiar">
+                        <Copy size={15} />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="!px-2" disabled={link.status === 'Expirado'} title="Código QR">
+                        <QrCode size={15} />
+                      </Button>
+                      <Button
+                        variant="action" size="sm" className="!px-3 ml-1"
+                        disabled={link.status === 'Expirado' || link.status === 'Pagado'}
+                      >
+                        <Mail size={15} />
+                        <span className="hidden xl:inline text-xs">Enviar</span>
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────────
+   LinksView
+───────────────────────────────────────────────────────────── */
+export default function LinksView() {
+  const { isDarkMode }            = useTheme()
+  const [links, setLinks]         = useState(PERMANENT_LINKS)
+  const [newLinkOpen, setNewLinkOpen] = useState(false)
+
+  const toggleLink = id =>
+    setLinks(prev => prev.map(l => l.id === id ? { ...l, active: !l.active } : l))
+
+  return (
+    <div className="animate-fade-in">
+      {/* Page header */}
+      <div className="flex justify-between items-end mb-8">
+        <div>
+          <h1 className={`text-3xl font-bold mb-2 tracking-tight ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+            Links de Pago
+          </h1>
+          <p className={`text-sm font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+            Gestiona cobros rápidos en mostrador y reservas personalizadas.
+          </p>
+        </div>
+        <Button onClick={() => setNewLinkOpen(true)}>
+          <Plus size={18} /> Nuevo Link de Reserva
+        </Button>
+      </div>
+
+      {/* Permanentes */}
+      <p className={`text-xs font-bold tracking-widest uppercase mb-4 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+        Enlaces Permanentes (Monto Abierto)
+      </p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        {links.map(link => (
+          <PermanentCard key={link.id} link={link} onToggle={() => toggleLink(link.id)} />
+        ))}
+      </div>
+
+      {/* Personalizados */}
+      <p className={`text-xs font-bold tracking-widest uppercase mb-4 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+        Enlaces de Reserva (Personalizados)
+      </p>
+      <CustomLinksTable />
+
+      {newLinkOpen && <NewLinkModal onClose={() => setNewLinkOpen(false)} />}
+    </div>
+  )
+}
