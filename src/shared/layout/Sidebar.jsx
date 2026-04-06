@@ -63,34 +63,46 @@ export default function Sidebar() {
       {/* Footer */}
       <div className="px-4 pb-5 space-y-3 flex-shrink-0">
 
-        {/* Wallet balance card */}
+        {/* Wallet shortcut */}
         <button
           onClick={() => navigate(ROUTES.WALLET)}
-          className={`w-full p-4 rounded-2xl flex items-center justify-between transition-all duration-300 group ${
-            isDarkMode
-              ? 'bg-[#7C3AED]/15 border border-[#7C3AED]/25 hover:bg-[#7C3AED]/25 hover:border-[#7C3AED]/40'
-              : 'bg-[#DBD3FB]/50 border border-[#7C3AED]/15 hover:bg-[#DBD3FB]/80 hover:border-[#7C3AED]/30'
+          className={`w-full p-5 mb-4 rounded-[24px] border transition-all duration-300 cursor-pointer overflow-hidden relative group flex justify-between items-center ${
+            location.pathname === ROUTES.WALLET
+              ? isDarkMode
+                ? 'bg-[#252429]/60 border-[#7C3AED]/50 shadow-[0_0_20px_rgba(124,58,237,0.15)]'
+                : 'bg-white/80 border-[#7C3AED]/40 shadow-[0_0_15px_rgba(124,58,237,0.1)]'
+              : isDarkMode
+                ? 'bg-[#252429]/30 border-white/10 hover:bg-[#252429]/50 hover:border-white/20 hover:-translate-y-0.5 hover:shadow-lg'
+                : 'bg-white/40 border-white hover:bg-white/60 hover:-translate-y-0.5 hover:shadow-md'
           }`}
         >
-          <div className="text-left">
-            <p className={`text-[10px] font-bold tracking-widest uppercase mb-1 ${
-              isDarkMode ? 'text-[#A78BFA]' : 'text-[#7C3AED]'
+          <div className="relative z-10 text-left">
+            <p className={`text-[11px] font-bold tracking-widest uppercase mb-1 transition-colors ${
+              location.pathname === ROUTES.WALLET
+                ? isDarkMode ? 'text-[#B9A4F8]' : 'text-[#7C3AED]'
+                : isDarkMode ? 'text-[#888991] group-hover:text-[#D8D7D9]' : 'text-[#67656E]'
             }`}>
               Mi Billetera
             </p>
-            <p className={`text-2xl font-mono font-bold tracking-tight leading-none ${
-              isDarkMode ? 'text-white' : 'text-[#111113]'
-            }`}>
+            <span className={`text-2xl font-mono font-bold tracking-tighter block leading-none ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
               $12.4K
-            </p>
+            </span>
           </div>
-          <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
-            isDarkMode
-              ? 'bg-[#7C3AED] text-white shadow-[0_0_20px_rgba(124,58,237,0.5)] group-hover:shadow-[0_0_28px_rgba(124,58,237,0.7)]'
-              : 'bg-[#7C3AED] text-white shadow-[0_4px_14px_rgba(124,58,237,0.4)] group-hover:shadow-[0_6px_20px_rgba(124,58,237,0.5)]'
+          <div className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+            location.pathname === ROUTES.WALLET
+              ? isDarkMode
+                ? 'bg-[#7C3AED] text-white shadow-[0_0_15px_rgba(124,58,237,0.5)]'
+                : 'bg-[#7C3AED] text-white shadow-md'
+              : 'bg-transparent text-[#888991] -translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0'
           }`}>
-            <ArrowRight size={16} />
+            <ArrowRight size={16} strokeWidth={3} />
           </div>
+          {/* Glow blob */}
+          <div className={`absolute -bottom-6 -right-6 w-24 h-24 rounded-full blur-2xl transition-all duration-500 pointer-events-none ${
+            location.pathname === ROUTES.WALLET
+              ? isDarkMode ? 'bg-[#7C3AED]/30' : 'bg-[#7C3AED]/20'
+              : 'bg-transparent group-hover:bg-[#7C3AED]/15'
+          }`} />
         </button>
 
         {/* User row */}
