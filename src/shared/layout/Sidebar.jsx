@@ -1,7 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, Link as LinkIcon, ArrowRightLeft,
-  Landmark, Users, Building2, Settings,
+  Landmark, Users, Building2,
   LogOut,
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
