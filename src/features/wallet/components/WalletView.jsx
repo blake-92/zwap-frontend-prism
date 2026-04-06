@@ -221,18 +221,27 @@ export default function WalletView() {
         </div>
       </div>
 
-      {/* Historial de Retiros */}
-      <Card className="pb-2">
-        <div className={`px-8 py-4 flex justify-between items-center border-b ${isDarkMode ? 'border-white/10' : 'border-black/5'}`}>
-          <h3 className={`font-bold text-sm ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-            Historial de Retiros
-          </h3>
+      {/* Toolbar — Historial de Retiros */}
+      <div className={`relative z-20 mb-6 p-2 rounded-2xl border flex justify-between items-center ${
+        isDarkMode
+          ? 'bg-[#252429]/20 backdrop-blur-xl border-white/10'
+          : 'bg-white/40 backdrop-blur-xl border-white shadow-sm'
+      }`}>
+        <div className="flex items-center gap-2 flex-1">
           <SearchInput
             value={search}
             onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
             placeholder="Buscar por ID o monto..."
-            className="w-56"
           />
+        </div>
+      </div>
+
+      {/* Historial de Retiros */}
+      <Card className="pb-2">
+        <div className={`px-8 py-4 border-b ${isDarkMode ? 'border-white/10' : 'border-black/5'}`}>
+          <h3 className={`font-bold text-sm ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+            Historial de Retiros
+          </h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[680px]">
