@@ -2,11 +2,12 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, Link as LinkIcon, ArrowRightLeft,
   Landmark, Users, Building2, Settings,
-  ArrowRight, LogOut,
+  LogOut,
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
 import ZwapLogo from '@/shared/brand/ZwapLogo'
 import { ROUTES } from '@/router/routes'
+import WalletSidebarCard from '@/features/wallet/components/WalletSidebarCard'
 
 const NAV_ITEMS = [
   { id: 'dashboard',     label: 'Dashboard',     icon: LayoutDashboard, route: ROUTES.DASHBOARD    },
@@ -63,35 +64,8 @@ export default function Sidebar() {
       {/* Footer */}
       <div className="px-4 pb-5 space-y-3 flex-shrink-0">
 
-        {/* Wallet balance card */}
-        <button
-          onClick={() => navigate(ROUTES.WALLET)}
-          className={`w-full p-4 rounded-2xl flex items-center justify-between transition-all duration-300 group ${
-            isDarkMode
-              ? 'bg-[#7C3AED]/15 border border-[#7C3AED]/25 hover:bg-[#7C3AED]/25 hover:border-[#7C3AED]/40'
-              : 'bg-[#DBD3FB]/50 border border-[#7C3AED]/15 hover:bg-[#DBD3FB]/80 hover:border-[#7C3AED]/30'
-          }`}
-        >
-          <div className="text-left">
-            <p className={`text-[10px] font-bold tracking-widest uppercase mb-1 ${
-              isDarkMode ? 'text-[#A78BFA]' : 'text-[#7C3AED]'
-            }`}>
-              Mi Billetera
-            </p>
-            <p className={`text-2xl font-mono font-bold tracking-tight leading-none ${
-              isDarkMode ? 'text-white' : 'text-[#111113]'
-            }`}>
-              $12.4K
-            </p>
-          </div>
-          <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
-            isDarkMode
-              ? 'bg-[#7C3AED] text-white shadow-[0_0_20px_rgba(124,58,237,0.5)] group-hover:shadow-[0_0_28px_rgba(124,58,237,0.7)]'
-              : 'bg-[#7C3AED] text-white shadow-[0_4px_14px_rgba(124,58,237,0.4)] group-hover:shadow-[0_6px_20px_rgba(124,58,237,0.5)]'
-          }`}>
-            <ArrowRight size={16} />
-          </div>
-        </button>
+        {/* Wallet shortcut */}
+        <WalletSidebarCard />
 
         {/* User row */}
         <div className={`flex items-center gap-3 px-1 py-2 rounded-xl transition-all duration-300 group ${
