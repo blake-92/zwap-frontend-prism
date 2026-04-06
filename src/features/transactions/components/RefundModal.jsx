@@ -11,9 +11,10 @@ export default function RefundModal({ trx, onClose }) {
 
   if (!trx) return null
 
-  const warningText = feeBearer === 'hotel'
-    ? 'El cliente recibirá los fondos completos. El hotel asumirá el costo transaccional de $3.50 generado por el banco.'
-    : 'El cliente recibirá el monto menos la comisión bancaria de $3.50. El saldo del hotel no se verá afectado.'
+  const refundAmount = refundType === 'parcial' ? (partial || '0.00') : trx.amount
+  const warningText  = feeBearer === 'hotel'
+    ? `El cliente recibirá $${refundAmount} completos. El hotel asumirá el costo transaccional de $3.50.`
+    : `El cliente recibirá $${refundAmount} menos la comisión bancaria de $3.50. El saldo del hotel no se verá afectado.`
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

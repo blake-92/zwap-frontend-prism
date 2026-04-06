@@ -4,10 +4,11 @@ import { motion } from 'framer-motion'
 import {
   Calendar, Download,
   LinkIcon, Clock, CreditCard, Globe2, User,
-  FileText, RotateCcw, SearchX, Filter
+  FileText, RotateCcw, Filter
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, DropdownFilter, Pagination, SearchInput } from '@/shared/ui'
+import { Card, Button, Badge, DropdownFilter, Pagination, SearchInput, EmptySearchState } from '@/shared/ui'
+import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
 import { TRANSACTIONS } from '@/services/mocks/mockData'
 import { ROUTES } from '@/router/routes'
 import ReceiptModal from './ReceiptModal'
@@ -48,19 +49,6 @@ export default function TransaccionesView() {
     currentPage * ITEMS_PER_PAGE
   )
 
-  const listVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.05 }
-    }
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, x: -10 },
-    show: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
-  }
-
   return (
     <motion.div 
       initial={{ opacity: 0, y: 15 }}
@@ -92,7 +80,7 @@ export default function TransaccionesView() {
         <div className="flex items-center gap-2 flex-1">
           <SearchInput
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
             placeholder="Buscar por cliente o email..."
           />
           <DropdownFilter
@@ -249,28 +237,7 @@ export default function TransaccionesView() {
                   </motion.tr>
                 ))
               ) : (
-                <tr>
-                  <td colSpan="5" className="px-8 py-16 text-center">
-                    <div className="flex flex-col items-center justify-center animate-fade-in">
-                      <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 ${
-                        isDarkMode
-                          ? 'bg-[#111113]/50 border border-white/10 text-[#888991]'
-                          : 'bg-gray-50 border border-gray-200 text-[#B0AFB4]'
-                      }`}>
-                        <SearchX size={32} strokeWidth={1.5} />
-                      </div>
-                      <h3 className={`text-lg font-bold mb-2 tracking-tight ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-                        No se encontraron resultados
-                      </h3>
-                      <p className={`text-sm font-medium max-w-[300px] mx-auto mb-6 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                        No pudimos encontrar ninguna transacción que coincida con &quot;{search}&quot;.
-                      </p>
-                      <Button variant="outline" onClick={() => setSearch('')}>
-                        Limpiar búsqueda
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
+                <EmptySearchState colSpan={5} term={search} onClear={() => setSearch('')} />
               )}
             </motion.tbody>
           </table>

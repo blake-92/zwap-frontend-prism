@@ -3,10 +3,10 @@ import { motion } from 'framer-motion'
 import {
   ArrowUpFromLine, Landmark, TrendingUp,
   CheckCircle2, RefreshCcw, FileText, CircleDot,
-  SearchX
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, Pagination, SearchInput } from '@/shared/ui'
+import { Card, Button, Badge, Pagination, SearchInput, EmptySearchState } from '@/shared/ui'
+import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
 import { WITHDRAWALS } from '@/services/mocks/mockData'
 import WithdrawModal from './WithdrawModal'
 
@@ -111,15 +111,6 @@ export default function WalletView() {
     currentPage * ITEMS_PER_PAGE
   )
 
-  const listVariants = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.05 } }
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, x: -10 },
-    show: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
-  }
 
   return (
     <motion.div 
@@ -276,28 +267,7 @@ export default function WalletView() {
             </thead>
             <motion.tbody variants={listVariants} initial="hidden" animate="show">
               {paginatedWithdrawals.length === 0 ? (
-                <tr>
-                  <td colSpan="6" className="px-8 py-16 text-center">
-                    <div className="flex flex-col items-center justify-center animate-fade-in">
-                      <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 ${
-                        isDarkMode
-                          ? 'bg-[#111113]/50 border border-white/10 text-[#888991]'
-                          : 'bg-gray-50 border border-gray-200 text-[#B0AFB4]'
-                      }`}>
-                        <SearchX size={32} strokeWidth={1.5} />
-                      </div>
-                      <h3 className={`text-lg font-bold mb-2 tracking-tight ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-                        No se encontraron resultados
-                      </h3>
-                      <p className={`text-sm font-medium max-w-[300px] mx-auto mb-6 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                        No pudimos encontrar ningún retiro que coincida con &quot;{search}&quot;.
-                      </p>
-                      <Button variant="outline" onClick={() => { setSearch(''); setCurrentPage(1) }}>
-                        Limpiar búsqueda
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
+                <EmptySearchState colSpan={6} term={search} onClear={() => { setSearch(''); setCurrentPage(1) }} />
               ) : paginatedWithdrawals.map((w, idx) => (
                 <motion.tr
                   variants={itemVariants}
