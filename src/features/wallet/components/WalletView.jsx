@@ -307,7 +307,7 @@ export default function WalletView() {
                     </Badge>
                   </td>
                   <td className="px-8 py-3.5 text-right">
-                    <div className="opacity-40 group-hover:opacity-100 transition-opacity duration-200 flex justify-end">
+                    <div className="flex justify-end">
                       <Tooltip content="Ver recibo" position="top">
                         <Button
                           variant="action" size="sm"

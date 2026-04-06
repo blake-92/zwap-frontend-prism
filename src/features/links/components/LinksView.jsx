@@ -195,7 +195,7 @@ function CustomLinksTable() {
 
                   {/* Acciones */}
                   <td className="px-8 py-4 text-right">
-                    <div className="flex items-center justify-end gap-1 opacity-40 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="flex items-center justify-end gap-1">
                       <Tooltip content="Editar" position="top">
                         <Button variant="ghost" size="sm" className="!px-2" disabled={link.status === 'Pagado'}>
                           <Edit2 size={15} />

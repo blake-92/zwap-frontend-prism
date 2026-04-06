@@ -273,7 +273,7 @@ export default function LiquidacionesView() {
 
                     {/* Acciones */}
                     <td className="px-8 py-4 text-right">
-                      <div className="opacity-40 group-hover:opacity-100 transition-opacity duration-200">
+                      <div>
                         <Tooltip content="Inspeccionar lote" position="top">
                           <Button variant="action" size="sm" className="!px-3 !py-2">
                             <Search size={15} />

@@ -194,7 +194,7 @@ export default function UsuariosView() {
 
                   {/* Acciones */}
                   <td className="px-8 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2 opacity-40 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="flex items-center justify-end gap-2">
                       <Tooltip content="Editar usuario" position="top">
                         <Button variant="action" size="sm" className="!px-3 !py-2">
                           <Pencil size={14} />
