@@ -16,7 +16,6 @@ const NAV_ITEMS = [
   { id: 'liquidaciones', label: 'Liquidaciones', icon: Landmark,        route: ROUTES.SETTLEMENTS  },
   { id: 'usuarios',      label: 'Usuarios',      icon: Users,           route: ROUTES.USERS        },
   { id: 'sucursales',    label: 'Sucursales',    icon: Building2,       route: ROUTES.BRANCHES     },
-  { id: 'configuracion', label: 'Configuración', icon: Settings,        route: ROUTES.SETTINGS     },
 ]
 
 export default function Sidebar() {
