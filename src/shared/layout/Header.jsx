@@ -1,11 +1,14 @@
 import { useState, useEffect, useRef } from 'react'
-import { Search, Moon, Sun, Bell, ChevronDown, Building2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Search, Moon, Sun, Bell, ChevronDown, Building2, Settings } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Button } from '@/shared/ui'
+import { ROUTES } from '@/router/routes'
+import { Button, Tooltip } from '@/shared/ui'
 import { BRANCHES } from '@/services/mocks/mockData'
 
 export default function Header({ selectedBranch, onBranchChange }) {
   const { isDarkMode, toggleTheme } = useTheme()
+  const navigate                    = useNavigate()
   const [menuOpen, setMenuOpen]     = useState(false)
   const menuRef                     = useRef(null)
 
@@ -42,17 +45,28 @@ export default function Header({ selectedBranch, onBranchChange }) {
 
       {/* Right actions */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={toggleTheme}>
-          {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-        </Button>
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell size={20} />
-          <span className={`absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full border-[2px] ${
-            isDarkMode
-              ? 'bg-[#7C3AED] border-[#111113] shadow-[0_0_10px_rgba(124,58,237,0.9)]'
-              : 'bg-red-500 border-white shadow-[0_0_10px_rgba(239,68,68,0.6)]'
-          }`} />
-        </Button>
+        <Tooltip content="Modo Oscuro/Claro" position="bottom">
+          <Button variant="ghost" size="icon" onClick={toggleTheme}>
+            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+          </Button>
+        </Tooltip>
+
+        <Tooltip content="Configuración" position="bottom">
+          <Button variant="ghost" size="icon" onClick={() => navigate(ROUTES.SETTINGS)}>
+            <Settings size={20} />
+          </Button>
+        </Tooltip>
+
+        <Tooltip content="Notificaciones" position="bottom">
+          <Button variant="ghost" size="icon" className="relative">
+            <Bell size={20} />
+            <span className={`absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full border-[2px] ${
+              isDarkMode
+                ? 'bg-[#7C3AED] border-[#111113] shadow-[0_0_10px_rgba(124,58,237,0.9)]'
+                : 'bg-red-500 border-white shadow-[0_0_10px_rgba(239,68,68,0.6)]'
+            }`} />
+          </Button>
+        </Tooltip>
 
         {/* Branch selector */}
         <div ref={menuRef} className="relative">

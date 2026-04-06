@@ -5,6 +5,7 @@ import {
   Smartphone, KeyRound, MonitorSmartphone, Mail, Lock
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
+import { useToast } from '@/shared/context/ToastContext'
 import { Card, Button, Input, Toggle, Badge } from '@/shared/ui'
 
 /* ─── Generic Setting Row ─────────────────────────────────── */
@@ -38,7 +39,12 @@ function SettingRow({ icon: Icon, title, desc, control }) {
 
 export default function SettingsView() {
   const { isDarkMode } = useTheme()
+  const { addToast } = useToast()
   const [activeTab, setActiveTab] = useState('perfil')
+
+  const handleSave = () => {
+    addToast('Cambios guardados correctamente.', 'success')
+  }
 
   const TABS = [
     { id: 'perfil', label: 'Mi Perfil', icon: User },
@@ -150,7 +156,7 @@ export default function SettingsView() {
               </div>
 
               <div className={`pt-6 border-t flex justify-end ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
-                <Button><Save size={16} /> Guardar Cambios</Button>
+                <Button onClick={handleSave}><Save size={16} /> Guardar Cambios</Button>
               </div>
             </Card>
 

@@ -1,14 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   ArrowUpFromLine, Landmark, TrendingUp,
   CheckCircle2, RefreshCcw, FileText, CircleDot,
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, Pagination, SearchInput, EmptySearchState } from '@/shared/ui'
+import { Card, Button, Badge, Pagination, SearchInput, EmptySearchState, Tooltip } from '@/shared/ui'
 import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
 import { WITHDRAWALS } from '@/services/mocks/mockData'
 import WithdrawModal from './WithdrawModal'
+import WithdrawReceiptModal from './WithdrawReceiptModal'
 
 /* ─── Stepper horizontal ──────────────────────────────────── */
 const STEPS = [
@@ -96,6 +97,7 @@ function Stepper() {
 export default function WalletView() {
   const { isDarkMode } = useTheme()
   const [modalOpen, setModalOpen] = useState(false)
+  const [receiptTrx, setReceiptTrx] = useState(null)
   const [search, setSearch] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
 
@@ -305,14 +307,17 @@ export default function WalletView() {
                     </Badge>
                   </td>
                   <td className="px-8 py-3.5 text-right">
-                    <div className="opacity-40 group-hover:opacity-100 transition-opacity duration-200 flex justify-end">
-                      <Button
-                        variant="action" size="sm"
-                        className="!px-2.5 !py-1.5"
-                        disabled={w.status !== 'Completado'}
-                      >
-                        <FileText size={13} />
-                      </Button>
+                    <div className="flex justify-end">
+                      <Tooltip content="Ver recibo" position="top">
+                        <Button
+                          variant="action" size="sm"
+                          className="!px-2.5 !py-1.5"
+                          disabled={w.status !== 'Completado'}
+                          onClick={() => setReceiptTrx(w)}
+                        >
+                          <FileText size={13} />
+                        </Button>
+                      </Tooltip>
                     </div>
                   </td>
                 </motion.tr>
@@ -330,6 +335,7 @@ export default function WalletView() {
       </Card>
 
       {modalOpen && <WithdrawModal onClose={() => setModalOpen(false)} />}
+      {receiptTrx && <WithdrawReceiptModal trx={receiptTrx} onClose={() => setReceiptTrx(null)} />}
     </motion.div>
   )
 }

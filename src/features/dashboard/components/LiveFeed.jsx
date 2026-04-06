@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion'
 import { ArrowRight, User } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Card, Button, Badge } from '@/shared/ui'
@@ -11,7 +12,12 @@ export default function LiveFeed({ onViewAll }) {
       <div className={`p-6 pb-5 flex justify-between items-center border-b ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
         <div>
           <h3 className={`font-bold text-xl tracking-tight flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)] inline-block" />
+            <motion.span 
+              initial={{ opacity: 0.2 }}
+              animate={{ opacity: [1, 0.2, 1, 0.2, 1] }}
+              transition={{ duration: 2, times: [0, 0.2, 0.4, 0.6, 1], ease: "easeInOut" }}
+              className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] inline-block" 
+            />
             Feed en Vivo
           </h3>
           <p className={`text-xs font-medium mt-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>

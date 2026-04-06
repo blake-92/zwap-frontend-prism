@@ -7,7 +7,7 @@ import {
   FileText, RotateCcw, Filter
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, DropdownFilter, Pagination, SearchInput, EmptySearchState } from '@/shared/ui'
+import { Card, Button, Badge, DropdownFilter, Pagination, SearchInput, EmptySearchState, Tooltip } from '@/shared/ui'
 import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
 import { TRANSACTIONS } from '@/services/mocks/mockData'
 import { ROUTES } from '@/router/routes'
@@ -214,24 +214,41 @@ export default function TransaccionesView() {
 
                     {/* Acciones */}
                     <td className="px-8 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-40 group-hover:opacity-100 transition-opacity duration-200">
-                        <Button
-                          variant="action" size="sm"
-                          onClick={() => setReceiptTrx(trx)}
-                          className="!px-3 !py-2"
-                        >
-                          <FileText size={15} />
-                          <span className="hidden xl:inline">Recibo</span>
-                        </Button>
-                        <Button
-                          variant="danger" size="sm"
-                          onClick={() => setRefundTrx(trx)}
-                          className="!px-3 !py-2"
-                          disabled={trx.status === 'Reembolsado'}
-                        >
-                          <RotateCcw size={15} />
-                          <span className="hidden xl:inline">Devolución</span>
-                        </Button>
+                      <div className="flex items-center justify-end gap-2">
+                        <Tooltip content="Ver Recibo" position="top">
+                          <Button
+                            variant="action" size="sm"
+                            onClick={() => setReceiptTrx(trx)}
+                            className="!px-3 !py-2"
+                          >
+                            <FileText size={15} />
+                            <span className="hidden xl:inline ml-1">Recibo</span>
+                          </Button>
+                        </Tooltip>
+                        {trx.status === 'Reembolsado' ? (
+                          <Tooltip content="Recibo de Devolución" position="top">
+                            <Button
+                              variant="outline" size="sm"
+                              onClick={() => setRefundTrx(trx)}
+                              className="!px-3 !py-2"
+                            >
+                              <FileText size={15} />
+                              <span className="hidden xl:inline ml-1">Recibo Dev.</span>
+                            </Button>
+                          </Tooltip>
+                        ) : (
+                          <Tooltip content="Devolución" position="top">
+                            <Button
+                              variant="danger" size="sm"
+                              onClick={() => setRefundTrx(trx)}
+                              className="!px-3 !py-2"
+                              disabled={trx.status === 'Pendiente'}
+                            >
+                              <RotateCcw size={15} />
+                              <span className="hidden xl:inline ml-1">Devolución</span>
+                            </Button>
+                          </Tooltip>
+                        )}
                       </div>
                     </td>
                   </motion.tr>

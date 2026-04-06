@@ -7,7 +7,8 @@ import {
   CalendarDays,
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, Toggle, SearchInput, EmptySearchState } from '@/shared/ui'
+import { useToast } from '@/shared/context/ToastContext'
+import { Card, Button, Badge, Toggle, SearchInput, EmptySearchState, Tooltip } from '@/shared/ui'
 import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
 import { PERMANENT_LINKS, CUSTOM_LINKS } from '@/services/mocks/mockData'
 import NewLinkModal from './NewLinkModal'
@@ -17,6 +18,12 @@ import NewLinkModal from './NewLinkModal'
 ───────────────────────────────────────────────────────────── */
 function PermanentCard({ link, onToggle }) {
   const { isDarkMode } = useTheme()
+  const { addToast } = useToast()
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(`https://zwap.me/pay/${link.id}`)
+    addToast(`Enlace "${link.name}" copiado al portapapeles.`, 'success')
+  }
 
   return (
     <Card className="p-6 relative group">
@@ -47,12 +54,16 @@ function PermanentCard({ link, onToggle }) {
       {/* Actions */}
       <div className={`pt-4 border-t flex justify-between items-center ${isDarkMode ? 'border-white/10' : 'border-black/5'}`}>
         <div className="flex gap-2">
-          <Button variant="ghost" size="icon" className="!p-1.5" disabled={!link.active} title="Ver QR">
-            <QrCode size={16} />
-          </Button>
-          <Button variant="ghost" size="icon" className="!p-1.5" disabled={!link.active} title="Copiar enlace">
-            <Copy size={16} />
-          </Button>
+          <Tooltip content="Ver código QR" position="top">
+            <Button variant="ghost" size="icon" className="!p-1.5" disabled={!link.active}>
+              <QrCode size={16} />
+            </Button>
+          </Tooltip>
+          <Tooltip content="Copiar enlace" position="top">
+            <Button variant="ghost" size="icon" className="!p-1.5" disabled={!link.active} onClick={handleCopy}>
+              <Copy size={16} />
+            </Button>
+          </Tooltip>
         </div>
         <Button variant="outline" size="sm" disabled={!link.active} className="!py-1.5 !px-3 !text-xs">
           Abrir <ExternalLink size={12} />
@@ -67,6 +78,7 @@ function PermanentCard({ link, onToggle }) {
 ───────────────────────────────────────────────────────────── */
 function CustomLinksTable() {
   const { isDarkMode } = useTheme()
+  const { addToast } = useToast()
   const [search, setSearch] = useState('')
 
   const filtered = CUSTOM_LINKS.filter(l =>
@@ -183,24 +195,41 @@ function CustomLinksTable() {
 
                   {/* Acciones */}
                   <td className="px-8 py-4 text-right">
-                    <div className="flex items-center justify-end gap-1 opacity-40 group-hover:opacity-100 transition-opacity duration-200">
-                      <Button variant="ghost" size="sm" className="!px-2" disabled={link.status === 'Pagado'} title="Editar">
-                        <Edit2 size={15} />
-                        <span className="hidden xl:inline text-xs">Editar</span>
-                      </Button>
-                      <Button variant="ghost" size="sm" className="!px-2" disabled={link.status === 'Expirado'} title="Copiar">
-                        <Copy size={15} />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="!px-2" disabled={link.status === 'Expirado'} title="Código QR">
-                        <QrCode size={15} />
-                      </Button>
-                      <Button
-                        variant="action" size="sm" className="!px-3 ml-1"
-                        disabled={link.status === 'Expirado' || link.status === 'Pagado'}
-                      >
-                        <Mail size={15} />
-                        <span className="hidden xl:inline text-xs">Enviar</span>
-                      </Button>
+                    <div className="flex items-center justify-end gap-1">
+                      <Tooltip content="Editar" position="top">
+                        <Button variant="ghost" size="sm" className="!px-2" disabled={link.status === 'Pagado'}>
+                          <Edit2 size={15} />
+                          <span className="hidden xl:inline text-xs ml-1">Editar</span>
+                        </Button>
+                      </Tooltip>
+                      <Tooltip content="Copiar enlace" position="top">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="!px-2" 
+                          disabled={link.status === 'Expirado'}
+                          onClick={() => {
+                            navigator.clipboard.writeText(`https://zwap.me/pay/${link.id}`)
+                            addToast(`Enlace "${link.id}" copiado al portapapeles.`, 'success')
+                          }}
+                        >
+                          <Copy size={15} />
+                        </Button>
+                      </Tooltip>
+                      <Tooltip content="Generar QR" position="top">
+                        <Button variant="ghost" size="sm" className="!px-2" disabled={link.status === 'Expirado'}>
+                          <QrCode size={15} />
+                        </Button>
+                      </Tooltip>
+                      <Tooltip content="Enviar por Mail" position="top">
+                        <Button
+                          variant="action" size="sm" className="!px-3 ml-1"
+                          disabled={link.status === 'Expirado' || link.status === 'Pagado'}
+                        >
+                          <Mail size={15} />
+                          <span className="hidden xl:inline text-xs ml-1">Enviar</span>
+                        </Button>
+                      </Tooltip>
                     </div>
                   </td>
                 </motion.tr>
