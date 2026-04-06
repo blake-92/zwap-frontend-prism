@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import {
   ArrowUpFromLine, Landmark, TrendingUp,
   CheckCircle2, RefreshCcw, FileText, CircleDot,
@@ -110,8 +111,22 @@ export default function WalletView() {
     currentPage * ITEMS_PER_PAGE
   )
 
+  const listVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.05 } }
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -10 },
+    show: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+  }
+
   return (
-    <div className="animate-fade-in">
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+    >
 
       {/* Page header */}
       <div className="flex justify-between items-end mb-8">
@@ -259,7 +274,7 @@ export default function WalletView() {
                 <th className="px-8 py-3 text-right">Recibo</th>
               </tr>
             </thead>
-            <tbody>
+            <motion.tbody variants={listVariants} initial="hidden" animate="show">
               {paginatedWithdrawals.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="px-8 py-16 text-center">
@@ -284,7 +299,8 @@ export default function WalletView() {
                   </td>
                 </tr>
               ) : paginatedWithdrawals.map((w, idx) => (
-                <tr
+                <motion.tr
+                  variants={itemVariants}
                   key={idx}
                   className={`group transition-colors duration-200 ${
                     isDarkMode
@@ -329,9 +345,9 @@ export default function WalletView() {
                       </Button>
                     </div>
                   </td>
-                </tr>
+                </motion.tr>
               ))}
-            </tbody>
+            </motion.tbody>
           </table>
         </div>
         <div className="px-6 pb-2">
@@ -344,6 +360,6 @@ export default function WalletView() {
       </Card>
 
       {modalOpen && <WithdrawModal onClose={() => setModalOpen(false)} />}
-    </div>
+    </motion.div>
   )
 }

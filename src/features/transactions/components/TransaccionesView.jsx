@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import {
   Calendar, Download,
   LinkIcon, Clock, CreditCard, Globe2, User,
@@ -47,8 +48,25 @@ export default function TransaccionesView() {
     currentPage * ITEMS_PER_PAGE
   )
 
+  const listVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.05 }
+    }
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -10 },
+    show: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+  }
+
   return (
-    <div className="animate-fade-in">
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+    >
 
       {/* Page header */}
       <div className="flex justify-between items-end mb-8">
@@ -114,10 +132,11 @@ export default function TransaccionesView() {
                 <th className="px-8 py-4 text-right min-w-[160px]">Acciones</th>
               </tr>
             </thead>
-            <tbody>
+            <motion.tbody variants={listVariants} initial="hidden" animate="show">
               {paginatedData.length > 0 ? (
                 paginatedData.map((trx, idx) => (
-                  <tr
+                  <motion.tr
+                    variants={itemVariants}
                     key={idx}
                     className={`group transition-colors duration-200 ${
                       isDarkMode
@@ -227,7 +246,7 @@ export default function TransaccionesView() {
                         </Button>
                       </div>
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))
               ) : (
                 <tr>
@@ -253,7 +272,7 @@ export default function TransaccionesView() {
                   </td>
                 </tr>
               )}
-            </tbody>
+            </motion.tbody>
           </table>
         </div>
         <div className="px-6 pb-2">
@@ -268,6 +287,6 @@ export default function TransaccionesView() {
       {/* Modals */}
       {receiptTrx && <ReceiptModal trx={receiptTrx} onClose={() => setReceiptTrx(null)} />}
       {refundTrx  && <RefundModal  trx={refundTrx}  onClose={() => setRefundTrx(null)}  />}
-    </div>
+    </motion.div>
   )
 }

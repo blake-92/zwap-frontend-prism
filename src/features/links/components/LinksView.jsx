@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import {
   Plus, QrCode, Copy, ExternalLink,
   Download, ChevronDown, Edit2, Mail, Eye,
@@ -71,6 +72,16 @@ function CustomLinksTable() {
     !search || l.client.toLowerCase().includes(search.toLowerCase()) || l.id.toLowerCase().includes(search.toLowerCase())
   )
 
+  const listVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.05 } }
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -10 },
+    show: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+  }
+
   return (
     <>
       {/* Toolbar */}
@@ -109,7 +120,7 @@ function CustomLinksTable() {
                 <th className="px-8 py-4 text-right">Acciones</th>
               </tr>
             </thead>
-            <tbody>
+            <motion.tbody variants={listVariants} initial="hidden" animate="show">
               {filtered.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="px-8 py-16 text-center">
@@ -134,7 +145,8 @@ function CustomLinksTable() {
                   </td>
                 </tr>
               ) : filtered.map((link, idx) => (
-                <tr
+                <motion.tr
+                  variants={itemVariants}
                   key={idx}
                   className={`group transition-colors duration-200 ${
                     isDarkMode
@@ -221,9 +233,9 @@ function CustomLinksTable() {
                       </Button>
                     </div>
                   </td>
-                </tr>
+                </motion.tr>
               ))}
-            </tbody>
+            </motion.tbody>
           </table>
         </div>
       </Card>
@@ -244,7 +256,11 @@ export default function LinksView() {
     setLinks(prev => prev.map(l => l.id === id ? { ...l, active: !l.active } : l))
 
   return (
-    <div className="animate-fade-in">
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+    >
       {/* Page header */}
       <div className="flex justify-between items-end mb-8">
         <div>
@@ -277,6 +293,6 @@ export default function LinksView() {
       <CustomLinksTable />
 
       {newLinkOpen && <NewLinkModal onClose={() => setNewLinkOpen(false)} />}
-    </div>
+    </motion.div>
   )
 }
