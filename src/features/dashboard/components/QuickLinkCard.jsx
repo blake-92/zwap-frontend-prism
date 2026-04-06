@@ -1,14 +1,23 @@
 import { useState } from 'react'
 import { MousePointerClick, QrCode, Copy, ExternalLink } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
+import { useToast } from '@/shared/context/ToastContext'
 import { Card, Button } from '@/shared/ui'
 import { PERMANENT_LINKS } from '@/services/mocks/mockData'
 
 export default function QuickLinkCard({ onNewLink }) {
   const { isDarkMode }    = useTheme()
+  const { addToast }      = useToast()
   const activeLinks       = PERMANENT_LINKS.filter(l => l.active)
   const [active, setActive] = useState(activeLinks[0]?.id ?? null)
   const selected          = PERMANENT_LINKS.find(l => l.id === active) ?? activeLinks[0]
+
+  const handleCopy = () => {
+    if (selected?.url) {
+      navigator.clipboard.writeText(selected.url)
+      addToast(`Enlace "${selected.name}" copiado al portapapeles.`, 'success')
+    }
+  }
 
   return (
     <Card className="p-0 flex flex-col bg-gradient-to-b from-[#7C3AED]/5 to-transparent">
@@ -64,7 +73,7 @@ export default function QuickLinkCard({ onNewLink }) {
           <p className={`text-[11px] font-mono font-bold mb-3 truncate ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
             {selected?.url}
           </p>
-          <Button className="w-full !py-2.5 shadow-lg">
+          <Button className="w-full !py-2.5 shadow-lg" onClick={handleCopy}>
             <Copy size={16} /> Copiar Enlace
           </Button>
         </div>
