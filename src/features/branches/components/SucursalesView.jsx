@@ -6,7 +6,7 @@ import {
   PlusCircle, Star,
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge } from '@/shared/ui'
+import { Card, Button, Badge, Tooltip } from '@/shared/ui'
 import { BRANCH_LIST } from '@/services/mocks/mockData'
 import NewBranchModal from './NewBranchModal'
 
@@ -27,13 +27,17 @@ function BranchCard({ branch }) {
         </div>
 
         <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <Button variant="action" size="sm" className="!px-2.5 !py-2">
-            <Pencil size={13} />
-          </Button>
-          {!branch.isMain && (
-            <Button variant="danger" size="sm" className="!px-2.5 !py-2">
-              <Trash2 size={13} />
+          <Tooltip content="Editar sucursal" position="top">
+            <Button variant="action" size="sm" className="!px-2.5 !py-2">
+              <Pencil size={13} />
             </Button>
+          </Tooltip>
+          {!branch.isMain && (
+            <Tooltip content="Eliminar sucursal" position="top">
+              <Button variant="danger" size="sm" className="!px-2.5 !py-2">
+                <Trash2 size={13} />
+              </Button>
+            </Tooltip>
           )}
         </div>
       </div>

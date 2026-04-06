@@ -78,6 +78,7 @@ function PermanentCard({ link, onToggle }) {
 ───────────────────────────────────────────────────────────── */
 function CustomLinksTable() {
   const { isDarkMode } = useTheme()
+  const { addToast } = useToast()
   const [search, setSearch] = useState('')
 
   const filtered = CUSTOM_LINKS.filter(l =>
@@ -202,7 +203,16 @@ function CustomLinksTable() {
                         </Button>
                       </Tooltip>
                       <Tooltip content="Copiar enlace" position="top">
-                        <Button variant="ghost" size="sm" className="!px-2" disabled={link.status === 'Expirado'}>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="!px-2" 
+                          disabled={link.status === 'Expirado'}
+                          onClick={() => {
+                            navigator.clipboard.writeText(`https://zwap.me/pay/${link.id}`)
+                            addToast(`Enlace "${link.id}" copiado al portapapeles.`, 'success')
+                          }}
+                        >
                           <Copy size={15} />
                         </Button>
                       </Tooltip>

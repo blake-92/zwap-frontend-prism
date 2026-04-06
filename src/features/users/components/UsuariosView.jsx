@@ -5,7 +5,7 @@ import {
   Pencil, Trash2,
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, Toggle, SearchInput, EmptySearchState } from '@/shared/ui'
+import { Card, Button, Badge, Toggle, SearchInput, EmptySearchState, Tooltip } from '@/shared/ui'
 import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
 import { USERS } from '@/services/mocks/mockData'
 import NewUserModal from './NewUserModal'
@@ -195,12 +195,16 @@ export default function UsuariosView() {
                   {/* Acciones */}
                   <td className="px-8 py-4 text-right">
                     <div className="flex items-center justify-end gap-2 opacity-40 group-hover:opacity-100 transition-opacity duration-200">
-                      <Button variant="action" size="sm" className="!px-3 !py-2">
-                        <Pencil size={14} />
-                      </Button>
-                      <Button variant="danger" size="sm" className="!px-3 !py-2">
-                        <Trash2 size={14} />
-                      </Button>
+                      <Tooltip content="Editar usuario" position="top">
+                        <Button variant="action" size="sm" className="!px-3 !py-2">
+                          <Pencil size={14} />
+                        </Button>
+                      </Tooltip>
+                      <Tooltip content="Eliminar usuario" position="top">
+                        <Button variant="danger" size="sm" className="!px-3 !py-2">
+                          <Trash2 size={14} />
+                        </Button>
+                      </Tooltip>
                     </div>
                   </td>
                 </motion.tr>

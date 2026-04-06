@@ -6,7 +6,7 @@ import {
   CalendarDays, Clock, ArrowDownToLine, Filter
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, DropdownFilter, Pagination, SearchInput, EmptySearchState } from '@/shared/ui'
+import { Card, Button, Badge, DropdownFilter, Pagination, SearchInput, EmptySearchState, Tooltip } from '@/shared/ui'
 import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
 import { PAYOUTS } from '@/services/mocks/mockData'
 
@@ -274,10 +274,12 @@ export default function LiquidacionesView() {
                     {/* Acciones */}
                     <td className="px-8 py-4 text-right">
                       <div className="opacity-40 group-hover:opacity-100 transition-opacity duration-200">
-                        <Button variant="action" size="sm" className="!px-3 !py-2">
-                          <Search size={15} />
-                          <span className="hidden xl:inline text-xs">Inspeccionar</span>
-                        </Button>
+                        <Tooltip content="Inspeccionar lote" position="top">
+                          <Button variant="action" size="sm" className="!px-3 !py-2">
+                            <Search size={15} />
+                            <span className="hidden xl:inline text-xs ml-1">Inspeccionar</span>
+                          </Button>
+                        </Tooltip>
                       </div>
                     </td>
                   </motion.tr>

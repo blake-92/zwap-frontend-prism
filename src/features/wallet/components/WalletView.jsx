@@ -5,7 +5,7 @@ import {
   CheckCircle2, RefreshCcw, FileText, CircleDot,
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, Pagination, SearchInput, EmptySearchState, Skeleton } from '@/shared/ui'
+import { Card, Button, Badge, Pagination, SearchInput, EmptySearchState, Tooltip } from '@/shared/ui'
 import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
 import { WITHDRAWALS } from '@/services/mocks/mockData'
 import WithdrawModal from './WithdrawModal'
@@ -98,12 +98,6 @@ export default function WalletView() {
   const [modalOpen, setModalOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 800)
-    return () => clearTimeout(t)
-  }, [])
 
   const ITEMS_PER_PAGE = 5
   const filtered = WITHDRAWALS.filter(w =>
@@ -156,8 +150,8 @@ export default function WalletView() {
               </span>
             </div>
 
-            <h2 className={`text-[2.6rem] font-mono font-bold tracking-tighter leading-none mb-2 h-[42px] ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-              {loading ? <Skeleton width="220px" height="100%" rounded="rounded-xl" /> : '$12,450.00'}
+            <h2 className={`text-[2.6rem] font-mono font-bold tracking-tighter leading-none mb-2 ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+              $12,450.00
             </h2>
 
             <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/20">
@@ -312,13 +306,15 @@ export default function WalletView() {
                   </td>
                   <td className="px-8 py-3.5 text-right">
                     <div className="opacity-40 group-hover:opacity-100 transition-opacity duration-200 flex justify-end">
-                      <Button
-                        variant="action" size="sm"
-                        className="!px-2.5 !py-1.5"
-                        disabled={w.status !== 'Completado'}
-                      >
-                        <FileText size={13} />
-                      </Button>
+                      <Tooltip content="Ver recibo" position="top">
+                        <Button
+                          variant="action" size="sm"
+                          className="!px-2.5 !py-1.5"
+                          disabled={w.status !== 'Completado'}
+                        >
+                          <FileText size={13} />
+                        </Button>
+                      </Tooltip>
                     </div>
                   </td>
                 </motion.tr>
