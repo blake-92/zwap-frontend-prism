@@ -47,10 +47,15 @@ export default function LiveFeed({ onViewAll }) {
                 }`}
               >
                 {/* Time */}
-                <td className="px-6 py-3">
-                  <span className={`text-xs font-bold ${isDarkMode ? 'text-[#D8D7D9] group-hover:text-white' : 'text-[#111113]'}`}>
-                    {trx.time}
-                  </span>
+                <td className="px-6 py-3 relative">
+                  <div className="flex items-center gap-2">
+                    {idx === 0 && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)] flex-shrink-0" />
+                    )}
+                    <span className={`text-xs font-bold ${isDarkMode ? 'text-[#D8D7D9] group-hover:text-white' : 'text-[#111113]'}`}>
+                      {trx.time}
+                    </span>
+                  </div>
                 </td>
 
                 {/* Origin */}
