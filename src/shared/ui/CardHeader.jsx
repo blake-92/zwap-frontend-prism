@@ -20,7 +20,7 @@ export default function CardHeader({ title, description, className = 'p-6', chil
       isDarkMode ? 'border-white/10' : 'border-black/5'
     } ${className}`}>
       <div>
-        <h3 className={`font-bold text-lg tracking-tight ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+        <h3 className={`font-bold text-lg tracking-tight flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
           {title}
         </h3>
         {description && (

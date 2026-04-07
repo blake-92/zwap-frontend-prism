@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import {
   LayoutDashboard, Link as LinkIcon, ArrowRightLeft,
   Landmark, Users, Building2,
@@ -39,36 +39,44 @@ export default function Sidebar() {
 
       {/* Nav */}
       <nav className="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto">
-        {NAV_ITEMS.map(({ id, label, icon: Icon, route }) => {
-          const isActive = location.pathname === route
-          return (
-            <button
-              key={id}
-              onClick={() => navigate(route)}
-              className={`relative w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-200 ${
-                isActive
-                  ? isDarkMode ? 'text-white' : 'text-[#561BAF]'
-                  : isDarkMode
-                    ? 'text-[#888991] hover:text-[#D8D7D9]'
-                    : 'text-[#67656E] hover:text-[#111113]'
-              }`}
-            >
-              {isActive && (
-                <motion.div
-                  layoutId="sidebar-indicator"
-                  className={`absolute inset-0 rounded-xl ${
-                    isDarkMode
-                      ? 'bg-[#252429]/40 border border-white/10 border-t-white/20 shadow-xl shadow-black/30 backdrop-blur-md'
-                      : 'bg-white/60 border border-white shadow-[0_8px_20px_rgba(0,0,0,0.04)] backdrop-blur-md'
-                  }`}
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                />
-              )}
-              <Icon size={18} className={`relative z-10 ${isActive ? 'text-[#7C3AED]' : 'opacity-70'}`} />
-              <span className="relative z-10">{label}</span>
-            </button>
-          )
-        })}
+        <LayoutGroup id="sidebar-nav">
+          {NAV_ITEMS.map(({ id, label, icon: Icon, route }) => {
+            const isActive = location.pathname === route
+            return (
+              <button
+                key={id}
+                onClick={() => navigate(route)}
+                className={`relative w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-200 ${
+                  isActive
+                    ? isDarkMode ? 'text-white' : 'text-[#561BAF]'
+                    : isDarkMode
+                      ? 'text-[#888991] hover:text-[#D8D7D9]'
+                      : 'text-[#67656E] hover:text-[#111113]'
+                }`}
+              >
+                <AnimatePresence initial={false}>
+                  {isActive && (
+                    <motion.div
+                      key="sidebar-indicator"
+                      layoutId="sidebar-indicator"
+                      className={`absolute inset-0 rounded-xl ${
+                        isDarkMode
+                          ? 'bg-[#252429]/40 border border-white/10 border-t-white/20 shadow-xl shadow-black/30 backdrop-blur-md'
+                          : 'bg-white/60 border border-white shadow-[0_8px_20px_rgba(0,0,0,0.04)] backdrop-blur-md'
+                      }`}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                    />
+                  )}
+                </AnimatePresence>
+                <Icon size={18} className={`relative z-10 ${isActive ? 'text-[#7C3AED]' : 'opacity-70'}`} />
+                <span className="relative z-10">{label}</span>
+              </button>
+            )
+          })}
+        </LayoutGroup>
       </nav>
 
       {/* Footer */}

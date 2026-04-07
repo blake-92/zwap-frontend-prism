@@ -1,5 +1,13 @@
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { Outlet } from 'react-router-dom'
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-full min-h-[50vh]">
+      <div className="w-8 h-8 border-2 border-[#7C3AED]/30 border-t-[#7C3AED] rounded-full animate-spin" />
+    </div>
+  )
+}
 import { useTheme } from '@/shared/context/ThemeContext'
 import { BRANCHES } from '@/services/mocks/mockData'
 import Sidebar from './Sidebar'
@@ -20,7 +28,9 @@ export default function AppShell() {
 
         <main className="flex-1 overflow-auto p-8 xl:p-10 pb-24 xl:pb-32">
           <div className="max-w-[1400px] mx-auto h-full">
-            <Outlet />
+            <Suspense fallback={<PageLoader />}>
+              <Outlet />
+            </Suspense>
           </div>
         </main>
       </div>

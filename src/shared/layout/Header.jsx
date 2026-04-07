@@ -1,16 +1,26 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useId } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Moon, Sun, Bell, ChevronDown, Building2, Settings } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { ROUTES } from '@/router/routes'
 import { Button, Tooltip } from '@/shared/ui'
 import { BRANCHES } from '@/services/mocks/mockData'
 
+const SPRING = { type: 'spring', stiffness: 400, damping: 30 }
+
+const panelVariants = {
+  hidden:  { opacity: 0, scale: 0.95, y: -4 },
+  visible: { opacity: 1, scale: 1,    y: 0,  transition: { ...SPRING, stiffness: 500 } },
+  exit:    { opacity: 0, scale: 0.95, y: -4,  transition: { duration: 0.12, ease: 'easeIn' } },
+}
+
 export default function Header({ selectedBranch, onBranchChange }) {
   const { isDarkMode, toggleTheme } = useTheme()
   const navigate                    = useNavigate()
   const [menuOpen, setMenuOpen]     = useState(false)
   const menuRef                     = useRef(null)
+  const pillId                      = useId()
 
   useEffect(() => {
     const handler = e => {
@@ -86,42 +96,60 @@ export default function Header({ selectedBranch, onBranchChange }) {
             <span className={`text-sm font-semibold ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`}>
               {selectedBranch}
             </span>
-            <ChevronDown size={14} className={`transition-transform duration-200 ${menuOpen ? 'rotate-180' : ''} ${
-              isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'
-            }`} />
+            <motion.span
+              animate={{ rotate: menuOpen ? 180 : 0 }}
+              transition={SPRING}
+              className={`flex items-center ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}
+            >
+              <ChevronDown size={14} />
+            </motion.span>
           </div>
 
-          {menuOpen && (
-            <div className={`absolute right-0 mt-4 w-56 rounded-2xl z-50 overflow-hidden border shadow-2xl animate-scale-in ${
-              isDarkMode
-                ? 'bg-[#252429]/95 backdrop-blur-3xl border-white/20 shadow-[0_40px_80px_rgba(0,0,0,0.9)]'
-                : 'bg-white/95 backdrop-blur-3xl border-white/80 shadow-[0_40px_80px_rgba(0,0,0,0.15)]'
-            }`}>
-              <div className="p-2 space-y-1">
-                {BRANCHES.map(branch => {
-                  const isSelected = selectedBranch === branch
-                  return (
-                    <button
-                      key={branch}
-                      onClick={() => { onBranchChange(branch); setMenuOpen(false) }}
-                      className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-3 ${
-                        isSelected
-                          ? isDarkMode
-                            ? 'bg-[#7C3AED]/25 text-[#7C3AED] border border-[#7C3AED]/30'
-                            : 'bg-[#DBD3FB]/60 text-[#561BAF] border border-[#DBD3FB]'
-                          : isDarkMode
-                            ? 'text-[#D8D7D9] hover:bg-white/10 border border-transparent'
-                            : 'text-[#45434A] hover:bg-black/5 border border-transparent'
-                      }`}
-                    >
-                      <Building2 size={16} className={isSelected ? 'text-[#7C3AED]' : 'opacity-50'} />
-                      {branch}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )}
+          <AnimatePresence>
+            {menuOpen && (
+              <motion.div
+                variants={panelVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                style={{ transformOrigin: 'top right' }}
+                className={`absolute right-0 mt-4 w-56 rounded-2xl z-50 overflow-hidden border shadow-2xl ${
+                  isDarkMode
+                    ? 'bg-[#252429]/95 backdrop-blur-3xl border-white/20 shadow-[0_40px_80px_rgba(0,0,0,0.9)]'
+                    : 'bg-white/95 backdrop-blur-3xl border-white/80 shadow-[0_40px_80px_rgba(0,0,0,0.15)]'
+                }`}
+              >
+                <div className="p-2 flex flex-col gap-0.5">
+                  {BRANCHES.map(branch => {
+                    const isSelected = selectedBranch === branch
+                    return (
+                      <button
+                        key={branch}
+                        onClick={() => { onBranchChange(branch); setMenuOpen(false) }}
+                        className={`relative w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-3 transition-colors duration-150 ${
+                          isSelected
+                            ? isDarkMode ? 'text-white' : 'text-[#561BAF]'
+                            : isDarkMode ? 'text-[#888991] hover:text-[#D8D7D9]' : 'text-[#67656E] hover:text-[#111113]'
+                        }`}
+                      >
+                        {isSelected && (
+                          <motion.div
+                            layoutId={`branch-pill-${pillId}`}
+                            className={`absolute inset-0 rounded-xl ${
+                              isDarkMode ? 'bg-[#7C3AED]/15' : 'bg-[#DBD3FB]/50'
+                            }`}
+                            transition={SPRING}
+                          />
+                        )}
+                        <Building2 size={16} className={`relative z-10 ${isSelected ? 'text-[#7C3AED]' : 'opacity-50'}`} />
+                        <span className="relative z-10">{branch}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </header>

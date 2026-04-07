@@ -31,38 +31,40 @@ export default function AppRouter() {
   return (
     <BrowserRouter>
       <GlassBackground />
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
-          {/* Public */}
-          <Route path={ROUTES.LOGIN} element={<LoginView />} />
-          <Route path="/legal/:doc" element={
-            <div className="relative z-10 text-white p-8 font-sans">Legal — próximamente</div>
-          } />
+      <Routes>
+        {/* Public */}
+        <Route path={ROUTES.LOGIN} element={
+          <Suspense fallback={<PageLoader />}>
+            <LoginView />
+          </Suspense>
+        } />
+        <Route path="/legal/:doc" element={
+          <div className="relative z-10 text-white p-8 font-sans">Legal — próximamente</div>
+        } />
 
-          {/* Protected — layout wrapper con Outlet */}
-          <Route
-            path={ROUTES.APP}
-            element={
-              <AuthGuard>
-                <AppShell />
-              </AuthGuard>
-            }
-          >
-            <Route index element={<Navigate to={ROUTES.DASHBOARD} replace />} />
-            <Route path={ROUTES.DASHBOARD}    element={<DashboardView />} />
-            <Route path={ROUTES.TRANSACTIONS} element={<TransaccionesView />} />
-            <Route path={ROUTES.LINKS}        element={<LinksView />} />
-            <Route path={ROUTES.SETTLEMENTS}  element={<LiquidacionesView />} />
-            <Route path={ROUTES.WALLET}       element={<WalletView />} />
-            <Route path={ROUTES.BRANCHES}     element={<SucursalesView />} />
-            <Route path={ROUTES.USERS}        element={<UsuariosView />} />
-            <Route path={ROUTES.SETTINGS}     element={<SettingsView />} />
-          </Route>
+        {/* Protected — layout wrapper con Outlet */}
+        <Route
+          path={ROUTES.APP}
+          element={
+            <AuthGuard>
+              <AppShell />
+            </AuthGuard>
+          }
+        >
+          <Route index element={<Navigate to={ROUTES.DASHBOARD} replace />} />
+          <Route path={ROUTES.DASHBOARD}    element={<DashboardView />} />
+          <Route path={ROUTES.TRANSACTIONS} element={<TransaccionesView />} />
+          <Route path={ROUTES.LINKS}        element={<LinksView />} />
+          <Route path={ROUTES.SETTLEMENTS}  element={<LiquidacionesView />} />
+          <Route path={ROUTES.WALLET}       element={<WalletView />} />
+          <Route path={ROUTES.BRANCHES}     element={<SucursalesView />} />
+          <Route path={ROUTES.USERS}        element={<UsuariosView />} />
+          <Route path={ROUTES.SETTINGS}     element={<SettingsView />} />
+        </Route>
 
-          {/* Default */}
-          <Route path="*" element={<Navigate to={ROUTES.LOGIN} replace />} />
-        </Routes>
-      </Suspense>
+        {/* Default */}
+        <Route path="*" element={<Navigate to={ROUTES.LOGIN} replace />} />
+      </Routes>
     </BrowserRouter>
   )
 }
