@@ -1,19 +1,19 @@
 import { useState } from 'react'
 import {
-  X, Plus, Trash2, Mail, User, ListTree,
+  Plus, Trash2, Mail, User, ListTree,
   Star, Receipt, Link as LinkIcon,
   CalendarDays,
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Input, SegmentControl, MiniCalendar } from '@/shared/ui'
+import { Card, Button, Input, Modal, SegmentControl, MiniCalendar } from '@/shared/ui'
 
 export default function NewLinkModal({ onClose }) {
   const { isDarkMode } = useTheme()
 
-  const [items, setItems]             = useState([{ desc: '', amount: '' }])
-  const [feeBearer, setFeeBearer]     = useState('hotel')
+  const [items, setItems]               = useState([{ desc: '', amount: '' }])
+  const [feeBearer, setFeeBearer]       = useState('hotel')
   const [selectedDate, setSelectedDate] = useState(null)
-  const [timeValue, setTimeValue]     = useState('14:00')
+  const [timeValue, setTimeValue]       = useState('14:00')
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [showConfirmClose, setShowConfirmClose] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
@@ -23,7 +23,7 @@ export default function NewLinkModal({ onClose }) {
     return hasItems || selectedDate !== null || feeBearer !== 'hotel' || timeValue !== '14:00'
   }
 
-  const handleBackdropClick = () => {
+  const handleClose = () => {
     if (hasData()) {
       setShowConfirmClose(true)
     } else {
@@ -37,10 +37,7 @@ export default function NewLinkModal({ onClose }) {
 
   const handleGenerateLink = () => {
     setIsGenerating(true)
-    setTimeout(() => {
-      setIsGenerating(false)
-      onClose()
-    }, 1500)
+    setTimeout(() => { setIsGenerating(false); onClose() }, 1500)
   }
 
   const subtotal = items.reduce((sum, it) => sum + (parseFloat(it.amount) || 0), 0)
@@ -48,16 +45,10 @@ export default function NewLinkModal({ onClose }) {
   const total    = subtotal + fee
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div
-        className={`absolute inset-0 backdrop-blur-md backdrop-saturate-200 transition-colors ${isDarkMode ? 'bg-black/70' : 'bg-[#111113]/40'}`}
-        onClick={handleBackdropClick}
-      />
-
-      {/* Confirmation Modal */}
+    <>
+      {/* Confirmation sub-modal */}
       {showConfirmClose && (
-        <div className="absolute inset-0 z-[60] flex items-center justify-center p-4 backdrop-blur-md bg-black/60">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 backdrop-blur-md bg-black/60">
           <div className={`p-6 rounded-2xl border shadow-2xl max-w-[360px] animate-scale-in ${
             isDarkMode ? 'bg-[#252429] border-white/20' : 'bg-white border-gray-200'
           }`}>
@@ -79,26 +70,14 @@ export default function NewLinkModal({ onClose }) {
         </div>
       )}
 
-      {/* Modal */}
-      <div className={`relative w-full max-w-[1000px] rounded-[24px] border overflow-hidden shadow-2xl animate-scale-in flex flex-col max-h-[90vh] ${
-        isDarkMode
-          ? 'bg-[#252429]/95 backdrop-blur-3xl border-white/20 border-t-white/30 shadow-[0_40px_100px_rgba(0,0,0,0.9)]'
-          : 'bg-white/95 backdrop-blur-3xl border-white shadow-[0_20px_60px_rgba(0,0,0,0.15)]'
-      }`}>
-
-        {/* Modal header */}
-        <div className={`px-8 py-5 border-b flex justify-between items-center flex-shrink-0 ${isDarkMode ? 'border-white/10' : 'border-black/5'}`}>
-          <div>
-            <h2 className={`text-xl font-bold tracking-tight ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-              Crear Link de Reserva
-            </h2>
-            <p className={`text-xs mt-0.5 font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-              Genera un enlace de cobro con vencimiento e ítems detallados.
-            </p>
-          </div>
-          <Button variant="ghost" size="icon" onClick={onClose}><X size={20} /></Button>
-        </div>
-
+      <Modal
+        onClose={handleClose}
+        icon={<LinkIcon size={24} />}
+        title="Crear Link de Reserva"
+        description="Genera un enlace de cobro con vencimiento e ítems detallados."
+        maxWidth="1000px"
+        className="max-h-[90vh] flex flex-col"
+      >
         {/* Body: 60% left + 40% right */}
         <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
 
@@ -258,7 +237,7 @@ export default function NewLinkModal({ onClose }) {
               >
                 {isGenerating ? (
                   <span className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin-slow"></div>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin-slow" />
                     Generando...
                   </span>
                 ) : (
@@ -270,7 +249,7 @@ export default function NewLinkModal({ onClose }) {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </Modal>
+    </>
   )
 }
