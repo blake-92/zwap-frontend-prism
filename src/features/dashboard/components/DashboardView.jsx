@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Button } from '@/shared/ui'
+import { Button, PageHeader } from '@/shared/ui'
 import { KPIS } from '@/services/mocks/mockData'
 import { ROUTES } from '@/router/routes'
 import KpiCard       from './KpiCard'
@@ -24,20 +24,15 @@ export default function DashboardView() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
     >
-      {/* Page header */}
-      <div className="mb-10 flex justify-between items-end">
-        <div>
-          <h1 className={`text-3xl font-bold mb-2 tracking-tight ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-            Buenas noches, Admin 👋
-          </h1>
-          <p className={`text-sm font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-            Aquí tienes el pulso financiero de tus sucursales hoy.
-          </p>
-        </div>
+      <PageHeader
+        title="Buenas noches, Admin 👋"
+        description="Aquí tienes el pulso financiero de tus sucursales hoy."
+        className="mb-10"
+      >
         <Button onClick={() => setNewLinkOpen(true)} className="hidden md:flex">
           <Plus size={18} /> Nueva Reserva
         </Button>
-      </div>
+      </PageHeader>
 
       {/* KPI row */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">

@@ -5,7 +5,7 @@ import {
   Pencil, Trash2,
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, Toggle, SearchInput, EmptySearchState, Tooltip } from '@/shared/ui'
+import { Card, Button, Badge, Toggle, SearchInput, EmptySearchState, Tooltip, PageHeader } from '@/shared/ui'
 import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
 import { USERS } from '@/services/mocks/mockData'
 import NewUserModal from './NewUserModal'
@@ -45,20 +45,11 @@ export default function UsuariosView() {
       transition={{ duration: 0.4, ease: "easeOut" }}
     >
 
-      {/* Page header */}
-      <div className="flex justify-between items-end mb-8">
-        <div>
-          <h1 className={`text-3xl font-bold mb-2 tracking-tight ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-            Usuarios
-          </h1>
-          <p className={`text-sm font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-            Gestión de acceso y permisos del equipo
-          </p>
-        </div>
+      <PageHeader title="Usuarios" description="Gestión de acceso y permisos del equipo">
         <Button onClick={() => setNewUserOpen(true)}>
           <UserPlus size={18} /> Nuevo Usuario
         </Button>
-      </div>
+      </PageHeader>
 
       {/* Toolbar */}
       <div className={`relative z-20 mb-6 p-2 rounded-2xl border flex justify-between items-center ${

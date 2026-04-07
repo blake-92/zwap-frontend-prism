@@ -6,7 +6,7 @@ import {
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { useToast } from '@/shared/context/ToastContext'
-import { Card, Button, Input, Toggle, Badge } from '@/shared/ui'
+import { Card, Button, Input, Toggle, Badge, PageHeader } from '@/shared/ui'
 
 /* ─── Generic Setting Row ─────────────────────────────────── */
 function SettingRow({ icon: Icon, title, desc, control }) {
@@ -60,15 +60,10 @@ export default function SettingsView() {
       className="max-w-4xl mx-auto"
     >
 
-      {/* Page header */}
-      <div className="mb-8">
-        <h1 className={`text-3xl font-bold mb-2 tracking-tight ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-          Configuración
-        </h1>
-        <p className={`text-sm font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-          Administra tus preferencias, seguridad y métodos de pago
-        </p>
-      </div>
+      <PageHeader
+        title="Configuración"
+        description="Administra tus preferencias, seguridad y métodos de pago"
+      />
 
       {/* Tabs */}
       <div className={`flex gap-2 p-1 mb-6 rounded-xl inline-flex ${

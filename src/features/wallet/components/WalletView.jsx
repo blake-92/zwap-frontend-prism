@@ -5,7 +5,7 @@ import {
   CheckCircle2, RefreshCcw, FileText, CircleDot,
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, Pagination, SearchInput, EmptySearchState, Tooltip } from '@/shared/ui'
+import { Card, Button, Badge, Pagination, SearchInput, EmptySearchState, Tooltip, PageHeader } from '@/shared/ui'
 import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
 import { WITHDRAWALS } from '@/services/mocks/mockData'
 import WithdrawModal from './WithdrawModal'
@@ -121,17 +121,10 @@ export default function WalletView() {
       transition={{ duration: 0.4, ease: "easeOut" }}
     >
 
-      {/* Page header */}
-      <div className="flex justify-between items-end mb-8">
-        <div>
-          <h1 className={`text-3xl font-bold mb-2 tracking-tight ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-            Billetera &amp; Retiros
-          </h1>
-          <p className={`text-sm font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-            Gestiona el saldo disponible y tus cuentas bancarias conectadas
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Billetera &amp; Retiros"
+        description="Gestiona el saldo disponible y tus cuentas bancarias conectadas"
+      />
 
       {/* Top section: balance (izq) + retiro + cuenta (der) */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-6">

@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { useToast } from '@/shared/context/ToastContext'
-import { Card, Button, Badge, Toggle, SearchInput, EmptySearchState, Tooltip } from '@/shared/ui'
+import { Card, Button, Badge, Toggle, SearchInput, EmptySearchState, Tooltip, PageHeader } from '@/shared/ui'
 import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
 import { PERMANENT_LINKS, CUSTOM_LINKS } from '@/services/mocks/mockData'
 import NewLinkModal from './NewLinkModal'
@@ -260,20 +260,11 @@ export default function LinksView() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
     >
-      {/* Page header */}
-      <div className="flex justify-between items-end mb-8">
-        <div>
-          <h1 className={`text-3xl font-bold mb-2 tracking-tight ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-            Links de Pago
-          </h1>
-          <p className={`text-sm font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-            Gestiona cobros rápidos en mostrador y reservas personalizadas.
-          </p>
-        </div>
+      <PageHeader title="Links de Pago" description="Gestiona cobros rápidos en mostrador y reservas personalizadas.">
         <Button onClick={() => setNewLinkOpen(true)}>
           <Plus size={18} /> Nuevo Link de Reserva
         </Button>
-      </div>
+      </PageHeader>
 
       {/* Permanentes */}
       <p className={`text-xs font-bold tracking-widest uppercase mb-4 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>

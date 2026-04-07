@@ -6,7 +6,7 @@ import {
   PlusCircle, Star,
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, Tooltip } from '@/shared/ui'
+import { Card, Button, Badge, Tooltip, PageHeader } from '@/shared/ui'
 import { BRANCH_LIST } from '@/services/mocks/mockData'
 import NewBranchModal from './NewBranchModal'
 
@@ -101,20 +101,11 @@ export default function SucursalesView() {
       transition={{ duration: 0.4, ease: "easeOut" }}
     >
 
-      {/* Page header */}
-      <div className="flex justify-between items-end mb-8">
-        <div>
-          <h1 className={`text-3xl font-bold mb-2 tracking-tight ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-            Sucursales
-          </h1>
-          <p className={`text-sm font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-            Gestión de propiedades y puntos de venta
-          </p>
-        </div>
+      <PageHeader title="Sucursales" description="Gestión de propiedades y puntos de venta">
         <Button onClick={() => setNewBranchOpen(true)}>
           <PlusCircle size={18} /> Nueva Sucursal
         </Button>
-      </div>
+      </PageHeader>
 
       {/* Cards grid */}
       <motion.div variants={listVariants} initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">

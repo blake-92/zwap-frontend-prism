@@ -6,7 +6,7 @@ import {
   CalendarDays, Clock, ArrowDownToLine, Filter
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, DropdownFilter, Pagination, SearchInput, EmptySearchState, Tooltip } from '@/shared/ui'
+import { Card, Button, Badge, DropdownFilter, Pagination, SearchInput, EmptySearchState, Tooltip, PageHeader } from '@/shared/ui'
 import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
 import { PAYOUTS } from '@/services/mocks/mockData'
 
@@ -85,20 +85,11 @@ export default function LiquidacionesView() {
       transition={{ duration: 0.4, ease: "easeOut" }}
     >
 
-      {/* Page header */}
-      <div className="flex justify-between items-end mb-8">
-        <div>
-          <h1 className={`text-3xl font-bold mb-2 tracking-tight ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-            Liquidaciones
-          </h1>
-          <p className={`text-sm font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-            Control de Cierres Diarios y Depósitos Bancarios.
-          </p>
-        </div>
+      <PageHeader title="Liquidaciones" description="Control de Cierres Diarios y Depósitos Bancarios.">
         <Button variant="outline">
           <Download size={18} /> Descargar Reporte Fiscal
         </Button>
-      </div>
+      </PageHeader>
 
       {/* KPI row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
