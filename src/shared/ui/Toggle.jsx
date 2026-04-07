@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion'
 import { useTheme } from '@/shared/context/ThemeContext'
 
 export default function Toggle({ active, onToggle, disabled = false }) {
@@ -9,7 +10,7 @@ export default function Toggle({ active, onToggle, disabled = false }) {
       role="switch"
       aria-checked={active}
       disabled={disabled}
-      className={`w-10 h-5 rounded-full p-0.5 flex items-center transition-all duration-300 outline-none ${
+      className={`w-10 h-5 rounded-full p-0.5 flex items-center outline-none transition-colors duration-300 ${
         disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
       } ${
         active
@@ -21,7 +22,11 @@ export default function Toggle({ active, onToggle, disabled = false }) {
             : 'bg-gray-200 border border-gray-300'
       }`}
     >
-      <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-300 ${active ? 'translate-x-5' : 'translate-x-0'}`} />
+      <motion.div
+        className="w-4 h-4 rounded-full bg-white shadow-sm"
+        animate={{ x: active ? 20 : 0 }}
+        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+      />
     </button>
   )
 }

@@ -1,4 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import {
   LayoutDashboard, Link as LinkIcon, ArrowRightLeft,
   Landmark, Users, Building2,
@@ -44,18 +45,27 @@ export default function Sidebar() {
             <button
               key={id}
               onClick={() => navigate(route)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
+              className={`relative w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-200 ${
                 isActive
-                  ? isDarkMode
-                    ? 'bg-[#252429]/40 border border-white/10 border-t-white/20 text-white shadow-xl shadow-black/30 backdrop-blur-md'
-                    : 'bg-white/60 border border-white text-[#561BAF] shadow-[0_8px_20px_rgba(0,0,0,0.04)] backdrop-blur-md'
+                  ? isDarkMode ? 'text-white' : 'text-[#561BAF]'
                   : isDarkMode
-                    ? 'text-[#888991] hover:bg-[#252429]/30 hover:text-[#D8D7D9] border border-transparent'
-                    : 'text-[#67656E] hover:bg-white/40 hover:text-[#111113] border border-transparent'
+                    ? 'text-[#888991] hover:text-[#D8D7D9]'
+                    : 'text-[#67656E] hover:text-[#111113]'
               }`}
             >
-              <Icon size={18} className={isActive ? 'text-[#7C3AED]' : 'opacity-70'} />
-              {label}
+              {isActive && (
+                <motion.div
+                  layoutId="sidebar-indicator"
+                  className={`absolute inset-0 rounded-xl ${
+                    isDarkMode
+                      ? 'bg-[#252429]/40 border border-white/10 border-t-white/20 shadow-xl shadow-black/30 backdrop-blur-md'
+                      : 'bg-white/60 border border-white shadow-[0_8px_20px_rgba(0,0,0,0.04)] backdrop-blur-md'
+                  }`}
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                />
+              )}
+              <Icon size={18} className={`relative z-10 ${isActive ? 'text-[#7C3AED]' : 'opacity-70'}`} />
+              <span className="relative z-10">{label}</span>
             </button>
           )
         })}
