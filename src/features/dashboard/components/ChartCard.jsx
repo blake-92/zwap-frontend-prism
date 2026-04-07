@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
 import { CreditCard } from 'lucide-react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card } from '@/shared/ui'
+import { Card, SegmentControl } from '@/shared/ui'
 
 const chartData = [
   { name: 'Lun', pos: 2400, links: 4000 },
@@ -22,9 +21,9 @@ export default function ChartCard() {
   const [chart, setChart] = useState('volumen')
 
   const tabs = [
-    { id: 'volumen',    label: 'Volumen' },
-    { id: 'conversion', label: 'Conversión' },
-    { id: 'metodos',    label: 'Métodos' },
+    { value: 'volumen',    label: 'Volumen' },
+    { value: 'conversion', label: 'Conversión' },
+    { value: 'metodos',    label: 'Métodos' },
   ]
 
   const titles = {
@@ -69,38 +68,12 @@ export default function ChartCard() {
         </div>
 
         {/* Tab switcher */}
-        <div className={`flex rounded-xl p-1.5 shadow-inner ${
-          isDarkMode ? 'bg-black/60 border border-white/5' : 'bg-gray-200/50 border border-black/5'
-        }`}>
-          {tabs.map(t => (
-            <button
-              key={t.id}
-              onClick={() => setChart(t.id)}
-              className={`relative px-3 py-1.5 text-xs font-bold rounded-lg transition-colors duration-300 ${
-                chart === t.id
-                  ? isDarkMode
-                    ? 'text-white'
-                    : 'text-[#7C3AED]'
-                  : isDarkMode
-                    ? 'text-[#888991] hover:text-[#D8D7D9]'
-                    : 'text-[#67656E] hover:text-[#111113]'
-              }`}
-            >
-              {chart === t.id && (
-                <motion.div
-                  layoutId="chartTabIndicator"
-                  className={`absolute inset-0 rounded-lg ${
-                    isDarkMode
-                      ? 'bg-[#252429] border border-white/10 shadow-[0_4px_15px_rgba(124,58,237,0.2)]'
-                      : 'bg-white border border-[#7C3AED]/20 shadow-md'
-                  }`}
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                />
-              )}
-              <span className="relative z-10">{t.label}</span>
-            </button>
-          ))}
-        </div>
+        <SegmentControl
+          options={tabs}
+          value={chart}
+          onChange={setChart}
+          layoutId="chartTabIndicator"
+        />
       </div>
 
       {/* Chart area */}

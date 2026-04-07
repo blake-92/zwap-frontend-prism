@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { MousePointerClick, QrCode, Copy, ExternalLink } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { useToast } from '@/shared/context/ToastContext'
-import { Card, Button } from '@/shared/ui'
+import { Card, Button, SegmentControl } from '@/shared/ui'
 import { PERMANENT_LINKS } from '@/services/mocks/mockData'
 
 export default function QuickLinkCard({ onNewLink }) {
@@ -36,26 +36,13 @@ export default function QuickLinkCard({ onNewLink }) {
 
       <div className="p-6 flex flex-col items-center flex-1">
         {/* Tab switcher */}
-        <div className={`flex w-full rounded-xl p-1 mb-6 shadow-inner ${
-          isDarkMode ? 'bg-black/60 border border-white/5' : 'bg-gray-200/50 border border-black/5'
-        }`}>
-          {activeLinks.map(link => (
-            <button
-              key={link.id}
-              onClick={() => setActive(link.id)}
-              className={`flex-1 py-1.5 text-[10px] font-bold rounded-lg transition-all duration-300 truncate px-2 ${
-                active === link.id
-                  ? isDarkMode
-                    ? 'bg-[#252429] text-white border border-white/10 shadow-[0_4px_15px_rgba(124,58,237,0.2)]'
-                    : 'bg-white text-[#7C3AED] shadow-md border border-[#7C3AED]/20'
-                  : isDarkMode
-                    ? 'text-[#888991] hover:text-[#D8D7D9]'
-                    : 'text-[#67656E] hover:text-[#111113]'
-              }`}
-            >
-              {link.name}
-            </button>
-          ))}
+        <div className="w-full mb-6">
+          <SegmentControl
+            options={activeLinks.map(l => ({ value: l.id, label: l.name }))}
+            value={active}
+            onChange={setActive}
+            layoutId="quickLinkTab"
+          />
         </div>
 
         {/* QR Code placeholder */}
