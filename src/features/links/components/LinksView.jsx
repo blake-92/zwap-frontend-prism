@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { useToast } from '@/shared/context/ToastContext'
-import { Card, Button, Badge, Toggle, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
+import { Card, Button, Badge, Avatar, Toggle, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
 import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
 import { PERMANENT_LINKS, CUSTOM_LINKS } from '@/services/mocks/mockData'
 import NewLinkModal from './NewLinkModal'
@@ -129,13 +129,7 @@ function CustomLinksTable() {
                   {/* ID & Cliente */}
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-4">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${
-                        isDarkMode
-                          ? 'bg-[#7C3AED]/15 text-[#7C3AED] border border-[#7C3AED]/30'
-                          : 'bg-[#DBD3FB]/60 border border-white text-[#561BAF] shadow-sm'
-                      }`}>
-                        {link.initials}
-                      </div>
+                      <Avatar initials={link.initials} />
                       <div>
                         <p className={`font-bold text-sm ${isDarkMode ? 'text-[#D8D7D9] group-hover:text-white' : 'text-[#111113]'}`}>
                           {link.client}{' '}

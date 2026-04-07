@@ -5,7 +5,7 @@ import {
   Pencil, Trash2,
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, Toggle, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
+import { Card, Button, Badge, Avatar, Toggle, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
 import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
 import { USERS } from '@/services/mocks/mockData'
 import NewUserModal from './NewUserModal'
@@ -111,13 +111,7 @@ export default function UsuariosView() {
                   {/* Usuario */}
                   <td className="px-8 py-4">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 transition-all ${
-                        isDarkMode
-                          ? 'bg-[#7C3AED]/15 text-[#7C3AED] border border-[#7C3AED]/30 group-hover:shadow-[0_0_20px_rgba(124,58,237,0.4)]'
-                          : 'bg-[#DBD3FB]/60 border border-white text-[#561BAF] shadow-sm'
-                      }`}>
-                        {user.initials}
-                      </div>
+                      <Avatar initials={user.initials} glow />
                       <div>
                         <p className={`font-bold text-sm capitalize ${isDarkMode ? 'text-[#D8D7D9] group-hover:text-white' : 'text-[#111113]'}`}>
                           {user.name}

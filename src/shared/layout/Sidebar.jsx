@@ -8,6 +8,7 @@ import { useTheme } from '@/shared/context/ThemeContext'
 import ZwapLogo from '@/shared/brand/ZwapLogo'
 import { ROUTES } from '@/router/routes'
 import WalletSidebarCard from '@/features/wallet/components/WalletSidebarCard'
+import Avatar from '@/shared/ui/Avatar'
 
 const NAV_ITEMS = [
   { id: 'dashboard',     label: 'Dashboard',     icon: LayoutDashboard, route: ROUTES.DASHBOARD    },
@@ -71,13 +72,7 @@ export default function Sidebar() {
           isDarkMode ? 'border border-transparent' : 'border border-transparent'
         }`}>
           {/* Avatar */}
-          <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${
-            isDarkMode
-              ? 'bg-[#252429] border border-white/15 text-[#D8D7D9]'
-              : 'bg-white border border-black/10 text-[#45434A] shadow-sm'
-          }`}>
-            A
-          </div>
+          <Avatar initials="A" size="sm" variant="neutral" />
 
           {/* Name + action */}
           <div className="flex-1 min-w-0">
