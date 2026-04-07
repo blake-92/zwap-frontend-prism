@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { useToast } from '@/shared/context/ToastContext'
-import { Card, Button, Badge, Avatar, Toggle, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
+import { Card, Button, Badge, AvatarInfo, SectionLabel, Toggle, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
 import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
 import { PERMANENT_LINKS, CUSTOM_LINKS } from '@/services/mocks/mockData'
 import NewLinkModal from './NewLinkModal'
@@ -128,18 +128,12 @@ function CustomLinksTable() {
                 >
                   {/* ID & Cliente */}
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-4">
-                      <Avatar initials={link.initials} />
-                      <div>
-                        <p className={`font-bold text-sm ${isDarkMode ? 'text-[#D8D7D9] group-hover:text-white' : 'text-[#111113]'}`}>
-                          {link.client}{' '}
-                          <span className="font-mono text-[10px] text-[#888991] ml-1">({link.id})</span>
-                        </p>
-                        <p className={`text-xs mt-0.5 font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                          {link.email}
-                        </p>
-                      </div>
-                    </div>
+                    <AvatarInfo
+                      initials={link.initials}
+                      primary={link.client}
+                      secondary={link.email}
+                      meta={link.id}
+                    />
                   </td>
 
                   {/* Detalle */}
@@ -251,9 +245,7 @@ export default function LinksView() {
       </PageHeader>
 
       {/* Permanentes */}
-      <p className={`text-xs font-bold tracking-widest uppercase mb-4 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-        Enlaces Permanentes (Monto Abierto)
-      </p>
+      <SectionLabel className="uppercase mb-4">Enlaces Permanentes (Monto Abierto)</SectionLabel>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
         {links.map(link => (
           <PermanentCard key={link.id} link={link} onToggle={() => toggleLink(link.id)} />
@@ -261,9 +253,7 @@ export default function LinksView() {
       </div>
 
       {/* Personalizados */}
-      <p className={`text-xs font-bold tracking-widest uppercase mb-4 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-        Enlaces de Reserva (Personalizados)
-      </p>
+      <SectionLabel className="uppercase mb-4">Enlaces de Reserva (Personalizados)</SectionLabel>
       <CustomLinksTable />
 
       {newLinkOpen && <NewLinkModal onClose={() => setNewLinkOpen(false)} />}

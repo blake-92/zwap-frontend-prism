@@ -5,7 +5,7 @@ import {
   CalendarDays,
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Input, Modal, SegmentControl, MiniCalendar } from '@/shared/ui'
+import { Card, Button, Input, Modal, SegmentControl, MiniCalendar, SectionLabel } from '@/shared/ui'
 
 export default function NewLinkModal({ onClose }) {
   const { isDarkMode } = useTheme()
@@ -86,9 +86,7 @@ export default function NewLinkModal({ onClose }) {
 
             {/* Cliente */}
             <div className="mb-8">
-              <h3 className={`text-xs font-bold tracking-widest mb-4 flex items-center gap-2 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
-                <User size={14} /> DATOS DEL CLIENTE
-              </h3>
+              <SectionLabel className="flex items-center gap-2 mb-4"><User size={14} /> DATOS DEL CLIENTE</SectionLabel>
               <div className="space-y-4">
                 <div>
                   <label className={`block text-xs font-bold tracking-wide mb-2 ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
@@ -155,9 +153,7 @@ export default function NewLinkModal({ onClose }) {
             isDarkMode ? 'bg-gradient-to-b from-[#7C3AED]/10 to-transparent' : 'bg-gradient-to-b from-[#DBD3FB]/20 to-transparent'
           }`}>
             <div className="p-8 flex-1 overflow-y-auto">
-              <h3 className={`text-xs font-bold tracking-widest mb-6 flex items-center gap-2 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
-                <Star size={14} /> CONFIGURACIÓN
-              </h3>
+              <SectionLabel className="flex items-center gap-2 mb-6"><Star size={14} /> CONFIGURACIÓN</SectionLabel>
 
               <div className="space-y-6">
                 {/* Fecha */}
@@ -203,9 +199,7 @@ export default function NewLinkModal({ onClose }) {
               {/* Summary ticket */}
               <Card className={`mt-8 !rounded-2xl ${isDarkMode ? '!bg-[#111113]/50 border-white/5' : '!bg-white/80 border-white'}`}>
                 <div className="p-5">
-                  <h3 className={`text-xs font-bold tracking-widest mb-4 flex items-center gap-2 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
-                    <Receipt size={14} /> RESUMEN DEL LINK
-                  </h3>
+                  <SectionLabel className="flex items-center gap-2 mb-4"><Receipt size={14} /> RESUMEN DEL LINK</SectionLabel>
                   <div className="space-y-3 font-mono text-sm">
                     <div className={`flex justify-between ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
                       <span>Subtotal ({items.length} ítems):</span>

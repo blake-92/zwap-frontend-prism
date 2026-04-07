@@ -5,7 +5,7 @@ import {
   Pencil, Trash2,
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, Avatar, Toggle, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
+import { Card, Button, Badge, AvatarInfo, Toggle, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
 import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
 import { USERS } from '@/services/mocks/mockData'
 import NewUserModal from './NewUserModal'
@@ -110,17 +110,12 @@ export default function UsuariosView() {
                 >
                   {/* Usuario */}
                   <td className="px-8 py-4">
-                    <div className="flex items-center gap-3">
-                      <Avatar initials={user.initials} glow />
-                      <div>
-                        <p className={`font-bold text-sm capitalize ${isDarkMode ? 'text-[#D8D7D9] group-hover:text-white' : 'text-[#111113]'}`}>
-                          {user.name}
-                        </p>
-                        <p className={`text-xs font-medium mt-0.5 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                          {user.email}
-                        </p>
-                      </div>
-                    </div>
+                    <AvatarInfo
+                      initials={user.initials}
+                      primary={user.name}
+                      secondary={user.email}
+                      glow
+                    />
                   </td>
 
                   {/* Rol */}

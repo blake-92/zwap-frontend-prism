@@ -1,6 +1,6 @@
 import { Bell, Timer, AlertOctagon, Landmark } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge } from '@/shared/ui'
+import { Card, Button, Badge, CardHeader } from '@/shared/ui'
 
 const alerts = [
   {
@@ -31,18 +31,12 @@ export default function AlertsPanel() {
 
   return (
     <Card className="lg:col-span-1 p-0 flex flex-col">
-      <div className={`p-6 border-b flex items-center justify-between ${isDarkMode ? 'border-white/10' : 'border-black/5'}`}>
-        <div>
-          <h3 className={`font-bold text-lg flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-            <Bell size={18} className="text-amber-500 animate-pulse" />
-            Requiere Atención
-          </h3>
-          <p className={`text-xs font-medium mt-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-            Alertas de tu operativa hoy
-          </p>
-        </div>
+      <CardHeader
+        title={<><Bell size={18} className="text-amber-500 animate-pulse" /> Requiere Atención</>}
+        description="Alertas de tu operativa hoy"
+      >
         <Badge variant="warning">{alerts.length}</Badge>
-      </div>
+      </CardHeader>
 
       <div className="flex-1 overflow-y-auto p-2 space-y-1">
         {alerts.map((alert, i) => (

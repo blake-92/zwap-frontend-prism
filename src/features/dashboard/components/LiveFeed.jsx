@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { ArrowRight, User } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge } from '@/shared/ui'
+import { Card, Button, Badge, CardHeader } from '@/shared/ui'
 import { TRANSACTIONS } from '@/services/mocks/mockData'
 
 export default function LiveFeed({ onViewAll }) {
@@ -9,25 +9,25 @@ export default function LiveFeed({ onViewAll }) {
 
   return (
     <Card className="lg:col-span-2 pb-2 flex flex-col">
-      <div className={`p-6 pb-5 flex justify-between items-center border-b ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
-        <div>
-          <h3 className={`font-bold text-xl tracking-tight flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-            <motion.span 
+      <CardHeader
+        title={
+          <>
+            <motion.span
               initial={{ opacity: 0.2 }}
               animate={{ opacity: [1, 0.2, 1, 0.2, 1] }}
               transition={{ duration: 2, times: [0, 0.2, 0.4, 0.6, 1], ease: "easeInOut" }}
-              className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] inline-block" 
+              className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] inline-block"
             />
             Feed en Vivo
-          </h3>
-          <p className={`text-xs font-medium mt-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-            Últimas operaciones procesadas
-          </p>
-        </div>
+          </>
+        }
+        description="Últimas operaciones procesadas"
+        className="p-6 pb-5"
+      >
         <Button variant="ghost" size="sm" onClick={onViewAll} className="!text-[#7C3AED] !h-8 !px-2">
           Ver Todas <ArrowRight size={14} className="ml-1" />
         </Button>
-      </div>
+      </CardHeader>
 
       <div className="overflow-x-auto flex-1">
         <table className="w-full text-left border-collapse min-w-[640px]">

@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { RotateCcw, AlertCircle } from 'lucide-react'
+import { RotateCcw } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Button, Modal, SegmentControl } from '@/shared/ui'
+import { Button, Modal, SegmentControl, SectionLabel, InfoBanner } from '@/shared/ui'
 
 export default function RefundModal({ trx, onClose }) {
   const { isDarkMode }              = useTheme()
@@ -46,9 +46,7 @@ export default function RefundModal({ trx, onClose }) {
 
         {/* Tipo de reembolso */}
         <div>
-          <h3 className={`text-xs font-bold tracking-widest mb-4 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
-            TIPO DE REEMBOLSO
-          </h3>
+          <SectionLabel className="mb-4">TIPO DE REEMBOLSO</SectionLabel>
           <div className="grid grid-cols-2 gap-4">
             {[
               { id: 'total',   label: 'Total',   sub: `$${trx.amount}`,      subColor: 'text-rose-500' },
@@ -102,9 +100,7 @@ export default function RefundModal({ trx, onClose }) {
 
         {/* Fee bearer */}
         <div>
-          <h3 className={`text-xs font-bold tracking-widest mb-4 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
-            ¿QUIÉN ABSORBE LA COMISIÓN BANCARIA?
-          </h3>
+          <SectionLabel className="mb-4">¿QUIÉN ABSORBE LA COMISIÓN BANCARIA?</SectionLabel>
           <SegmentControl
             options={[
               { value: 'hotel',   label: 'El Hotel (Reembolso exacto)' },
@@ -113,12 +109,7 @@ export default function RefundModal({ trx, onClose }) {
             value={feeBearer}
             onChange={setFeeBearer}
           />
-          <div className={`mt-4 p-4 rounded-xl border flex items-start gap-3 ${
-            isDarkMode ? 'bg-amber-500/10 border-amber-500/20 text-amber-200' : 'bg-amber-50 border-amber-200 text-amber-800'
-          }`}>
-            <AlertCircle size={18} className="mt-0.5 flex-shrink-0" />
-            <p className="text-xs font-medium leading-relaxed">{warningText}</p>
-          </div>
+          <InfoBanner className="mt-4">{warningText}</InfoBanner>
         </div>
       </div>
     </Modal>

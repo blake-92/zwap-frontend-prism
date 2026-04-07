@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { UserPlus, Shield, Calculator, ConciergeBell } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Button, Modal } from '@/shared/ui'
+import { Button, Modal, SectionLabel } from '@/shared/ui'
 import { BRANCH_LIST } from '@/services/mocks/mockData'
 
 const ROLES = [
@@ -153,9 +153,7 @@ export default function NewUserModal({ onClose }) {
 
         {/* Role */}
         <div>
-          <h3 className={`text-xs font-bold tracking-widest mb-4 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
-            ROL
-          </h3>
+          <SectionLabel className="mb-4">ROL</SectionLabel>
           <div className="grid grid-cols-3 gap-3">
             {ROLES.map(({ id, icon: Icon, desc }) => (
               <div
@@ -177,9 +175,7 @@ export default function NewUserModal({ onClose }) {
 
         {/* Branches */}
         <div>
-          <h3 className={`text-xs font-bold tracking-widest mb-4 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
-            SUCURSALES CON ACCESO
-          </h3>
+          <SectionLabel className="mb-4">SUCURSALES CON ACCESO</SectionLabel>
           <div className="flex flex-col gap-2">
             {BRANCH_LIST.map(b => (
               <label
