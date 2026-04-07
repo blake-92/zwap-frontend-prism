@@ -5,7 +5,7 @@ import {
   Pencil, Trash2,
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, Toggle, SearchInput, EmptySearchState, Tooltip, PageHeader } from '@/shared/ui'
+import { Card, Button, Badge, Toggle, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
 import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
 import { USERS } from '@/services/mocks/mockData'
 import NewUserModal from './NewUserModal'
@@ -51,44 +51,32 @@ export default function UsuariosView() {
         </Button>
       </PageHeader>
 
-      {/* Toolbar */}
-      <div className={`relative z-20 mb-6 p-2 rounded-2xl border flex justify-between items-center ${
-        isDarkMode
-          ? 'bg-[#252429]/20 backdrop-blur-xl border-white/10'
-          : 'bg-white/40 backdrop-blur-xl border-white shadow-sm'
-      }`}>
-        <div className="flex items-center gap-2 flex-1">
-          {/* Search */}
-          <SearchInput
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Buscar por nombre o email..."
-          />
-          {/* Role filter pills */}
-          <div className="flex items-center gap-1.5">
-            {roles.map(r => (
-              <button
-                key={r}
-                onClick={() => setRoleFilter(r)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  roleFilter === r
-                    ? isDarkMode
-                      ? 'bg-[#7C3AED]/20 text-[#A78BFA] border border-[#7C3AED]/30'
-                      : 'bg-[#DBD3FB]/60 text-[#561BAF] border border-[#7C3AED]/20'
-                    : isDarkMode
-                      ? 'text-[#888991] hover:text-[#D8D7D9]'
-                      : 'text-[#67656E] hover:text-[#111113]'
-                }`}
-              >
-                {r}
-              </button>
-            ))}
-          </div>
+      <TableToolbar actions={<Button variant="successExport" size="sm"><Download size={14} /> Exportar CSV</Button>}>
+        <SearchInput
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Buscar por nombre o email..."
+        />
+        <div className="flex items-center gap-1.5">
+          {roles.map(r => (
+            <button
+              key={r}
+              onClick={() => setRoleFilter(r)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                roleFilter === r
+                  ? isDarkMode
+                    ? 'bg-[#7C3AED]/20 text-[#A78BFA] border border-[#7C3AED]/30'
+                    : 'bg-[#DBD3FB]/60 text-[#561BAF] border border-[#7C3AED]/20'
+                  : isDarkMode
+                    ? 'text-[#888991] hover:text-[#D8D7D9]'
+                    : 'text-[#67656E] hover:text-[#111113]'
+              }`}
+            >
+              {r}
+            </button>
+          ))}
         </div>
-        <Button variant="successExport" size="sm">
-          <Download size={14} /> Exportar CSV
-        </Button>
-      </div>
+      </TableToolbar>
 
       {/* Table */}
       <Card className="pb-2">

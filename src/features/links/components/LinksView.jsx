@@ -87,26 +87,16 @@ function CustomLinksTable() {
 
   return (
     <>
-      {/* Toolbar */}
-      <div className={`relative z-20 mb-6 p-2 rounded-2xl border flex justify-between items-center ${
-        isDarkMode
-          ? 'bg-[#252429]/20 backdrop-blur-xl border-white/10'
-          : 'bg-white/40 backdrop-blur-xl border-white shadow-sm'
-      }`}>
-        <div className="flex items-center gap-2 flex-1">
-          <SearchInput
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Buscar por cliente o ID..."
-          />
-          <Button variant="outline" size="sm">
-            Estado <ChevronDown size={12} />
-          </Button>
-        </div>
-        <Button variant="successExport" size="sm">
-          <Download size={14} /> Exportar CSV
+      <TableToolbar actions={<Button variant="successExport" size="sm"><Download size={14} /> Exportar CSV</Button>}>
+        <SearchInput
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Buscar por cliente o ID..."
+        />
+        <Button variant="outline" size="sm">
+          Estado <ChevronDown size={12} />
         </Button>
-      </div>
+      </TableToolbar>
 
       {/* Table */}
       <Card className="pb-2">

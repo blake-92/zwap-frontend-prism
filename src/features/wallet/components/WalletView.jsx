@@ -5,7 +5,7 @@ import {
   CheckCircle2, RefreshCcw, FileText, CircleDot,
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, Pagination, SearchInput, EmptySearchState, Tooltip, PageHeader } from '@/shared/ui'
+import { Card, Button, Badge, Pagination, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
 import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
 import { WITHDRAWALS } from '@/services/mocks/mockData'
 import WithdrawModal from './WithdrawModal'
@@ -222,20 +222,13 @@ export default function WalletView() {
         </div>
       </div>
 
-      {/* Toolbar — Historial de Retiros */}
-      <div className={`relative z-20 mb-6 p-2 rounded-2xl border flex justify-between items-center ${
-        isDarkMode
-          ? 'bg-[#252429]/20 backdrop-blur-xl border-white/10'
-          : 'bg-white/40 backdrop-blur-xl border-white shadow-sm'
-      }`}>
-        <div className="flex items-center gap-2 flex-1">
-          <SearchInput
-            value={search}
-            onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
-            placeholder="Buscar por ID o monto..."
-          />
-        </div>
-      </div>
+      <TableToolbar>
+        <SearchInput
+          value={search}
+          onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
+          placeholder="Buscar por ID o monto..."
+        />
+      </TableToolbar>
 
       {/* Historial de Retiros */}
       <Card className="pb-2">
