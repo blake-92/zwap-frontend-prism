@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Button, PageHeader } from '@/shared/ui'
 import { KPIS } from '@/services/mocks/mockData'
@@ -18,7 +19,11 @@ export default function DashboardView() {
   const [newLinkOpen, setNewLinkOpen] = useState(false)
 
   return (
-  <>
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+    >
       <PageHeader
         title="Buenas noches, Admin 👋"
         description="Aquí tienes el pulso financiero de tus sucursales hoy."
@@ -47,6 +52,6 @@ export default function DashboardView() {
       </div>
 
       {newLinkOpen && <NewLinkModal onClose={() => setNewLinkOpen(false)} />}
-  </>
+    </motion.div>
   )
 }

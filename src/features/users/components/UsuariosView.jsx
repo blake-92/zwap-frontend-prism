@@ -39,7 +39,11 @@ export default function UsuariosView() {
 
 
   return (
-  <>
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+    >
 
       <PageHeader title="Usuarios" description="Gestión de acceso y permisos del equipo">
         <Button onClick={() => setNewUserOpen(true)}>
@@ -179,6 +183,6 @@ export default function UsuariosView() {
       </Card>
 
       {newUserOpen && <NewUserModal onClose={() => setNewUserOpen(false)} />}
-  </>
+    </motion.div>
   )
 }

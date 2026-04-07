@@ -53,7 +53,12 @@ export default function SettingsView() {
   ]
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="max-w-4xl mx-auto"
+    >
 
       <PageHeader
         title="Configuración"
@@ -256,6 +261,6 @@ export default function SettingsView() {
         )}
 
       </div>
-    </div>
+    </motion.div>
   )
 }
