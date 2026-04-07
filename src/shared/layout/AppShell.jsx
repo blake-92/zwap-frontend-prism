@@ -1,5 +1,9 @@
 import { useState, Suspense } from 'react'
 import { Outlet } from 'react-router-dom'
+import { useTheme } from '@/shared/context/ThemeContext'
+import { BRANCHES } from '@/services/mocks/mockData'
+import Sidebar from './Sidebar'
+import Header  from './Header'
 
 function PageLoader() {
   return (
@@ -8,10 +12,6 @@ function PageLoader() {
     </div>
   )
 }
-import { useTheme } from '@/shared/context/ThemeContext'
-import { BRANCHES } from '@/services/mocks/mockData'
-import Sidebar from './Sidebar'
-import Header  from './Header'
 
 export default function AppShell() {
   const { isDarkMode }      = useTheme()
