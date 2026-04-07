@@ -43,11 +43,7 @@ export default function LiquidacionesView() {
   )
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-    >
+  <>
 
       <PageHeader title="Liquidaciones" description="Control de Cierres Diarios y Depósitos Bancarios.">
         <Button variant="outline">
@@ -244,6 +240,6 @@ export default function LiquidacionesView() {
           />
         </div>
       </Card>
-    </motion.div>
+  </>
   )
 }

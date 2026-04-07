@@ -50,11 +50,7 @@ export default function TransaccionesView() {
   )
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-    >
+  <>
 
       <PageHeader title="Transacciones" description="Historial de cobros y pagos procesados">
         <Button onClick={() => navigate(ROUTES.LINKS)}>
@@ -233,6 +229,6 @@ export default function TransaccionesView() {
       {/* Modals */}
       {receiptTrx && <ReceiptModal trx={receiptTrx} onClose={() => setReceiptTrx(null)} />}
       {refundTrx  && <RefundModal  trx={refundTrx}  onClose={() => setRefundTrx(null)}  />}
-    </motion.div>
+  </>
   )
 }

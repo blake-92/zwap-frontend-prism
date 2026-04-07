@@ -95,11 +95,7 @@ export default function SucursalesView() {
   const [newBranchOpen, setNewBranchOpen] = useState(false)
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-    >
+  <>
 
       <PageHeader title="Sucursales" description="Gestión de propiedades y puntos de venta">
         <Button onClick={() => setNewBranchOpen(true)}>
@@ -120,6 +116,6 @@ export default function SucursalesView() {
       </motion.div>
 
       {newBranchOpen && <NewBranchModal onClose={() => setNewBranchOpen(false)} />}
-    </motion.div>
+  </>
   )
 }

@@ -233,11 +233,7 @@ export default function LinksView() {
     setLinks(prev => prev.map(l => l.id === id ? { ...l, active: !l.active } : l))
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-    >
+  <>
       <PageHeader title="Links de Pago" description="Gestiona cobros rápidos en mostrador y reservas personalizadas.">
         <Button onClick={() => setNewLinkOpen(true)}>
           <Plus size={18} /> Nuevo Link de Reserva
@@ -257,6 +253,6 @@ export default function LinksView() {
       <CustomLinksTable />
 
       {newLinkOpen && <NewLinkModal onClose={() => setNewLinkOpen(false)} />}
-    </motion.div>
+  </>
   )
 }
