@@ -6,45 +6,9 @@ import {
   CalendarDays, Clock, ArrowDownToLine, Filter
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, DropdownFilter, Pagination, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
+import { Card, Button, Badge, StatCard, DropdownFilter, Pagination, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
 import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
 import { PAYOUTS } from '@/services/mocks/mockData'
-
-/* ─────────────────────────────────────────────────────────────
-   KPI Card
-───────────────────────────────────────────────────────────── */
-function SaldoCard({ icon: Icon, iconVariant, label, value, badge, badgeVariant, negative }) {
-  const { isDarkMode } = useTheme()
-
-  const iconColors = {
-    success: isDarkMode ? 'bg-emerald-500/15 text-emerald-500' : 'bg-emerald-100 text-emerald-600',
-    warning: isDarkMode ? 'bg-amber-500/15 text-amber-500'    : 'bg-amber-100 text-amber-600',
-    danger:  isDarkMode ? 'bg-rose-500/15 text-rose-500'      : 'bg-rose-100 text-rose-600',
-  }
-
-  return (
-    <Card hoverEffect className="p-6 cursor-pointer group">
-      <div className="flex justify-between items-start mb-4">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${iconColors[iconVariant]}`}>
-          <Icon size={20} />
-        </div>
-        <Badge variant={badgeVariant}>{badge}</Badge>
-      </div>
-      <p className={`text-sm font-semibold mb-1 transition-colors ${
-        isDarkMode ? 'text-[#888991] group-hover:text-[#D8D7D9]' : 'text-[#67656E] group-hover:text-[#111113]'
-      }`}>
-        {label}
-      </p>
-      <h3 className={`text-3xl font-mono font-bold tracking-tight ${
-        negative
-          ? isDarkMode ? 'text-rose-500' : 'text-rose-600'
-          : isDarkMode ? 'text-white' : 'text-[#111113]'
-      }`}>
-        {value}
-      </h3>
-    </Card>
-  )
-}
 
 /* ─────────────────────────────────────────────────────────────
    LiquidacionesView
@@ -93,19 +57,19 @@ export default function LiquidacionesView() {
 
       {/* KPI row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <SaldoCard
+        <StatCard layout="balance"
           icon={CheckCircle2} iconVariant="success"
           label="Depositado (Disponible)"
           value="$12,450.00"
           badge="Últimos 30 días" badgeVariant="success"
         />
-        <SaldoCard
+        <StatCard layout="balance"
           icon={Landmark} iconVariant="warning"
           label="En Tránsito (Bancos)"
           value="$3,772.00"
           badge="En limpieza (2 días hábiles)" badgeVariant="warning"
         />
-        <SaldoCard
+        <StatCard layout="balance"
           icon={AlertOctagon} iconVariant="danger"
           label="Retenciones / Ajustes"
           value="-$150.00"
