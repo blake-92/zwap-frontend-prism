@@ -162,7 +162,8 @@ Toda superficie sigue la fórmula:
 // Light
 'bg-white/90 backdrop-blur-3xl border-white shadow-[0_20px_60px_rgba(0,0,0,0.15)]'
 
-// Siempre: rounded-[24px] border overflow-hidden animate-scale-in
+// Siempre: rounded-[24px] border overflow-hidden
+// Entrada: motion spring — ver sección 11.3
 ```
 
 **Ancho máximo según contenido:**
@@ -190,7 +191,8 @@ Toda superficie sigue la fórmula:
 // Light
 'bg-white/95 backdrop-blur-3xl border-white/80 shadow-[0_40px_80px_rgba(0,0,0,0.15)]'
 
-// Siempre: rounded-2xl border overflow-hidden animate-scale-in
+// Siempre: rounded-2xl border overflow-hidden
+// Entrada: motion spring — ver sección 11.4
 ```
 
 ### 3.7 Mini Calendar (popover flotante)
@@ -350,6 +352,8 @@ Toda superficie sigue la fórmula:
 
 **Props:** `variant`, `size`, `disabled`, `onClick`, `type`, `title`
 
+> Implementado como `motion.button` — incluye `whileTap={{ scale: 0.94 }}` automáticamente en todas las variantes. Ver sección 11.2.
+
 **Variantes:**
 
 | Variant | Descripción |
@@ -417,8 +421,7 @@ Interruptor on/off, reutilizado en `LinksView` y `UsuariosView`.
 // Apagado light: bg-gray-200 border-gray-300  (LinksView) / bg-gray-300 (UsuariosView)
 
 // Track: w-9 h-5 (LinksView) / w-10 h-5 (UsuariosView) rounded-full
-// Thumb: w-4 h-4 rounded-full bg-white shadow-sm transition-transform
-// Encendido: translate-x-4 / translate-x-5
+// Thumb: motion.div con animate={{ x: active ? 20 : 0 }} spring — ver sección 11.6
 ```
 
 ### 6.6 `<SegmentControl>` (inline en modales)
@@ -740,16 +743,262 @@ Usado en SucursalesView para la tarjeta "Nueva Sucursal".
 
 ## 11. Animaciones
 
-Definidas en `globals.css`, aplicadas como clases utilitarias.
+Prism UI usa **Framer Motion** como sistema de animación principal. Las animaciones CSS (`globals.css`) se reservan para casos donde Framer Motion no aplica (loading spinners, pulse de live dot).
+
+### 11.1 Sistema Spring — Constantes
+
+Todas las animaciones de interacción usan spring, no ease. Constantes estándar:
+
+```js
+// Transición estándar — navegación, hovers, layout
+const SPRING = { type: 'spring', stiffness: 400, damping: 30 }
+
+// Transición rápida — apertura de paneles
+const SPRING_FAST = { type: 'spring', stiffness: 500, damping: 30 }
+```
+
+Estas constantes se declaran al nivel del módulo (fuera del componente) para evitar re-creaciones.
+
+---
+
+### 11.2 Button — `whileTap` spring
+
+Todos los botones de la app (`<Button>`) tienen feedback táctil al presionar:
+
+```jsx
+<motion.button
+  whileTap={disabled ? undefined : { scale: 0.94 }}
+  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+>
+```
+
+- Escala: `0.94` — suficiente para ser perceptible sin ser agresivo
+- Respeta `disabled`: cuando el botón está deshabilitado no anima
+- Implementado en `src/shared/ui/Button.jsx` — aplica a todos los botones automáticamente
+
+---
+
+### 11.3 Modal — Spring entrance
+
+Los modales entran con spring en lugar de `animate-scale-in` CSS:
+
+```jsx
+{/* Backdrop */}
+<motion.div
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  transition={{ duration: 0.2 }}
+/>
+
+{/* Contenedor */}
+<motion.div
+  initial={{ opacity: 0, scale: 0.95, y: 10 }}
+  animate={{ opacity: 1, scale: 1, y: 0 }}
+  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+/>
+```
+
+---
+
+### 11.4 Dropdown / Popover — Spring completo
+
+Todos los paneles flotantes (DropdownFilter, branch selector del Header) usan el mismo patrón:
+
+```jsx
+const panelVariants = {
+  hidden:  { opacity: 0, scale: 0.95, y: -4 },
+  visible: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', stiffness: 500, damping: 30 } },
+  exit:    { opacity: 0, scale: 0.95, y: -4, transition: { duration: 0.12, ease: 'easeIn' } },
+}
+
+<AnimatePresence>
+  {isOpen && (
+    <motion.div
+      variants={panelVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      style={{ transformOrigin: 'top left' }}  // o 'top right' según posición
+    />
+  )}
+</AnimatePresence>
+```
+
+**Chevron spring** (acompaña al panel):
+```jsx
+<motion.span
+  animate={{ rotate: isOpen ? 180 : 0 }}
+  transition={SPRING}
+>
+  <ChevronDown size={14} />
+</motion.span>
+```
+
+**Píldora activa con layoutId** (opción seleccionada):
+```jsx
+{isSelected && (
+  <motion.div
+    layoutId={`dropdown-pill-${useId()}`}
+    className="absolute inset-0 rounded-xl bg-[#7C3AED]/15"
+    transition={SPRING}
+  />
+)}
+```
+
+> Usar `useId()` de React 18 para el `layoutId` cuando el componente puede instanciarse múltiples veces en la misma página.
+
+---
+
+### 11.5 Sidebar Nav — `layoutId` spring pill
+
+El indicador activo del sidebar se mueve entre ítems con shared layout animation:
+
+```jsx
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
+
+<LayoutGroup id="sidebar-nav">
+  {NAV_ITEMS.map(item => (
+    <button key={item.id} className="relative ...">
+      <AnimatePresence initial={false}>
+        {isActive && (
+          <motion.div
+            key="sidebar-indicator"
+            layoutId="sidebar-indicator"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            className="absolute inset-0 rounded-xl ..."
+          />
+        )}
+      </AnimatePresence>
+      <Icon className="relative z-10" />
+      <span className="relative z-10">{label}</span>
+    </button>
+  ))}
+</LayoutGroup>
+```
+
+- **`<LayoutGroup>`** es obligatorio para que Framer Motion coordine el `layoutId` entre botones distintos
+- **`initial={false}`** en `AnimatePresence` evita la animación de entrada en la carga inicial
+- El ícono y el label necesitan `relative z-10` para quedar sobre el indicador
+
+---
+
+### 11.6 Toggle — Spring knob
+
+El knob del toggle usa `motion.div` con `animate={{ x }}` en lugar de clases CSS `translate-x-*`:
+
+```jsx
+<motion.div
+  className="w-4 h-4 rounded-full bg-white shadow-sm"
+  animate={{ x: active ? 20 : 0 }}
+  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+/>
+```
+
+---
+
+### 11.7 Hover spring (WalletSidebarCard)
+
+Para elementos que reaccionan al hover con movimiento spring:
+
+```jsx
+const [hovered, setHovered] = useState(false)
+
+<motion.button
+  onHoverStart={() => setHovered(true)}
+  onHoverEnd={() => setHovered(false)}
+  animate={{ y: !isActive && hovered ? -3 : 0 }}
+  transition={SPRING}
+>
+  {/* Elemento que aparece en hover */}
+  <motion.div
+    animate={hovered ? { x: 0, opacity: 1 } : { x: -8, opacity: 0 }}
+    transition={SPRING}
+  />
+</motion.button>
+```
+
+---
+
+### 11.8 Stagger de listas
+
+Para listas de cards y filas de tabla que deben aparecer en cascada al montar:
+
+```js
+// src/shared/utils/motionVariants.js
+export const listVariants = {
+  hidden: { opacity: 0 },
+  show:   { opacity: 1, transition: { staggerChildren: 0.05 } },
+}
+
+export const itemVariants = {   // filas de tabla (slide desde izquierda)
+  hidden: { opacity: 0, x: -10 },
+  show:   { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } },
+}
+
+export const cardItemVariants = {  // cards/grids (aparece desde abajo)
+  hidden: { opacity: 0, y: 15 },
+  show:   { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } },
+}
+```
+
+**Uso en tabla:**
+```jsx
+import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
+
+<motion.tbody variants={listVariants} initial="hidden" animate="show">
+  {rows.map((row, i) => (
+    <motion.tr key={i} variants={itemVariants}>
+      ...
+    </motion.tr>
+  ))}
+</motion.tbody>
+```
+
+**Uso en grid de cards:**
+```jsx
+<motion.div variants={listVariants} initial="hidden" animate="show" className="grid ...">
+  {items.map((item, i) => (
+    <motion.div key={i} variants={cardItemVariants}>
+      <Card>...</Card>
+    </motion.div>
+  ))}
+</motion.div>
+```
+
+---
+
+### 11.9 Bell wiggle — Hover de ícono
+
+Para íconos de notificación que sacuden al hover:
+
+```jsx
+<motion.span
+  whileHover={{ rotate: [0, -18, 14, -10, 6, 0] }}
+  transition={{ duration: 0.5, ease: 'easeInOut' }}
+  className="flex items-center justify-center"
+>
+  <Bell size={20} />
+</motion.span>
+```
+
+---
+
+### 11.10 Animaciones CSS (globals.css)
+
+Reservadas para casos donde Framer Motion no aplica:
 
 | Clase | Keyframe | Duración | Uso |
 |---|---|---|---|
 | `animate-fade-in` | `opacity: 0 → 1` | 0.4s ease | Entrada de vistas completas |
-| `animate-scale-in` | `opacity 0→1 + scale 0.96→1` | 0.3s ease | Modales, dropdowns, calendar |
 | `animate-slide-up` | `opacity 0→1 + translateY 12px→0` | 0.4s ease | Formularios de email en login |
 | `animate-pulse-glow` | box-shadow pulsante morado | 2s ease-in-out ∞ | Elementos que requieren atención |
 | `animate-spin-slow` | `rotate 0→360deg` | 2s linear ∞ | Íconos de carga |
-| `animate-pulse` (Tailwind) | opacidad pulsante | built-in | Bell de alertas, live dot |
+| `animate-pulse` (Tailwind) | opacidad pulsante | built-in | Live dot del feed |
+
+> `animate-scale-in` fue reemplazado por Framer Motion en modales y dropdowns. No usar en componentes nuevos.
 
 ---
 
@@ -864,4 +1113,8 @@ function MiComponente() {
 
 6. **Semántica consistente por color.** Emerald = bien. Amber = atención. Rose = peligro/negativo. Purple = brand/neutro-positivo. Nunca se mezclan estos roles.
 
-7. **`duration-300` como estándar.** Todas las transiciones de color y transform usan `transition-all duration-300`, excepto apariciones de elementos (que usan `animate-*` con `0.3s–0.4s`).
+7. **`duration-300` como estándar.** Todas las transiciones de color y transform usan `transition-all duration-300`, excepto apariciones de elementos (que usan Framer Motion spring).
+
+8. **Spring sobre ease para interacciones.** Cualquier elemento que responde a input del usuario (clic, hover, selección) anima con `type: 'spring'`. Las animaciones ease (`duration` fijo) se reservan para entradas de página y fundidos pasivos. La física spring da la sensación de materialidad que define Prism UI.
+
+9. **`layoutId` para indicadores de selección.** Cuando un indicador visual (píldora, underline, highlight) se mueve entre opciones, usar `layoutId` con `LayoutGroup` en lugar de mostrar/ocultar. La píldora "viaja" en lugar de parpadear.
