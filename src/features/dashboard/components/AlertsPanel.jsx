@@ -1,6 +1,8 @@
 import { Bell, Timer, AlertOctagon, Landmark } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Card, Button, Badge, CardHeader } from '@/shared/ui'
+import { listVariants, cardItemVariants } from '@/shared/utils/motionVariants'
 
 const alerts = [
   {
@@ -38,10 +40,16 @@ export default function AlertsPanel() {
         <Badge variant="warning">{alerts.length}</Badge>
       </CardHeader>
 
-      <div className="flex-1 overflow-y-auto p-2 space-y-1">
+      <motion.div
+        variants={listVariants}
+        initial="hidden"
+        animate="show"
+        className="flex-1 overflow-y-auto p-2 space-y-1"
+      >
         {alerts.map((alert, i) => (
-          <div
+          <motion.div
             key={i}
+            variants={cardItemVariants}
             className={`group p-4 m-1 rounded-xl border transition-all duration-300 hover:shadow-md cursor-pointer ${
               isDarkMode
                 ? `bg-[#252429]/40 border-white/5 hover:bg-[#252429]/80 ${colorMap[alert.iconColor].border}`
@@ -68,9 +76,9 @@ export default function AlertsPanel() {
                 )}
               </div>
             </div>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </Card>
   )
 }

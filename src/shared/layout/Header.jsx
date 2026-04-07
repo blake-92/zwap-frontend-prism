@@ -69,7 +69,13 @@ export default function Header({ selectedBranch, onBranchChange }) {
 
         <Tooltip content="Notificaciones" position="bottom">
           <Button variant="ghost" size="icon" className="relative">
-            <Bell size={20} />
+            <motion.span
+              whileHover={{ rotate: [0, -18, 14, -10, 6, 0] }}
+              transition={{ duration: 0.5, ease: 'easeInOut' }}
+              className="flex items-center justify-center"
+            >
+              <Bell size={20} />
+            </motion.span>
             <span className={`absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full border-[2px] ${
               isDarkMode
                 ? 'bg-[#7C3AED] border-[#111113] shadow-[0_0_10px_rgba(124,58,237,0.9)]'

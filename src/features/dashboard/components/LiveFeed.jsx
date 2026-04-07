@@ -3,6 +3,7 @@ import { ArrowRight, User } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Card, Button, Badge, CardHeader } from '@/shared/ui'
 import { TRANSACTIONS } from '@/services/mocks/mockData'
+import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
 
 export default function LiveFeed({ onViewAll }) {
   const { isDarkMode } = useTheme()
@@ -42,10 +43,11 @@ export default function LiveFeed({ onViewAll }) {
               <th className="px-6 py-3 text-right">Monto</th>
             </tr>
           </thead>
-          <tbody>
+          <motion.tbody variants={listVariants} initial="hidden" animate="show">
             {TRANSACTIONS.slice(0, 4).map((trx, idx) => (
-              <tr
+              <motion.tr
                 key={idx}
+                variants={itemVariants}
                 className={`group transition-colors duration-200 ${
                   isDarkMode
                     ? 'border-b border-white/5 hover:bg-[#7C3AED]/5 last:border-0'
@@ -99,9 +101,9 @@ export default function LiveFeed({ onViewAll }) {
                     ${trx.amount}
                   </span>
                 </td>
-              </tr>
+              </motion.tr>
             ))}
-          </tbody>
+          </motion.tbody>
         </table>
       </div>
     </Card>

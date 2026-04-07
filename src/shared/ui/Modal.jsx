@@ -1,4 +1,5 @@
 import { X } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { useTheme } from '@/shared/context/ThemeContext'
 import Button from './Button'
 
@@ -34,17 +35,23 @@ export default function Modal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div
-        className={`absolute inset-0 backdrop-blur-md backdrop-saturate-200 transition-colors ${
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.2 }}
+        className={`absolute inset-0 backdrop-blur-md backdrop-saturate-200 ${
           isDarkMode ? 'bg-black/70' : 'bg-[#111113]/40'
         }`}
         onClick={onClose}
       />
 
       {/* Container */}
-      <div
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
         style={{ maxWidth }}
-        className={`relative w-full rounded-[24px] border overflow-hidden shadow-2xl animate-scale-in ${
+        className={`relative w-full rounded-[24px] border overflow-hidden shadow-2xl ${
           isDarkMode
             ? 'bg-[#252429]/80 backdrop-blur-3xl border-white/20 border-t-white/30'
             : 'bg-white/90 backdrop-blur-3xl border-white shadow-[0_20px_60px_rgba(0,0,0,0.15)]'
@@ -83,7 +90,7 @@ export default function Modal({
             {footer}
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
   )
 }

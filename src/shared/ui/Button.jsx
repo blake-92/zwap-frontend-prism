@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion'
 import { useTheme } from '@/shared/context/ThemeContext'
 
 const SIZES = {
@@ -42,11 +43,13 @@ export default function Button({
   }
 
   return (
-    <button
+    <motion.button
       type={type}
       title={title}
       disabled={disabled}
       onClick={onClick}
+      whileTap={disabled ? undefined : { scale: 0.94 }}
+      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
       className={`
         inline-flex items-center justify-center gap-2 font-semibold
         transition-colors duration-200 outline-none rounded-xl
@@ -56,6 +59,6 @@ export default function Button({
       {...props}
     >
       {children}
-    </button>
+    </motion.button>
   )
 }
