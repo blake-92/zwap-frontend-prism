@@ -334,38 +334,59 @@ Toda superficie sigue la fórmula:
 
 ---
 
-## 6. Componentes UI
+## 6. Componentes UI — Referencia
 
-### 6.1 `<Card>`
+### Contenedores y Estructura
+
+#### 6.1 `<Card>`
 
 **Props:** `hoverEffect`, `className`, `onClick`, `style`
 
-```jsx
-<Card>Contenido</Card>
-<Card hoverEffect className="p-6">Con elevación al hover</Card>
-```
+- Base: glass surface con `rounded-[24px]` (ver sección 3.1)
+- `hoverEffect`: `-translate-y-1` + sombra con glow morado
 
-- Base: glass surface con `rounded-[24px]`
-- `hoverEffect`: `-translate-y-1` + glow shadow
+#### 6.2 `<CardHeader>`
 
-### 6.2 `<Button>`
+**Props:** `title` (node), `description` (string), `className`, `children` (acciones derecha)
 
-**Props:** `variant`, `size`, `disabled`, `onClick`, `type`, `title`
+- Línea divisoria inferior. Jerarquía visual entre título (`font-bold`) y subtítulo (muted)
 
-> Implementado como `motion.button` — incluye `whileTap={{ scale: 0.94 }}` automáticamente en todas las variantes. Ver sección 11.2.
+#### 6.3 `<PageHeader>`
 
-**Variantes:**
+**Props:** `title`, `description`, `className`, `children` (nodo de acción)
 
-| Variant | Descripción |
+- Renderiza `<h1>` con `text-3xl font-bold tracking-tight`
+
+#### 6.4 `<SectionLabel>`
+
+**Props:** `children`, `className`
+
+- `text-xs uppercase tracking-widest font-bold` en color muted — no roba atención al contenido
+
+#### 6.5 `<Modal>`
+
+**Props:** `onClose`, `title`, `description`, `icon`, `maxWidth`, `footer`, `className`, `children`
+
+- Glass con `backdrop-blur-3xl` (ver sección 3.4)
+- Entrada con spring (ver sección 11.3)
+- Anchos estándar: `max-w-[480px]` simple · `max-w-[540px]` mediano · `max-w-[600px]` ancho · `max-w-[1000px]` wizard
+
+### Entradas de Usuario
+
+#### 6.6 `<Button>`
+
+**Props:** `variant`, `size`, `disabled`, `onClick`, `type`
+
+> Implementado como `motion.button` — `whileTap={{ scale: 0.94 }}` automático. Ver sección 11.2.
+
+| Variant | Uso |
 |---|---|
-| `default` | Morado sólido con glow shadow. Acción principal de la página. |
-| `outline` | Glass translúcido con borde. Acciones secundarias, filtros. |
-| `ghost` | Sin fondo, solo tint en hover. Nav, íconos de acción, tema toggle. |
-| `action` | Tint morado suave. Botones de fila en tablas (Recibo, Inspeccionar). |
-| `danger` | Neutro → rose en hover. Eliminar, Devolución. |
-| `successExport` | Neutro → emerald en hover. Exportar CSV. |
-
-**Tamaños:**
+| `default` | Acción principal — morado sólido con glow |
+| `outline` | Acciones secundarias — glass translúcido con borde |
+| `ghost` | Nav, íconos de acción — sin fondo, tint en hover |
+| `action` | Botones de fila en tabla — tint morado suave |
+| `danger` | Eliminar, devolución — neutro → rose en hover |
+| `successExport` | Exportar — neutro → emerald en hover |
 
 | Size | Padding | Texto |
 |---|---|---|
@@ -381,67 +402,134 @@ Toda superficie sigue la fórmula:
 </Button>
 ```
 
-### 6.3 `<Badge>`
+#### 6.7 `<Input>`
 
-**Props:** `variant`, `icon` (Lucide icon component), `className`
+**Props:** `icon` (Lucide), más props nativos de `<input>`
 
-**Variantes:** `default` | `success` | `warning` | `danger` | `outline`
+- Con ícono: `pl-11`; sin ícono: `px-4`
+- Dark focus: borde morado + `shadow-[0_0_15px_rgba(124,58,237,0.15)]`
+
+#### 6.8 `<SearchInput>`
+
+**Props:** `value`, `onChange`, `placeholder`, `className`
+
+- Ícono `Search` fijo a la izquierda. Fondo más transparente para vivir dentro de `TableToolbar`
+
+#### 6.9 `<Toggle>`
+
+**Props:** `active`, `onToggle`, `disabled`
+
+- Knob anima con spring `x: active ? 20 : 0` (ver sección 11.6)
+- Encendido: `bg-[#7C3AED] shadow-[0_0_12px_rgba(124,58,237,0.4)]`
+
+#### 6.10 `<DropdownFilter>`
+
+**Props:** `label`, `options`, `value`, `onChange`, `icon`
+
+- Gatillo `<Button>` + panel `AnimatePresence` + píldora activa con `layoutId` (ver sección 11.4)
+
+#### 6.11 `<SegmentControl>`
+
+**Props:** `options`, `value`, `onChange`, `layoutId`
+
+- Píldora viaja entre opciones con spring `layoutId`. Patrón también en tab switchers de cards.
+
+```jsx
+// Contenedor dark: bg-black/60 border border-white/5 · light: bg-gray-200/50 border border-black/5
+// Opción activa dark: bg-[#252429] text-white shadow-[0_4px_15px_rgba(124,58,237,0.2)]
+// Opción activa light: bg-white text-[#7C3AED] shadow-md border border-[#7C3AED]/20
+```
+
+#### 6.12 `<MiniCalendar>`
+
+**Props:** `selectedDate`, `onSelect`, `timeValue`, `onTimeChange`, `onConfirm`
+
+- Grid de días del mes + inputs separados de horas/minutos
+- Se renderiza como popover flotante (ver sección 3.7)
+
+### Visualización de Datos
+
+#### 6.13 `<Badge>`
+
+**Props:** `variant` (default/success/warning/danger/outline), `icon` (Lucide), `className`
 
 ```jsx
 <Badge variant="success" icon={CheckCircle2}>Exitoso</Badge>
-<Badge variant="warning">5 pendientes</Badge>
 ```
 
-- Siempre: `px-2.5 py-1 rounded-md text-[11px] font-bold border backdrop-blur-md shadow-sm`
-- Con ícono: `strokeWidth={3}` forzado
+- `backdrop-blur-md` con sombra mínima. Con ícono: `strokeWidth={3}` forzado
 
-### 6.4 `<Input>`
+#### 6.14 `<Avatar>`
 
-**Props:** `icon` (Lucide), más todos los props nativos de `<input>`
+**Props:** `initials`, `size` (sm/md), `variant` (purple/neutral), `glow`
 
-```jsx
-<Input icon={Mail} type="email" placeholder="admin@hotel.com" />
-<Input type="text" placeholder="Sin ícono" />
-```
+- Círculo con iniciales. `glow` activa `shadow-[0_0_20px_rgba(124,58,237,0.4)]` en hover desde el padre
 
-- Con ícono: `pl-11 pr-4`
-- Sin ícono: `px-4`
-- Dark focus: `focus:border-[#7C3AED]/50 focus:shadow-[0_0_15px_rgba(124,58,237,0.15)]`
-- Siempre: `py-3 rounded-xl border outline-none transition-all font-medium`
+#### 6.15 `<AvatarInfo>`
 
-### 6.5 `<Toggle>` (inline en vistas)
+**Props:** `initials`, `name`, `secondary`, `meta`
 
-Interruptor on/off, reutilizado en `LinksView` y `UsuariosView`.
+- Compone `Avatar` + nombre + texto secundario + ID
+- Si `initials` es null: círculo discontinuo con ícono `User` como fallback
 
-```jsx
-// Estado visual
-// Encendido dark: bg-[#7C3AED] shadow-[0_0_12px_rgba(124,58,237,0.4)]
-// Encendido light: bg-[#7C3AED]
-// Apagado dark: bg-[#252429] border-white/10  (LinksView) / bg-[#45434A] (UsuariosView)
-// Apagado light: bg-gray-200 border-gray-300  (LinksView) / bg-gray-300 (UsuariosView)
+#### 6.16 `<StatCard>`
 
-// Track: w-9 h-5 (LinksView) / w-10 h-5 (UsuariosView) rounded-full
-// Thumb: motion.div con animate={{ x: active ? 20 : 0 }} spring — ver sección 11.6
-```
+**Props:** `label`, `value`, `icon`, `iconVariant` (default/success/warning/danger), `badge`, `badgeVariant`, `badgeSuffix`, `negative`, `layout` (kpi/balance)
 
-### 6.6 `<SegmentControl>` (inline en modales)
+- `kpi`: label arriba, valor centrado, badge abajo — para dashboards
+- `balance`: ícono/badge arriba, valor grande — para WalletView
+- `negative`: tiñe el valor en `rose-500`
 
-Selector de opciones tipo "tabs internos". Reutilizado en `RefundModal` y `NewLinkModal`.
+#### 6.17 `<TableToolbar>`
 
-```jsx
-// Contenedor
-// Dark: bg-black/60 border border-white/5
-// Light: bg-gray-200/50 border border-black/5
-// Siempre: flex rounded-xl p-1.5 shadow-inner
+**Props:** `children` (SearchInput, filtros, pills), `actions` (botones exportar/añadir), `className`
 
-// Opción activa dark: bg-[#252429] text-white border border-white/10 shadow-[0_4px_15px_rgba(124,58,237,0.2)]
-// Opción activa light: bg-white text-[#7C3AED] shadow-md border border-[#7C3AED]/20
-// Opción inactiva dark: text-[#888991] hover:text-[#D8D7D9]
-// Opción inactiva light: text-[#67656E] hover:text-[#111113]
-// Siempre: flex-1 py-2 text-xs font-bold rounded-lg transition-all duration-300
-```
+- Barra glass semitransparente (ver sección 3.8)
+- `children` → izquierda; `actions` → derecha (solo se renderiza si existe)
 
-Este mismo patrón se usa para los **tab switchers** dentro de cards (ChartCard, QuickLinkCard).
+### Navegación y Flujo
+
+#### 6.18 `<Pagination>`
+
+**Props:** `currentPage`, `totalPages`, `onPageChange`
+
+- Elipsis `...` inteligente para rangos largos. Íconos `ChevronLeft`/`ChevronRight` de Lucide
+
+#### 6.19 `<Stepper>`
+
+**Props:** `steps[]` (cada step: `label`, `sub`, `icon`, `done`, `active`)
+
+- Conectores entre pasos con líneas divisorias
+- Paso activo: glow + puede usar `animate-spin-slow` en el ícono
+- Glow completado: `shadow-[0_0_14px_rgba(16,185,129,0.4)]` · activo: `shadow-[0_0_14px_rgba(124,58,237,0.4)]`
+
+### Retroalimentación
+
+#### 6.20 `<InfoBanner>`
+
+**Props:** `children`, `variant` (warning/info/danger)
+
+- Ícono automático según variante. Ideal en cabeceras de modales o páginas
+
+#### 6.21 `<Skeleton>`
+
+**Props:** `width`, `height`, `rounded` (clase Tailwind, default `rounded-lg`), `className`
+
+- Framer Motion: shimmer `x: ['-100%','200%']` + respiración `opacity: 0.5→1`
+
+#### 6.22 `<EmptySearchState>`
+
+**Props:** `colSpan`, `term`, `onClear`
+
+- Renderiza directamente dentro de `<tbody>`. Ícono `SearchX` centrado
+- `onClear`: callback del botón "Limpiar búsqueda"
+
+#### 6.23 `<Tooltip>`
+
+**Props:** `children`, `content`, `position` (top/bottom/left/right, default `top`)
+
+- Portal con `createPortal` para evitar clipping por `overflow: hidden` en padres
+- Cálculo dinámico de posición; fade de entrada/salida
 
 ---
 
@@ -1044,7 +1132,7 @@ isDarkMode ? 'drop-shadow-[0_0_12px_rgba(255,255,255,0.15)]' : 'drop-shadow-sm'
 Cada componente llama a `useTheme()` directamente. No se hace prop-drilling de `isDarkMode`.
 
 ```jsx
-import { useTheme } from '../../context/ThemeContext'
+import { useTheme } from '@/shared/context/ThemeContext'
 
 function MiComponente() {
   const { isDarkMode, toggleTheme } = useTheme()
