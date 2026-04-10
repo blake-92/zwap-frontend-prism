@@ -24,11 +24,39 @@ const NAV_ITEMS = [
 
 const SPRING = { type: 'spring', stiffness: 400, damping: 30 }
 
-const LABEL_VARIANTS = {
-  hidden: { opacity: 0, x: -8 },
-  show:   { opacity: 1, x:  0, transition: { duration: 0.15 } },
-  exit:   { opacity: 0, x: -8, transition: { duration: 0.1  } },
+const WRAPPER_VARIANTS = {
+  hidden: { width: 0, marginLeft: 0 },
+  show:   { 
+    width: 'auto', marginLeft: 12, 
+    transition: { 
+      duration: 0.3, ease: "easeOut",
+      staggerChildren: 0.02, delayChildren: 0.05
+    } 
+  },
+  exit:   { 
+    width: 0, marginLeft: 0, 
+    transition: { 
+      duration: 0.2, ease: "easeIn",
+      staggerChildren: 0.01, staggerDirection: -1
+    } 
+  },
 }
+
+const CONTENT_VARIANTS = {
+  hidden: { opacity: 0, filter: 'blur(2px)' },
+  show:   { opacity: 1, filter: 'blur(0px)', transition: { duration: 0.2 } },
+  exit:   { opacity: 0, filter: 'blur(0px)', transition: { duration: 0.05 } },
+}
+
+const AnimatedText = ({ text }) => (
+  <span className="flex">
+    {text.split('').map((char, i) => (
+      <motion.span key={i} variants={CONTENT_VARIANTS}>
+        {char === ' ' ? '\u00A0' : char}
+      </motion.span>
+    ))}
+  </span>
+)
 
 export default function Sidebar({ isCollapsed }) {
   const { isDarkMode } = useTheme()
@@ -50,12 +78,13 @@ export default function Sidebar({ isCollapsed }) {
     >
 
       {/* ── Logo ── */}
-      <div className={`h-20 flex items-center flex-shrink-0 overflow-hidden ${
+      <div className={`relative h-20 flex items-center flex-shrink-0 overflow-hidden ${
         isCollapsed ? 'justify-center px-0' : 'px-4'
       }`}>
-        <AnimatePresence mode="wait" initial={false}>
+        <AnimatePresence initial={false} mode="popLayout">
           {isCollapsed ? (
             <motion.div
+              layoutId="brand-logo"
               key="iso"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -66,6 +95,7 @@ export default function Sidebar({ isCollapsed }) {
             </motion.div>
           ) : (
             <motion.div
+              layoutId="brand-logo"
               key="logo"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -84,12 +114,13 @@ export default function Sidebar({ isCollapsed }) {
           {NAV_ITEMS.map(({ id, label, icon: Icon, route }) => {
             const isActive = location.pathname === route
             return (
-              <button
+              <motion.button
+                layout
                 key={id}
                 onClick={() => navigate(route)}
                 title={isCollapsed ? label : undefined}
                 className={`relative w-full flex items-center py-3 rounded-xl text-sm font-medium transition-colors duration-200 ${
-                  isCollapsed ? 'justify-center px-0' : 'gap-3 px-4'
+                  isCollapsed ? 'justify-center px-0' : 'px-4'
                 } ${
                   isActive
                     ? isDarkMode ? 'text-white'     : 'text-[#561BAF]'
@@ -116,17 +147,17 @@ export default function Sidebar({ isCollapsed }) {
                   {!isCollapsed && (
                     <motion.span
                       key="label"
-                      variants={LABEL_VARIANTS}
+                      variants={WRAPPER_VARIANTS}
                       initial="hidden"
                       animate="show"
                       exit="exit"
                       className="relative z-10 whitespace-nowrap overflow-hidden"
                     >
-                      {label}
+                      <AnimatedText text={label} />
                     </motion.span>
                   )}
                 </AnimatePresence>
-              </button>
+              </motion.button>
             )
           })}
         </LayoutGroup>
@@ -136,9 +167,10 @@ export default function Sidebar({ isCollapsed }) {
       <div className="px-2 pb-5 space-y-3 flex-shrink-0 overflow-hidden">
 
         {/* Wallet — card completa o ícono según estado */}
-        <AnimatePresence mode="wait" initial={false}>
+        <AnimatePresence initial={false} mode="popLayout">
           {isCollapsed ? (
             <motion.button
+              layoutId="wallet-widget"
               key="wallet-icon"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, y: !isWalletActive && walletHover ? -3 : 0 }}
@@ -171,6 +203,7 @@ export default function Sidebar({ isCollapsed }) {
             </motion.button>
           ) : (
             <motion.div
+              layoutId="wallet-widget"
               key="wallet-card"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -183,8 +216,8 @@ export default function Sidebar({ isCollapsed }) {
         </AnimatePresence>
 
         {/* User row */}
-        <div className={`flex items-center py-2 rounded-xl transition-all duration-200 ${
-          isCollapsed ? 'justify-center px-0' : 'gap-3 px-1'
+        <motion.div layout className={`flex items-center py-2 rounded-xl transition-all duration-200 ${
+          isCollapsed ? 'justify-center px-0' : 'px-1'
         }`}>
           <Avatar initials="A" size="sm" variant="neutral" />
 
@@ -192,13 +225,13 @@ export default function Sidebar({ isCollapsed }) {
             {!isCollapsed && (
               <motion.div
                 key="user-info"
-                variants={LABEL_VARIANTS}
+                variants={WRAPPER_VARIANTS}
                 initial="hidden"
                 animate="show"
                 exit="exit"
-                className="flex-1 min-w-0 flex items-center justify-between"
+                className="flex-1 min-w-0 flex items-center justify-between overflow-hidden whitespace-nowrap"
               >
-                <div className="min-w-0">
+                <motion.div variants={CONTENT_VARIANTS} className="min-w-0">
                   <p className={`text-sm font-bold truncate leading-tight ${
                     isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'
                   }`}>
@@ -209,8 +242,9 @@ export default function Sidebar({ isCollapsed }) {
                   }`}>
                     Cerrar Sesión
                   </p>
-                </div>
-                <button
+                </motion.div>
+                <motion.button
+                  variants={CONTENT_VARIANTS}
                   onClick={() => { localStorage.removeItem('zwap_token'); navigate(ROUTES.LOGIN) }}
                   title="Cerrar Sesión"
                   className={`p-1.5 rounded-lg flex-shrink-0 transition-all duration-200 ${
@@ -220,11 +254,11 @@ export default function Sidebar({ isCollapsed }) {
                   }`}
                 >
                   <LogOut size={16} />
-                </button>
+                </motion.button>
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        </motion.div>
       </div>
     </motion.aside>
   )
