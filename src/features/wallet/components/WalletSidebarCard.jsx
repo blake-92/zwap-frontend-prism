@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Wallet } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { ROUTES } from '@/router/routes'
 
@@ -34,13 +34,16 @@ export default function WalletSidebarCard() {
       }`}
     >
       <div className="relative z-10 text-left">
-        <p className={`text-[11px] font-bold tracking-widest uppercase mb-1 transition-colors ${
+        <div className={`flex items-center gap-1.5 mb-1 transition-colors ${
           isActive
             ? isDarkMode ? 'text-[#B9A4F8]' : 'text-[#7C3AED]'
             : isDarkMode ? 'text-[#888991] group-hover:text-[#D8D7D9]' : 'text-[#67656E]'
         }`}>
-          Mi Billetera
-        </p>
+          <Wallet size={11} strokeWidth={2.5} />
+          <p className="text-[11px] font-bold tracking-widest uppercase">
+            Mi Billetera
+          </p>
+        </div>
         <span className={`text-2xl font-mono font-bold tracking-tighter block leading-none ${
           isDarkMode ? 'text-white' : 'text-[#111113]'
         }`}>
