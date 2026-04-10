@@ -5,7 +5,7 @@ import {
   Pencil, Trash2,
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, AvatarInfo, Toggle, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
+import { Card, Button, Badge, AvatarInfo, Toggle, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar, SegmentControl } from '@/shared/ui'
 import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
 import { USERS } from '@/services/mocks/mockData'
 import NewUserModal from './NewUserModal'
@@ -57,25 +57,11 @@ export default function UsuariosView() {
           onChange={e => setSearch(e.target.value)}
           placeholder="Buscar por nombre o email..."
         />
-        <div className="flex items-center gap-1.5">
-          {roles.map(r => (
-            <button
-              key={r}
-              onClick={() => setRoleFilter(r)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                roleFilter === r
-                  ? isDarkMode
-                    ? 'bg-[#7C3AED]/20 text-[#A78BFA] border border-[#7C3AED]/30'
-                    : 'bg-[#DBD3FB]/60 text-[#561BAF] border border-[#7C3AED]/20'
-                  : isDarkMode
-                    ? 'text-[#888991] hover:text-[#D8D7D9]'
-                    : 'text-[#67656E] hover:text-[#111113]'
-              }`}
-            >
-              {r}
-            </button>
-          ))}
-        </div>
+        <SegmentControl
+          options={roles.map(r => ({ value: r, label: r }))}
+          value={roleFilter}
+          onChange={setRoleFilter}
+        />
       </TableToolbar>
 
       {/* Table */}
