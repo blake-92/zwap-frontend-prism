@@ -258,13 +258,21 @@ export default function TransaccionesView() {
                 >
                   <div className="p-4">
                     <div className="flex items-start justify-between gap-3 mb-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <AvatarInfo
-                          initials={trx.initials}
-                          primary={trx.client || 'Cliente Anonimo'}
-                          secondary={trx.email || 'Venta en mostrador'}
-                          glow
-                        />
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <p className={`font-bold text-sm truncate ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`} title={trx.client || 'Cliente Anónimo'}>
+                          {trx.client || 'Cliente Anónimo'}
+                        </p>
+                        <div className={`flex items-center gap-1.5 text-[11px] font-medium truncate ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                          <span className="flex items-center gap-1 flex-shrink-0">
+                            <CreditCard size={12} className="opacity-70" />
+                            <span className="font-mono tracking-widest opacity-70">••</span>
+                            <span className="font-mono">{trx.last4}</span>
+                          </span>
+                          <span className="opacity-40 flex-shrink-0">•</span>
+                          <span className="truncate" title={trx.email || 'Venta en mostrador'}>
+                            {trx.email || 'Venta en mostrador'}
+                          </span>
+                        </div>
                       </div>
                       <span className={`font-mono font-bold text-lg tracking-tight mt-0.5 flex-shrink-0 ${
                         trx.status === 'Reembolsado'
