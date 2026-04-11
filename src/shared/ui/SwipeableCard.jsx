@@ -2,12 +2,13 @@ import { useState } from 'react'
 import { motion, useAnimation } from 'framer-motion'
 import { ChevronLeft } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
+import { getCardClasses } from '@/shared/utils/cardClasses'
 
 export default function SwipeableCard({ children, actions, className = '' }) {
   const { isDarkMode } = useTheme()
   const controls = useAnimation()
   const [isOpen, setIsOpen] = useState(false)
-  
+
   const validActions = actions.filter(a => !a.hidden)
   const actionWidth = 76
   const maxDrag = validActions.length * actionWidth
@@ -28,9 +29,7 @@ export default function SwipeableCard({ children, actions, className = '' }) {
     setIsOpen(false)
   }
 
-  const base = isDarkMode
-    ? 'bg-[#252429]/30 backdrop-blur-2xl border-white/10 border-t-white/20 shadow-2xl'
-    : 'bg-white/40 backdrop-blur-2xl border-white border-t-white shadow-[0_10px_40px_rgb(0,0,0,0.05)]'
+  const { base } = getCardClasses(isDarkMode)
 
   return (
     <div className={`relative overflow-hidden rounded-[24px] ${className}`}>
@@ -86,14 +85,15 @@ export default function SwipeableCard({ children, actions, className = '' }) {
         
         {/* Visual indicator (animated chevron) - only show if actions exist and not open */}
         {maxDrag > 0 && !isOpen && (
-          <motion.div 
-            initial={{ opacity: 0, x: 5 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ 
-              repeat: Infinity, 
-              repeatType: "reverse", 
-              duration: 1.5,
-              ease: "easeInOut"
+          <motion.div
+            initial={{ x: 5 }}
+            animate={{ x: 0 }}
+            transition={{
+              type: 'spring',
+              stiffness: 120,
+              damping: 8,
+              repeat: Infinity,
+              repeatType: 'reverse',
             }}
             className={`absolute right-0 top-0 bottom-0 flex flex-col items-center justify-center w-10 pointer-events-none rounded-r-[24px] ${
               isDarkMode 

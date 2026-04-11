@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useTheme } from '@/shared/context/ThemeContext'
+import useMediaQuery from '@/shared/hooks/useMediaQuery'
 import Button from './Button'
 
 /**
@@ -32,6 +33,7 @@ export default function Modal({
   children,
 }) {
   const { isDarkMode } = useTheme()
+  const isMobile = !useMediaQuery('(min-width: 640px)')
   const containerRef = useRef(null)
 
   // Escape key handler
@@ -97,12 +99,14 @@ export default function Modal({
       {/* Container */}
       <motion.div
         ref={containerRef}
-        drag="y"
-        dragConstraints={{ top: 0 }}
-        dragElastic={0.2}
-        onDragEnd={(e, info) => {
-          if (info.offset.y > 100 || info.velocity.y > 500) onClose()
-        }}
+        {...(isMobile && {
+          drag: 'y',
+          dragConstraints: { top: 0 },
+          dragElastic: 0.2,
+          onDragEnd: (e, info) => {
+            if (info.offset.y > 100 || info.velocity.y > 500) onClose()
+          },
+        })}
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
