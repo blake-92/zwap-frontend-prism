@@ -97,6 +97,12 @@ export default function Modal({
       {/* Container */}
       <motion.div
         ref={containerRef}
+        drag="y"
+        dragConstraints={{ top: 0 }}
+        dragElastic={0.2}
+        onDragEnd={(e, info) => {
+          if (info.offset.y > 100 || info.velocity.y > 500) onClose()
+        }}
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -115,8 +121,13 @@ export default function Modal({
             : 'bg-white/90 backdrop-blur-3xl border-white shadow-[0_20px_60px_rgba(0,0,0,0.15)]'
         } ${className}`}
       >
+        {/* Handle bar mobile */}
+        <div className="sm:hidden flex justify-center pt-3 pb-1">
+          <div className={`w-10 h-1 rounded-full ${isDarkMode ? 'bg-white/20' : 'bg-black/10'}`} />
+        </div>
+
         {/* Header */}
-        <div className={`px-5 sm:px-8 py-5 sm:py-6 border-b flex justify-between items-start flex-shrink-0 ${
+        <div className={`px-5 sm:px-8 py-4 sm:py-6 border-b flex justify-between items-start flex-shrink-0 ${
           isDarkMode ? 'border-white/10' : 'border-black/5'
         }`}>
           <div>
@@ -132,7 +143,7 @@ export default function Modal({
               </p>
             )}
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose}>
+          <Button variant="ghost" size="icon" onClick={onClose} className="!w-11 !h-11 sm:!w-10 sm:!h-10">
             <X size={20} />
           </Button>
         </div>
