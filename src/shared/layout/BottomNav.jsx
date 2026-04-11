@@ -148,6 +148,12 @@ export default function BottomNav() {
             initial="hidden"
             animate="visible"
             exit="exit"
+            drag="y"
+            dragConstraints={{ top: 0 }}
+            dragElastic={0.2}
+            onDragEnd={(e, info) => {
+              if (info.offset.y > 100 || info.velocity.y > 500) setSheetOpen(false)
+            }}
             className={`fixed bottom-0 inset-x-0 z-[35] rounded-t-2xl border-t pb-[calc(68px+env(safe-area-inset-bottom))] ${
               isDarkMode
                 ? 'bg-[#1A1A1D] border-white/10'
@@ -166,11 +172,11 @@ export default function BottomNav() {
               </h3>
               <button
                 onClick={() => setSheetOpen(false)}
-                className={`p-3 -mr-1.5 rounded-xl transition-colors ${
+                className={`w-11 h-11 flex items-center justify-center -mr-2 rounded-xl transition-colors ${
                   isDarkMode ? 'text-[#888991] hover:bg-white/10' : 'text-[#67656E] hover:bg-black/5'
                 }`}
               >
-                <X size={18} />
+                <X size={20} />
               </button>
             </div>
 
