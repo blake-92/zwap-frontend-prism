@@ -36,7 +36,7 @@ export default function SwipeableCard({ children, actions, className = '' }) {
     <div className={`relative overflow-hidden rounded-[24px] ${className}`}>
       {/* Background actions layer */}
       <div 
-        className={`absolute inset-y-0 right-0 flex justify-end ${
+        className={`absolute inset-y-0 right-0 flex justify-end overflow-hidden ${
           isDarkMode ? 'bg-[#111113]/50 border border-white/5' : 'bg-gray-100 border border-black/5'
         } rounded-[24px]`}
         style={{ width: maxDrag }}
@@ -95,11 +95,13 @@ export default function SwipeableCard({ children, actions, className = '' }) {
               duration: 1.5,
               ease: "easeInOut"
             }}
-            className={`absolute right-1 top-1/2 -translate-y-1/2 flex flex-col items-center justify-center w-6 h-12 pointer-events-none ${
-              isDarkMode ? 'text-white/30' : 'text-black/20'
+            className={`absolute right-0 top-0 bottom-0 flex flex-col items-center justify-center w-10 pointer-events-none rounded-r-[24px] ${
+              isDarkMode 
+                ? 'bg-gradient-to-l from-[#252429] via-[#252429]/80 to-transparent text-white/40' 
+                : 'bg-gradient-to-l from-white via-white/80 to-transparent text-black/30'
             }`}
           >
-            <ChevronLeft size={16} strokeWidth={3} />
+            <ChevronLeft size={16} strokeWidth={3} className="ml-2" />
           </motion.div>
         )}
       </motion.div>

@@ -277,15 +277,12 @@ export default function TransaccionesView() {
 
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <Badge variant={trx.statusVariant} icon={trx.StatusIcon}>
-                          {trx.status}
-                        </Badge>
-                        <span className={`text-[11px] font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                          <trx.ChannelIcon size={12} />
-                          {trx.channel.includes('POS') ? 'POS' : 'Link'}
+                        <Badge variant={trx.statusVariant} icon={trx.StatusIcon} title={trx.status} />
+                        <span className={`text-[11px] font-medium flex items-center gap-1 opacity-70 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`} title={trx.channel}>
+                          <trx.ChannelIcon size={14} />
                         </span>
                       </div>
-                      <span className={`text-xs font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                      <span className={`text-[11px] font-medium flex items-center gap-1.5 opacity-80 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
                         <Clock size={12} /> {trx.date} {trx.time}
                       </span>
                     </div>
