@@ -106,6 +106,7 @@ export default function LiquidacionesView() {
           label="Fecha"
           icon={Calendar}
           options={['Cualquier fecha', 'Esta semana', 'Este mes']}
+          defaultValue="Cualquier fecha"
           value={dateFilter}
           onChange={(val) => { setDateFilter(val); setCurrentPage(1) }}
         />
@@ -113,6 +114,7 @@ export default function LiquidacionesView() {
           label="Estado"
           icon={Filter}
           options={['Todos', 'Depositado', 'Pendiente (ACH)']}
+          defaultValue="Todos"
           value={statusFilter}
           onChange={(val) => { setStatusFilter(val); setCurrentPage(1) }}
         />

@@ -94,6 +94,7 @@ export default function TransaccionesView() {
           label="Fecha"
           icon={Calendar}
           options={['Cualquier fecha', 'Hoy', 'Últimos 7 días', 'Este mes']}
+          defaultValue="Cualquier fecha"
           value={dateFilter}
           onChange={(val) => { setDateFilter(val); setCurrentPage(1) }}
         />
@@ -101,6 +102,7 @@ export default function TransaccionesView() {
           label="Estado"
           icon={Filter}
           options={['Todos', 'Exitoso', 'Pendiente', 'Reembolsado']}
+          defaultValue="Todos"
           value={statusFilter}
           onChange={(val) => { setStatusFilter(val); setCurrentPage(1) }}
         />
