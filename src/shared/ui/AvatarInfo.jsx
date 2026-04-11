@@ -19,7 +19,7 @@ export default function AvatarInfo({ initials, primary, secondary, meta, glow = 
   const { isDarkMode } = useTheme()
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-3 min-w-0">
       {initials ? (
         <Avatar initials={initials} glow={glow} />
       ) : (
@@ -29,13 +29,13 @@ export default function AvatarInfo({ initials, primary, secondary, meta, glow = 
           <User size={16} />
         </div>
       )}
-      <div>
-        <p className={`font-bold text-sm ${isDarkMode ? 'text-[#D8D7D9] group-hover:text-white' : 'text-[#111113]'}`}>
+      <div className="min-w-0">
+        <p className={`font-bold text-sm truncate ${isDarkMode ? 'text-[#D8D7D9] group-hover:text-white' : 'text-[#111113]'}`}>
           {primary}
           {meta && <span className="font-mono text-[10px] text-[#888991] ml-1">({meta})</span>}
         </p>
         {secondary && (
-          <p className={`text-xs mt-0.5 font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+          <p className={`text-xs mt-0.5 font-medium truncate ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
             {secondary}
           </p>
         )}

@@ -103,7 +103,7 @@ export default function SucursalesView() {
       </PageHeader>
 
       {/* Cards grid */}
-      <motion.div variants={listVariants} initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <motion.div variants={listVariants} initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 2xl:gap-8">
         {BRANCH_LIST.map(b => (
           <motion.div key={b.id} variants={cardItemVariants}>
             <BranchCard branch={b} />

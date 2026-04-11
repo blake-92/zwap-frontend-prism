@@ -96,8 +96,8 @@ export default function TransaccionesView() {
         />
       </TableToolbar>
 
-      {/* Table */}
-      <Card className="pb-2">
+      {/* Table (desktop) */}
+      <Card className="pb-2 hidden lg:block">
         <div className="overflow-x-auto">
           <table aria-label="Historial de transacciones" className="w-full text-left border-collapse min-w-[900px]">
             <thead>
@@ -108,7 +108,7 @@ export default function TransaccionesView() {
               }`}>
                 <th className="px-8 py-4 min-w-[140px]">Fecha</th>
                 <th className="px-6 py-4 min-w-[220px]">Cliente</th>
-                <th className="px-6 py-4 min-w-[280px]">Detalles de Operación</th>
+                <th className="px-6 py-4 min-w-[280px]">Detalles de Operacion</th>
                 <th className="px-6 py-4 text-right min-w-[140px]">Monto (USD)</th>
                 <th className="px-8 py-4 text-right min-w-[160px]">Acciones</th>
               </tr>
@@ -139,7 +139,7 @@ export default function TransaccionesView() {
                     <td className="px-6 py-4">
                       <AvatarInfo
                         initials={trx.initials}
-                        primary={trx.client || 'Cliente Anónimo'}
+                        primary={trx.client || 'Cliente Anonimo'}
                         secondary={trx.email || 'Venta en mostrador'}
                         glow
                       />
@@ -200,7 +200,7 @@ export default function TransaccionesView() {
                           </Button>
                         </Tooltip>
                         {trx.status === 'Reembolsado' ? (
-                          <Tooltip content="Recibo de Devolución" position="top">
+                          <Tooltip content="Recibo de Devolucion" position="top">
                             <Button
                               variant="outline" size="sm"
                               onClick={() => setRefundTrx(trx)}
@@ -211,7 +211,7 @@ export default function TransaccionesView() {
                             </Button>
                           </Tooltip>
                         ) : (
-                          <Tooltip content="Devolución" position="top">
+                          <Tooltip content="Devolucion" position="top">
                             <Button
                               variant="danger" size="sm"
                               onClick={() => setRefundTrx(trx)}
@@ -219,7 +219,7 @@ export default function TransaccionesView() {
                               disabled={trx.status === 'Pendiente'}
                             >
                               <RotateCcw size={15} />
-                              <span className="hidden xl:inline ml-1">Devolución</span>
+                              <span className="hidden xl:inline ml-1">Devolucion</span>
                             </Button>
                           </Tooltip>
                         )}
@@ -241,6 +241,83 @@ export default function TransaccionesView() {
           />
         </div>
       </Card>
+
+      {/* Cards (mobile / tablet) */}
+      <div className="lg:hidden space-y-3">
+        {paginatedData.length > 0 ? (
+          <motion.div variants={listVariants} initial="hidden" animate="show" className="space-y-3">
+            {paginatedData.map((trx) => (
+              <motion.div key={trx.id} variants={itemVariants}>
+                <Card className="p-4">
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <AvatarInfo
+                        initials={trx.initials}
+                        primary={trx.client || 'Cliente Anonimo'}
+                        secondary={trx.email || 'Venta en mostrador'}
+                        glow
+                      />
+                    </div>
+                    <span className={`font-mono font-bold text-lg tracking-tight flex-shrink-0 ${
+                      trx.status === 'Reembolsado'
+                        ? 'text-rose-500 line-through opacity-70'
+                        : isDarkMode ? 'text-white' : 'text-[#111113]'
+                    }`}>
+                      ${trx.amount}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge variant={trx.statusVariant} icon={trx.StatusIcon}>
+                        {trx.status}
+                      </Badge>
+                      <span className={`text-[11px] font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                        <trx.ChannelIcon size={12} />
+                        {trx.channel.includes('POS') ? 'POS' : 'Link'}
+                      </span>
+                    </div>
+                    <span className={`text-xs font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                      <Clock size={12} /> {trx.date} {trx.time}
+                    </span>
+                  </div>
+
+                  <div className={`flex items-center gap-2 pt-3 border-t ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
+                    <Button variant="action" size="sm" onClick={() => setReceiptTrx(trx)} className="!px-3 !py-1.5 flex-1">
+                      <FileText size={14} /> Recibo
+                    </Button>
+                    {trx.status === 'Reembolsado' ? (
+                      <Button variant="outline" size="sm" onClick={() => setRefundTrx(trx)} className="!px-3 !py-1.5 flex-1">
+                        <FileText size={14} /> Recibo Dev.
+                      </Button>
+                    ) : (
+                      <Button variant="danger" size="sm" onClick={() => setRefundTrx(trx)} className="!px-3 !py-1.5 flex-1" disabled={trx.status === 'Pendiente'}>
+                        <RotateCcw size={14} /> Devolucion
+                      </Button>
+                    )}
+                  </div>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        ) : (
+          <Card className="p-8 text-center">
+            <p className={`text-sm font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+              No se encontraron transacciones{search ? ` para "${search}"` : ''}.
+            </p>
+            {search && (
+              <Button variant="ghost" size="sm" onClick={() => setSearch('')} className="mt-2">
+                Limpiar busqueda
+              </Button>
+            )}
+          </Card>
+        )}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      </div>
 
       {/* Modals */}
       <AnimatePresence>

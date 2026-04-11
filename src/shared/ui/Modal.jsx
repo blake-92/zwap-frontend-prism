@@ -81,7 +81,7 @@ export default function Modal({
     <motion.div
       exit={{ opacity: 0 }}
       transition={{ duration: 0.15 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
     >
       {/* Backdrop */}
       <motion.div
@@ -109,18 +109,18 @@ export default function Modal({
         aria-modal="true"
         aria-labelledby="modal-title"
         style={{ maxWidth }}
-        className={`relative w-full rounded-[24px] border overflow-hidden shadow-2xl ${
+        className={`relative w-full rounded-t-[24px] sm:rounded-[24px] border overflow-hidden shadow-2xl max-h-[95vh] sm:max-h-[90vh] pb-[env(safe-area-inset-bottom)] sm:pb-0 ${
           isDarkMode
             ? 'bg-[#252429]/80 backdrop-blur-3xl border-white/20 border-t-white/30'
             : 'bg-white/90 backdrop-blur-3xl border-white shadow-[0_20px_60px_rgba(0,0,0,0.15)]'
         } ${className}`}
       >
         {/* Header */}
-        <div className={`px-8 py-6 border-b flex justify-between items-start flex-shrink-0 ${
+        <div className={`px-5 sm:px-8 py-5 sm:py-6 border-b flex justify-between items-start flex-shrink-0 ${
           isDarkMode ? 'border-white/10' : 'border-black/5'
         }`}>
           <div>
-            <h2 id="modal-title" className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${
+            <h2 id="modal-title" className={`text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2 ${
               isDarkMode ? 'text-white' : 'text-[#111113]'
             }`}>
               {icon && <span className="text-[#7C3AED]">{icon}</span>}
@@ -142,7 +142,7 @@ export default function Modal({
 
         {/* Footer */}
         {footer && (
-          <div className={`px-8 py-6 flex gap-4 border-t flex-shrink-0 ${
+          <div className={`px-5 sm:px-8 py-5 sm:py-6 flex gap-3 sm:gap-4 border-t flex-shrink-0 ${
             isDarkMode ? 'bg-[#111113]/40 border-white/10' : 'bg-gray-50/50 border-black/5'
           }`}>
             {footer}

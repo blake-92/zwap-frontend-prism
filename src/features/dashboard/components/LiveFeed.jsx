@@ -30,7 +30,8 @@ export default function LiveFeed({ onViewAll }) {
         </Button>
       </CardHeader>
 
-      <div className="overflow-x-auto flex-1">
+      {/* Table (desktop) */}
+      <div className="overflow-x-auto flex-1 hidden lg:block">
         <table aria-label="Feed en vivo de transacciones" className="w-full text-left border-collapse min-w-[640px]">
           <thead>
             <tr className={`text-[10px] uppercase font-bold tracking-widest ${
@@ -105,6 +106,54 @@ export default function LiveFeed({ onViewAll }) {
             ))}
           </motion.tbody>
         </table>
+      </div>
+
+      {/* Cards (mobile / tablet) */}
+      <div className="lg:hidden flex-1 px-4 pb-3">
+        <motion.div variants={listVariants} initial="hidden" animate="show" className="space-y-2">
+          {TRANSACTIONS.slice(0, 4).map((trx) => (
+            <motion.div
+              key={trx.id}
+              variants={itemVariants}
+              className={`flex items-center justify-between gap-3 py-2.5 ${
+                isDarkMode ? 'border-b border-white/5 last:border-0' : 'border-b border-black/5 last:border-0'
+              }`}
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center bg-gray-100 border border-black/5 flex-shrink-0">
+                  {trx.countryCode === 'xx'
+                    ? <User size={12} className="text-gray-400" />
+                    : <img src={`https://flagcdn.com/w20/${trx.countryCode}.png`} alt={trx.country} loading="lazy" className="w-full h-full object-cover" />
+                  }
+                </div>
+                <div className="min-w-0">
+                  <span className={`font-bold text-xs block truncate ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`}>
+                    {trx.client ? trx.client.split(' ')[0] : 'Mostrador'}
+                  </span>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className={`text-[10px] font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>{trx.time}</span>
+                    <span className={`text-[10px] font-semibold flex items-center gap-1 ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
+                      <trx.ChannelIcon size={10} className={isDarkMode ? 'text-[#7C3AED]' : 'text-[#561BAF]'} />
+                      {trx.channel.includes('POS') ? 'POS' : 'Link'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <Badge variant={trx.statusVariant} icon={trx.StatusIcon} className="!py-0.5 !px-2 !text-[9px]">
+                  {trx.status}
+                </Badge>
+                <span className={`font-mono font-bold text-sm tracking-tight ${
+                  trx.status === 'Reembolsado'
+                    ? 'text-rose-500 line-through opacity-70'
+                    : isDarkMode ? 'text-white' : 'text-[#111113]'
+                }`}>
+                  ${trx.amount}
+                </span>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
     </Card>
   )

@@ -112,7 +112,7 @@ import {
 | `Input` | `icon` (Lucide) | Input con ícono izquierdo, theme-aware |
 | `Toggle` | `active`, `onToggle`, `disabled` | Switch con animación spring en el knob |
 | `Badge` | `variant` (default/success/warning/danger/outline), `icon` | Label inline con variantes semánticas |
-| `Modal` | `onClose`, `title`, `description`, `icon` | Modal glass con spring de entrada (renderizado condicional por el padre via `AnimatePresence`) |
+| `Modal` | `onClose`, `title`, `description`, `icon` | Modal glass con spring; bottom-sheet en mobile (`items-end`, `rounded-t-[24px]`), centered en desktop |
 | `Avatar` | `initials`, `size` (sm/md), `variant` (purple/neutral), `glow` | Badge circular con iniciales |
 | `AvatarInfo` | `initials`, `primary`, `secondary`, `meta`, `glow` | Avatar + nombre + texto secundario + ID |
 | `StatCard` | `layout` (kpi/balance), `label`, `value`, `icon`, `variant`, `negative` | Tarjeta de métrica / KPI |
@@ -377,6 +377,95 @@ El sidebar usa `ZwapIsotipo` + `ZwapWordmark` por separado para poder animar la 
 - Token de auth: `localStorage.getItem('zwap_token')` — usado por `AuthGuard` y `api.js`
 - Sidebar state: `localStorage.getItem('zwap-sidebar')` — `'collapsed'`/`'expanded'`, usado por `AppShell`
 - Ambos providers están en `App.jsx` envolviendo el router
+
+## Responsive Design
+
+### Estrategia general
+
+- **Desktop-first** — diseñar para 1920x1080, luego adaptar hacia abajo
+- **Breakpoint principal:** `lg: 1024px` — switch entre Sidebar (desktop) y BottomNav (mobile/tablet)
+- **Max-width de contenido:** `max-w-[1400px] 2xl:max-w-[1600px]` en el contenedor principal (`AppShell`)
+- **Viewport meta:** `viewport-fit=cover` habilitado para safe areas en iOS
+
+### Hook de breakpoints
+
+```js
+import useMediaQuery from '@/shared/hooks/useMediaQuery'
+
+const isDesktop = useMediaQuery('(min-width: 1024px)')
+```
+
+Usado en `AppShell` para condicionar Sidebar vs BottomNav, y en `Header` para search bar vs search icon.
+
+### Navegación responsive
+
+| Viewport | Navegación | Componente |
+|---|---|---|
+| ≥ 1024px (lg) | Sidebar colapsable | `shared/layout/Sidebar.jsx` |
+| < 1024px | Bottom navigation | `shared/layout/BottomNav.jsx` |
+
+**BottomNav** — 4 tabs fijos (Dashboard, Transacciones, Links, Liquidaciones) + botón "Más" que abre un sheet con opciones secundarias (Sucursales, Usuarios, Wallet, Configuración). Safe area padding via `pb-[env(safe-area-inset-bottom)]`. Scroll lock cuando el sheet está abierto.
+
+**Header** — en desktop muestra search bar inline; en mobile muestra icono de búsqueda que abre `SearchPanel` (dropdown flotante debajo del header).
+
+### Componentes de layout responsive
+
+| Componente | Archivo | Descripción |
+|---|---|---|
+| `BottomNav` | `shared/layout/BottomNav.jsx` | Bottom navigation con 4+1 tabs y sheet de "Más" |
+| `SearchPanel` | `shared/layout/SearchOverlay.jsx` | Dropdown de búsqueda, `fixed` debajo del header |
+| `useMediaQuery` | `shared/hooks/useMediaQuery.js` | Hook para detectar breakpoints via `matchMedia` |
+
+### Patrón tabla → cards (mobile)
+
+Para tablas de datos, usar **CSS visibility** (no renderizado condicional JS):
+
+```jsx
+{/* Tabla desktop — oculta en mobile */}
+<Card className="hidden lg:block">
+  <table>...</table>
+</Card>
+
+{/* Cards mobile — ocultas en desktop */}
+<div className="lg:hidden space-y-3">
+  {items.map(item => (
+    <Card className="p-4">
+      {/* Layout de card */}
+    </Card>
+  ))}
+</div>
+```
+
+**Vistas con tabla→cards implementado:** TransaccionesView, LinksView (CustomLinksTable), LiquidacionesView, UsuariosView, WalletView (withdrawals), LiveFeed.
+
+**Reglas para cards mobile:**
+1. Usar `min-w-0` en flex children que contienen texto (evita overflow)
+2. Usar `truncate` en textos que podrían desbordar (emails, IDs, nombres largos)
+3. Usar `flex-shrink-0` en elementos de ancho fijo (amounts, badges, avatars)
+4. Usar `flex-wrap` en filas con múltiples badges/tags
+
+### Modal responsive
+
+El componente `Modal` cambia de comportamiento según viewport:
+
+| Viewport | Posición | Esquinas | Padding |
+|---|---|---|---|
+| < sm (640px) | Bottom-sheet (`items-end`) | `rounded-t-[24px]` | `px-5 py-5` |
+| ≥ sm | Centered (`items-center`) | `rounded-[24px]` | `px-8 py-6` |
+
+- Safe area: `pb-[env(safe-area-inset-bottom)]` en mobile, `sm:pb-0` en desktop
+- Max height: `max-h-[95vh]` mobile, `max-h-[90vh]` desktop
+- Body padding en modales de formulario: `p-5 sm:p-8`
+- Grids de formulario: `grid-cols-1 sm:grid-cols-2`
+
+### Convenciones responsive
+
+1. **Padding responsive en AppShell:** `p-4 sm:p-6 lg:p-8 xl:p-10 2xl:p-12`
+2. **Bottom padding para BottomNav:** `pb-28` en mobile (clearance para el bottom nav)
+3. **Header height:** `h-16 lg:h-20`
+4. **Safe areas:** usar `env(safe-area-inset-bottom)` en elementos fijos al fondo (BottomNav, Modal bottom-sheet)
+5. **Touch targets:** mínimo 40px (idealmente 44px) para botones interactivos en mobile
+6. **Scroll locking:** aplicar `document.body.style.overflow = 'hidden'` en modales y sheets abiertos
 
 ## Mock data
 

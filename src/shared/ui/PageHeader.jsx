@@ -15,12 +15,12 @@ export default function PageHeader({ title, description, className = 'mb-8', chi
   const { isDarkMode } = useTheme()
 
   return (
-    <div className={`flex justify-between items-end ${className}`}>
+    <div className={`flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 ${className}`}>
       <div>
-        <h1 className={`text-3xl font-bold mb-2 tracking-tight ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+        <h1 className={`text-2xl sm:text-3xl font-bold mb-1 sm:mb-2 tracking-tight ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
           {title}
         </h1>
-        <p className={`text-sm font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+        <p className={`text-xs sm:text-sm font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
           {description}
         </p>
       </div>

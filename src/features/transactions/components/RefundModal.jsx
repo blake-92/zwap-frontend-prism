@@ -42,7 +42,7 @@ export default function RefundModal({ trx, onClose }) {
       maxWidth="600px"
       footer={footer}
     >
-      <div className="p-8 space-y-8">
+      <div className="p-5 sm:p-8 space-y-8">
 
         {/* Tipo de reembolso */}
         <div>

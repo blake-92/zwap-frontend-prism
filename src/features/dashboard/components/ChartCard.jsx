@@ -49,7 +49,7 @@ export default function ChartCard() {
   return (
     <Card className="lg:col-span-2 p-8 flex flex-col">
       {/* Header */}
-      <div className="flex justify-between items-start mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-8">
         <div>
           <h3 className={`font-bold text-lg ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
             {CHART_TITLES[chart].h}

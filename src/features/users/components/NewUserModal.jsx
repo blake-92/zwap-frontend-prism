@@ -102,10 +102,10 @@ export default function NewUserModal({ onClose }) {
       maxWidth="540px"
       footer={footer}
     >
-      <div className="p-8 space-y-7">
+      <div className="p-5 sm:p-8 space-y-7">
 
         {/* Name + Email */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={`block text-xs font-bold tracking-widest mb-2 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
               NOMBRE

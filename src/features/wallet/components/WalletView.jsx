@@ -147,8 +147,8 @@ export default function WalletView() {
         />
       </TableToolbar>
 
-      {/* Historial de Retiros */}
-      <Card className="pb-2">
+      {/* Historial de Retiros (desktop) */}
+      <Card className="pb-2 hidden lg:block">
         <div className={`px-8 py-4 border-b ${isDarkMode ? 'border-white/10' : 'border-black/5'}`}>
           <h3 className={`font-bold text-sm ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
             Historial de Retiros
@@ -236,6 +236,79 @@ export default function WalletView() {
           />
         </div>
       </Card>
+
+      {/* Cards (mobile / tablet) */}
+      <div className="lg:hidden space-y-3">
+        <div className="py-2">
+          <h3 className={`font-bold text-sm ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+            Historial de Retiros
+          </h3>
+        </div>
+        {paginatedWithdrawals.length > 0 ? (
+          <motion.div variants={listVariants} initial="hidden" animate="show" className="space-y-3">
+            {paginatedWithdrawals.map((w) => (
+              <motion.div key={w.id} variants={itemVariants}>
+                <Card className="p-4">
+                  {/* Header: ID + amount */}
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <div className="min-w-0">
+                      <span className={`font-mono font-bold text-sm truncate block ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`}>
+                        {w.id}
+                      </span>
+                      <p className={`text-xs font-medium mt-0.5 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                        {w.date}
+                      </p>
+                    </div>
+                    <span className={`font-mono font-bold text-lg tracking-tight flex-shrink-0 ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+                      ${w.amount}
+                    </span>
+                  </div>
+
+                  {/* Status + bank */}
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <Badge variant={w.statusVariant} icon={w.StatusIcon}>
+                      {w.status}
+                    </Badge>
+                    <span className={`text-xs font-medium flex items-center gap-1 min-w-0 truncate ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                      <Landmark size={11} className="opacity-60 flex-shrink-0" />
+                      <span className="truncate">{w.bank}</span>
+                    </span>
+                  </div>
+
+                  {/* Action */}
+                  {w.status === 'Completado' && (
+                    <div className={`pt-3 border-t ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
+                      <Button
+                        variant="action" size="sm"
+                        className="!px-3 !py-1.5 w-full justify-center"
+                        onClick={() => setReceiptTrx(w)}
+                      >
+                        <FileText size={14} /> Ver Recibo
+                      </Button>
+                    </div>
+                  )}
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        ) : (
+          <Card className="p-8 text-center">
+            <p className={`text-sm font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+              No se encontraron retiros{search ? ` para "${search}"` : ''}.
+            </p>
+            {search && (
+              <Button variant="ghost" size="sm" onClick={() => { setSearch(''); setCurrentPage(1) }} className="mt-2">
+                Limpiar busqueda
+              </Button>
+            )}
+          </Card>
+        )}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      </div>
 
       <AnimatePresence>
         {modalOpen && <WithdrawModal key="withdraw" onClose={() => setModalOpen(false)} />}

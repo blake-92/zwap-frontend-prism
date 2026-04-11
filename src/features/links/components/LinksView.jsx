@@ -98,8 +98,8 @@ function CustomLinksTable() {
         </Button>
       </TableToolbar>
 
-      {/* Table */}
-      <Card className="pb-2">
+      {/* Table (desktop) */}
+      <Card className="pb-2 hidden lg:block">
         <div className="overflow-x-auto">
           <table aria-label="Links de pago personalizados" className="w-full text-left border-collapse min-w-[900px]">
             <thead>
@@ -216,6 +216,97 @@ function CustomLinksTable() {
           </table>
         </div>
       </Card>
+
+      {/* Cards (mobile / tablet) */}
+      <div className="lg:hidden space-y-3">
+        {filtered.length > 0 ? (
+          <motion.div variants={listVariants} initial="hidden" animate="show" className="space-y-3">
+            {filtered.map((link) => (
+              <motion.div key={link.id} variants={itemVariants}>
+                <Card className="p-4">
+                  {/* Header: client + amount */}
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <AvatarInfo
+                      initials={link.initials}
+                      primary={link.client}
+                      secondary={link.email}
+                      meta={link.id}
+                    />
+                    <span className={`font-mono font-bold text-lg tracking-tight flex-shrink-0 ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+                      ${link.amount}
+                    </span>
+                  </div>
+
+                  {/* Status + items + views */}
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge variant={link.statusVariant} icon={link.StatusIcon}>
+                        {link.status}
+                      </Badge>
+                      <span className={`text-[11px] font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                        <ListTree size={12} /> {link.items} Items
+                      </span>
+                    </div>
+                    <span className={`text-[10px] font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                      <Eye size={10} /> {link.views} vistas
+                    </span>
+                  </div>
+
+                  {/* Times */}
+                  <div className="flex items-center gap-3 mb-3 flex-wrap">
+                    <span className={`text-[11px] font-bold flex items-center gap-1 ${
+                      link.status === 'Expirado' ? 'text-rose-500' : isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'
+                    }`}>
+                      <Timer size={12} />
+                      {link.expires !== '-' ? `Expira: ${link.expires}` : 'Sin expiración'}
+                    </span>
+                    <span className={`text-[10px] font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                      <CalendarDays size={12} /> {link.createdAt}
+                    </span>
+                  </div>
+
+                  {/* Actions */}
+                  <div className={`flex items-center gap-2 pt-3 border-t ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
+                    <Button variant="ghost" size="sm" className="!px-2 !py-1.5" disabled={link.status === 'Pagado'}>
+                      <Edit2 size={14} />
+                    </Button>
+                    <Button
+                      variant="ghost" size="sm" className="!px-2 !py-1.5"
+                      disabled={link.status === 'Expirado'}
+                      onClick={() => {
+                        navigator.clipboard.writeText(`https://zwap.me/pay/${link.id}`)
+                        addToast(`Enlace "${link.id}" copiado al portapapeles.`, 'success')
+                      }}
+                    >
+                      <Copy size={14} />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="!px-2 !py-1.5" disabled={link.status === 'Expirado'}>
+                      <QrCode size={14} />
+                    </Button>
+                    <Button
+                      variant="action" size="sm" className="!px-3 !py-1.5 ml-auto"
+                      disabled={link.status === 'Expirado' || link.status === 'Pagado'}
+                    >
+                      <Mail size={14} /> Enviar
+                    </Button>
+                  </div>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        ) : (
+          <Card className="p-8 text-center">
+            <p className={`text-sm font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+              No se encontraron links{search ? ` para "${search}"` : ''}.
+            </p>
+            {search && (
+              <Button variant="ghost" size="sm" onClick={() => setSearch('')} className="mt-2">
+                Limpiar busqueda
+              </Button>
+            )}
+          </Card>
+        )}
+      </div>
     </>
   )
 }
@@ -241,7 +332,7 @@ export default function LinksView() {
 
       {/* Permanentes */}
       <SectionLabel className="uppercase mb-4">Enlaces Permanentes (Monto Abierto)</SectionLabel>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 2xl:gap-8 mb-10">
         {links.map(link => (
           <PermanentCard key={link.id} link={link} onToggle={() => toggleLink(link.id)} />
         ))}

@@ -74,7 +74,7 @@ export default function LiquidacionesView() {
       </PageHeader>
 
       {/* KPI row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 2xl:gap-8 mb-10">
         <StatCard layout="balance"
           icon={CheckCircle2} iconVariant="success"
           label="Depositado (Disponible)"
@@ -118,8 +118,8 @@ export default function LiquidacionesView() {
         />
       </TableToolbar>
 
-      {/* Table */}
-      <Card className="pb-2">
+      {/* Table (desktop) */}
+      <Card className="pb-2 hidden lg:block">
         <div className="overflow-x-auto">
           <table aria-label="Liquidaciones y depósitos" className="w-full text-left border-collapse min-w-[1000px]">
             <thead>
@@ -262,6 +262,116 @@ export default function LiquidacionesView() {
           />
         </div>
       </Card>
+
+      {/* Cards (mobile / tablet) */}
+      <div className="lg:hidden space-y-3">
+        {paginatedData.length > 0 ? (
+          <motion.div variants={listVariants} initial="hidden" animate="show" className="space-y-3">
+            {paginatedData.map((lote, idx) => {
+              const isDebt = lote.net < 0
+              return (
+                <motion.div key={`${lote.type}-${lote.closeDate}-${idx}`} variants={itemVariants}>
+                  <Card className="p-4">
+                    {/* Header: type icon + concept + net amount */}
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div className="flex items-start gap-3 min-w-0">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                          isDebt
+                            ? isDarkMode ? 'bg-rose-500/15 text-rose-500' : 'bg-rose-100 text-rose-600'
+                            : isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/60 text-[#561BAF]'
+                        }`}>
+                          <lote.typeIcon size={18} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className={`font-bold text-sm ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+                            {lote.type}
+                          </p>
+                          <p className={`text-xs font-medium flex items-center gap-1 mt-0.5 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                            <CalendarDays size={12} /> {lote.closeDate}
+                          </p>
+                        </div>
+                      </div>
+                      <span className={`font-mono font-bold text-lg tracking-tight flex-shrink-0 ${
+                        isDebt ? 'text-rose-500' : isDarkMode ? 'text-white' : 'text-[#111113]'
+                      }`}>
+                        {isDebt ? '-' : ''}${Math.abs(lote.net).toFixed(2)}
+                      </span>
+                    </div>
+
+                    {/* Status + close time */}
+                    <div className="flex items-center justify-between gap-2 mb-3">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge variant={lote.statusVariant} icon={lote.StatusIcon}>
+                          {lote.status}
+                        </Badge>
+                        {!isDebt && lote.depositDate !== '-' && (
+                          <span className={`text-[10px] font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                            <ArrowDownToLine size={10} /> {lote.depositDate}
+                          </span>
+                        )}
+                      </div>
+                      <span className={`text-[10px] font-bold flex items-center gap-1 ${isDarkMode ? 'text-[#7C3AED]' : 'text-[#561BAF]'}`}>
+                        <Clock size={10} /> {lote.closeTime} UTC
+                      </span>
+                    </div>
+
+                    {/* Financial breakdown */}
+                    <div className={`font-mono text-xs flex flex-col gap-1 mb-3 p-3 rounded-lg ${
+                      isDarkMode ? 'bg-[#111113]/40' : 'bg-gray-50'
+                    }`}>
+                      <div className={`flex justify-between ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
+                        <span>Volumen <span className="font-sans text-[10px] opacity-60">({lote.trxCount} trx)</span></span>
+                        <span className="font-bold">${lote.gross.toFixed(2)}</span>
+                      </div>
+                      {lote.fees.pos && (
+                        <div className={`flex justify-between ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                          <span>Fee POS <span className="font-sans text-[10px] opacity-60">({lote.fees.pos.rate})</span></span>
+                          <span className="text-amber-500">-${lote.fees.pos.amount.toFixed(2)}</span>
+                        </div>
+                      )}
+                      {lote.fees.links && (
+                        <div className={`flex justify-between ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                          <span>Fee Links <span className="font-sans text-[10px] opacity-60">({lote.fees.links.rate})</span></span>
+                          <span className="text-amber-500">-${lote.fees.links.amount.toFixed(2)}</span>
+                        </div>
+                      )}
+                      {lote.adj !== 0 && (
+                        <div className={`flex justify-between pt-1 mt-1 border-t ${isDarkMode ? 'border-white/10' : 'border-black/5'}`}>
+                          <span className={isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}>Ajuste</span>
+                          <span className="font-bold text-rose-500">-${Math.abs(lote.adj).toFixed(2)}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Action */}
+                    <div className={`pt-3 border-t ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
+                      <Button variant="action" size="sm" className="!px-3 !py-1.5 w-full justify-center">
+                        <Search size={14} /> Inspeccionar
+                      </Button>
+                    </div>
+                  </Card>
+                </motion.div>
+              )
+            })}
+          </motion.div>
+        ) : (
+          <Card className="p-8 text-center">
+            <p className={`text-sm font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+              No se encontraron liquidaciones{search ? ` para "${search}"` : ''}.
+            </p>
+            {search && (
+              <Button variant="ghost" size="sm" onClick={() => setSearch('')} className="mt-2">
+                Limpiar busqueda
+              </Button>
+            )}
+          </Card>
+        )}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      </div>
     </motion.div>
   )
 }

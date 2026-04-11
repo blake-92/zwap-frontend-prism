@@ -64,7 +64,7 @@ export default function NewBranchModal({ onClose }) {
       aria-label="Nueva Sucursal"
       exit={{ opacity: 0 }}
       transition={{ duration: 0.15 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
     >
       {/* Backdrop */}
       <motion.div
@@ -85,16 +85,16 @@ export default function NewBranchModal({ onClose }) {
           scale: SPRING,
           y: SPRING,
         }}
-        className={`relative w-full max-w-[480px] rounded-[24px] border overflow-hidden shadow-2xl ${
+        className={`relative w-full max-w-[480px] rounded-t-[24px] sm:rounded-[24px] border overflow-hidden shadow-2xl max-h-[95vh] sm:max-h-[90vh] ${
         isDarkMode
           ? 'bg-[#252429]/80 backdrop-blur-3xl border-white/20 border-t-white/30'
           : 'bg-white/90 backdrop-blur-3xl border-white shadow-[0_20px_60px_rgba(0,0,0,0.15)]'
       }`}>
 
         {/* Header */}
-        <div className={`px-8 py-6 border-b flex justify-between items-start ${isDarkMode ? 'border-white/10' : 'border-black/5'}`}>
+        <div className={`px-5 sm:px-8 py-5 sm:py-6 border-b flex justify-between items-start ${isDarkMode ? 'border-white/10' : 'border-black/5'}`}>
           <div>
-            <h2 className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+            <h2 className={`text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
               <Building2 className="text-[#7C3AED]" size={24} /> Nueva Sucursal
             </h2>
             <p className={`text-sm mt-1 font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
@@ -105,7 +105,7 @@ export default function NewBranchModal({ onClose }) {
         </div>
 
         {/* Body */}
-        <div className="p-8 space-y-5">
+        <div className="p-5 sm:p-8 space-y-5">
           {fields.filter(f => f.full).map(({ label, val, set, ph }) => (
             <div key={label}>
               <label className={`block text-xs font-bold tracking-widest mb-2 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
@@ -118,7 +118,7 @@ export default function NewBranchModal({ onClose }) {
               />
             </div>
           ))}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {fields.filter(f => !f.full).map(({ label, val, set, ph }) => (
               <div key={label}>
                 <label className={`block text-xs font-bold tracking-widest mb-2 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
@@ -139,7 +139,7 @@ export default function NewBranchModal({ onClose }) {
         </div>
 
         {/* Footer */}
-        <div className={`px-8 py-6 flex gap-4 border-t ${isDarkMode ? 'bg-[#111113]/40 border-white/10' : 'bg-gray-50/50 border-black/5'}`}>
+        <div className={`px-5 sm:px-8 py-5 sm:py-6 flex gap-3 sm:gap-4 border-t ${isDarkMode ? 'bg-[#111113]/40 border-white/10' : 'bg-gray-50/50 border-black/5'}`}>
           <Button variant="outline" className="flex-1 !py-3.5" onClick={onClose}>Cancelar</Button>
           <Button className="flex-1 !py-3.5" disabled={!name.trim() || !address.trim() || !city.trim()}>
             <Building2 size={18} /> Crear Sucursal

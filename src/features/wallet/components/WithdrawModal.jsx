@@ -39,7 +39,7 @@ export default function WithdrawModal({ onClose }) {
       description={description}
       footer={footer}
     >
-      <div className="p-8 space-y-6">
+      <div className="p-5 sm:p-8 space-y-6">
 
         {/* Amount input */}
         <div>

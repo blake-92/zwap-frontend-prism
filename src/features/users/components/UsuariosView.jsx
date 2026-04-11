@@ -60,8 +60,8 @@ export default function UsuariosView() {
         />
       </TableToolbar>
 
-      {/* Table */}
-      <Card className="pb-2">
+      {/* Table (desktop) */}
+      <Card className="pb-2 hidden lg:block">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
@@ -163,6 +163,83 @@ export default function UsuariosView() {
           </table>
         </div>
       </Card>
+
+      {/* Cards (mobile / tablet) */}
+      <div className="lg:hidden space-y-3">
+        {filtered.length > 0 ? (
+          <motion.div variants={listVariants} initial="hidden" animate="show" className="space-y-3">
+            {filtered.map((user) => (
+              <motion.div key={user.id} variants={itemVariants}>
+                <Card className="p-4">
+                  {/* Header: avatar + toggle */}
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <AvatarInfo
+                      initials={user.initials}
+                      primary={user.name}
+                      secondary={user.email}
+                      glow
+                    />
+                    <Toggle
+                      active={user.active}
+                      onToggle={() => toggleUser(user.id)}
+                    />
+                  </div>
+
+                  {/* Role + branches */}
+                  <div className="flex items-center gap-2 flex-wrap mb-3">
+                    <Badge variant={ROLE_VARIANT[user.role] || 'default'}>
+                      {user.role}
+                    </Badge>
+                    <span className="opacity-40">|</span>
+                    {user.branches.slice(0, 2).map(b => (
+                      <span
+                        key={b}
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-lg border ${
+                          isDarkMode
+                            ? 'bg-white/5 border-white/10 text-[#888991]'
+                            : 'bg-gray-50 border-gray-200 text-[#67656E]'
+                        }`}
+                      >
+                        {b}
+                      </span>
+                    ))}
+                    {user.branches.length > 2 && (
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg border ${
+                        isDarkMode
+                          ? 'bg-[#7C3AED]/10 border-[#7C3AED]/20 text-[#A78BFA]'
+                          : 'bg-[#DBD3FB]/40 border-[#7C3AED]/20 text-[#7C3AED]'
+                      }`}>
+                        +{user.branches.length - 2}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className={`flex items-center gap-2 pt-3 border-t ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
+                    <Button variant="action" size="sm" className="!px-3 !py-1.5 flex-1">
+                      <Pencil size={14} /> Editar
+                    </Button>
+                    <Button variant="danger" size="sm" className="!px-3 !py-1.5 flex-1">
+                      <Trash2 size={14} /> Eliminar
+                    </Button>
+                  </div>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        ) : (
+          <Card className="p-8 text-center">
+            <p className={`text-sm font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+              No se encontraron usuarios{search ? ` para "${search}"` : ''}.
+            </p>
+            {search && (
+              <Button variant="ghost" size="sm" onClick={() => setSearch('')} className="mt-2">
+                Limpiar busqueda
+              </Button>
+            )}
+          </Card>
+        )}
+      </div>
 
       <AnimatePresence>
         {newUserOpen && <NewUserModal key="new-user" onClose={() => setNewUserOpen(false)} />}

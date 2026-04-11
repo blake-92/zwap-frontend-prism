@@ -26,24 +26,24 @@ export default function DashboardView() {
         description="Aquí tienes el pulso financiero de tus sucursales hoy."
         className="mb-10"
       >
-        <Button onClick={() => setNewLinkOpen(true)} className="hidden md:flex">
-          <Plus size={18} /> Nueva Reserva
+        <Button onClick={() => setNewLinkOpen(true)}>
+          <Plus size={18} /> <span className="hidden sm:inline">Nueva Reserva</span>
         </Button>
       </PageHeader>
 
       {/* KPI row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 2xl:gap-8 mb-6 sm:mb-8">
         {KPIS.map((kpi) => <KpiCard key={kpi.label} kpi={kpi} />)}
       </div>
 
       {/* Middle row: Quick cobro + Chart */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 2xl:gap-8 mb-6 sm:mb-8">
         <QuickLinkCard />
         <ChartCard />
       </div>
 
       {/* Bottom row: Live feed + Alerts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 2xl:gap-8">
         <LiveFeed onViewAll={() => navigate(ROUTES.TRANSACTIONS)} />
         <AlertsPanel />
       </div>

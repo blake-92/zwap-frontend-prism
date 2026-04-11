@@ -107,7 +107,7 @@ export default function NewLinkModal({ onClose }) {
         <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
 
           {/* ── LEFT: Cliente + Items ── */}
-          <div className={`p-8 flex-[1.5] md:border-r overflow-y-auto ${isDarkMode ? 'border-white/10' : 'border-black/5'}`}>
+          <div className={`p-5 sm:p-8 flex-[1.5] md:border-r overflow-y-auto ${isDarkMode ? 'border-white/10' : 'border-black/5'}`}>
 
             {/* Cliente */}
             <div className="mb-8">
@@ -178,7 +178,7 @@ export default function NewLinkModal({ onClose }) {
           <div className={`flex-1 flex flex-col relative overflow-hidden ${
             isDarkMode ? 'bg-gradient-to-b from-[#7C3AED]/10 to-transparent' : 'bg-gradient-to-b from-[#DBD3FB]/20 to-transparent'
           }`}>
-            <div className="p-8 flex-1 overflow-y-auto">
+            <div className="p-5 sm:p-8 flex-1 overflow-y-auto">
               <SectionLabel className="flex items-center gap-2 mb-6"><Star size={14} /> CONFIGURACIÓN</SectionLabel>
 
               <div className="space-y-6">
