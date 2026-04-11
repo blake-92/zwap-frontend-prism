@@ -72,7 +72,7 @@ export default function NewLinkModal({ onClose }) {
                 scale: { type: 'spring', stiffness: 400, damping: 26 },
                 y: { type: 'spring', stiffness: 400, damping: 26 },
               }}
-              className={`p-6 rounded-2xl border shadow-2xl max-w-[360px] ${
+              className={`relative p-6 rounded-2xl border shadow-2xl max-w-[360px] ${
                 isDarkMode ? 'bg-[#252429] border-white/20' : 'bg-white border-gray-200'
               }`}
             >
