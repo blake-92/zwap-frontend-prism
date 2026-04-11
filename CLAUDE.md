@@ -45,7 +45,7 @@ features/links/
 | `transactions` | TransaccionesView | ReceiptModal, RefundModal |
 | `links` | LinksView | NewLinkModal |
 | `settlements` | LiquidacionesView | — |
-| `wallet` | WalletView | WithdrawModal, WithdrawReceiptModal, WalletSidebarCard |
+| `wallet` | WalletView | WithdrawModal, WithdrawReceiptModal |
 | `branches` | SucursalesView | NewBranchModal |
 | `users` | UsuariosView | NewUserModal |
 | `settings` | SettingsView | — |
@@ -55,6 +55,7 @@ features/links/
 1. **Las vistas son autónomas** — no reciben callbacks de navegación desde el padre. Usan `useNavigate(ROUTES.X)` internamente.
 2. **Los modales son propios** — cada vista gestiona su propio estado de modal con `useState`. `AppShell` no orquesta modales.
 3. **No prop-drilling** — si una vista necesita navegar a otra, usa `useNavigate`, no callbacks.
+4. **No cross-feature imports** — nunca importar desde `features/X/components/` en otro feature o en `shared/`. Usar el re-export público de `features/X/index.js`. Componentes usados por el layout (Sidebar, Header) viven en `shared/layout/`.
 
 ## Rutas
 
@@ -83,10 +84,11 @@ Al añadir una ruta nueva:
 
 **Notas:**
 - `/app` redirige automáticamente a `/app/dashboard` vía `<Route index>`
+- `/legal/:doc` — ruta pública para páginas legales (stub por ahora)
 - `ROUTES.SETTINGS` existe y funciona pero no está en `NAV_ITEMS` (acceso directo por URL o desde Header)
-- `ROUTES.WALLET` no está en `NAV_ITEMS`; se accede desde `WalletSidebarCard` en el Sidebar
+- `ROUTES.WALLET` no está en `NAV_ITEMS`; se accede desde `WalletSidebarCard` en `shared/layout/`
 
-**Suspense boundary:** El `<Suspense>` vive dentro de `AppShell`, envolviendo solo el `<Outlet>`. Nunca mover Suspense por encima de AppShell — causaría que Sidebar y Header remonten en cada cambio de ruta lazy.
+**Error & Suspense boundaries:** `AppShell` envuelve el `<Outlet>` con `<ErrorBoundary>` + `<Suspense>`. El `ErrorBoundary` captura errores runtime de vistas lazy; el `Suspense` muestra `<PageLoader />` mientras cargan. Nunca mover estos boundaries por encima de AppShell — causaría que Sidebar y Header remonten en cada cambio de ruta.
 
 ## Componentes base (Shared UI)
 
@@ -98,7 +100,7 @@ import {
   Avatar, AvatarInfo, StatCard, Stepper, SegmentControl,
   DropdownFilter, SearchInput, TableToolbar, Pagination,
   PageHeader, SectionLabel, InfoBanner, Skeleton, Tooltip,
-  MiniCalendar, EmptySearchState
+  MiniCalendar, EmptySearchState, ErrorBoundary, PageLoader
 } from '@/shared/ui'
 ```
 
@@ -112,10 +114,10 @@ import {
 | `Badge` | `variant` (default/success/warning/danger/outline), `icon` | Label inline con variantes semánticas |
 | `Modal` | `isOpen`, `onClose`, `title`, `description`, `icon` | Modal glass con spring de entrada |
 | `Avatar` | `initials`, `size` (sm/md), `variant` (purple/neutral), `glow` | Badge circular con iniciales |
-| `AvatarInfo` | `initials`, `name`, `secondary`, `meta` | Avatar + nombre + texto secundario + ID |
+| `AvatarInfo` | `initials`, `primary`, `secondary`, `meta`, `glow` | Avatar + nombre + texto secundario + ID |
 | `StatCard` | `layout` (kpi/balance), `label`, `value`, `icon`, `variant`, `negative` | Tarjeta de métrica / KPI |
-| `Stepper` | `steps[]`, `currentStep` | Stepper horizontal con estados done/active/pending |
-| `SegmentControl` | `options[]`, `value`, `onChange` | Selector de segmentos con pill animado (layoutId) |
+| `Stepper` | `steps[]` (cada step: `label`, `sub`, `icon`, `done`, `active`) | Stepper horizontal con estados done/active/pending |
+| `SegmentControl` | `options[]`, `value`, `onChange`, `layoutId?` | Selector de segmentos con pill animado (layoutId) |
 | `DropdownFilter` | `label`, `options[]`, `value`, `onChange`, `icon` | Dropdown select con spring |
 | `SearchInput` | `value`, `onChange`, `placeholder` | Input con ícono de búsqueda |
 | `TableToolbar` | left slot (filtros), right slot (acciones) | Toolbar glass para tablas |
@@ -127,6 +129,8 @@ import {
 | `Tooltip` | `content`, `position` (top/bottom/left/right) | Tooltip portal con fade |
 | `MiniCalendar` | `selectedDate`, `onSelect`, `timeValue`, `onTimeChange`, `onConfirm` | Selector de fecha + hora con navegación por mes |
 | `EmptySearchState` | `colSpan`, `term`, `onClear` | Fila vacía para tablas sin resultados |
+| `ErrorBoundary` | `children` | Captura errores runtime, muestra UI de fallback con botón reintentar |
+| `PageLoader` | — | Spinner de carga para Suspense fallback |
 
 ## Sistema de diseño — Prism UI
 
@@ -174,28 +178,44 @@ Spring es el paradigma principal. Nunca usar `ease` o `tween` en interacciones d
 
 ### Constantes spring
 
+Cada componente de layout define su propio `SPRING` local ajustado a su caso de uso. Valores típicos:
+
 ```js
-const SPRING      = { type: 'spring', stiffness: 300, damping: 24 }
-const SPRING_FAST = { type: 'spring', stiffness: 400, damping: 28 }
+// motionVariants.js — stagger items
+{ type: 'spring', stiffness: 300, damping: 24 }
+
+// Sidebar — collapse/expand (critically damped, sin rebote)
+{ type: 'spring', stiffness: 380, damping: 42 }
+
+// AppShell — toggle button
+{ type: 'spring', stiffness: 400, damping: 30 }
 ```
 
-### Variantes de stagger (motionVariants.js)
+### Variantes compartidas (motionVariants.js)
 
 Importar desde `@/shared/utils/motionVariants`:
 
 ```js
-import { listVariants, itemVariants, cardItemVariants } from '@/shared/utils/motionVariants'
+import { listVariants, itemVariants, cardItemVariants, pageVariants } from '@/shared/utils/motionVariants'
 ```
 
 - `listVariants` — wrapper con `staggerChildren: 0.05`
 - `itemVariants` — fila de tabla: slide izquierda→derecha (`x: -10 → 0`)
 - `cardItemVariants` — card: slide abajo→arriba (`y: 15 → 0`)
+- `pageVariants` — page entry: slide + fade con spring (usado en todas las vistas)
 
 Uso en tablas:
 ```jsx
 <motion.tbody variants={listVariants} initial="hidden" animate="show">
   {rows.map(row => <motion.tr key={row.id} variants={itemVariants}>...</motion.tr>)}
 </motion.tbody>
+```
+
+Uso en vistas (page entry):
+```jsx
+<motion.div variants={pageVariants} initial="hidden" animate="show">
+  {/* contenido de la vista */}
+</motion.div>
 ```
 
 ### Patrón dropdown / popover
@@ -222,27 +242,29 @@ const panelVariants = {
 
 ### Patrón sidebar / nav indicator
 
-Usar `LayoutGroup` para coordinar `layoutId` entre múltiples botones:
+Usar `LayoutGroup` + `layoutId` para el pill activo. Sin `AnimatePresence` — el spring de layout maneja la transición:
 
 ```jsx
 <LayoutGroup id="sidebar-nav">
   {NAV_ITEMS.map(item => (
-    <button key={item.path}>
+    <button key={item.id} className="relative w-full flex items-center gap-3 py-3 pl-[19px] ...">
+      {isActive && (
+        <motion.div
+          layoutId="sidebar-indicator"
+          className="absolute inset-0 rounded-xl ..."
+          transition={SPRING}
+        />
+      )}
+      <Icon size={18} />
       <AnimatePresence initial={false}>
-        {isActive && (
-          <motion.span
-            layoutId="active-indicator"
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="absolute inset-0 z-10 rounded-lg bg-[#7C3AED]/20"
-          />
-        )}
+        {!isCollapsed && <motion.span variants={LABEL_VARIANTS} ...>{label}</motion.span>}
       </AnimatePresence>
     </button>
   ))}
 </LayoutGroup>
 ```
 
-`initial={false}` en AnimatePresence evita que el indicador anime al cargar la primera vez.
+**Nota:** Los botones usan `pl-[19px]` fijo (no `justify-center`) para que los íconos no salten al colapsar. El ícono queda centrado en 72px y alineado en 256px sin cambio de className.
 
 ### Modal
 
@@ -265,8 +287,10 @@ Usar `LayoutGroup` para coordinar `layoutId` entre múltiples botones:
 | `useTheme()` | `ThemeProvider` | `{ isDarkMode, toggleTheme }` | `zwap-theme` (`'dark'`/`'light'`) |
 | `useToast()` | `ToastProvider` | `{ addToast(message, type?, duration?) }` | — |
 
+- `useTheme` — si no hay valor guardado, usa `prefers-color-scheme` del OS como default
 - `useToast` tipos: `'success'` (emerald) · `'error'` (rose) · `'info'` (purple). Default: `'success'`, duración: 3000ms
 - Token de auth: `localStorage.getItem('zwap_token')` — usado por `AuthGuard` y `api.js`
+- Sidebar state: `localStorage.getItem('zwap-sidebar')` — `'collapsed'`/`'expanded'`, usado por `AppShell`
 - Ambos providers están en `App.jsx` envolviendo el router
 
 ## Mock data
@@ -278,6 +302,10 @@ Exports disponibles:
 | Export | Contenido |
 |---|---|
 | `BRANCHES` | `string[]` — nombres de sucursales |
+| `WALLET_BALANCE` | `{ raw, display, short }` — saldo de billetera centralizado |
+| `WALLET_STEPS` | Steps del stepper de retiro en progreso |
+| `ALERTS` | Alertas del dashboard (icon, title, body, action) |
+| `CHART_DATA` | Datos de gráfica semanal (pos, links por día) |
 | `KPIS` | KPIs del dashboard (label, value, change, icon, variant) |
 | `TRANSACTIONS` | Historial de transacciones |
 | `PERMANENT_LINKS` | Links de pago permanentes |

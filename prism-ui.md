@@ -176,10 +176,10 @@ Toda superficie sigue la fórmula:
 
 ```jsx
 // Dark
-'absolute inset-0 backdrop-blur-xl bg-black/70'
+'absolute inset-0 backdrop-blur-md backdrop-saturate-200 bg-black/70'
 
 // Light
-'absolute inset-0 backdrop-blur-xl bg-black/40'
+'absolute inset-0 backdrop-blur-md backdrop-saturate-200 bg-[#111113]/40'
 ```
 
 ### 3.6 Dropdown / Popover
@@ -189,7 +189,7 @@ Toda superficie sigue la fórmula:
 'bg-[#252429]/95 backdrop-blur-3xl border-white/20 shadow-[0_40px_80px_rgba(0,0,0,0.9)]'
 
 // Light
-'bg-white/95 backdrop-blur-3xl border-white/80 shadow-[0_40px_80px_rgba(0,0,0,0.15)]'
+'bg-white/95 backdrop-blur-xl border-gray-200 shadow-[0_40px_80px_rgba(0,0,0,0.15)]'
 
 // Siempre: rounded-2xl border overflow-hidden
 // Entrada: motion spring — ver sección 11.4
@@ -467,7 +467,7 @@ Toda superficie sigue la fórmula:
 
 #### 6.15 `<AvatarInfo>`
 
-**Props:** `initials`, `name`, `secondary`, `meta`
+**Props:** `initials`, `primary`, `secondary`, `meta`, `glow`
 
 - Compone `Avatar` + nombre + texto secundario + ID
 - Si `initials` es null: círculo discontinuo con ícono `User` como fallback
@@ -835,14 +835,23 @@ Prism UI usa **Framer Motion** como sistema de animación principal. Las animaci
 
 ### 11.1 Sistema Spring — Constantes
 
-Todas las animaciones de interacción usan spring, no ease. Constantes estándar:
+Todas las animaciones de interacción usan spring, no ease. Cada componente declara su `SPRING` local ajustado a su caso:
 
 ```js
-// Transición estándar — navegación, hovers, layout
-const SPRING = { type: 'spring', stiffness: 400, damping: 30 }
+// motionVariants.js — stagger items (tablas, cards)
+{ type: 'spring', stiffness: 300, damping: 24 }
 
-// Transición rápida — apertura de paneles
-const SPRING_FAST = { type: 'spring', stiffness: 500, damping: 30 }
+// Sidebar — collapse/expand (critically damped, sin rebote)
+{ type: 'spring', stiffness: 380, damping: 42 }
+
+// AppShell toggle, buttons — interacciones rápidas
+{ type: 'spring', stiffness: 400, damping: 30 }
+
+// DropdownFilter panel — apertura de paneles
+{ type: 'spring', stiffness: 500, damping: 30 }
+
+// pageVariants — page entry
+{ type: 'spring', stiffness: 260, damping: 26 }
 ```
 
 Estas constantes se declaran al nivel del módulo (fuera del componente) para evitar re-creaciones.
@@ -939,36 +948,36 @@ const panelVariants = {
 
 ### 11.5 Sidebar Nav — `layoutId` spring pill
 
-El indicador activo del sidebar se mueve entre ítems con shared layout animation:
+El indicador activo del sidebar se mueve entre ítems con shared layout animation. Sin `AnimatePresence` — el spring de layout maneja la transición:
 
 ```jsx
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 
 <LayoutGroup id="sidebar-nav">
   {NAV_ITEMS.map(item => (
-    <button key={item.id} className="relative ...">
+    <button key={item.id} className="relative w-full flex items-center gap-3 py-3 pl-[19px] ...">
+      {isActive && (
+        <motion.div
+          layoutId="sidebar-indicator"
+          className="absolute inset-0 rounded-xl ..."
+          transition={SPRING}
+        />
+      )}
+      <Icon className="relative z-10 flex-shrink-0" />
       <AnimatePresence initial={false}>
-        {isActive && (
-          <motion.div
-            key="sidebar-indicator"
-            layoutId="sidebar-indicator"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="absolute inset-0 rounded-xl ..."
-          />
+        {!isCollapsed && (
+          <motion.span variants={LABEL_VARIANTS} initial="hidden" animate="show" exit="exit"
+            className="relative z-10 whitespace-nowrap">{label}</motion.span>
         )}
       </AnimatePresence>
-      <Icon className="relative z-10" />
-      <span className="relative z-10">{label}</span>
     </button>
   ))}
 </LayoutGroup>
 ```
 
 - **`<LayoutGroup>`** es obligatorio para que Framer Motion coordine el `layoutId` entre botones distintos
-- **`initial={false}`** en `AnimatePresence` evita la animación de entrada en la carga inicial
+- **`pl-[19px]` fijo** — centra el ícono de 18px en el sidebar colapsado de 56px sin cambiar className al colapsar (evita salto visual)
+- **`AnimatePresence initial={false}`** solo envuelve el label (blur reveal/exit), no el indicator
 - El ícono y el label necesitan `relative z-10` para quedar sobre el indicador
 
 ---
@@ -1145,7 +1154,7 @@ function MiComponente() {
 }
 ```
 
-**Persistencia:** `localStorage.getItem('theme')` — aplica clase `dark` a `<html>`.
+**Persistencia:** `localStorage.getItem('zwap-theme')` — valores `'dark'`/`'light'`. Si no hay valor, usa `prefers-color-scheme` del OS.
 
 ---
 
