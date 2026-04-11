@@ -86,7 +86,7 @@ Al añadir una ruta nueva:
 - `/app` redirige automáticamente a `/app/dashboard` vía `<Route index>`
 - `/legal/:doc` — ruta pública para páginas legales (stub por ahora)
 - `ROUTES.SETTINGS` existe y funciona pero no está en `NAV_ITEMS` (acceso directo por URL o desde Header)
-- `ROUTES.WALLET` no está en `NAV_ITEMS`; se accede desde `WalletSidebarCard` en `shared/layout/`
+- `ROUTES.WALLET` no está en `NAV_ITEMS`; se accede desde el wallet button inlined en `Sidebar.jsx`
 
 **Error & Suspense boundaries:** `AppShell` envuelve el `<Outlet>` con `<ErrorBoundary>` + `<Suspense>`. El `ErrorBoundary` captura errores runtime de vistas lazy; el `Suspense` muestra `<PageLoader />` mientras cargan. Nunca mover estos boundaries por encima de AppShell — causaría que Sidebar y Header remonten en cada cambio de ruta.
 
@@ -112,7 +112,7 @@ import {
 | `Input` | `icon` (Lucide) | Input con ícono izquierdo, theme-aware |
 | `Toggle` | `active`, `onToggle`, `disabled` | Switch con animación spring en el knob |
 | `Badge` | `variant` (default/success/warning/danger/outline), `icon` | Label inline con variantes semánticas |
-| `Modal` | `isOpen`, `onClose`, `title`, `description`, `icon` | Modal glass con spring de entrada |
+| `Modal` | `onClose`, `title`, `description`, `icon` | Modal glass con spring de entrada (renderizado condicional por el padre via `AnimatePresence`) |
 | `Avatar` | `initials`, `size` (sm/md), `variant` (purple/neutral), `glow` | Badge circular con iniciales |
 | `AvatarInfo` | `initials`, `primary`, `secondary`, `meta`, `glow` | Avatar + nombre + texto secundario + ID |
 | `StatCard` | `layout` (kpi/balance), `label`, `value`, `icon`, `variant`, `negative` | Tarjeta de métrica / KPI |
@@ -266,19 +266,104 @@ Usar `LayoutGroup` + `layoutId` para el pill activo. Sin `AnimatePresence` — e
 
 **Nota:** Los botones usan `pl-[19px]` fijo (no `justify-center`) para que los íconos no salten al colapsar. El ícono queda centrado en 72px y alineado en 256px sin cambio de className.
 
+### Sidebar — variantes de label y contenido
+
+El sidebar define dos sets de variantes locales para las animaciones de reveal/hide al colapsar:
+
+```js
+// Liquid label reveal: blur + slide spring con delay
+const LABEL_VARIANTS = {
+  hidden: { opacity: 0, filter: 'blur(4px)', x: -8 },
+  show:   { opacity: 1, filter: 'blur(0px)', x: 0,
+            transition: { type: 'spring', stiffness: 400, damping: 30, delay: 0.06 } },
+  exit:   { opacity: 0, filter: 'blur(4px)', x: -8,
+            transition: { type: 'spring', stiffness: 320, damping: 28 } },
+}
+
+// Fade-blur para contenido secundario (user info)
+const CONTENT_VARIANTS = {
+  hidden: { opacity: 0, filter: 'blur(3px)' },
+  show:   { opacity: 1, filter: 'blur(0px)',
+            transition: { type: 'spring', stiffness: 380, damping: 30, delay: 0.1 } },
+  exit:   { opacity: 0, filter: 'blur(3px)',
+            transition: { type: 'spring', stiffness: 320, damping: 28 } },
+}
+```
+
+- `LABEL_VARIANTS` — usado por los labels de nav, el wordmark del logo, y el wallet info. Incluye desplazamiento `x` para efecto de slide.
+- `CONTENT_VARIANTS` — usado por el user row. Solo blur + fade, sin desplazamiento.
+
+### Sidebar — layout anti-inflation
+
+El footer del sidebar (wallet + user row) usa un patrón específico para evitar que los contenedores cambien de tamaño durante las transiciones de collapse/expand:
+
+1. **Alturas fijas** en cada fila: nav `h-11`, wallet `h-14`, user `h-[52px]`
+2. **Contenido absolutamente posicionado** — el texto revelado usa `absolute inset-y-0 left-[Xpx] right-Y` en vez de estar en el flow del flex. Esto garantiza que `AnimatePresence` no afecte las dimensiones del contenedor durante exit/enter.
+3. **Ícono/avatar fijo en flow** — solo el elemento ancla (ícono Wallet, Avatar) permanece en el flujo flex del contenedor, determinando su altura natural.
+
+```jsx
+// Wallet: ícono en flow + contenido absoluto
+<motion.button className="relative w-full h-14 flex items-center pl-[19px] ... overflow-hidden">
+  <Wallet size={18} className="flex-shrink-0" />
+  <AnimatePresence initial={false}>
+    {!isCollapsed && (
+      <motion.div variants={LABEL_VARIANTS}
+        className="absolute inset-y-0 left-[49px] right-3 flex items-center justify-between overflow-hidden">
+        ...
+      </motion.div>
+    )}
+  </AnimatePresence>
+</motion.button>
+
+// User: avatar en flow + contenido absoluto
+<div className="relative h-[52px] flex items-center pl-[10px] overflow-hidden">
+  <Avatar size="sm" />
+  <AnimatePresence initial={false}>
+    {!isCollapsed && (
+      <motion.div variants={CONTENT_VARIANTS}
+        className="absolute inset-y-0 left-[58px] right-2 flex items-center justify-between overflow-hidden">
+        ...
+      </motion.div>
+    )}
+  </AnimatePresence>
+</div>
+```
+
+### Brand components
+
+Los assets de marca viven en `src/shared/brand/`:
+
+| Componente | Props | Descripción |
+|---|---|---|
+| `ZwapIsotipo` | `isDarkMode`, `className` | Isotipo SVG (solo el símbolo) |
+| `ZwapWordmark` | `isDarkMode`, `className` | Texto "ZWAP" SVG |
+| `ZwapLogo` | `isDarkMode`, `className` | Logo completo (isotipo + wordmark en un solo SVG) |
+
+El sidebar usa `ZwapIsotipo` + `ZwapWordmark` por separado para poder animar la aparición del wordmark con `LABEL_VARIANTS` al expandir. `ZwapLogo` existe como referencia pero no se usa activamente.
+
 ### Modal
 
 ```jsx
-// Backdrop
-<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-  transition={{ duration: 0.2 }} />
+// Root — solo posiciona, sin initial/animate opacity (conserva exit para AnimatePresence)
+<motion.div exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center">
 
-// Contenedor
-<motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }}
-  animate={{ opacity: 1, scale: 1, y: 0 }}
-  exit={{ opacity: 0, scale: 0.95, y: 10 }}
-  transition={SPRING} />
+  // Backdrop — opacity independiente
+  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+    transition={{ duration: 0.15 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+
+  // Panel — opacity + scale/y con per-property transitions
+  <motion.div
+    initial={{ opacity: 0, scale: 0.95, y: 10 }}
+    animate={{ opacity: 1, scale: 1, y: 0 }}
+    exit={{ opacity: 0, scale: 0.95, y: 10 }}
+    transition={{
+      opacity: { duration: 0.15 },
+      scale: SPRING, y: SPRING,
+    }} />
+</motion.div>
 ```
+
+**Nota:** El root `motion.div` NO anima opacity en initial/animate — solo en exit. Cada hijo (backdrop y panel) controla su propia opacity. Esto evita desincronización donde el backdrop-blur era imperceptible a baja opacidad del root.
 
 ## Contextos
 
@@ -306,14 +391,22 @@ Exports disponibles:
 | `WALLET_STEPS` | Steps del stepper de retiro en progreso |
 | `ALERTS` | Alertas del dashboard (icon, title, body, action) |
 | `CHART_DATA` | Datos de gráfica semanal (pos, links por día) |
+| `CONVERSION_DATA` | Datos de conversión por día para gráfica |
+| `PAYMENT_METHODS` | Distribución Visa/MC/Amex para gráfica |
 | `KPIS` | KPIs del dashboard (label, value, change, icon, variant) |
 | `TRANSACTIONS` | Historial de transacciones |
 | `PERMANENT_LINKS` | Links de pago permanentes |
 | `WITHDRAWALS` | Retiros/withdrawals |
 | `PAYOUTS` | Liquidaciones programadas |
+| `SETTLEMENT_SUMMARY` | KPIs de liquidaciones |
 | `USERS` | Usuarios del sistema |
+| `CURRENT_USER` | `{ displayName, role, email }` — usuario logueado actual |
 | `BRANCH_LIST` | Sucursales con detalle (address, users, isMain) |
 | `CUSTOM_LINKS` | Links de pago customizados por cliente |
+| `PLAN_INFO` | Detalles del plan de suscripción |
+| `SESSIONS` | Lista de sesiones activas (settings) |
+| `PAYMENT_CARD` | Datos de tarjeta guardada |
+| `BANK_ACCOUNT` | Datos de cuenta bancaria |
 
 Importar desde ahí, no hardcodear datos en las vistas.
 

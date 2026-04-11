@@ -877,23 +877,39 @@ Todos los botones de la app (`<Button>`) tienen feedback táctil al presionar:
 
 ### 11.3 Modal — Spring entrance
 
-Los modales entran con spring en lugar de `animate-scale-in` CSS:
+Los modales usan un patrón de 3 capas con opacity independiente por elemento:
 
 ```jsx
-{/* Backdrop */}
+{/* Root — solo posiciona, sin initial/animate opacity (conserva exit para AnimatePresence) */}
 <motion.div
-  initial={{ opacity: 0 }}
-  animate={{ opacity: 1 }}
-  transition={{ duration: 0.2 }}
-/>
+  exit={{ opacity: 0 }}
+  className="fixed inset-0 z-50 flex items-center justify-center"
+>
 
-{/* Contenedor */}
-<motion.div
-  initial={{ opacity: 0, scale: 0.95, y: 10 }}
-  animate={{ opacity: 1, scale: 1, y: 0 }}
-  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-/>
+  {/* Backdrop — opacity independiente */}
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 0.15 }}
+    className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+  />
+
+  {/* Panel — opacity + scale/y con per-property transitions */}
+  <motion.div
+    initial={{ opacity: 0, scale: 0.95, y: 10 }}
+    animate={{ opacity: 1, scale: 1, y: 0 }}
+    exit={{ opacity: 0, scale: 0.95, y: 10 }}
+    transition={{
+      opacity: { duration: 0.15 },
+      scale: { type: 'spring', stiffness: 400, damping: 30 },
+      y: { type: 'spring', stiffness: 400, damping: 30 },
+    }}
+  />
+</motion.div>
 ```
+
+**Nota:** El root NO anima opacity en initial/animate — solo en exit. Cada hijo controla su propia opacity. Esto evita desincronización donde el backdrop-blur era imperceptible a baja opacidad del root.
 
 ---
 
