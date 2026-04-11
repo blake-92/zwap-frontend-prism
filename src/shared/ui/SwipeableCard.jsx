@@ -1,0 +1,108 @@
+import { useState } from 'react'
+import { motion, useAnimation } from 'framer-motion'
+import { ChevronLeft } from 'lucide-react'
+import { useTheme } from '@/shared/context/ThemeContext'
+
+export default function SwipeableCard({ children, actions, className = '' }) {
+  const { isDarkMode } = useTheme()
+  const controls = useAnimation()
+  const [isOpen, setIsOpen] = useState(false)
+  
+  const validActions = actions.filter(a => !a.hidden)
+  const actionWidth = 76
+  const maxDrag = validActions.length * actionWidth
+
+  const handleDragEnd = (event, info) => {
+    const threshold = -maxDrag / 2
+    if (info.offset.x < threshold || info.velocity.x < -500) {
+      controls.start({ x: -maxDrag })
+      setIsOpen(true)
+    } else {
+      controls.start({ x: 0 })
+      setIsOpen(false)
+    }
+  }
+
+  const closeCard = () => {
+    controls.start({ x: 0 })
+    setIsOpen(false)
+  }
+
+  const base = isDarkMode
+    ? 'bg-[#252429]/30 backdrop-blur-2xl border-white/10 border-t-white/20 shadow-2xl'
+    : 'bg-white/40 backdrop-blur-2xl border-white border-t-white shadow-[0_10px_40px_rgb(0,0,0,0.05)]'
+
+  return (
+    <div className={`relative overflow-hidden rounded-[24px] ${className}`}>
+      {/* Background actions layer */}
+      <div 
+        className={`absolute inset-y-0 right-0 flex justify-end ${
+          isDarkMode ? 'bg-[#111113]/50 border border-white/5' : 'bg-gray-100 border border-black/5'
+        } rounded-[24px]`}
+        style={{ width: maxDrag }}
+      >
+        {validActions.map((act, i) => {
+           const Icon = act.icon
+           return (
+             <button 
+               key={i}
+               onClick={(e) => {
+                 e.stopPropagation()
+                 if (!act.disabled) {
+                   act.onClick()
+                   closeCard()
+                 }
+               }}
+               disabled={act.disabled}
+               style={{ width: actionWidth }}
+               className={`flex flex-col items-center justify-center gap-1.5 h-full text-[10px] font-bold transition-colors ${
+                 act.disabled 
+                   ? isDarkMode ? 'text-[#888991]/40 cursor-not-allowed' : 'text-[#67656E]/40 cursor-not-allowed'
+                   : act.variant === 'danger' 
+                     ? isDarkMode ? 'text-rose-400 hover:bg-rose-500/10' : 'text-rose-600 hover:bg-rose-50'
+                     : isDarkMode ? 'text-[#A78BFA] hover:bg-white/5' : 'text-[#561BAF] hover:bg-[#7C3AED]/10'
+               }`}
+             >
+               {Icon && <Icon size={18} className={act.variant === 'danger' && !act.disabled ? '' : 'opacity-80'} />}
+               <span className={act.variant === 'danger' && !act.disabled ? '' : 'opacity-90'}>{act.label}</span>
+             </button>
+           )
+        })}
+      </div>
+      
+      {/* Foreground card */}
+      <motion.div
+        drag={maxDrag > 0 ? "x" : false}
+        dragConstraints={{ left: -maxDrag, right: 0 }}
+        dragElastic={0.1}
+        animate={controls}
+        onDragEnd={handleDragEnd}
+        onClick={() => {
+          if (isOpen) closeCard()
+        }}
+        className={`relative z-10 w-full rounded-[24px] border overflow-hidden ${base}`}
+      >
+        {children}
+        
+        {/* Visual indicator (animated chevron) - only show if actions exist and not open */}
+        {maxDrag > 0 && !isOpen && (
+          <motion.div 
+            initial={{ opacity: 0, x: 5 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ 
+              repeat: Infinity, 
+              repeatType: "reverse", 
+              duration: 1.5,
+              ease: "easeInOut"
+            }}
+            className={`absolute right-1 top-1/2 -translate-y-1/2 flex flex-col items-center justify-center w-6 h-12 pointer-events-none ${
+              isDarkMode ? 'text-white/30' : 'text-black/20'
+            }`}
+          >
+            <ChevronLeft size={16} strokeWidth={3} />
+          </motion.div>
+        )}
+      </motion.div>
+    </div>
+  )
+}

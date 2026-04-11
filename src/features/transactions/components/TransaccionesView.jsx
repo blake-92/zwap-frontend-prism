@@ -7,7 +7,7 @@ import {
   FileText, RotateCcw, Filter
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, AvatarInfo, DropdownFilter, Pagination, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar, ActionMenu } from '@/shared/ui'
+import { Card, Button, Badge, AvatarInfo, DropdownFilter, Pagination, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar, SwipeableCard } from '@/shared/ui'
 import { listVariants, itemVariants, pageVariants } from '@/shared/utils/motionVariants'
 import { TRANSACTIONS } from '@/services/mocks/mockData'
 import { ROUTES } from '@/router/routes'
@@ -248,52 +248,49 @@ export default function TransaccionesView() {
           <motion.div variants={listVariants} initial="hidden" animate="show" className="space-y-3">
             {paginatedData.map((trx) => (
               <motion.div key={trx.id} variants={itemVariants}>
-                <Card className="p-4">
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <AvatarInfo
-                        initials={trx.initials}
-                        primary={trx.client || 'Cliente Anonimo'}
-                        secondary={trx.email || 'Venta en mostrador'}
-                        glow
-                      />
-                    </div>
-                    <div className="flex items-start gap-2 flex-shrink-0">
-                      <span className={`font-mono font-bold text-lg tracking-tight mt-0.5 ${
+                <SwipeableCard
+                  actions={[
+                    { label: 'Ver Recibo', icon: FileText, onClick: () => setReceiptTrx(trx) },
+                    trx.status === 'Reembolsado'
+                      ? { label: 'Recibo Dev.', icon: FileText, onClick: () => setRefundTrx(trx) }
+                      : { label: 'Devolución', icon: RotateCcw, variant: 'danger', disabled: trx.status === 'Pendiente', onClick: () => setRefundTrx(trx) }
+                  ]}
+                >
+                  <div className="p-4">
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <AvatarInfo
+                          initials={trx.initials}
+                          primary={trx.client || 'Cliente Anonimo'}
+                          secondary={trx.email || 'Venta en mostrador'}
+                          glow
+                        />
+                      </div>
+                      <span className={`font-mono font-bold text-lg tracking-tight mt-0.5 flex-shrink-0 ${
                         trx.status === 'Reembolsado'
                           ? 'text-rose-500 line-through opacity-70'
                           : isDarkMode ? 'text-white' : 'text-[#111113]'
                       }`}>
                         ${trx.amount}
                       </span>
-                      <div className="-mr-2 -mt-1.5">
-                        <ActionMenu
-                          actions={[
-                            { label: 'Ver Recibo', icon: FileText, onClick: () => setReceiptTrx(trx) },
-                            trx.status === 'Reembolsado'
-                              ? { label: 'Recibo de Dev.', icon: FileText, onClick: () => setRefundTrx(trx) }
-                              : { label: 'Devolución', icon: RotateCcw, variant: 'danger', disabled: trx.status === 'Pendiente', onClick: () => setRefundTrx(trx) }
-                          ]}
-                        />
-                      </div>
                     </div>
-                  </div>
 
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Badge variant={trx.statusVariant} icon={trx.StatusIcon}>
-                        {trx.status}
-                      </Badge>
-                      <span className={`text-[11px] font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                        <trx.ChannelIcon size={12} />
-                        {trx.channel.includes('POS') ? 'POS' : 'Link'}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge variant={trx.statusVariant} icon={trx.StatusIcon}>
+                          {trx.status}
+                        </Badge>
+                        <span className={`text-[11px] font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                          <trx.ChannelIcon size={12} />
+                          {trx.channel.includes('POS') ? 'POS' : 'Link'}
+                        </span>
+                      </div>
+                      <span className={`text-xs font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                        <Clock size={12} /> {trx.date} {trx.time}
                       </span>
                     </div>
-                    <span className={`text-xs font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                      <Clock size={12} /> {trx.date} {trx.time}
-                    </span>
                   </div>
-                </Card>
+                </SwipeableCard>
               </motion.div>
             ))}
           </motion.div>
