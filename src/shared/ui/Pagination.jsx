@@ -1,8 +1,10 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import Button from './Button'
 
 export default function Pagination({ currentPage, totalPages, onPageChange }) {
+  const { t } = useTranslation()
   const { isDarkMode } = useTheme()
 
   if (totalPages <= 1) return null
@@ -22,7 +24,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
   return (
     <nav aria-label="Paginación" className={`flex items-center justify-between pt-4 border-t ${isDarkMode ? 'border-white/10' : 'border-gray-200'}`}>
       <span className={`text-xs font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-        Mostrando página {currentPage} de {totalPages}
+        {t('pagination.showingPage', { current: currentPage, total: totalPages })}
       </span>
       <div className="flex items-center gap-1.5">
         <Button variant="outline" size="icon" onClick={() => onPageChange(Math.max(1, currentPage - 1))} disabled={currentPage === 1} className="!h-8 !w-8">

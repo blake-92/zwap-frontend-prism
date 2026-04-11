@@ -1,16 +1,17 @@
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import Button from './Button'
-
-const MONTH_NAMES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
-const MONTH_LABELS_FULL = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 
 const SPRING = { type: 'spring', stiffness: 400, damping: 26 }
 
 export default function MiniCalendar({ selectedDate, onSelect, timeValue = '00:00', onTimeChange, onConfirm }) {
+  const { t } = useTranslation()
   const { isDarkMode } = useTheme()
+  const MONTH_NAMES = t('calendar.monthsShort', { returnObjects: true })
+  const MONTH_LABELS_FULL = t('calendar.months', { returnObjects: true })
   const now = new Date()
   const [viewYear, setViewYear] = useState(now.getFullYear())
   const [viewMonth, setViewMonth] = useState(now.getMonth())
@@ -43,7 +44,7 @@ export default function MiniCalendar({ selectedDate, onSelect, timeValue = '00:0
       </div>
 
       <div className="grid grid-cols-7 gap-1 text-center mb-2">
-        {['Lu','Ma','Mi','Ju','Vi','Sa','Do'].map(d => (
+        {t('calendar.daysShort', { returnObjects: true }).map(d => (
           <div key={d} className={`text-[9px] font-bold ${isDarkMode ? 'text-[#888991]' : 'text-[#B0AFB4]'}`}>{d}</div>
         ))}
       </div>
@@ -71,7 +72,7 @@ export default function MiniCalendar({ selectedDate, onSelect, timeValue = '00:0
       </div>
 
       <div className={`mt-3 pt-3 border-t flex justify-between items-center ${isDarkMode ? 'border-white/10' : 'border-gray-200'}`}>
-        <span className={`text-[10px] font-bold ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>Hora Límite:</span>
+        <span className={`text-[10px] font-bold ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>{t('calendar.deadline')}:</span>
         <div className={`flex items-center gap-1 rounded-md px-2 py-1 border transition-all ${
           isDarkMode ? 'bg-[#252429] border-white/20 focus-within:border-[#7C3AED]/60' : 'bg-gray-50 border-gray-300 focus-within:border-[#7C3AED]/40'
         }`}>
@@ -90,7 +91,7 @@ export default function MiniCalendar({ selectedDate, onSelect, timeValue = '00:0
       </div>
 
       <Button className="w-full mt-3 !py-1.5 !text-xs" onClick={onConfirm} disabled={!selectedDate}>
-        Confirmar Fecha
+        {t('calendar.confirmDate')}
       </Button>
     </motion.div>
   )

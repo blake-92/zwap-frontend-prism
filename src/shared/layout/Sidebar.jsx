@@ -6,6 +6,7 @@ import {
   Landmark, Users, Building2,
   LogOut, Wallet, ArrowRight,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import ZwapIsotipo  from '@/shared/brand/ZwapIsotipo'
 import ZwapWordmark from '@/shared/brand/ZwapWordmark'
@@ -14,12 +15,12 @@ import { Avatar } from '@/shared/ui'
 import { CURRENT_USER, WALLET_BALANCE } from '@/services/mocks/mockData'
 
 const NAV_ITEMS = [
-  { id: 'dashboard',     label: 'Dashboard',     icon: LayoutDashboard, route: ROUTES.DASHBOARD    },
-  { id: 'links',         label: 'Links de Pago', icon: LinkIcon,        route: ROUTES.LINKS        },
-  { id: 'transacciones', label: 'Transacciones', icon: ArrowRightLeft,  route: ROUTES.TRANSACTIONS },
-  { id: 'liquidaciones', label: 'Liquidaciones', icon: Landmark,        route: ROUTES.SETTLEMENTS  },
-  { id: 'usuarios',      label: 'Usuarios',      icon: Users,           route: ROUTES.USERS        },
-  { id: 'sucursales',    label: 'Sucursales',    icon: Building2,       route: ROUTES.BRANCHES     },
+  { id: 'dashboard',     labelKey: 'nav.dashboard',     icon: LayoutDashboard, route: ROUTES.DASHBOARD    },
+  { id: 'links',         labelKey: 'nav.links',         icon: LinkIcon,        route: ROUTES.LINKS        },
+  { id: 'transacciones', labelKey: 'nav.transactions',  icon: ArrowRightLeft,  route: ROUTES.TRANSACTIONS },
+  { id: 'liquidaciones', labelKey: 'nav.settlements',   icon: Landmark,        route: ROUTES.SETTLEMENTS  },
+  { id: 'usuarios',      labelKey: 'nav.users',         icon: Users,           route: ROUTES.USERS        },
+  { id: 'sucursales',    labelKey: 'nav.branches',      icon: Building2,       route: ROUTES.BRANCHES     },
 ]
 
 const SPRING = { type: 'spring', stiffness: 380, damping: 42 }
@@ -43,6 +44,7 @@ const CONTENT_VARIANTS = {
 }
 
 export default function Sidebar({ isCollapsed }) {
+  const { t } = useTranslation()
   const { isDarkMode } = useTheme()
   const navigate       = useNavigate()
   const location       = useLocation()
@@ -83,8 +85,9 @@ export default function Sidebar({ isCollapsed }) {
       {/* ── Nav ── */}
       <nav className="flex-1 px-2 py-4 space-y-1.5 overflow-y-auto overflow-x-hidden no-scrollbar">
         <LayoutGroup id="sidebar-nav">
-          {NAV_ITEMS.map(({ id, label, icon: Icon, route }) => {
+          {NAV_ITEMS.map(({ id, labelKey, icon: Icon, route }) => {
             const isActive = location.pathname === route
+            const label = t(labelKey)
             return (
               <button
                 key={id}
@@ -142,7 +145,7 @@ export default function Sidebar({ isCollapsed }) {
           onHoverEnd={() => setWalletHover(false)}
           animate={{ y: !isWalletActive && walletHover && !isCollapsed ? -3 : 0 }}
           transition={SPRING}
-          title={isCollapsed ? 'Mi Billetera' : undefined}
+          title={isCollapsed ? t('nav.myWallet') : undefined}
           className={`relative w-full h-14 flex items-center pl-[19px] pr-3 py-3 mb-1 rounded-xl border overflow-hidden transition-[border-color,background-color,box-shadow] duration-200 ${
             isCollapsed
               ? 'border-transparent bg-transparent shadow-none'
@@ -177,7 +180,7 @@ export default function Sidebar({ isCollapsed }) {
                     isWalletActive
                       ? isDarkMode ? 'text-[#B9A4F8]' : 'text-[#7C3AED]'
                       : isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'
-                  }`}>Mi Billetera</p>
+                  }`}>{t('nav.myWallet')}</p>
                   <span className={`text-sm font-mono font-bold tracking-tight block leading-snug ${
                     isDarkMode ? 'text-white' : 'text-[#111113]'
                   }`}>
@@ -235,12 +238,12 @@ export default function Sidebar({ isCollapsed }) {
                   <p className={`text-[11px] font-medium whitespace-nowrap ${
                     isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'
                   }`}>
-                    Cerrar Sesión
+                    {t('nav.logout')}
                   </p>
                 </div>
                 <button
                   onClick={() => { localStorage.removeItem('zwap_token'); navigate(ROUTES.LOGIN) }}
-                  title="Cerrar Sesión"
+                  title={t('nav.logout')}
                   className={`p-1.5 rounded-lg flex-shrink-0 transition-all duration-200 ${
                     isDarkMode
                       ? 'text-[#888991] hover:text-rose-400 hover:bg-rose-500/10'

@@ -5,23 +5,24 @@ import {
   LayoutDashboard, ArrowRightLeft, Link as LinkIcon, Landmark,
   MoreHorizontal, X, Building2, Users, Wallet, Settings,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { ROUTES } from '@/router/routes'
 
 const SPRING = { type: 'spring', stiffness: 400, damping: 30 }
 
 const TABS = [
-  { id: 'dashboard',     label: 'Dashboard',     icon: LayoutDashboard, route: ROUTES.DASHBOARD    },
-  { id: 'transacciones', label: 'Transacciones', icon: ArrowRightLeft,  route: ROUTES.TRANSACTIONS },
-  { id: 'links',         label: 'Links',         icon: LinkIcon,        route: ROUTES.LINKS        },
-  { id: 'liquidaciones', label: 'Liquidaciones', icon: Landmark,        route: ROUTES.SETTLEMENTS  },
+  { id: 'dashboard',     labelKey: 'nav.dashboard',     icon: LayoutDashboard, route: ROUTES.DASHBOARD    },
+  { id: 'transacciones', labelKey: 'nav.transactions',  icon: ArrowRightLeft,  route: ROUTES.TRANSACTIONS },
+  { id: 'links',         labelKey: 'nav.linksShort',    icon: LinkIcon,        route: ROUTES.LINKS        },
+  { id: 'liquidaciones', labelKey: 'nav.settlements',   icon: Landmark,        route: ROUTES.SETTLEMENTS  },
 ]
 
 const MORE_ITEMS = [
-  { id: 'sucursales', label: 'Sucursales',    icon: Building2, route: ROUTES.BRANCHES },
-  { id: 'usuarios',   label: 'Usuarios',      icon: Users,     route: ROUTES.USERS    },
-  { id: 'wallet',     label: 'Wallet',        icon: Wallet,    route: ROUTES.WALLET   },
-  { id: 'settings',   label: 'Configuracion', icon: Settings,  route: ROUTES.SETTINGS },
+  { id: 'sucursales', labelKey: 'nav.branches', icon: Building2, route: ROUTES.BRANCHES },
+  { id: 'usuarios',   labelKey: 'nav.users',    icon: Users,     route: ROUTES.USERS    },
+  { id: 'wallet',     labelKey: 'nav.wallet',   icon: Wallet,    route: ROUTES.WALLET   },
+  { id: 'settings',   labelKey: 'nav.settings', icon: Settings,  route: ROUTES.SETTINGS },
 ]
 
 const sheetVariants = {
@@ -37,6 +38,7 @@ const backdropVariants = {
 }
 
 export default function BottomNav() {
+  const { t } = useTranslation()
   const { isDarkMode } = useTheme()
   const navigate       = useNavigate()
   const location       = useLocation()
@@ -66,8 +68,9 @@ export default function BottomNav() {
           : 'bg-white/90 border-black/5 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]'
       }`}>
         <LayoutGroup id="bottomnav">
-        {TABS.map(({ id, label, icon: Icon, route }) => {
+        {TABS.map(({ id, labelKey, icon: Icon, route }) => {
           const isActive = location.pathname === route
+          const label = t(labelKey)
           return (
             <button
               key={id}
@@ -119,7 +122,7 @@ export default function BottomNav() {
           )}
           <MoreHorizontal size={20} strokeWidth={isMoreActive || sheetOpen ? 2.5 : 2} className="relative z-10" />
           <span className={`text-[10px] leading-none relative z-10 ${isMoreActive || sheetOpen ? 'font-bold' : 'font-medium'}`}>
-            Mas
+            {t('nav.moreShort')}
           </span>
         </button>
         </LayoutGroup>
@@ -168,7 +171,7 @@ export default function BottomNav() {
             {/* Sheet header */}
             <div className="flex items-center justify-between px-6 pb-4">
               <h3 className={`text-sm font-bold ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-                Mas opciones
+                {t('nav.moreOptions')}
               </h3>
               <button
                 onClick={() => setSheetOpen(false)}
@@ -182,8 +185,9 @@ export default function BottomNav() {
 
             {/* Sheet items */}
             <div className="px-4 grid grid-cols-4 gap-2">
-              {MORE_ITEMS.map(({ id, label, icon: Icon, route }) => {
+              {MORE_ITEMS.map(({ id, labelKey, icon: Icon, route }) => {
                 const isActive = location.pathname === route
+                const label = t(labelKey)
                 return (
                   <button
                     key={id}

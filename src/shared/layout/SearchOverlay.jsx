@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Search, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 
 const SPRING = { type: 'spring', stiffness: 400, damping: 30 }
@@ -11,6 +12,7 @@ const SPRING = { type: 'spring', stiffness: 400, damping: 30 }
  * Click outside or ESC to close.
  */
 export default function SearchPanel({ onClose }) {
+  const { t } = useTranslation()
   const { isDarkMode } = useTheme()
   const inputRef = useRef(null)
   const panelRef = useRef(null)
@@ -71,7 +73,7 @@ export default function SearchPanel({ onClose }) {
         <input
           ref={inputRef}
           type="text"
-          placeholder="Buscar transacciones, links o clientes..."
+          placeholder={t('header.searchPlaceholder')}
           className={`flex-1 bg-transparent border-none outline-none text-sm font-medium placeholder:opacity-50 ${
             isDarkMode ? 'text-[#D8D7D9] placeholder:text-[#888991]' : 'text-[#111113] placeholder:text-[#B0AFB4]'
           }`}
@@ -91,7 +93,7 @@ export default function SearchPanel({ onClose }) {
       {/* Results area / empty state */}
       <div className="px-4 py-6">
         <p className={`text-xs font-medium text-center ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-          Escribe para buscar en transacciones, links de pago y clientes.
+          {t('search.emptyHint')}
         </p>
       </div>
     </motion.div>

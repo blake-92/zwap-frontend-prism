@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useId } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, Check, Filter } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import useMediaQuery from '@/shared/hooks/useMediaQuery'
 import Button from './Button'
@@ -15,6 +16,7 @@ const panelVariants = {
 }
 
 export default function DropdownFilter({ label, options, value, onChange, icon: Icon, defaultValue }) {
+  const { t } = useTranslation()
   const { isDarkMode } = useTheme()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
   const [isOpen, setIsOpen] = useState(false)
@@ -120,7 +122,7 @@ export default function DropdownFilter({ label, options, value, onChange, icon: 
 
       {/* Mobile Bottom Sheet */}
       {!isDesktop && (
-        <BottomSheet isOpen={isOpen} onClose={() => setIsOpen(false)} title={`Filtrar por ${label.toLowerCase()}`}>
+        <BottomSheet isOpen={isOpen} onClose={() => setIsOpen(false)} title={t('filters.filterBy', { label: label.toLowerCase() })}>
           {renderOptions(true)}
         </BottomSheet>
       )}

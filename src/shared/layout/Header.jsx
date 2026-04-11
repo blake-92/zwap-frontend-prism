@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useId } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Moon, Sun, Bell, ChevronDown, Building2, Settings } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { ROUTES } from '@/router/routes'
 import { Button, Tooltip } from '@/shared/ui'
@@ -17,6 +18,7 @@ const panelVariants = {
 }
 
 export default function Header({ selectedBranch, onBranchChange, isDesktop }) {
+  const { t } = useTranslation()
   const { isDarkMode, toggleTheme } = useTheme()
   const navigate                    = useNavigate()
   const [menuOpen, setMenuOpen]     = useState(false)
@@ -50,7 +52,7 @@ export default function Header({ selectedBranch, onBranchChange, isDesktop }) {
             <Search size={16} className={isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'} />
             <input
               type="text"
-              placeholder="Buscar transacciones, links o clientes..."
+              placeholder={t('header.searchPlaceholder')}
               className={`bg-transparent border-none outline-none text-sm ml-3 w-full font-medium placeholder:opacity-60 ${
                 isDarkMode ? 'text-[#D8D7D9] placeholder:text-[#888991]' : 'text-[#111113] placeholder:text-[#B0AFB4]'
               }`}
@@ -64,7 +66,7 @@ export default function Header({ selectedBranch, onBranchChange, isDesktop }) {
 
         {/* ── Right actions ── */}
         <div className="flex items-center gap-2 sm:gap-4">
-          <Tooltip content="Modo Oscuro/Claro" position="bottom">
+          <Tooltip content={t('header.themeToggle')} position="bottom">
             <Button variant="ghost" size="icon" onClick={toggleTheme}>
               {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
             </Button>
@@ -72,14 +74,14 @@ export default function Header({ selectedBranch, onBranchChange, isDesktop }) {
 
           {/* Settings — desktop only (on mobile, accessible via BottomNav More) */}
           {isDesktop && (
-            <Tooltip content="Configuracion" position="bottom">
+            <Tooltip content={t('header.settings')} position="bottom">
               <Button variant="ghost" size="icon" onClick={() => navigate(ROUTES.SETTINGS)}>
                 <Settings size={20} />
               </Button>
             </Tooltip>
           )}
 
-          <Tooltip content="Notificaciones" position="bottom">
+          <Tooltip content={t('header.notifications')} position="bottom">
             <Button variant="ghost" size="icon" className="relative">
               <motion.span
                 whileHover={{ rotate: [0, -18, 14, -10, 6, 0] }}
