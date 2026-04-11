@@ -22,7 +22,7 @@ const NAV_ITEMS = [
   { id: 'sucursales',    label: 'Sucursales',    icon: Building2,       route: ROUTES.BRANCHES     },
 ]
 
-const SPRING = { type: 'spring', stiffness: 400, damping: 30 }
+const SPRING = { type: 'spring', stiffness: 380, damping: 42 }
 
 // Liquid label reveal: blur + slide spring con delay para esperar al sidebar
 const LABEL_VARIANTS = {
@@ -30,7 +30,7 @@ const LABEL_VARIANTS = {
   show:   { opacity: 1, filter: 'blur(0px)', x: 0,
             transition: { type: 'spring', stiffness: 400, damping: 30, delay: 0.06 } },
   exit:   { opacity: 0, filter: 'blur(4px)', x: -8,
-            transition: { duration: 0.1 } },
+            transition: { type: 'spring', stiffness: 320, damping: 28 } },
 }
 
 // Fade-blur para contenido secundario (user info, logout)
@@ -39,7 +39,7 @@ const CONTENT_VARIANTS = {
   show:   { opacity: 1, filter: 'blur(0px)',
             transition: { type: 'spring', stiffness: 380, damping: 30, delay: 0.1 } },
   exit:   { opacity: 0, filter: 'blur(3px)',
-            transition: { duration: 0.08 } },
+            transition: { type: 'spring', stiffness: 320, damping: 28 } },
 }
 
 export default function Sidebar({ isCollapsed }) {
@@ -96,14 +96,11 @@ export default function Sidebar({ isCollapsed }) {
           {NAV_ITEMS.map(({ id, label, icon: Icon, route }) => {
             const isActive = location.pathname === route
             return (
-              <motion.button
-                layout
+              <button
                 key={id}
                 onClick={() => navigate(route)}
                 title={isCollapsed ? label : undefined}
-                className={`relative w-full flex items-center py-3 rounded-xl text-sm font-medium transition-colors duration-200 ${
-                  isCollapsed ? 'justify-center px-0' : 'gap-3 px-4'
-                } ${
+                className={`relative w-full flex items-center gap-3 py-3 pl-[19px] rounded-xl text-sm font-medium transition-colors duration-200 ${
                   isActive
                     ? isDarkMode ? 'text-white'     : 'text-[#561BAF]'
                     : isDarkMode ? 'text-[#888991] hover:text-[#D8D7D9]'
@@ -139,14 +136,14 @@ export default function Sidebar({ isCollapsed }) {
                     </motion.span>
                   )}
                 </AnimatePresence>
-              </motion.button>
+              </button>
             )
           })}
         </LayoutGroup>
       </nav>
 
       {/* ── Footer ── */}
-      <div className="px-2 pb-5 space-y-3 flex-shrink-0 overflow-hidden">
+      <div className="px-2 pb-5 space-y-3 flex-shrink-0">
 
         {/* Wallet — card completa o ícono según estado */}
         <AnimatePresence mode="wait" initial={false}>
@@ -156,7 +153,7 @@ export default function Sidebar({ isCollapsed }) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, y: !isWalletActive && walletHover ? -3 : 0 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.15, ...SPRING }}
+              transition={SPRING}
               onClick={() => navigate(ROUTES.WALLET)}
               onHoverStart={() => setWalletHover(true)}
               onHoverEnd={() => setWalletHover(false)}
@@ -195,9 +192,7 @@ export default function Sidebar({ isCollapsed }) {
         </AnimatePresence>
 
         {/* User row */}
-        <motion.div layout className={`flex items-center py-2 rounded-xl transition-all duration-200 ${
-          isCollapsed ? 'justify-center px-0' : 'gap-3 px-1'
-        }`}>
+        <div className="flex items-center gap-3 py-2 pl-[10px] rounded-xl transition-colors duration-200">
           <Avatar initials="A" size="sm" variant="neutral" />
 
           <AnimatePresence initial={false}>
@@ -236,7 +231,7 @@ export default function Sidebar({ isCollapsed }) {
               </motion.div>
             )}
           </AnimatePresence>
-        </motion.div>
+        </div>
       </div>
     </motion.aside>
   )
