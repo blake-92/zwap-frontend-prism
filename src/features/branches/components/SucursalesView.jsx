@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { listVariants, cardItemVariants } from '@/shared/utils/motionVariants'
+import { listVariants, cardItemVariants, pageVariants } from '@/shared/utils/motionVariants'
 import {
   Building2, MapPin, Users, Pencil, Trash2,
   PlusCircle, Star,
@@ -91,15 +91,10 @@ function AddBranchCard({ onClick }) {
 
 /* ─── SucursalesView ──────────────────────────────────────── */
 export default function SucursalesView() {
-  const { isDarkMode }                = useTheme()
   const [newBranchOpen, setNewBranchOpen] = useState(false)
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-    >
+    <motion.div variants={pageVariants} initial="hidden" animate="show">
 
       <PageHeader title="Sucursales" description="Gestión de propiedades y puntos de venta">
         <Button onClick={() => setNewBranchOpen(true)}>

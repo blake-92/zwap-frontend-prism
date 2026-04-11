@@ -10,7 +10,7 @@ import { useTheme } from '@/shared/context/ThemeContext'
 import ZwapLogo    from '@/shared/brand/ZwapLogo'
 import ZwapIsotipo from '@/shared/brand/ZwapIsotipo'
 import { ROUTES }  from '@/router/routes'
-import WalletSidebarCard from '@/features/wallet/components/WalletSidebarCard'
+import WalletSidebarCard from '@/shared/layout/WalletSidebarCard'
 import Avatar from '@/shared/ui/Avatar'
 
 const NAV_ITEMS = [

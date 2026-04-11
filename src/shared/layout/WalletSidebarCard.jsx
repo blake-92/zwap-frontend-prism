@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { ArrowRight, Wallet } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { ROUTES } from '@/router/routes'
+import { WALLET_BALANCE } from '@/services/mocks/mockData'
 
 const SPRING = { type: 'spring', stiffness: 400, damping: 25 }
 
@@ -47,7 +48,7 @@ export default function WalletSidebarCard() {
         <span className={`text-2xl font-mono font-bold tracking-tighter block leading-none ${
           isDarkMode ? 'text-white' : 'text-[#111113]'
         }`}>
-          $12.4K
+          {WALLET_BALANCE.short}
         </span>
       </div>
 

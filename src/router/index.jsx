@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ROUTES } from './routes'
+import { PageLoader } from '@/shared/ui'
 import AuthGuard    from './guards/AuthGuard'
 import AppShell     from '@/shared/layout/AppShell'
 import GlassBackground from '@/shared/layout/GlassBackground'
@@ -18,14 +19,6 @@ const WalletView        = lazy(() => import('@/features/wallet/components/Wallet
 const SucursalesView    = lazy(() => import('@/features/branches/components/SucursalesView'))
 const UsuariosView      = lazy(() => import('@/features/users/components/UsuariosView'))
 const SettingsView      = lazy(() => import('@/features/settings/components/SettingsView'))
-
-function PageLoader() {
-  return (
-    <div className="flex items-center justify-center h-full min-h-[50vh]">
-      <div className="w-8 h-8 border-2 border-[#7C3AED]/30 border-t-[#7C3AED] rounded-full animate-spin" />
-    </div>
-  )
-}
 
 export default function AppRouter() {
   return (

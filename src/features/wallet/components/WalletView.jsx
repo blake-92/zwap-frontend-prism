@@ -2,22 +2,14 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import {
   ArrowUpFromLine, Landmark, TrendingUp,
-  CheckCircle2, RefreshCcw, FileText, CircleDot,
+  FileText,
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Card, Button, Badge, Stepper, Pagination, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
-import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
-import { WITHDRAWALS } from '@/services/mocks/mockData'
+import { listVariants, itemVariants, pageVariants } from '@/shared/utils/motionVariants'
+import { WITHDRAWALS, WALLET_BALANCE, WALLET_STEPS } from '@/services/mocks/mockData'
 import WithdrawModal from './WithdrawModal'
 import WithdrawReceiptModal from './WithdrawReceiptModal'
-
-/* ─── Stepper data ────────────────────────────────────────── */
-const STEPS = [
-  { label: 'Iniciado',         sub: '20 Oct, 08:12', icon: CheckCircle2, done: true,  active: false },
-  { label: 'Procesando',       sub: '20 Oct, 10:35', icon: CheckCircle2, done: true,  active: false },
-  { label: 'Enviado al Banco', sub: 'En proceso...',  icon: RefreshCcw,   done: false, active: true  },
-  { label: 'Completado',       sub: 'Pendiente',      icon: CircleDot,    done: false, active: false },
-]
 
 /* ─── WalletView ──────────────────────────────────────────── */
 export default function WalletView() {
@@ -41,11 +33,7 @@ export default function WalletView() {
 
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-    >
+    <motion.div variants={pageVariants} initial="hidden" animate="show">
 
       <PageHeader
         title="Billetera &amp; Retiros"
@@ -72,7 +60,7 @@ export default function WalletView() {
             </div>
 
             <h2 className={`text-[2.6rem] font-mono font-bold tracking-tighter leading-none mb-2 ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-              $12,450.00
+              {WALLET_BALANCE.display}
             </h2>
 
             <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/20">
@@ -115,7 +103,7 @@ export default function WalletView() {
               </div>
             </div>
 
-            <Stepper steps={STEPS} />
+            <Stepper steps={WALLET_STEPS} />
           </Card>
 
           {/* Cuenta Destino */}

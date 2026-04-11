@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { pageVariants } from '@/shared/utils/motionVariants'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Button, PageHeader } from '@/shared/ui'
 import { KPIS } from '@/services/mocks/mockData'
@@ -11,7 +12,7 @@ import QuickLinkCard from './QuickLinkCard'
 import ChartCard     from './ChartCard'
 import LiveFeed      from './LiveFeed'
 import AlertsPanel   from './AlertsPanel'
-import NewLinkModal  from '@/features/links/components/NewLinkModal'
+import { NewLinkModal } from '@/features/links'
 
 export default function DashboardView() {
   const { isDarkMode } = useTheme()
@@ -19,11 +20,7 @@ export default function DashboardView() {
   const [newLinkOpen, setNewLinkOpen] = useState(false)
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-    >
+    <motion.div variants={pageVariants} initial="hidden" animate="show">
       <PageHeader
         title="Buenas noches, Admin 👋"
         description="Aquí tienes el pulso financiero de tus sucursales hoy."

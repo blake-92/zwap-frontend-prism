@@ -6,7 +6,7 @@ import {
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Card, Button, Badge, AvatarInfo, Toggle, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar, SegmentControl } from '@/shared/ui'
-import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
+import { listVariants, itemVariants, pageVariants } from '@/shared/utils/motionVariants'
 import { USERS } from '@/services/mocks/mockData'
 import NewUserModal from './NewUserModal'
 
@@ -39,11 +39,7 @@ export default function UsuariosView() {
 
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-    >
+    <motion.div variants={pageVariants} initial="hidden" animate="show">
 
       <PageHeader title="Usuarios" description="Gestión de acceso y permisos del equipo">
         <Button onClick={() => setNewUserOpen(true)}>

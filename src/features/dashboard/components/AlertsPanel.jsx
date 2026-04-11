@@ -1,26 +1,9 @@
-import { Bell, Timer, AlertOctagon, Landmark } from 'lucide-react'
+import { Bell } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Card, Button, Badge, CardHeader } from '@/shared/ui'
 import { listVariants, cardItemVariants } from '@/shared/utils/motionVariants'
-
-const alerts = [
-  {
-    icon: Timer, iconColor: 'amber', title: 'Link expira en 2 hrs',
-    body: 'Reserva de Alice Smith ($350.00)',
-    action: { label: 'Ver Link', variant: 'outline' },
-  },
-  {
-    icon: AlertOctagon, iconColor: 'rose', title: 'Disputa Abierta',
-    body: 'Pago de $150.00 reportado como fraude (Visa •••• 4242).',
-    action: { label: 'Gestionar Evidencia', variant: 'danger' },
-  },
-  {
-    icon: Landmark, iconColor: 'emerald', title: 'Depósito Confirmado',
-    body: 'Liquidación del 25 Mar ($2,526.00) acreditada en tu cuenta.',
-    action: null,
-  },
-]
+import { ALERTS } from '@/services/mocks/mockData'
 
 export default function AlertsPanel() {
   const { isDarkMode } = useTheme()
@@ -37,7 +20,7 @@ export default function AlertsPanel() {
         title={<><Bell size={18} className="text-amber-500 animate-pulse" /> Requiere Atención</>}
         description="Alertas de tu operativa hoy"
       >
-        <Badge variant="warning">{alerts.length}</Badge>
+        <Badge variant="warning">{ALERTS.length}</Badge>
       </CardHeader>
 
       <motion.div
@@ -46,7 +29,7 @@ export default function AlertsPanel() {
         animate="show"
         className="flex-1 overflow-y-auto p-2 space-y-1"
       >
-        {alerts.map((alert, i) => (
+        {ALERTS.map((alert, i) => (
           <motion.div
             key={i}
             variants={cardItemVariants}

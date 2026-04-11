@@ -6,15 +6,7 @@ import {
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Card, SegmentControl } from '@/shared/ui'
 
-const chartData = [
-  { name: 'Lun', pos: 2400, links: 4000 },
-  { name: 'Mar', pos: 1398, links: 3000 },
-  { name: 'Mié', pos: 9800, links: 2000 },
-  { name: 'Jue', pos: 3908, links: 2780 },
-  { name: 'Vie', pos: 4800, links: 1890 },
-  { name: 'Sáb', pos: 3800, links: 2390 },
-  { name: 'Hoy', pos: 4300, links: 3490 },
-]
+import { CHART_DATA } from '@/services/mocks/mockData'
 
 export default function ChartCard() {
   const { isDarkMode } = useTheme()
@@ -83,7 +75,7 @@ export default function ChartCard() {
         {chart === 'volumen' && (
           <div className="w-full h-[200px] animate-fade-in">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+              <AreaChart data={CHART_DATA} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="purpleGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#7C3AED" stopOpacity={0.3}/>

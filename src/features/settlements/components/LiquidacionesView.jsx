@@ -7,8 +7,8 @@ import {
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Card, Button, Badge, StatCard, DropdownFilter, Pagination, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
-import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
-import { PAYOUTS } from '@/services/mocks/mockData'
+import { listVariants, itemVariants, pageVariants } from '@/shared/utils/motionVariants'
+import { PAYOUTS, WALLET_BALANCE } from '@/services/mocks/mockData'
 
 /* ─────────────────────────────────────────────────────────────
    LiquidacionesView
@@ -43,11 +43,7 @@ export default function LiquidacionesView() {
   )
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-    >
+    <motion.div variants={pageVariants} initial="hidden" animate="show">
 
       <PageHeader title="Liquidaciones" description="Control de Cierres Diarios y Depósitos Bancarios.">
         <Button variant="outline">
@@ -60,7 +56,7 @@ export default function LiquidacionesView() {
         <StatCard layout="balance"
           icon={CheckCircle2} iconVariant="success"
           label="Depositado (Disponible)"
-          value="$12,450.00"
+          value={WALLET_BALANCE.display}
           badge="Últimos 30 días" badgeVariant="success"
         />
         <StatCard layout="balance"

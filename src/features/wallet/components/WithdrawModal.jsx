@@ -2,12 +2,13 @@ import { useState } from 'react'
 import { ArrowUpFromLine, Landmark } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Button, Modal, InfoBanner } from '@/shared/ui'
+import { WALLET_BALANCE } from '@/services/mocks/mockData'
 
 export default function WithdrawModal({ onClose }) {
   const { isDarkMode } = useTheme()
   const [amount, setAmount] = useState('')
 
-  const balance    = 12450.00
+  const balance    = WALLET_BALANCE.raw
   const fee        = 0
   const parsedAmt  = parseFloat(amount.replace(',', '.')) || 0
   const net        = parsedAmt - fee

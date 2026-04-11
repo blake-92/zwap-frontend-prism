@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom'
-import { ROUTES } from '../routes'
+import { ROUTES } from '@/router/routes'
 
 /**
  * AuthGuard — protege rutas que requieren sesión activa.

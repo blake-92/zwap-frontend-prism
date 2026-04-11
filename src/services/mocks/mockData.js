@@ -1,10 +1,47 @@
 import {
   TrendingUp, BarChart3, Timer, Landmark,
   CheckCircle2, XCircle, RotateCcw, RefreshCcw, Clock,
-  Wallet, AlertOctagon, LinkIcon, Smartphone,
+  Wallet, AlertOctagon, LinkIcon, Smartphone, CircleDot,
 } from 'lucide-react'
 
 export const BRANCHES = ['Hotel de Sal', 'Hotel de Piedra', 'Hotel del Mar']
+
+export const WALLET_BALANCE = { raw: 12450.00, display: '$12,450.00', short: '$12.4K' }
+
+export const WALLET_STEPS = [
+  { label: 'Iniciado',         sub: '20 Oct, 08:12', icon: CheckCircle2, done: true,  active: false },
+  { label: 'Procesando',       sub: '20 Oct, 10:35', icon: CheckCircle2, done: true,  active: false },
+  { label: 'Enviado al Banco', sub: 'En proceso...',  icon: RefreshCcw,   done: false, active: true  },
+  { label: 'Completado',       sub: 'Pendiente',      icon: CircleDot,    done: false, active: false },
+]
+
+export const ALERTS = [
+  {
+    icon: Timer, iconColor: 'amber', title: 'Link expira en 2 hrs',
+    body: 'Reserva de Alice Smith ($350.00)',
+    action: { label: 'Ver Link', variant: 'outline' },
+  },
+  {
+    icon: AlertOctagon, iconColor: 'rose', title: 'Disputa Abierta',
+    body: 'Pago de $150.00 reportado como fraude (Visa •••• 4242).',
+    action: { label: 'Gestionar Evidencia', variant: 'danger' },
+  },
+  {
+    icon: Landmark, iconColor: 'emerald', title: 'Depósito Confirmado',
+    body: 'Liquidación del 25 Mar ($2,526.00) acreditada en tu cuenta.',
+    action: null,
+  },
+]
+
+export const CHART_DATA = [
+  { name: 'Lun', pos: 2400, links: 4000 },
+  { name: 'Mar', pos: 1398, links: 3000 },
+  { name: 'Mié', pos: 9800, links: 2000 },
+  { name: 'Jue', pos: 3908, links: 2780 },
+  { name: 'Vie', pos: 4800, links: 1890 },
+  { name: 'Sáb', pos: 3800, links: 2390 },
+  { name: 'Hoy', pos: 4300, links: 3490 },
+]
 
 
 export const KPIS = [

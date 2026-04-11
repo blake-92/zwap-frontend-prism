@@ -9,7 +9,7 @@ import {
 import { useTheme } from '@/shared/context/ThemeContext'
 import { useToast } from '@/shared/context/ToastContext'
 import { Card, Button, Badge, AvatarInfo, SectionLabel, Toggle, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
-import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
+import { listVariants, itemVariants, pageVariants } from '@/shared/utils/motionVariants'
 import { PERMANENT_LINKS, CUSTOM_LINKS } from '@/services/mocks/mockData'
 import NewLinkModal from './NewLinkModal'
 
@@ -233,11 +233,7 @@ export default function LinksView() {
     setLinks(prev => prev.map(l => l.id === id ? { ...l, active: !l.active } : l))
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-    >
+    <motion.div variants={pageVariants} initial="hidden" animate="show">
       <PageHeader title="Links de Pago" description="Gestiona cobros rápidos en mostrador y reservas personalizadas.">
         <Button onClick={() => setNewLinkOpen(true)}>
           <Plus size={18} /> Nuevo Link de Reserva

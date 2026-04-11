@@ -20,3 +20,9 @@ export const cardItemVariants = {
   hidden: { opacity: 0, y: 15 },
   show:   { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } },
 }
+
+/** Page entry — usado como wrapper en todas las vistas (reemplaza ease boilerplate) */
+export const pageVariants = {
+  hidden: { opacity: 0, y: 15 },
+  show:   { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 260, damping: 26 } },
+}

@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Card, Button, Badge, AvatarInfo, DropdownFilter, Pagination, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
-import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
+import { listVariants, itemVariants, pageVariants } from '@/shared/utils/motionVariants'
 import { TRANSACTIONS } from '@/services/mocks/mockData'
 import { ROUTES } from '@/router/routes'
 import ReceiptModal from './ReceiptModal'
@@ -50,11 +50,7 @@ export default function TransaccionesView() {
   )
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-    >
+    <motion.div variants={pageVariants} initial="hidden" animate="show">
 
       <PageHeader title="Transacciones" description="Historial de cobros y pagos procesados">
         <Button onClick={() => navigate(ROUTES.LINKS)}>
