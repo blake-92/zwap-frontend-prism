@@ -1,5 +1,6 @@
 export { default as Card }            from './Card'
 export { default as SearchInput }     from './SearchInput'
+export { default as ActionMenu }      from './ActionMenu'
 export { default as EmptySearchState } from './EmptySearchState'
 export { default as Button }          from './Button'
 export { default as Badge }           from './Badge'

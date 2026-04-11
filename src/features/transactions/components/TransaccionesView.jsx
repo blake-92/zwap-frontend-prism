@@ -7,7 +7,7 @@ import {
   FileText, RotateCcw, Filter
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, AvatarInfo, DropdownFilter, Pagination, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
+import { Card, Button, Badge, AvatarInfo, DropdownFilter, Pagination, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar, ActionMenu } from '@/shared/ui'
 import { listVariants, itemVariants, pageVariants } from '@/shared/utils/motionVariants'
 import { TRANSACTIONS } from '@/services/mocks/mockData'
 import { ROUTES } from '@/router/routes'
@@ -258,16 +258,28 @@ export default function TransaccionesView() {
                         glow
                       />
                     </div>
-                    <span className={`font-mono font-bold text-lg tracking-tight flex-shrink-0 ${
-                      trx.status === 'Reembolsado'
-                        ? 'text-rose-500 line-through opacity-70'
-                        : isDarkMode ? 'text-white' : 'text-[#111113]'
-                    }`}>
-                      ${trx.amount}
-                    </span>
+                    <div className="flex items-start gap-2 flex-shrink-0">
+                      <span className={`font-mono font-bold text-lg tracking-tight mt-0.5 ${
+                        trx.status === 'Reembolsado'
+                          ? 'text-rose-500 line-through opacity-70'
+                          : isDarkMode ? 'text-white' : 'text-[#111113]'
+                      }`}>
+                        ${trx.amount}
+                      </span>
+                      <div className="-mr-2 -mt-1.5">
+                        <ActionMenu
+                          actions={[
+                            { label: 'Ver Recibo', icon: FileText, onClick: () => setReceiptTrx(trx) },
+                            trx.status === 'Reembolsado'
+                              ? { label: 'Recibo de Dev.', icon: FileText, onClick: () => setRefundTrx(trx) }
+                              : { label: 'Devolución', icon: RotateCcw, variant: 'danger', disabled: trx.status === 'Pendiente', onClick: () => setRefundTrx(trx) }
+                          ]}
+                        />
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="flex items-center justify-between gap-2 mb-3">
+                  <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 flex-wrap">
                       <Badge variant={trx.statusVariant} icon={trx.StatusIcon}>
                         {trx.status}
@@ -280,21 +292,6 @@ export default function TransaccionesView() {
                     <span className={`text-xs font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
                       <Clock size={12} /> {trx.date} {trx.time}
                     </span>
-                  </div>
-
-                  <div className={`flex items-center gap-2 pt-3 border-t ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
-                    <Button variant="action" size="sm" onClick={() => setReceiptTrx(trx)} className="!px-3 !py-1.5 flex-1">
-                      <FileText size={14} /> Recibo
-                    </Button>
-                    {trx.status === 'Reembolsado' ? (
-                      <Button variant="outline" size="sm" onClick={() => setRefundTrx(trx)} className="!px-3 !py-1.5 flex-1">
-                        <FileText size={14} /> Recibo Dev.
-                      </Button>
-                    ) : (
-                      <Button variant="danger" size="sm" onClick={() => setRefundTrx(trx)} className="!px-3 !py-1.5 flex-1" disabled={trx.status === 'Pendiente'}>
-                        <RotateCcw size={14} /> Devolucion
-                      </Button>
-                    )}
                   </div>
                 </Card>
               </motion.div>
