@@ -143,7 +143,7 @@ export default function Sidebar({ isCollapsed }) {
           animate={{ y: !isWalletActive && walletHover && !isCollapsed ? -3 : 0 }}
           transition={SPRING}
           title={isCollapsed ? 'Mi Billetera' : undefined}
-          className={`relative w-full flex items-center pl-[19px] pr-3 py-3 mb-1 rounded-xl border overflow-hidden transition-all duration-200 ${
+          className={`relative w-full h-14 flex items-center pl-[19px] pr-3 py-3 mb-1 rounded-xl border overflow-hidden transition-[border-color,background-color,box-shadow] duration-200 ${
             isCollapsed
               ? 'border-transparent bg-transparent shadow-none'
               : isWalletActive
@@ -170,7 +170,7 @@ export default function Sidebar({ isCollapsed }) {
                 initial="hidden"
                 animate="show"
                 exit="exit"
-                className="flex-1 min-w-0 flex items-center justify-between ml-3 overflow-hidden"
+                className="absolute inset-y-0 left-[49px] right-3 flex items-center justify-between overflow-hidden"
               >
                 <div className="text-left min-w-0">
                   <p className={`text-[10px] font-bold tracking-widest uppercase leading-tight ${
@@ -213,7 +213,7 @@ export default function Sidebar({ isCollapsed }) {
         </motion.button>
 
         {/* User row */}
-        <div className="flex items-center py-2 pl-[10px] rounded-xl transition-colors duration-200 overflow-hidden">
+        <div className="relative h-[52px] flex items-center py-2 pl-[10px] rounded-xl transition-colors duration-200 overflow-hidden">
           <Avatar initials="A" size="sm" variant="neutral" />
 
           <AnimatePresence initial={false}>
@@ -224,7 +224,7 @@ export default function Sidebar({ isCollapsed }) {
                 initial="hidden"
                 animate="show"
                 exit="exit"
-                className="ml-3 flex-1 min-w-0 flex items-center justify-between overflow-hidden"
+                className="absolute inset-y-0 left-[58px] right-2 flex items-center justify-between overflow-hidden"
               >
                 <div className="min-w-0">
                   <p className={`text-sm font-bold truncate leading-tight ${
@@ -232,7 +232,7 @@ export default function Sidebar({ isCollapsed }) {
                   }`}>
                     {CURRENT_USER.displayName}
                   </p>
-                  <p className={`text-[11px] font-medium ${
+                  <p className={`text-[11px] font-medium whitespace-nowrap ${
                     isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'
                   }`}>
                     Cerrar Sesión
