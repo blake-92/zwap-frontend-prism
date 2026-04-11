@@ -74,12 +74,22 @@ export default function TransaccionesView() {
         </Button>
       </PageHeader>
 
-      <TableToolbar actions={<Button variant="successExport" size="sm"><Download size={14} /> Exportar</Button>}>
-        <SearchInput
-          value={search}
-          onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
-          placeholder="Buscar por cliente o email..."
-        />
+      <TableToolbar 
+        actions={
+          <Button variant="successExport" size="sm" className="!px-2 sm:!px-3">
+            <Download size={14} /> 
+            <span className="hidden sm:inline ml-1.5">Exportar</span>
+          </Button>
+        }
+        search={
+          <SearchInput
+            value={search}
+            onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
+            placeholder="Buscar por cliente o email..."
+            className="w-full sm:w-72"
+          />
+        }
+      >
         <DropdownFilter
           label="Fecha"
           icon={Calendar}
