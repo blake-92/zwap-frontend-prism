@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import {
   LayoutDashboard, ArrowRightLeft, Link as LinkIcon, Landmark,
   MoreHorizontal, X, Building2, Users, Wallet, Settings,
@@ -65,13 +65,14 @@ export default function BottomNav() {
           ? 'bg-[#111113]/90 border-white/10'
           : 'bg-white/90 border-black/5 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]'
       }`}>
+        <LayoutGroup id="bottomnav">
         {TABS.map(({ id, label, icon: Icon, route }) => {
           const isActive = location.pathname === route
           return (
             <button
               key={id}
               onClick={() => handleNav(route)}
-              className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 pt-3 transition-colors relative ${
+              className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 pt-3 relative ${
                 isActive
                   ? isDarkMode ? 'text-[#A78BFA]' : 'text-[#7C3AED]'
                   : isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'
@@ -79,15 +80,17 @@ export default function BottomNav() {
             >
               {isActive && (
                 <motion.div
-                  layoutId="bottomnav-indicator"
-                  className={`absolute top-0 inset-x-3 h-0.5 rounded-full ${
-                    isDarkMode ? 'bg-[#7C3AED]' : 'bg-[#7C3AED]'
+                  layoutId="bottomnav-pill"
+                  className={`absolute inset-x-2 inset-y-1.5 rounded-2xl ${
+                    isDarkMode
+                      ? 'bg-[#7C3AED]/10 border border-[#7C3AED]/20'
+                      : 'bg-[#DBD3FB]/40 border border-[#7C3AED]/10'
                   }`}
                   transition={SPRING}
                 />
               )}
-              <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-              <span className={`text-[10px] leading-none ${isActive ? 'font-bold' : 'font-medium'}`}>
+              <Icon size={20} strokeWidth={isActive ? 2.5 : 2} className="relative z-10" />
+              <span className={`text-[10px] leading-none relative z-10 ${isActive ? 'font-bold' : 'font-medium'}`}>
                 {label}
               </span>
             </button>
@@ -97,7 +100,7 @@ export default function BottomNav() {
         {/* More tab */}
         <button
           onClick={() => setSheetOpen(v => !v)}
-          className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 pt-3 transition-colors relative ${
+          className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 pt-3 relative ${
             isMoreActive || sheetOpen
               ? isDarkMode ? 'text-[#A78BFA]' : 'text-[#7C3AED]'
               : isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'
@@ -105,16 +108,21 @@ export default function BottomNav() {
         >
           {isMoreActive && !sheetOpen && (
             <motion.div
-              layoutId="bottomnav-indicator"
-              className="absolute top-0 inset-x-3 h-0.5 rounded-full bg-[#7C3AED]"
+              layoutId="bottomnav-pill"
+              className={`absolute inset-x-2 inset-y-1.5 rounded-2xl ${
+                isDarkMode
+                  ? 'bg-[#7C3AED]/10 border border-[#7C3AED]/20'
+                  : 'bg-[#DBD3FB]/40 border border-[#7C3AED]/10'
+              }`}
               transition={SPRING}
             />
           )}
-          <MoreHorizontal size={20} strokeWidth={isMoreActive || sheetOpen ? 2.5 : 2} />
-          <span className={`text-[10px] leading-none ${isMoreActive || sheetOpen ? 'font-bold' : 'font-medium'}`}>
+          <MoreHorizontal size={20} strokeWidth={isMoreActive || sheetOpen ? 2.5 : 2} className="relative z-10" />
+          <span className={`text-[10px] leading-none relative z-10 ${isMoreActive || sheetOpen ? 'font-bold' : 'font-medium'}`}>
             Mas
           </span>
         </button>
+        </LayoutGroup>
       </nav>
 
       {/* ── More sheet ── */}
