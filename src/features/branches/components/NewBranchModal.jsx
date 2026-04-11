@@ -62,24 +62,29 @@ export default function NewBranchModal({ onClose }) {
       role="dialog"
       aria-modal="true"
       aria-label="Nueva Sucursal"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
+      transition={{ duration: 0.15 }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
     >
       {/* Backdrop */}
-      <div
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.15 }}
         className={`absolute inset-0 backdrop-blur-md backdrop-saturate-200 ${isDarkMode ? 'bg-black/70' : 'bg-[#111113]/40'}`}
         onClick={onClose}
       />
 
       {/* Modal */}
       <motion.div
-        initial={{ scale: 0.95, y: 10 }}
-        animate={{ scale: 1, y: 0 }}
-        exit={{ scale: 0.95, y: 10 }}
-        transition={SPRING}
+        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        transition={{
+          opacity: { duration: 0.15 },
+          scale: SPRING,
+          y: SPRING,
+        }}
         className={`relative w-full max-w-[480px] rounded-[24px] border overflow-hidden shadow-2xl ${
         isDarkMode
           ? 'bg-[#252429]/80 backdrop-blur-3xl border-white/20 border-t-white/30'

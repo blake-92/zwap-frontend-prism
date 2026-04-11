@@ -55,24 +55,29 @@ export default function ReceiptModal({ trx, onClose }) {
       role="dialog"
       aria-modal="true"
       aria-label="Comprobante de Pago"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
+      transition={{ duration: 0.15 }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
     >
       {/* Backdrop */}
-      <div
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.15 }}
         className={`absolute inset-0 backdrop-blur-md ${isDarkMode ? 'bg-[#111113]/80' : 'bg-white/60'}`}
         onClick={onClose}
       />
 
         {/* Digital Receipt Card */}
         <motion.div 
-          initial={{ y: 20, scale: 0.95 }}
-          animate={{ y: 0, scale: 1 }}
-          exit={{ scale: 0.95, y: 20 }}
-          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          transition={{
+            opacity: { duration: 0.15 },
+            y: { type: "spring", stiffness: 300, damping: 25 },
+            scale: { type: "spring", stiffness: 300, damping: 25 },
+          }}
           className="relative w-full max-w-[400px]"
         >
           {/* Floating action buttons (Top Right) */}

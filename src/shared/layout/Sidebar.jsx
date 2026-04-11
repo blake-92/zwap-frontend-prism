@@ -4,15 +4,14 @@ import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import {
   LayoutDashboard, Link as LinkIcon, ArrowRightLeft,
   Landmark, Users, Building2,
-  LogOut, Wallet,
+  LogOut, Wallet, ArrowRight,
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import ZwapLogo    from '@/shared/brand/ZwapLogo'
-import ZwapIsotipo from '@/shared/brand/ZwapIsotipo'
+import ZwapIsotipo  from '@/shared/brand/ZwapIsotipo'
+import ZwapWordmark from '@/shared/brand/ZwapWordmark'
 import { ROUTES }  from '@/router/routes'
-import WalletSidebarCard from '@/shared/layout/WalletSidebarCard'
 import { Avatar } from '@/shared/ui'
-import { CURRENT_USER } from '@/services/mocks/mockData'
+import { CURRENT_USER, WALLET_BALANCE } from '@/services/mocks/mockData'
 
 const NAV_ITEMS = [
   { id: 'dashboard',     label: 'Dashboard',     icon: LayoutDashboard, route: ROUTES.DASHBOARD    },
@@ -63,29 +62,19 @@ export default function Sidebar({ isCollapsed }) {
     >
 
       {/* ── Logo ── */}
-      <div className={`h-20 flex items-center flex-shrink-0 overflow-hidden ${
-        isCollapsed ? 'justify-center px-0' : 'px-4'
-      }`}>
-        <AnimatePresence mode="wait" initial={false}>
-          {isCollapsed ? (
+      <div className="h-20 flex items-center flex-shrink-0 overflow-hidden pl-[19px]">
+        <ZwapIsotipo isDarkMode={isDarkMode} className="h-7 w-auto flex-shrink-0" />
+        <AnimatePresence initial={false}>
+          {!isCollapsed && (
             <motion.div
-              key="iso"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
+              key="wordmark"
+              variants={LABEL_VARIANTS}
+              initial="hidden"
+              animate="show"
+              exit="exit"
+              className="overflow-hidden ml-2.5"
             >
-              <ZwapIsotipo isDarkMode={isDarkMode} className="h-7 w-auto" />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="logo"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              <ZwapLogo isDarkMode={isDarkMode} className="h-8" />
+              <ZwapWordmark isDarkMode={isDarkMode} className="h-[18px]" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -101,7 +90,7 @@ export default function Sidebar({ isCollapsed }) {
                 key={id}
                 onClick={() => navigate(route)}
                 title={isCollapsed ? label : undefined}
-                className={`relative w-full flex items-center gap-3 py-3 pl-[19px] rounded-xl text-sm font-medium transition-colors duration-200 ${
+                className={`relative w-full h-11 flex items-center gap-3 py-3 pl-[19px] rounded-xl text-sm font-medium transition-colors duration-200 ${
                   isActive
                     ? isDarkMode ? 'text-white'     : 'text-[#561BAF]'
                     : isDarkMode ? 'text-[#888991] hover:text-[#D8D7D9]'
@@ -146,54 +135,85 @@ export default function Sidebar({ isCollapsed }) {
       {/* ── Footer ── */}
       <div className="px-2 pb-5 space-y-3 flex-shrink-0">
 
-        {/* Wallet — card completa o ícono según estado */}
-        <AnimatePresence mode="wait" initial={false}>
-          {isCollapsed ? (
-            <motion.button
-              key="wallet-icon"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1, y: !isWalletActive && walletHover ? -3 : 0 }}
-              exit={{ opacity: 0 }}
-              transition={SPRING}
-              onClick={() => navigate(ROUTES.WALLET)}
-              onHoverStart={() => setWalletHover(true)}
-              onHoverEnd={() => setWalletHover(false)}
-              title="Mi Billetera"
-              className={`relative w-full flex items-center justify-center py-3 mb-1 rounded-xl border overflow-hidden transition-all duration-200 ${
-                isWalletActive
-                  ? isDarkMode
-                    ? 'bg-[#252429]/60 border-[#7C3AED]/50 shadow-[0_0_16px_rgba(124,58,237,0.2)]'
-                    : 'bg-white/80 border-[#7C3AED]/40 shadow-[0_0_12px_rgba(124,58,237,0.15)]'
-                  : isDarkMode
-                    ? 'bg-[#252429]/20 border-white/10 hover:bg-[#252429]/40 hover:border-[#7C3AED]/30'
-                    : 'bg-white/40 border-white hover:bg-white/60 hover:border-[#7C3AED]/20'
-              }`}
-            >
-              <Wallet
-                size={18}
-                className={`relative z-10 ${isWalletActive ? 'text-[#7C3AED]' : isDarkMode ? 'text-[#888991]' : 'text-[#B0AFB4]'}`}
-              />
-              <div className={`absolute -bottom-4 -right-4 w-16 h-16 rounded-full blur-xl pointer-events-none transition-all duration-500 ${
-                isWalletActive
-                  ? isDarkMode ? 'bg-[#7C3AED]/30' : 'bg-[#7C3AED]/20'
-                  : walletHover ? 'bg-[#7C3AED]/15' : 'bg-transparent'
-              }`} />
-            </motion.button>
-          ) : (
-            <motion.div
-              key="wallet-card"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              <WalletSidebarCard />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Wallet — ícono fijo + contenido reveal */}
+        <motion.button
+          onClick={() => navigate(ROUTES.WALLET)}
+          onHoverStart={() => setWalletHover(true)}
+          onHoverEnd={() => setWalletHover(false)}
+          animate={{ y: !isWalletActive && walletHover && !isCollapsed ? -3 : 0 }}
+          transition={SPRING}
+          title={isCollapsed ? 'Mi Billetera' : undefined}
+          className={`relative w-full flex items-center pl-[19px] pr-3 py-3 mb-1 rounded-xl border overflow-hidden transition-all duration-200 ${
+            isCollapsed
+              ? 'border-transparent bg-transparent shadow-none'
+              : isWalletActive
+                ? isDarkMode
+                  ? 'bg-[#252429]/60 border-[#7C3AED]/50 shadow-[0_0_16px_rgba(124,58,237,0.2)]'
+                  : 'bg-white/80 border-[#7C3AED]/40 shadow-[0_0_12px_rgba(124,58,237,0.15)]'
+                : isDarkMode
+                  ? 'bg-[#252429]/20 border-white/10 hover:bg-[#252429]/40 hover:border-[#7C3AED]/30'
+                  : 'bg-white/40 border-white hover:bg-white/60 hover:border-[#7C3AED]/20'
+          }`}
+        >
+          <Wallet
+            size={18}
+            className={`relative z-10 flex-shrink-0 ${
+              isWalletActive ? 'text-[#7C3AED]' : isDarkMode ? 'text-[#888991]' : 'text-[#B0AFB4]'
+            }`}
+          />
+
+          <AnimatePresence initial={false}>
+            {!isCollapsed && (
+              <motion.div
+                key="wallet-info"
+                variants={LABEL_VARIANTS}
+                initial="hidden"
+                animate="show"
+                exit="exit"
+                className="flex-1 min-w-0 flex items-center justify-between ml-3 overflow-hidden"
+              >
+                <div className="text-left min-w-0">
+                  <p className={`text-[10px] font-bold tracking-widest uppercase leading-tight ${
+                    isWalletActive
+                      ? isDarkMode ? 'text-[#B9A4F8]' : 'text-[#7C3AED]'
+                      : isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'
+                  }`}>Mi Billetera</p>
+                  <span className={`text-sm font-mono font-bold tracking-tight block leading-snug ${
+                    isDarkMode ? 'text-white' : 'text-[#111113]'
+                  }`}>
+                    {WALLET_BALANCE.short}
+                  </span>
+                </div>
+
+                <motion.div
+                  animate={(isWalletActive || walletHover) ? { x: 0, opacity: 1 } : { x: -8, opacity: 0 }}
+                  transition={SPRING}
+                  className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${
+                    isWalletActive
+                      ? isDarkMode
+                        ? 'bg-[#7C3AED] text-white shadow-[0_0_12px_rgba(124,58,237,0.5)]'
+                        : 'bg-[#7C3AED] text-white shadow-md'
+                      : 'bg-transparent text-[#888991]'
+                  }`}
+                >
+                  <ArrowRight size={14} strokeWidth={3} />
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Glow blob */}
+          <div className={`absolute -bottom-4 -right-4 w-16 h-16 rounded-full blur-xl pointer-events-none transition-all duration-500 ${
+            isCollapsed
+              ? 'bg-transparent'
+              : isWalletActive
+                ? isDarkMode ? 'bg-[#7C3AED]/30' : 'bg-[#7C3AED]/20'
+                : walletHover ? 'bg-[#7C3AED]/15' : 'bg-transparent'
+          }`} />
+        </motion.button>
 
         {/* User row */}
-        <div className="flex items-center gap-3 py-2 pl-[10px] rounded-xl transition-colors duration-200">
+        <div className="flex items-center py-2 pl-[10px] rounded-xl transition-colors duration-200 overflow-hidden">
           <Avatar initials="A" size="sm" variant="neutral" />
 
           <AnimatePresence initial={false}>
@@ -204,7 +224,7 @@ export default function Sidebar({ isCollapsed }) {
                 initial="hidden"
                 animate="show"
                 exit="exit"
-                className="flex-1 min-w-0 flex items-center justify-between overflow-hidden"
+                className="ml-3 flex-1 min-w-0 flex items-center justify-between overflow-hidden"
               >
                 <div className="min-w-0">
                   <p className={`text-sm font-bold truncate leading-tight ${

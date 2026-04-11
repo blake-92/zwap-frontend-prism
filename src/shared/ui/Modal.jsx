@@ -79,14 +79,15 @@ export default function Modal({
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
+      transition={{ duration: 0.15 }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
     >
       {/* Backdrop */}
-      <div
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.15 }}
         className={`absolute inset-0 backdrop-blur-md backdrop-saturate-200 ${
           isDarkMode ? 'bg-black/70' : 'bg-[#111113]/40'
         }`}
@@ -96,10 +97,14 @@ export default function Modal({
       {/* Container */}
       <motion.div
         ref={containerRef}
-        initial={{ scale: 0.95, y: 10 }}
-        animate={{ scale: 1, y: 0 }}
-        exit={{ scale: 0.95, y: 10 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        transition={{
+          opacity: { duration: 0.15 },
+          scale: { type: 'spring', stiffness: 400, damping: 30 },
+          y: { type: 'spring', stiffness: 400, damping: 30 },
+        }}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
