@@ -11,7 +11,8 @@ import ZwapLogo    from '@/shared/brand/ZwapLogo'
 import ZwapIsotipo from '@/shared/brand/ZwapIsotipo'
 import { ROUTES }  from '@/router/routes'
 import WalletSidebarCard from '@/shared/layout/WalletSidebarCard'
-import Avatar from '@/shared/ui/Avatar'
+import { Avatar } from '@/shared/ui'
+import { CURRENT_USER } from '@/services/mocks/mockData'
 
 const NAV_ITEMS = [
   { id: 'dashboard',     label: 'Dashboard',     icon: LayoutDashboard, route: ROUTES.DASHBOARD    },
@@ -209,7 +210,7 @@ export default function Sidebar({ isCollapsed }) {
                   <p className={`text-sm font-bold truncate leading-tight ${
                     isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'
                   }`}>
-                    Admin Zwap
+                    {CURRENT_USER.displayName}
                   </p>
                   <p className={`text-[11px] font-medium ${
                     isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ArrowUpFromLine, Landmark } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Button, Modal, InfoBanner } from '@/shared/ui'
-import { WALLET_BALANCE } from '@/services/mocks/mockData'
+import { WALLET_BALANCE, BANK_ACCOUNT } from '@/services/mocks/mockData'
 
 export default function WithdrawModal({ onClose }) {
   const { isDarkMode } = useTheme()
@@ -80,10 +80,10 @@ export default function WithdrawModal({ onClose }) {
           <div>
             <p className={`text-xs font-bold ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>Destino</p>
             <p className={`text-sm font-bold ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-              Banco Mercantil SCZ
+              {BANK_ACCOUNT.shortName}
             </p>
             <p className={`text-xs font-mono ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-              •••• 1234
+              •••• {BANK_ACCOUNT.last4}
             </p>
           </div>
         </div>

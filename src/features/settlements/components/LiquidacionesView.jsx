@@ -8,7 +8,7 @@ import {
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Card, Button, Badge, StatCard, DropdownFilter, Pagination, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
 import { listVariants, itemVariants, pageVariants } from '@/shared/utils/motionVariants'
-import { PAYOUTS, WALLET_BALANCE } from '@/services/mocks/mockData'
+import { PAYOUTS, WALLET_BALANCE, SETTLEMENT_SUMMARY } from '@/services/mocks/mockData'
 
 /* ─────────────────────────────────────────────────────────────
    LiquidacionesView
@@ -30,7 +30,29 @@ export default function LiquidacionesView() {
       const matchStatus = statusFilter === 'Todos' || p.status === statusFilter
 
       let matchDate = true
-      if (dateFilter === 'Esta semana') matchDate = p.closeDate.includes('27') || p.closeDate.includes('28')
+      if (dateFilter === 'Esta semana') {
+        const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+        const today = new Date()
+        const weekAgo = new Date(today)
+        weekAgo.setDate(today.getDate() - 7)
+        // Parse closeDate like "28 Mar 2026"
+        const parts = p.closeDate.split(' ')
+        if (parts.length === 3) {
+          const day = parseInt(parts[0])
+          const monthIdx = months.indexOf(parts[1])
+          const year = parseInt(parts[2])
+          if (monthIdx !== -1) {
+            const closeD = new Date(year, monthIdx, day)
+            matchDate = closeD >= weekAgo && closeD <= today
+          }
+        }
+      }
+      if (dateFilter === 'Este mes') {
+        const today = new Date()
+        const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+        const monthStr = months[today.getMonth()]
+        matchDate = p.closeDate.includes(monthStr)
+      }
 
       return matchSearch && matchStatus && matchDate
     })
@@ -62,14 +84,14 @@ export default function LiquidacionesView() {
         <StatCard layout="balance"
           icon={Landmark} iconVariant="warning"
           label="En Tránsito (Bancos)"
-          value="$3,772.00"
-          badge="En limpieza (2 días hábiles)" badgeVariant="warning"
+          value={SETTLEMENT_SUMMARY.inTransit}
+          badge={SETTLEMENT_SUMMARY.inTransitBadge} badgeVariant="warning"
         />
         <StatCard layout="balance"
           icon={AlertOctagon} iconVariant="danger"
           label="Retenciones / Ajustes"
-          value="-$150.00"
-          badge="Requiere atención" badgeVariant="danger"
+          value={SETTLEMENT_SUMMARY.adjustments}
+          badge={SETTLEMENT_SUMMARY.adjustmentsBadge} badgeVariant="danger"
           negative
         />
       </div>
@@ -77,7 +99,7 @@ export default function LiquidacionesView() {
       <TableToolbar>
         <SearchInput
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
           placeholder="Buscar concepto o fecha..."
         />
         <DropdownFilter
@@ -99,7 +121,7 @@ export default function LiquidacionesView() {
       {/* Table */}
       <Card className="pb-2">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[1000px]">
+          <table aria-label="Liquidaciones y depósitos" className="w-full text-left border-collapse min-w-[1000px]">
             <thead>
               <tr className={`text-[10px] uppercase font-bold tracking-widest ${
                 isDarkMode
@@ -121,7 +143,7 @@ export default function LiquidacionesView() {
                 return (
                   <motion.tr
                     variants={itemVariants}
-                    key={idx}
+                    key={`${lote.type}-${lote.closeDate}-${idx}`}
                     className={`group transition-colors duration-200 ${
                       isDarkMode
                         ? 'border-b border-white/5 hover:bg-[#7C3AED]/5 last:border-0'

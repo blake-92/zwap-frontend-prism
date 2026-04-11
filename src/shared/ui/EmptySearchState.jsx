@@ -1,6 +1,9 @@
 import { SearchX } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { useTheme } from '@/shared/context/ThemeContext'
 import Button from './Button'
+
+const SPRING = { type: 'spring', stiffness: 300, damping: 24 }
 
 /**
  * EmptySearchState — fila de estado vacío para tablas con búsqueda.
@@ -17,7 +20,12 @@ export default function EmptySearchState({ colSpan, term, onClear }) {
   return (
     <tr>
       <td colSpan={colSpan} className="px-8 py-16 text-center">
-        <div className="flex flex-col items-center justify-center animate-fade-in">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={SPRING}
+          className="flex flex-col items-center justify-center"
+        >
           <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 ${
             isDarkMode
               ? 'bg-[#111113]/50 border border-white/10 text-[#888991]'
@@ -38,7 +46,7 @@ export default function EmptySearchState({ colSpan, term, onClear }) {
           <Button variant="outline" onClick={onClear}>
             Limpiar búsqueda
           </Button>
-        </div>
+        </motion.div>
       </td>
     </tr>
   )

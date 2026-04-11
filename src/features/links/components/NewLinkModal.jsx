@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Plus, Trash2, Mail, User, ListTree,
   Star, Receipt, Link as LinkIcon,
@@ -10,7 +11,8 @@ import { Card, Button, Input, Modal, SegmentControl, MiniCalendar, SectionLabel 
 export default function NewLinkModal({ onClose }) {
   const { isDarkMode } = useTheme()
 
-  const [items, setItems]               = useState([{ desc: '', amount: '' }])
+  const [items, setItems]               = useState([{ id: 1, desc: '', amount: '' }])
+  const [nextItemId, setNextItemId]     = useState(2)
   const [feeBearer, setFeeBearer]       = useState('hotel')
   const [selectedDate, setSelectedDate] = useState(null)
   const [timeValue, setTimeValue]       = useState('14:00')
@@ -31,7 +33,7 @@ export default function NewLinkModal({ onClose }) {
     }
   }
 
-  const addItem    = () => setItems(prev => [...prev, { desc: '', amount: '' }])
+  const addItem    = () => { setItems(prev => [...prev, { id: nextItemId, desc: '', amount: '' }]); setNextItemId(n => n + 1) }
   const removeItem = i  => setItems(prev => prev.filter((_, idx) => idx !== i))
   const updateItem = (i, field, val) => setItems(prev => prev.map((it, idx) => idx === i ? { ...it, [field]: val } : it))
 
@@ -47,28 +49,42 @@ export default function NewLinkModal({ onClose }) {
   return (
     <>
       {/* Confirmation sub-modal */}
-      {showConfirmClose && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 backdrop-blur-md bg-black/60">
-          <div className={`p-6 rounded-2xl border shadow-2xl max-w-[360px] animate-scale-in ${
-            isDarkMode ? 'bg-[#252429] border-white/20' : 'bg-white border-gray-200'
-          }`}>
-            <h3 className={`text-lg font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-              ¿Descartar cambios?
-            </h3>
-            <p className={`text-sm mb-6 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-              Tienes datos sin guardar. Si cierras ahora, perderás toda la información ingresada.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <Button variant="ghost" onClick={() => setShowConfirmClose(false)}>
-                Cancelar
-              </Button>
-              <Button variant="danger" onClick={onClose}>
-                Sí, descartar
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {showConfirmClose && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[60] flex items-center justify-center p-4 backdrop-blur-md bg-black/60"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 10 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 10 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 26 }}
+              className={`p-6 rounded-2xl border shadow-2xl max-w-[360px] ${
+                isDarkMode ? 'bg-[#252429] border-white/20' : 'bg-white border-gray-200'
+              }`}
+            >
+              <h3 className={`text-lg font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+                ¿Descartar cambios?
+              </h3>
+              <p className={`text-sm mb-6 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                Tienes datos sin guardar. Si cierras ahora, perderás toda la información ingresada.
+              </p>
+              <div className="flex gap-3 justify-end">
+                <Button variant="ghost" onClick={() => setShowConfirmClose(false)}>
+                  Cancelar
+                </Button>
+                <Button variant="danger" onClick={onClose}>
+                  Sí, descartar
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <Modal
         onClose={handleClose}
@@ -116,7 +132,7 @@ export default function NewLinkModal({ onClose }) {
 
               <div className={`p-5 rounded-2xl border space-y-4 ${isDarkMode ? 'bg-[#111113]/30 border-white/5' : 'bg-gray-50/50 border-black/5'}`}>
                 {items.map((item, idx) => (
-                  <div key={idx} className="flex gap-3 items-start animate-fade-in">
+                  <div key={item.id} className="flex gap-3 items-start animate-fade-in">
                     <div className="flex-1">
                       <Input
                         type="text"
@@ -128,6 +144,7 @@ export default function NewLinkModal({ onClose }) {
                     <div className="w-32">
                       <Input
                         type="number"
+                        min="0"
                         placeholder="Precio ($)"
                         value={item.amount}
                         onChange={e => updateItem(idx, 'amount', e.target.value)}

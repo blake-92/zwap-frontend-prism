@@ -8,6 +8,7 @@ import {
 import { useTheme } from '@/shared/context/ThemeContext'
 import { useToast } from '@/shared/context/ToastContext'
 import { Card, Button, Input, Toggle, Badge, PageHeader } from '@/shared/ui'
+import { CURRENT_USER, PLAN_INFO, SESSIONS, PAYMENT_CARD } from '@/services/mocks/mockData'
 
 /* ─── Generic Setting Row ─────────────────────────────────── */
 function SettingRow({ icon: Icon, title, desc, control }) {
@@ -38,20 +39,23 @@ function SettingRow({ icon: Icon, title, desc, control }) {
   )
 }
 
+const TABS = [
+  { id: 'perfil', label: 'Mi Perfil', icon: User },
+  { id: 'seguridad', label: 'Seguridad', icon: Shield },
+  { id: 'facturacion', label: 'Facturación', icon: CreditCard },
+]
+
 export default function SettingsView() {
   const { isDarkMode } = useTheme()
   const { addToast } = useToast()
   const [activeTab, setActiveTab] = useState('perfil')
+  const [alertEmails, setAlertEmails] = useState(true)
+  const [pushNotifs, setPushNotifs]   = useState(false)
+  const [twoFactor, setTwoFactor]     = useState(false)
 
   const handleSave = () => {
     addToast('Cambios guardados correctamente.', 'success')
   }
-
-  const TABS = [
-    { id: 'perfil', label: 'Mi Perfil', icon: User },
-    { id: 'seguridad', label: 'Seguridad', icon: Shield },
-    { id: 'facturacion', label: 'Facturación', icon: CreditCard },
-  ]
 
   return (
     <motion.div variants={pageVariants} initial="hidden" animate="show" className="max-w-4xl mx-auto">
@@ -117,7 +121,7 @@ export default function SettingsView() {
                       ? 'bg-[#7C3AED]/20 text-[#7C3AED] border border-[#7C3AED]/40 group-hover:shadow-[0_0_20px_rgba(124,58,237,0.4)]'
                       : 'bg-[#DBD3FB]/60 border border-white text-[#561BAF] shadow-sm'
                   }`}>
-                    CS
+                    {CURRENT_USER.initials}
                   </div>
                   <div className="absolute inset-0 bg-black/60 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-xs font-bold backdrop-blur-sm">
                     Cambiar
@@ -129,7 +133,7 @@ export default function SettingsView() {
                     <label className={`block text-xs font-bold tracking-widest mb-2 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
                       NOMBRE COMPLETO
                     </label>
-                    <Input defaultValue="Carlos Smith" />
+                    <Input defaultValue={CURRENT_USER.name} />
                   </div>
                   <div>
                     <label className={`block text-xs font-bold tracking-widest mb-2 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
@@ -141,7 +145,7 @@ export default function SettingsView() {
                     <label className={`block text-xs font-bold tracking-widest mb-2 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
                       CORREO ELECTRÓNICO
                     </label>
-                    <Input icon={Mail} defaultValue="carlos@hotel.com" />
+                    <Input icon={Mail} defaultValue={CURRENT_USER.email} />
                   </div>
                 </div>
               </div>
@@ -161,13 +165,13 @@ export default function SettingsView() {
                   icon={Bell}
                   title="Alertas de Nuevos Pagos"
                   desc="Recibe un email cada vez que un link de pago sea completado."
-                  control={<Toggle active={true} />}
+                  control={<Toggle active={alertEmails} onToggle={() => setAlertEmails(v => !v)} />}
                 />
                 <SettingRow
                   icon={Smartphone}
                   title="Notificaciones Push"
                   desc="Alertas en tiempo real en tu navegador."
-                  control={<Toggle active={false} />}
+                  control={<Toggle active={pushNotifs} onToggle={() => setPushNotifs(v => !v)} />}
                 />
               </div>
             </Card>
@@ -193,7 +197,7 @@ export default function SettingsView() {
                   icon={Lock}
                   title="Autenticación de Dos Factores (2FA)"
                   desc="Protege tu cuenta con un código temporal enviado a tu móvil."
-                  control={<Toggle active={false} />}
+                  control={<Toggle active={twoFactor} onToggle={() => setTwoFactor(v => !v)} />}
                 />
               </div>
             </Card>
@@ -204,18 +208,18 @@ export default function SettingsView() {
               </h3>
 
               <div className="flex flex-col">
-                <SettingRow
-                  icon={MonitorSmartphone}
-                  title="MacBook Pro - Chrome"
-                  desc="Santa Cruz, BO • Sesión actual"
-                  control={<Badge variant="success">Actual</Badge>}
-                />
-                <SettingRow
-                  icon={Smartphone}
-                  title="iPhone 14 Pro - Safari"
-                  desc="Santa Cruz, BO • Activo hace 2 horas"
-                  control={<Button variant="danger" size="sm" className="!py-1.5 !px-3">Revocar</Button>}
-                />
+                {SESSIONS.map((session) => (
+                  <SettingRow
+                    key={session.id}
+                    icon={session.icon === 'desktop' ? MonitorSmartphone : Smartphone}
+                    title={session.device}
+                    desc={`${session.location} • ${session.isCurrent ? 'Sesión actual' : session.lastActive}`}
+                    control={session.isCurrent
+                      ? <Badge variant="success">Actual</Badge>
+                      : <Button variant="danger" size="sm" className="!py-1.5 !px-3">Revocar</Button>
+                    }
+                  />
+                ))}
               </div>
             </Card>
           </>
@@ -236,10 +240,10 @@ export default function SettingsView() {
                   PLAN ACTUAL
                 </p>
                 <h4 className={`text-xl font-bold flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-                  Prism Enterprise <Badge variant="default">Pro</Badge>
+                  {PLAN_INFO.name} <Badge variant="default">{PLAN_INFO.tier}</Badge>
                 </h4>
                 <p className={`text-sm mt-1 font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                  Renueva el 15 Nov, 2026 ($299.00/mes)
+                  Renueva el {PLAN_INFO.renewDate} ({PLAN_INFO.price})
                 </p>
               </div>
               <Button variant="outline">Administrar Plan</Button>
@@ -248,8 +252,8 @@ export default function SettingsView() {
             <div className="flex flex-col">
               <SettingRow
                 icon={CreditCard}
-                title="Visa terminada en 4242"
-                desc="Expiración: 12/28 • Tarjeta Principal"
+                title={`${PAYMENT_CARD.brand} terminada en ${PAYMENT_CARD.last4}`}
+                desc={`Expiración: ${PAYMENT_CARD.expiry} • Tarjeta ${PAYMENT_CARD.isPrimary ? 'Principal' : 'Secundaria'}`}
                 control={<Button variant="outline" size="sm">Actualizar</Button>}
               />
             </div>

@@ -1,18 +1,45 @@
+import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { useTheme } from '@/shared/context/ThemeContext'
 import Button from './Button'
 
-export default function MiniCalendar({ selectedDate, onSelect, timeValue, onTimeChange, onConfirm }) {
+const MONTH_NAMES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+const MONTH_LABELS_FULL = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+
+const SPRING = { type: 'spring', stiffness: 400, damping: 26 }
+
+export default function MiniCalendar({ selectedDate, onSelect, timeValue = '00:00', onTimeChange, onConfirm }) {
   const { isDarkMode } = useTheme()
+  const now = new Date()
+  const [viewYear, setViewYear] = useState(now.getFullYear())
+  const [viewMonth, setViewMonth] = useState(now.getMonth())
+
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
+  // Day of week for the 1st (0=Sun). Shift to Mon-first: (dow + 6) % 7
+  const firstDow = (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7
+
+  const prevMonth = () => {
+    if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1) }
+    else setViewMonth(m => m - 1)
+  }
+  const nextMonth = () => {
+    if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1) }
+    else setViewMonth(m => m + 1)
+  }
 
   return (
-    <div className={`absolute top-full left-0 mt-2 p-3 w-[250px] rounded-2xl z-50 shadow-[0_30px_60px_rgba(0,0,0,0.5)] animate-scale-in border ${
+    <motion.div
+      initial={{ opacity: 0, scale: 0.96 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={SPRING}
+      className={`absolute top-full left-0 mt-2 p-3 w-[250px] rounded-2xl z-50 shadow-[0_30px_60px_rgba(0,0,0,0.5)] border ${
       isDarkMode ? 'bg-[#111113] border-white/20' : 'bg-white border-gray-200 shadow-xl'
     }`}>
       <div className="flex justify-between items-center mb-3">
-        <Button variant="ghost" size="icon" className="!h-6 !w-6"><ChevronLeft size={12} /></Button>
-        <span className={`text-[11px] font-bold ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>Abril 2026</span>
-        <Button variant="ghost" size="icon" className="!h-6 !w-6"><ChevronRight size={12} /></Button>
+        <Button variant="ghost" size="icon" className="!h-6 !w-6" onClick={prevMonth}><ChevronLeft size={12} /></Button>
+        <span className={`text-[11px] font-bold ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>{MONTH_LABELS_FULL[viewMonth]} {viewYear}</span>
+        <Button variant="ghost" size="icon" className="!h-6 !w-6" onClick={nextMonth}><ChevronRight size={12} /></Button>
       </div>
 
       <div className="grid grid-cols-7 gap-1 text-center mb-2">
@@ -22,9 +49,13 @@ export default function MiniCalendar({ selectedDate, onSelect, timeValue, onTime
       </div>
 
       <div className="grid grid-cols-7 gap-1">
-        {[...Array(30)].map((_, i) => {
+        {/* Empty cells for offset */}
+        {[...Array(firstDow)].map((_, i) => (
+          <div key={`empty-${i}`} className="h-7 w-7" />
+        ))}
+        {[...Array(daysInMonth)].map((_, i) => {
           const day   = i + 1
-          const label = `${day} Abr 2026`
+          const label = `${day} ${MONTH_NAMES[viewMonth]} ${viewYear}`
           return (
             <button
               key={day}
@@ -61,6 +92,6 @@ export default function MiniCalendar({ selectedDate, onSelect, timeValue, onTime
       <Button className="w-full mt-3 !py-1.5 !text-xs" onClick={onConfirm} disabled={!selectedDate}>
         Confirmar Fecha
       </Button>
-    </div>
+    </motion.div>
   )
 }

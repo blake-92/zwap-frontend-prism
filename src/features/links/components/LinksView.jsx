@@ -1,9 +1,9 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Plus, QrCode, Copy, ExternalLink,
   Download, ChevronDown, Edit2, Mail, Eye,
-  Timer, CheckCircle2, XCircle, ListTree,
+  Timer, ListTree,
   CalendarDays,
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
@@ -81,9 +81,9 @@ function CustomLinksTable() {
   const { addToast } = useToast()
   const [search, setSearch] = useState('')
 
-  const filtered = CUSTOM_LINKS.filter(l =>
+  const filtered = useMemo(() => CUSTOM_LINKS.filter(l =>
     !search || l.client.toLowerCase().includes(search.toLowerCase()) || l.id.toLowerCase().includes(search.toLowerCase())
-  )
+  ), [search])
 
   return (
     <>
@@ -101,7 +101,7 @@ function CustomLinksTable() {
       {/* Table */}
       <Card className="pb-2">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[900px]">
+          <table aria-label="Links de pago personalizados" className="w-full text-left border-collapse min-w-[900px]">
             <thead>
               <tr className={`text-[10px] uppercase font-bold tracking-widest ${
                 isDarkMode ? 'text-[#888991] border-b border-white/10 bg-[#111113]/40' : 'text-[#67656E] border-b border-black/5 bg-white/50'
@@ -116,10 +116,10 @@ function CustomLinksTable() {
             <motion.tbody variants={listVariants} initial="hidden" animate="show">
               {filtered.length === 0 ? (
                 <EmptySearchState colSpan={5} term={search} onClear={() => setSearch('')} />
-              ) : filtered.map((link, idx) => (
+              ) : filtered.map((link) => (
                 <motion.tr
                   variants={itemVariants}
-                  key={idx}
+                  key={link.id}
                   className={`group transition-colors duration-200 ${
                     isDarkMode
                       ? 'border-b border-white/5 hover:bg-[#7C3AED]/5 last:border-0'
@@ -225,7 +225,6 @@ function CustomLinksTable() {
    LinksView
 ───────────────────────────────────────────────────────────── */
 export default function LinksView() {
-  const { isDarkMode }            = useTheme()
   const [links, setLinks]         = useState(PERMANENT_LINKS)
   const [newLinkOpen, setNewLinkOpen] = useState(false)
 
@@ -252,7 +251,9 @@ export default function LinksView() {
       <SectionLabel className="uppercase mb-4">Enlaces de Reserva (Personalizados)</SectionLabel>
       <CustomLinksTable />
 
-      {newLinkOpen && <NewLinkModal onClose={() => setNewLinkOpen(false)} />}
+      <AnimatePresence>
+        {newLinkOpen && <NewLinkModal key="new-link" onClose={() => setNewLinkOpen(false)} />}
+      </AnimatePresence>
     </motion.div>
   )
 }

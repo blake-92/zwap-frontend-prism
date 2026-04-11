@@ -16,7 +16,7 @@ export default function LiveFeed({ onViewAll }) {
             <motion.span
               initial={{ opacity: 0.2 }}
               animate={{ opacity: [1, 0.2, 1, 0.2, 1] }}
-              transition={{ duration: 2, times: [0, 0.2, 0.4, 0.6, 1], ease: "easeInOut" }}
+              transition={{ duration: 2, times: [0, 0.2, 0.4, 0.6, 1], repeat: Infinity, repeatDelay: 1 }}
               className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] inline-block"
             />
             Feed en Vivo
@@ -31,7 +31,7 @@ export default function LiveFeed({ onViewAll }) {
       </CardHeader>
 
       <div className="overflow-x-auto flex-1">
-        <table className="w-full text-left border-collapse min-w-[640px]">
+        <table aria-label="Feed en vivo de transacciones" className="w-full text-left border-collapse min-w-[640px]">
           <thead>
             <tr className={`text-[10px] uppercase font-bold tracking-widest ${
               isDarkMode ? 'text-[#888991] bg-[#111113]/20' : 'text-[#67656E] bg-white/20'
@@ -44,9 +44,9 @@ export default function LiveFeed({ onViewAll }) {
             </tr>
           </thead>
           <motion.tbody variants={listVariants} initial="hidden" animate="show">
-            {TRANSACTIONS.slice(0, 4).map((trx, idx) => (
+            {TRANSACTIONS.slice(0, 4).map((trx) => (
               <motion.tr
-                key={idx}
+                key={trx.id}
                 variants={itemVariants}
                 className={`group transition-colors duration-200 ${
                   isDarkMode
@@ -67,7 +67,7 @@ export default function LiveFeed({ onViewAll }) {
                     <div className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center bg-gray-100 border border-black/5 flex-shrink-0">
                       {trx.countryCode === 'xx'
                         ? <User size={12} className="text-gray-400" />
-                        : <img src={`https://flagcdn.com/w20/${trx.countryCode}.png`} alt={trx.country} className="w-full h-full object-cover" />
+                        : <img src={`https://flagcdn.com/w20/${trx.countryCode}.png`} alt={trx.country} loading="lazy" className="w-full h-full object-cover" />
                       }
                     </div>
                     <span className={`font-bold text-xs ${isDarkMode ? 'text-[#D8D7D9] group-hover:text-white' : 'text-[#111113]'}`}>

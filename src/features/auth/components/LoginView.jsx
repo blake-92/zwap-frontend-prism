@@ -78,7 +78,10 @@ function EmailForm({ onBack, onSubmit }) {
   const [password, setPassword] = useState('')
 
   return (
-    <div className="space-y-4 animate-slide-up">
+    <form
+      className="space-y-4 animate-slide-up"
+      onSubmit={e => { e.preventDefault(); onSubmit({ email, password }) }}
+    >
       <div>
         <label className={`block text-xs font-bold tracking-wide mb-2 ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
           Correo Electrónico
@@ -113,14 +116,15 @@ function EmailForm({ onBack, onSubmit }) {
       </div>
 
       <Button
+        type="submit"
         className="w-full !py-3.5 !text-base shadow-lg mt-4"
-        onClick={() => onSubmit({ email, password })}
       >
         Iniciar Sesión
       </Button>
 
       <div className="pt-4 text-center">
         <button
+          type="button"
           onClick={onBack}
           className={`text-xs font-semibold transition-colors hover:underline flex items-center justify-center w-full gap-1 ${
             isDarkMode ? 'text-[#888991] hover:text-white' : 'text-[#67656E] hover:text-[#111113]'
@@ -129,7 +133,7 @@ function EmailForm({ onBack, onSubmit }) {
           <ArrowLeft size={14} /> Volver a métodos de ingreso
         </button>
       </div>
-    </div>
+    </form>
   )
 }
 

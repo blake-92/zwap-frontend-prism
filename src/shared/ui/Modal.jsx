@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useTheme } from '@/shared/context/ThemeContext'
@@ -11,7 +12,7 @@ import Button from './Button'
  * y diseño especializado — no usan este componente.
  *
  * Props:
- *   onClose       fn        — handler de cierre (backdrop + X button)
+ *   onClose       fn        — handler de cierre (backdrop + X button + Escape key)
  *   title         string    — título del header (h2)
  *   description   node?     — subtítulo del header (puede ser JSX)
  *   icon          node?     — ícono junto al título (e.g. <ArrowUpFromLine />)
@@ -31,14 +32,61 @@ export default function Modal({
   children,
 }) {
   const { isDarkMode } = useTheme()
+  const containerRef = useRef(null)
+
+  // Escape key handler
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
+
+  // Prevent body scroll while modal is open
+  useEffect(() => {
+    const original = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = original }
+  }, [])
+
+  // Focus trap: keep focus within modal (re-queries on each Tab press)
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+
+    const getFocusable = () =>
+      el.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+
+    const initial = getFocusable()
+    if (initial.length > 0) initial[0].focus()
+
+    const handleTab = (e) => {
+      if (e.key !== 'Tab') return
+      const focusable = getFocusable()
+      if (focusable.length === 0) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus() }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus() }
+      }
+    }
+    document.addEventListener('keydown', handleTab)
+    return () => document.removeEventListener('keydown', handleTab)
+  }, [])
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+    >
       {/* Backdrop */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.2 }}
+      <div
         className={`absolute inset-0 backdrop-blur-md backdrop-saturate-200 ${
           isDarkMode ? 'bg-black/70' : 'bg-[#111113]/40'
         }`}
@@ -47,9 +95,14 @@ export default function Modal({
 
       {/* Container */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
+        ref={containerRef}
+        initial={{ scale: 0.95, y: 10 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.95, y: 10 }}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
         style={{ maxWidth }}
         className={`relative w-full rounded-[24px] border overflow-hidden shadow-2xl ${
           isDarkMode
@@ -62,7 +115,7 @@ export default function Modal({
           isDarkMode ? 'border-white/10' : 'border-black/5'
         }`}>
           <div>
-            <h2 className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${
+            <h2 id="modal-title" className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${
               isDarkMode ? 'text-white' : 'text-[#111113]'
             }`}>
               {icon && <span className="text-[#7C3AED]">{icon}</span>}
@@ -91,6 +144,6 @@ export default function Modal({
           </div>
         )}
       </motion.div>
-    </div>
+    </motion.div>
   )
 }

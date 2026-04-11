@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowUpFromLine, Landmark, TrendingUp,
   FileText,
@@ -7,7 +7,7 @@ import {
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Card, Button, Badge, Stepper, Pagination, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
 import { listVariants, itemVariants, pageVariants } from '@/shared/utils/motionVariants'
-import { WITHDRAWALS, WALLET_BALANCE, WALLET_STEPS } from '@/services/mocks/mockData'
+import { WITHDRAWALS, WALLET_BALANCE, WALLET_STEPS, BANK_ACCOUNT } from '@/services/mocks/mockData'
 import WithdrawModal from './WithdrawModal'
 import WithdrawReceiptModal from './WithdrawReceiptModal'
 
@@ -20,11 +20,14 @@ export default function WalletView() {
   const [currentPage, setCurrentPage] = useState(1)
 
   const ITEMS_PER_PAGE = 5
-  const filtered = WITHDRAWALS.filter(w =>
-    !search ||
-    w.id.toLowerCase().includes(search.toLowerCase()) ||
-    w.amount.includes(search)
-  )
+  const filtered = useMemo(() => WITHDRAWALS.filter(w => {
+    if (!search) return true
+    const q = search.toLowerCase()
+    const amountNormalized = w.amount.replace(/,/g, '')
+    return w.id.toLowerCase().includes(q) ||
+      w.amount.includes(search) ||
+      amountNormalized.includes(search)
+  }), [search])
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
   const paginatedWithdrawals = filtered.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -95,10 +98,10 @@ export default function WalletView() {
               </div>
               <div className="flex items-center gap-3">
                 <span className={`text-xs font-mono font-bold ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                  $2,400.00
+                  ${WITHDRAWALS[0].amount}
                 </span>
                 <span className={`text-[10px] font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                  20 Oct, 2026
+                  {WITHDRAWALS[0].date}
                 </span>
               </div>
             </div>
@@ -120,8 +123,8 @@ export default function WalletView() {
                     Cuenta Destino
                   </p>
                   <p className={`text-sm font-bold ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`}>
-                    Banco Mercantil Santa Cruz{' '}
-                    <span className={`font-mono text-xs ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>•••• 1234</span>
+                    {BANK_ACCOUNT.name}{' '}
+                    <span className={`font-mono text-xs ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>•••• {BANK_ACCOUNT.last4}</span>
                   </p>
                 </div>
               </div>
@@ -152,7 +155,7 @@ export default function WalletView() {
           </h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[680px]">
+          <table aria-label="Historial de retiros" className="w-full text-left border-collapse min-w-[680px]">
             <thead>
               <tr className={`text-[10px] uppercase font-bold tracking-widest ${
                 isDarkMode
@@ -170,10 +173,10 @@ export default function WalletView() {
             <motion.tbody variants={listVariants} initial="hidden" animate="show">
               {paginatedWithdrawals.length === 0 ? (
                 <EmptySearchState colSpan={6} term={search} onClear={() => { setSearch(''); setCurrentPage(1) }} />
-              ) : paginatedWithdrawals.map((w, idx) => (
+              ) : paginatedWithdrawals.map((w) => (
                 <motion.tr
                   variants={itemVariants}
-                  key={idx}
+                  key={w.id}
                   className={`group transition-colors duration-200 ${
                     isDarkMode
                       ? 'border-b border-white/5 hover:bg-[#7C3AED]/5 last:border-0'
@@ -234,8 +237,12 @@ export default function WalletView() {
         </div>
       </Card>
 
-      {modalOpen && <WithdrawModal onClose={() => setModalOpen(false)} />}
-      {receiptTrx && <WithdrawReceiptModal trx={receiptTrx} onClose={() => setReceiptTrx(null)} />}
+      <AnimatePresence>
+        {modalOpen && <WithdrawModal key="withdraw" onClose={() => setModalOpen(false)} />}
+      </AnimatePresence>
+      <AnimatePresence>
+        {receiptTrx && <WithdrawReceiptModal key="withdraw-receipt" trx={receiptTrx} onClose={() => setReceiptTrx(null)} />}
+      </AnimatePresence>
     </motion.div>
   )
 }

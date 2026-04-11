@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useLayoutEffect } from 'react'
+import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '@/shared/context/ThemeContext'
@@ -10,8 +10,9 @@ export default function Tooltip({ children, content, position = 'top' }) {
   const triggerRef = useRef(null)
   const tooltipRef = useRef(null)
   const timeoutRef = useRef(null)
+  const tooltipId = useRef(`tooltip-${Math.random().toString(36).slice(2, 9)}`).current
 
-  const updatePosition = () => {
+  const updatePosition = useCallback(() => {
     if (!triggerRef.current || !tooltipRef.current) return
     const rect = triggerRef.current.getBoundingClientRect()
     const tooltipRect = tooltipRef.current.getBoundingClientRect()
@@ -31,7 +32,7 @@ export default function Tooltip({ children, content, position = 'top' }) {
     }
 
     setCoords({ top, left })
-  }
+  }, [position])
 
   const showTooltip = () => {
     clearTimeout(timeoutRef.current)
@@ -60,7 +61,7 @@ export default function Tooltip({ children, content, position = 'top' }) {
         window.removeEventListener('scroll', handleScrollOrResize, true)
       }
     }
-  }, [isVisible, position])
+  }, [isVisible, position, updatePosition])
 
   useEffect(() => {
     return () => clearTimeout(timeoutRef.current)
@@ -75,6 +76,7 @@ export default function Tooltip({ children, content, position = 'top' }) {
         onMouseLeave={hideTooltip}
         onFocus={showTooltip}
         onBlur={hideTooltip}
+        aria-describedby={isVisible ? tooltipId : undefined}
       >
         {children}
       </div>
@@ -84,10 +86,12 @@ export default function Tooltip({ children, content, position = 'top' }) {
           {isVisible && (
             <motion.div
               ref={tooltipRef}
+              id={tooltipId}
+              role="tooltip"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.15, ease: 'easeOut' }}
+              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               style={{
                 position: 'fixed',
                 top: coords.top,

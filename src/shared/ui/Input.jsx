@@ -1,6 +1,7 @@
+import { forwardRef } from 'react'
 import { useTheme } from '@/shared/context/ThemeContext'
 
-export default function Input({ icon: Icon, className = '', ...props }) {
+const Input = forwardRef(function Input({ icon: Icon, className = '', ...props }, ref) {
   const { isDarkMode } = useTheme()
 
   return (
@@ -12,6 +13,7 @@ export default function Input({ icon: Icon, className = '', ...props }) {
         />
       )}
       <input
+        ref={ref}
         className={`
           w-full py-3 rounded-xl border outline-none transition-all font-medium
           ${Icon ? 'pl-11 pr-4' : 'px-4'}
@@ -25,4 +27,6 @@ export default function Input({ icon: Icon, className = '', ...props }) {
       />
     </div>
   )
-}
+})
+
+export default Input

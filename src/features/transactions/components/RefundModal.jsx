@@ -86,8 +86,14 @@ export default function RefundModal({ trx, onClose }) {
               <input
                 type="number"
                 placeholder="0.00"
+                min="0"
+                max={parseFloat(trx.amount.replace(/,/g, ''))}
                 value={partial}
-                onChange={e => setPartial(e.target.value)}
+                onChange={e => {
+                  const val = e.target.value
+                  const maxAmount = parseFloat(trx.amount.replace(/,/g, ''))
+                  if (val === '' || parseFloat(val) <= maxAmount) setPartial(val)
+                }}
                 className={`w-full pl-8 pr-4 py-3 rounded-xl border outline-none font-mono font-bold text-lg transition-all ${
                   isDarkMode
                     ? 'bg-[#111113]/50 border-white/10 text-white focus:border-[#7C3AED]/50 placeholder-[#45434A]'

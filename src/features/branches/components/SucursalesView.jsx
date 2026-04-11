@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { listVariants, cardItemVariants, pageVariants } from '@/shared/utils/motionVariants'
 import {
   Building2, MapPin, Users, Pencil, Trash2,
@@ -114,7 +114,9 @@ export default function SucursalesView() {
         </motion.div>
       </motion.div>
 
-      {newBranchOpen && <NewBranchModal onClose={() => setNewBranchOpen(false)} />}
+      <AnimatePresence>
+        {newBranchOpen && <NewBranchModal key="new-branch" onClose={() => setNewBranchOpen(false)} />}
+      </AnimatePresence>
     </motion.div>
   )
 }

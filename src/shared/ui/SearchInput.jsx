@@ -25,6 +25,7 @@ export default function SearchInput({ value, onChange, placeholder = 'Buscar...'
         placeholder={placeholder}
         value={value}
         onChange={onChange}
+        aria-label={placeholder.replace('...', '').trim()}
         className={`bg-transparent border-none outline-none text-xs ml-2 w-full font-medium ${
           isDarkMode ? 'text-[#D8D7D9] placeholder:text-[#888991]' : 'text-[#111113] placeholder:text-[#B0AFB4]'
         }`}

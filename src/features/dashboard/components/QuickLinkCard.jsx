@@ -5,7 +5,7 @@ import { useToast } from '@/shared/context/ToastContext'
 import { Card, Button, SegmentControl } from '@/shared/ui'
 import { PERMANENT_LINKS } from '@/services/mocks/mockData'
 
-export default function QuickLinkCard({ onNewLink }) {
+export default function QuickLinkCard() {
   const { isDarkMode }    = useTheme()
   const { addToast }      = useToast()
   const activeLinks       = PERMANENT_LINKS.filter(l => l.active)

@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Download, UserPlus,
   Pencil, Trash2,
@@ -26,13 +26,13 @@ export default function UsuariosView() {
 
   const roles = ['Todos', 'Administrador', 'Contador', 'Recepcionista']
 
-  const filtered = users.filter(u => {
+  const filtered = useMemo(() => users.filter(u => {
     const matchSearch = !search ||
       u.name.toLowerCase().includes(search.toLowerCase()) ||
       u.email.toLowerCase().includes(search.toLowerCase())
     const matchRole = roleFilter === 'Todos' || u.role === roleFilter
     return matchSearch && matchRole
-  })
+  }), [users, search, roleFilter])
 
   const toggleUser = id =>
     setUsers(prev => prev.map(u => u.id === id ? { ...u, active: !u.active } : u))
@@ -164,7 +164,9 @@ export default function UsuariosView() {
         </div>
       </Card>
 
-      {newUserOpen && <NewUserModal onClose={() => setNewUserOpen(false)} />}
+      <AnimatePresence>
+        {newUserOpen && <NewUserModal key="new-user" onClose={() => setNewUserOpen(false)} />}
+      </AnimatePresence>
     </motion.div>
   )
 }

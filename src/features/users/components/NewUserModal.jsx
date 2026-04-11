@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { UserPlus, Shield, Calculator, ConciergeBell } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Button, Modal, SectionLabel } from '@/shared/ui'
+import { Button, Input, Modal, SectionLabel } from '@/shared/ui'
 import { BRANCH_LIST } from '@/services/mocks/mockData'
 
 const ROLES = [
@@ -69,12 +69,6 @@ export default function NewUserModal({ onClose }) {
   const toggleBranch = id =>
     setBranches(prev => prev.includes(id) ? prev.filter(b => b !== id) : [...prev, id])
 
-  const inputBase = `w-full px-4 py-2.5 rounded-xl border outline-none text-sm font-medium transition-all ${
-    isDarkMode
-      ? 'bg-[#111113]/50 border-white/10 text-white placeholder-[#45434A] focus:border-[#7C3AED]/50'
-      : 'bg-white/60 border-white text-[#111113] placeholder-gray-300 focus:border-[#7C3AED]/40 shadow-sm'
-  }`
-
   const footer = (
     <>
       <Button variant="outline" className="flex-1 !py-3.5" onClick={onClose} disabled={isSubmitting}>
@@ -116,11 +110,10 @@ export default function NewUserModal({ onClose }) {
             <label className={`block text-xs font-bold tracking-widest mb-2 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
               NOMBRE
             </label>
-            <input
+            <Input
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="ej. Carlos Pérez"
-              className={inputBase}
             />
           </div>
 

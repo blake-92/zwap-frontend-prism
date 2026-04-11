@@ -9,7 +9,7 @@ const SPRING = { type: 'spring', stiffness: 400, damping: 30 }
 const panelVariants = {
   hidden: { opacity: 0, scale: 0.95, y: -4 },
   visible: { opacity: 1, scale: 1,    y: 0,  transition: { ...SPRING, stiffness: 500 } },
-  exit:    { opacity: 0, scale: 0.95, y: -4,  transition: { duration: 0.12, ease: 'easeIn' } },
+  exit:    { opacity: 0, scale: 0.95, y: -4,  transition: { type: 'spring', stiffness: 500, damping: 30 } },
 }
 
 export default function DropdownFilter({ label, options, value, onChange, icon: Icon }) {
@@ -32,6 +32,8 @@ export default function DropdownFilter({ label, options, value, onChange, icon: 
         variant="outline"
         size="sm"
         onClick={() => setIsOpen(!isOpen)}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
         className={`!px-3 flex items-center gap-1.5 transition-all ${
           isOpen
             ? isDarkMode

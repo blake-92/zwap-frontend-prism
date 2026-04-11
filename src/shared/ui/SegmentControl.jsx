@@ -20,7 +20,7 @@ export default function SegmentControl({ options, value, onChange, layoutId: lay
   const layoutId = layoutIdProp ?? `segment-${autoId}`
 
   return (
-    <div className={`flex rounded-xl p-1.5 shadow-inner ${
+    <div role="tablist" className={`flex rounded-xl p-1.5 shadow-inner ${
       isDarkMode
         ? 'bg-black/60 border border-white/5'
         : 'bg-gray-200/50 border border-black/5'
@@ -28,6 +28,8 @@ export default function SegmentControl({ options, value, onChange, layoutId: lay
       {options.map(opt => (
         <button
           key={opt.value}
+          role="tab"
+          aria-selected={value === opt.value}
           onClick={() => onChange(opt.value)}
           className={`relative flex-1 px-3 py-1.5 text-xs font-bold rounded-lg transition-colors duration-300 ${
             value === opt.value

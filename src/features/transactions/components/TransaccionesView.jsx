@@ -1,9 +1,9 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Calendar, Download,
-  LinkIcon, Clock, CreditCard, Globe2, User,
+  LinkIcon, Clock, CreditCard, Globe2,
   FileText, RotateCcw, Filter
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
@@ -36,8 +36,24 @@ export default function TransaccionesView() {
       const matchStatus = statusFilter === 'Todos' || t.status === statusFilter
 
       let matchDate = true
-      if (dateFilter === 'Hoy') matchDate = t.date.includes('Hoy') || t.date.includes('Abr 2026')
-      if (dateFilter === 'Últimos 7 días') matchDate = true
+      if (dateFilter === 'Hoy') {
+        const today = new Date()
+        const day = today.getDate()
+        const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+        const monthStr = months[today.getMonth()]
+        const yearStr = today.getFullYear()
+        matchDate = t.date.includes(`${day} ${monthStr}`) && t.date.includes(`${yearStr}`)
+      }
+      if (dateFilter === 'Últimos 7 días') {
+        // Mock: show last 3 days of data (27-29 Mar)
+        matchDate = t.date.includes('29 Mar') || t.date.includes('28 Mar') || t.date.includes('27 Mar')
+      }
+      if (dateFilter === 'Este mes') {
+        const today = new Date()
+        const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+        const monthStr = months[today.getMonth()]
+        matchDate = t.date.includes(monthStr)
+      }
 
       return matchSearch && matchStatus && matchDate
     })
@@ -74,7 +90,7 @@ export default function TransaccionesView() {
         <DropdownFilter
           label="Estado"
           icon={Filter}
-          options={['Todos', 'Completado', 'Pendiente', 'Reembolsado']}
+          options={['Todos', 'Exitoso', 'Pendiente', 'Reembolsado']}
           value={statusFilter}
           onChange={(val) => { setStatusFilter(val); setCurrentPage(1) }}
         />
@@ -83,7 +99,7 @@ export default function TransaccionesView() {
       {/* Table */}
       <Card className="pb-2">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[900px]">
+          <table aria-label="Historial de transacciones" className="w-full text-left border-collapse min-w-[900px]">
             <thead>
               <tr className={`text-[10px] uppercase font-bold tracking-widest ${
                 isDarkMode
@@ -99,10 +115,10 @@ export default function TransaccionesView() {
             </thead>
             <motion.tbody variants={listVariants} initial="hidden" animate="show">
               {paginatedData.length > 0 ? (
-                paginatedData.map((trx, idx) => (
+                paginatedData.map((trx) => (
                   <motion.tr
                     variants={itemVariants}
-                    key={idx}
+                    key={trx.id}
                     className={`group transition-colors duration-200 ${
                       isDarkMode
                         ? 'border-b border-white/5 hover:bg-[#7C3AED]/5 last:border-0'
@@ -227,8 +243,12 @@ export default function TransaccionesView() {
       </Card>
 
       {/* Modals */}
-      {receiptTrx && <ReceiptModal trx={receiptTrx} onClose={() => setReceiptTrx(null)} />}
-      {refundTrx  && <RefundModal  trx={refundTrx}  onClose={() => setRefundTrx(null)}  />}
+      <AnimatePresence>
+        {receiptTrx && <ReceiptModal key="receipt" trx={receiptTrx} onClose={() => setReceiptTrx(null)} />}
+      </AnimatePresence>
+      <AnimatePresence>
+        {refundTrx  && <RefundModal  key="refund" trx={refundTrx}  onClose={() => setRefundTrx(null)}  />}
+      </AnimatePresence>
     </motion.div>
   )
 }

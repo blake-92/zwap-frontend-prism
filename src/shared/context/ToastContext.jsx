@@ -15,13 +15,9 @@ export function ToastProvider({ children }) {
     
     if (duration) {
       setTimeout(() => {
-        removeToast(id)
+        setToasts(prev => prev.filter(t => t.id !== id))
       }, duration)
     }
-  }, [])
-
-  const removeToast = useCallback((id) => {
-    setToasts(prev => prev.filter(t => t.id !== id))
   }, [])
 
   const icons = {
@@ -40,7 +36,7 @@ export function ToastProvider({ children }) {
               key={toast.id}
               initial={{ opacity: 0, y: 20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+              exit={{ opacity: 0, scale: 0.95, transition: { type: 'spring', stiffness: 400, damping: 30 } }}
               className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl border backdrop-blur-xl ${
                 isDarkMode
                   ? 'bg-[#252429]/95 border-white/10 text-white shadow-black/50'

@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { pageVariants } from '@/shared/utils/motionVariants'
-import { useTheme } from '@/shared/context/ThemeContext'
 import { Button, PageHeader } from '@/shared/ui'
 import { KPIS } from '@/services/mocks/mockData'
 import { ROUTES } from '@/router/routes'
@@ -12,10 +11,11 @@ import QuickLinkCard from './QuickLinkCard'
 import ChartCard     from './ChartCard'
 import LiveFeed      from './LiveFeed'
 import AlertsPanel   from './AlertsPanel'
+// Cross-feature dependency: Dashboard reuses the NewLinkModal from links feature
+// via its public re-export. This avoids duplicating the modal component.
 import { NewLinkModal } from '@/features/links'
 
 export default function DashboardView() {
-  const { isDarkMode } = useTheme()
   const navigate       = useNavigate()
   const [newLinkOpen, setNewLinkOpen] = useState(false)
 
@@ -33,12 +33,12 @@ export default function DashboardView() {
 
       {/* KPI row */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
-        {KPIS.map((kpi, i) => <KpiCard key={i} kpi={kpi} />)}
+        {KPIS.map((kpi) => <KpiCard key={kpi.label} kpi={kpi} />)}
       </div>
 
       {/* Middle row: Quick cobro + Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <QuickLinkCard onNewLink={() => setNewLinkOpen(true)} />
+        <QuickLinkCard />
         <ChartCard />
       </div>
 
@@ -48,7 +48,9 @@ export default function DashboardView() {
         <AlertsPanel />
       </div>
 
-      {newLinkOpen && <NewLinkModal onClose={() => setNewLinkOpen(false)} />}
+      <AnimatePresence>
+        {newLinkOpen && <NewLinkModal key="new-link" onClose={() => setNewLinkOpen(false)} />}
+      </AnimatePresence>
     </motion.div>
   )
 }

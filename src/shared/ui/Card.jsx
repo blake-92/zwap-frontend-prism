@@ -13,11 +13,16 @@ export default function Card({ children, className = '', hoverEffect = false, on
     ? 'bg-[#252429]/30 backdrop-blur-2xl border-white/10 border-t-white/20 shadow-2xl'
     : 'bg-white/40 backdrop-blur-2xl border-white border-t-white shadow-[0_10px_40px_rgb(0,0,0,0.05)]'
 
+  const interactive = onClick
+    ? { role: 'button', tabIndex: 0, onKeyDown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(e) } } }
+    : {}
+
   return (
     <div
       onClick={onClick}
       style={style}
-      className={`rounded-[24px] border transition-all duration-300 transform-gpu overflow-hidden ${base} ${hover} ${className}`}
+      className={`rounded-[24px] border transition-all duration-300 transform-gpu overflow-hidden ${base} ${hover} ${onClick ? 'cursor-pointer' : ''} ${className}`}
+      {...interactive}
     >
       {children}
     </div>

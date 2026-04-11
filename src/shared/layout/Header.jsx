@@ -12,7 +12,7 @@ const SPRING = { type: 'spring', stiffness: 400, damping: 30 }
 const panelVariants = {
   hidden:  { opacity: 0, scale: 0.95, y: -4 },
   visible: { opacity: 1, scale: 1,    y: 0,  transition: { ...SPRING, stiffness: 500 } },
-  exit:    { opacity: 0, scale: 0.95, y: -4,  transition: { duration: 0.12, ease: 'easeIn' } },
+  exit:    { opacity: 0, scale: 0.95, y: -4,  transition: { type: 'spring', stiffness: 500, damping: 30 } },
 }
 
 export default function Header({ selectedBranch, onBranchChange }) {
@@ -86,8 +86,11 @@ export default function Header({ selectedBranch, onBranchChange }) {
 
         {/* Branch selector */}
         <div ref={menuRef} className="relative">
-          <div
+          <button
             onClick={() => setMenuOpen(v => !v)}
+            onKeyDown={e => { if (e.key === 'Escape') setMenuOpen(false) }}
+            aria-haspopup="listbox"
+            aria-expanded={menuOpen}
             className={`flex items-center gap-3 cursor-pointer pl-6 border-l h-10 transition-colors select-none ${
               isDarkMode ? 'border-white/10' : 'border-black/5'
             }`}
@@ -109,7 +112,7 @@ export default function Header({ selectedBranch, onBranchChange }) {
             >
               <ChevronDown size={14} />
             </motion.span>
-          </div>
+          </button>
 
           <AnimatePresence>
             {menuOpen && (

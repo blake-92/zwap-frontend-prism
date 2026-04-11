@@ -4,9 +4,9 @@ import {
   Wallet, AlertOctagon, LinkIcon, Smartphone, CircleDot,
 } from 'lucide-react'
 
-export const BRANCHES = ['Hotel de Sal', 'Hotel de Piedra', 'Hotel del Mar']
+export const BRANCHES = ['Sucursal Principal', 'Hotel de Sal', 'Hotel de Madera']
 
-export const WALLET_BALANCE = { raw: 12450.00, display: '$12,450.00', short: '$12.4K' }
+export const WALLET_BALANCE = { raw: 11694.00, display: '$11,694.00', short: '$11.7K' }
 
 export const WALLET_STEPS = [
   { label: 'Iniciado',         sub: '20 Oct, 08:12', icon: CheckCircle2, done: true,  active: false },
@@ -28,7 +28,7 @@ export const ALERTS = [
   },
   {
     icon: Landmark, iconColor: 'emerald', title: 'Depósito Confirmado',
-    body: 'Liquidación del 25 Mar ($2,526.00) acreditada en tu cuenta.',
+    body: 'Liquidación del 25 Mar ($5,356.00) acreditada en tu cuenta.',
     action: null,
   },
 ]
@@ -47,7 +47,7 @@ export const CHART_DATA = [
 export const KPIS = [
   { label: 'Volumen Hoy',        value: '$1,850.00', change: '+12%',       icon: TrendingUp, variant: 'success' },
   { label: 'Por Cobrar (Links)', value: '$1,240.00', change: '5 pendientes', icon: Timer,     variant: 'warning' },
-  { label: 'En Tránsito',        value: '$3,772.00', change: 'Llega mañana', icon: Landmark,  variant: 'default' },
+  { label: 'En Tránsito',        value: '$3,899.00', change: 'Llega mañana', icon: Landmark,  variant: 'default' },
   { label: 'Éxito de Reservas',  value: '92.5%',     change: '+2.1%',       icon: BarChart3, variant: 'success' },
 ]
 
@@ -117,7 +117,7 @@ export const TRANSACTIONS = [
   },
   {
     id: 'TRX-9832', client: 'Jane Smith', email: 'jane.smith@test.com',
-    initials: 'JS', country: 'Australia', countryCode: 'ca',
+    initials: 'JS', country: 'Australia', countryCode: 'au',
     card: 'Mastercard', last4: '8899', date: '26 Mar, 2026', time: '11:30 hrs',
     amount: '900.00', status: 'Exitoso', statusVariant: 'success', StatusIcon: CheckCircle2,
     channel: 'Link de Pago', ChannelIcon: LinkIcon,
@@ -125,9 +125,9 @@ export const TRANSACTIONS = [
 ]
 
 export const PERMANENT_LINKS = [
-  { id: 'p1', name: 'Recepción',   desc: 'Monto abierto para cobros rápidos en mostrador', url: 'zwap.pe/hsal/rec',   active: true },
-  { id: 'p2', name: 'Restaurante', desc: 'Consumos extras y propinas',                     url: 'zwap.pe/hsal/rest',  active: true },
-  { id: 'p3', name: 'Tours',       desc: 'Anticipos de paquetes',                          url: 'zwap.pe/hsal/tours', active: false },
+  { id: 'p1', name: 'Recepción',   desc: 'Monto abierto para cobros rápidos en mostrador', url: 'zwap.me/hsal/rec',   active: true },
+  { id: 'p2', name: 'Restaurante', desc: 'Consumos extras y propinas',                     url: 'zwap.me/hsal/rest',  active: true },
+  { id: 'p3', name: 'Tours',       desc: 'Anticipos de paquetes',                          url: 'zwap.me/hsal/tours', active: false },
 ]
 
 export const WITHDRAWALS = [
@@ -150,16 +150,16 @@ export const PAYOUTS = [
     type: 'Liquidación', typeIcon: Wallet,
     closeDate: '28 Mar 2026', closeTime: '20:00',
     gross: 3250, trxCount: 14,
-    fees: { pos: { amount: 160, rate: '8%' }, links: { amount: 75, rate: '6%' } },
-    adj: 0, net: 3015, depositDate: '30 Mar 2026',
+    fees: { pos: { amount: 108, rate: '4.9%' }, links: { amount: 84, rate: '3%' } },
+    adj: 0, net: 3058, depositDate: '30 Mar 2026',
     status: 'Procesando', statusVariant: 'default', StatusIcon: Clock,
   },
   {
     type: 'Liquidación', typeIcon: Wallet,
     closeDate: '27 Mar 2026', closeTime: '20:00',
     gross: 4100, trxCount: 22,
-    fees: { pos: { amount: 328, rate: '8%' } },
-    adj: 0, net: 3772, depositDate: '29 Mar 2026',
+    fees: { pos: { amount: 201, rate: '4.9%' } },
+    adj: 0, net: 3899, depositDate: '29 Mar 2026',
     status: 'En Tránsito', statusVariant: 'warning', StatusIcon: Landmark,
   },
   {
@@ -180,41 +180,41 @@ export const PAYOUTS = [
     type: 'Liquidación', typeIcon: Wallet,
     closeDate: '25 Mar 2026', closeTime: '20:00',
     gross: 5600, trxCount: 31,
-    fees: { pos: { amount: 312, rate: '8%' }, links: { amount: 102, rate: '6%' } },
-    adj: 0, net: 5186, depositDate: '27 Mar 2026',
+    fees: { pos: { amount: 172, rate: '4.9%' }, links: { amount: 72, rate: '3%' } },
+    adj: 0, net: 5356, depositDate: '27 Mar 2026',
     status: 'Depositado', statusVariant: 'success', StatusIcon: CheckCircle2,
   },
   {
     type: 'Liquidación', typeIcon: Wallet,
     closeDate: '24 Mar 2026', closeTime: '20:00',
     gross: 2100, trxCount: 10,
-    fees: { pos: { amount: 168, rate: '8%' } },
-    adj: 0, net: 1932, depositDate: '26 Mar 2026',
+    fees: { pos: { amount: 103, rate: '4.9%' } },
+    adj: 0, net: 1997, depositDate: '26 Mar 2026',
     status: 'Depositado', statusVariant: 'success', StatusIcon: CheckCircle2,
   },
   {
     type: 'Liquidación', typeIcon: Wallet,
     closeDate: '23 Mar 2026', closeTime: '20:00',
     gross: 3400, trxCount: 18,
-    fees: { links: { amount: 204, rate: '6%' } },
-    adj: 0, net: 3196, depositDate: '25 Mar 2026',
+    fees: { links: { amount: 102, rate: '3%' } },
+    adj: 0, net: 3298, depositDate: '25 Mar 2026',
     status: 'Depositado', statusVariant: 'success', StatusIcon: CheckCircle2,
   },
   {
     type: 'Liquidación', typeIcon: Wallet,
     closeDate: '22 Mar 2026', closeTime: '20:00',
     gross: 1500, trxCount: 5,
-    fees: { pos: { amount: 120, rate: '8%' } },
-    adj: 0, net: 1380, depositDate: '24 Mar 2026',
+    fees: { pos: { amount: 74, rate: '4.9%' } },
+    adj: 0, net: 1426, depositDate: '24 Mar 2026',
     status: 'Depositado', statusVariant: 'success', StatusIcon: CheckCircle2,
   },
 ]
 
 export const USERS = [
-  { id: '1', initials: 'C', name: 'carlos', email: 'carlos@zwap.com', role: 'Contador',       branches: ['Sucursal Principal'],                        active: true,  variant: 'warning' },
-  { id: '2', initials: 'P', name: 'pablo',  email: 'pablo@zwap.com',  role: 'Contador',       branches: ['Hotel de Sal'],                               active: true,  variant: 'warning' },
-  { id: '3', initials: 'J', name: 'juan',   email: 'juan@zwap.com',   role: 'Recepcionista',  branches: ['Hotel de Sal', 'Hotel de Madera', 'Sucursal Norte'], active: true, variant: 'success' },
-  { id: '4', initials: 'S', name: 'saul',   email: 'saul@zwap.com',   role: 'Administrador',  branches: ['Hotel de Sal', 'Sucursal Principal'],         active: true,  variant: 'default' },
+  { id: '1', initials: 'CS', name: 'Carlos Smith',   email: 'carlos@zwap.com', role: 'Contador',       branches: ['Sucursal Principal'],                        active: true,  variant: 'warning' },
+  { id: '2', initials: 'PG', name: 'Pablo García',   email: 'pablo@zwap.com',  role: 'Contador',       branches: ['Hotel de Sal'],                               active: true,  variant: 'warning' },
+  { id: '3', initials: 'JR', name: 'Juan Rodríguez', email: 'juan@zwap.com',   role: 'Recepcionista',  branches: ['Hotel de Sal', 'Hotel de Madera', 'Sucursal Principal'], active: true, variant: 'success' },
+  { id: '4', initials: 'SM', name: 'Saul Mendoza',   email: 'saul@zwap.com',   role: 'Administrador',  branches: ['Hotel de Sal', 'Sucursal Principal'],         active: true,  variant: 'default' },
 ]
 
 export const BRANCH_LIST = [
@@ -245,3 +245,63 @@ export const CUSTOM_LINKS = [
     status: 'Pendiente', statusVariant: 'warning', StatusIcon: Timer,
   },
 ]
+
+/* ── Chart sub-data (Conversión & Métodos tabs) ── */
+export const CONVERSION_DATA = [
+  { day: 'Lun', value: 60 },
+  { day: 'Mar', value: 80 },
+  { day: 'Mié', value: 45 },
+  { day: 'Jue', value: 90 },
+  { day: 'Vie', value: 75 },
+  { day: 'Sáb', value: 85 },
+  { day: 'Hoy', value: 95 },
+]
+
+export const PAYMENT_METHODS = [
+  { label: 'Visa',       val: 65, color: '#7C3AED' },
+  { label: 'Mastercard', val: 25, color: '#10B981' },
+  { label: 'Amex',       val: 10, color: '#F59E0B' },
+]
+
+/* ── Current user & settings ── */
+export const CURRENT_USER = {
+  initials: 'CS',
+  name: 'Carlos Smith',
+  displayName: 'Admin Zwap',
+  role: 'Administrador',
+  email: 'carlos@hotel.com',
+}
+
+export const PLAN_INFO = {
+  name: 'Prism Enterprise',
+  tier: 'Pro',
+  price: '$299.00/mes',
+  renewDate: '15 Nov, 2026',
+}
+
+export const SESSIONS = [
+  { id: 's1', device: 'MacBook Pro - Chrome', icon: 'desktop', location: 'Santa Cruz, BO', isCurrent: true, lastActive: null },
+  { id: 's2', device: 'iPhone 14 Pro - Safari', icon: 'phone', location: 'Santa Cruz, BO', isCurrent: false, lastActive: 'Activo hace 2 horas' },
+]
+
+export const PAYMENT_CARD = {
+  brand: 'Visa',
+  last4: '4242',
+  expiry: '12/28',
+  isPrimary: true,
+}
+
+/* ── Bank account ── */
+export const BANK_ACCOUNT = {
+  name: 'Banco Mercantil Santa Cruz',
+  shortName: 'Banco Mercantil SCZ',
+  last4: '1234',
+}
+
+/* ── Settlement summary KPIs ── */
+export const SETTLEMENT_SUMMARY = {
+  inTransit: '$3,899.00',
+  inTransitBadge: 'En limpieza (2 días hábiles)',
+  adjustments: '-$150.00',
+  adjustmentsBadge: 'Requiere atención',
+}

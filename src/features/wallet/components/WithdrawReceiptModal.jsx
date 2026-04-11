@@ -1,29 +1,77 @@
+import { useEffect, useRef } from 'react'
 import { X, Printer, Download, Landmark, CheckCircle2 } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useTheme } from '@/shared/context/ThemeContext'
 
 export default function WithdrawReceiptModal({ trx, onClose }) {
   const { isDarkMode } = useTheme()
+  const containerRef = useRef(null)
+
+  // ESC key handler
+  useEffect(() => {
+    if (!trx) return
+    const handleKeyDown = (e) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [trx, onClose])
+
+  // Body scroll lock
+  useEffect(() => {
+    if (!trx) return
+    const original = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = original }
+  }, [trx])
+
+  // Focus trap
+  useEffect(() => {
+    if (!trx) return
+    const el = containerRef.current
+    if (!el) return
+    const getFocusable = () => el.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+    const initial = getFocusable()
+    if (initial.length > 0) initial[0].focus()
+    const handleTab = (e) => {
+      if (e.key !== 'Tab') return
+      const focusable = getFocusable()
+      if (focusable.length === 0) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus() }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus() }
+      }
+    }
+    document.addEventListener('keydown', handleTab)
+    return () => document.removeEventListener('keydown', handleTab)
+  }, [trx])
+
   if (!trx) return null
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-        {/* Backdrop */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className={`absolute inset-0 backdrop-blur-md ${isDarkMode ? 'bg-[#111113]/80' : 'bg-white/60'}`}
-          onClick={onClose}
-        />
+    <motion.div
+      ref={containerRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Comprobante de Transferencia"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+    >
+      {/* Backdrop */}
+      <div
+        className={`absolute inset-0 backdrop-blur-md ${isDarkMode ? 'bg-[#111113]/80' : 'bg-white/60'}`}
+        onClick={onClose}
+      />
 
         {/* Digital Receipt Card */}
         <motion.div 
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          initial={{ y: 20, scale: 0.95 }}
+          animate={{ y: 0, scale: 1 }}
+          exit={{ scale: 0.95, y: 20 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
           className="relative w-full max-w-[400px]"
         >
@@ -131,7 +179,6 @@ export default function WithdrawReceiptModal({ trx, onClose }) {
             </div>
           </div>
         </motion.div>
-      </div>
-    </AnimatePresence>
+    </motion.div>
   )
 }

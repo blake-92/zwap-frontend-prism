@@ -32,7 +32,7 @@ export default function AppRouter() {
           </Suspense>
         } />
         <Route path="/legal/:doc" element={
-          <div className="relative z-10 text-white p-8 font-sans">Legal — próximamente</div>
+          <div className="relative z-10 p-8 font-sans text-[#111113] dark:text-white">Legal — próximamente</div>
         } />
 
         {/* Protected — layout wrapper con Outlet */}

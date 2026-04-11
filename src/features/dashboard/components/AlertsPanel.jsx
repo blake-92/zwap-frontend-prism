@@ -29,9 +29,9 @@ export default function AlertsPanel() {
         animate="show"
         className="flex-1 overflow-y-auto p-2 space-y-1"
       >
-        {ALERTS.map((alert, i) => (
+        {ALERTS.map((alert) => (
           <motion.div
-            key={i}
+            key={alert.title}
             variants={cardItemVariants}
             className={`group p-4 m-1 rounded-xl border transition-all duration-300 hover:shadow-md cursor-pointer ${
               isDarkMode
