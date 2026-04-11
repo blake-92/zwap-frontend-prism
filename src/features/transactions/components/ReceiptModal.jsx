@@ -183,7 +183,12 @@ export default function ReceiptModal({ trx, onClose }) {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className={`text-xs font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>Cliente</span>
-                  <span className={`text-sm font-bold ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`}>{trx.client || 'Cliente Anónimo'}</span>
+                  <div className="flex flex-col items-end min-w-0 ml-4">
+                    <span className={`text-sm font-bold truncate max-w-full ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`}>{trx.client || 'Cliente Anónimo'}</span>
+                    {trx.email && (
+                      <span className={`text-[11px] font-medium truncate max-w-full ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>{trx.email}</span>
+                    )}
+                  </div>
                 </div>
               </div>
 

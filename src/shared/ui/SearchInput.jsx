@@ -10,7 +10,7 @@ import { useTheme } from '@/shared/context/ThemeContext'
  *   placeholder  string   — texto de placeholder
  *   className    string   — clases extra para el contenedor (ej: "w-72", "w-48")
  */
-export default function SearchInput({ value, onChange, placeholder = 'Buscar...', className = 'w-72' }) {
+export default function SearchInput({ value, onChange, placeholder = 'Buscar...', className = 'w-full sm:w-72' }) {
   const { isDarkMode } = useTheme()
 
   return (

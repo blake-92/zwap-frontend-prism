@@ -7,7 +7,7 @@ import {
   FileText, RotateCcw, Filter
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, AvatarInfo, DropdownFilter, Pagination, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
+import { Card, Button, Badge, AvatarInfo, DropdownFilter, Pagination, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar, SwipeableCard } from '@/shared/ui'
 import { listVariants, itemVariants, pageVariants } from '@/shared/utils/motionVariants'
 import { TRANSACTIONS } from '@/services/mocks/mockData'
 import { ROUTES } from '@/router/routes'
@@ -74,12 +74,22 @@ export default function TransaccionesView() {
         </Button>
       </PageHeader>
 
-      <TableToolbar actions={<Button variant="successExport" size="sm"><Download size={14} /> Exportar</Button>}>
-        <SearchInput
-          value={search}
-          onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
-          placeholder="Buscar por cliente o email..."
-        />
+      <TableToolbar 
+        actions={
+          <Button variant="successExport" size="sm" className="!px-2 sm:!px-3">
+            <Download size={14} /> 
+            <span className="hidden sm:inline ml-1.5">Exportar</span>
+          </Button>
+        }
+        search={
+          <SearchInput
+            value={search}
+            onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
+            placeholder="Buscar por cliente o email..."
+            className="w-full sm:w-72"
+          />
+        }
+      >
         <DropdownFilter
           label="Fecha"
           icon={Calendar}
@@ -137,12 +147,18 @@ export default function TransaccionesView() {
 
                     {/* Cliente */}
                     <td className="px-6 py-4">
-                      <AvatarInfo
-                        initials={trx.initials}
-                        primary={trx.client || 'Cliente Anonimo'}
-                        secondary={trx.email || 'Venta en mostrador'}
-                        glow
-                      />
+                      <div className="flex flex-col gap-0.5 min-w-0 max-w-[200px]">
+                        <p className={`font-bold text-sm truncate ${isDarkMode ? 'text-[#D8D7D9] group-hover:text-white' : 'text-[#111113]'}`} title={trx.client || 'Cliente Anónimo'}>
+                          {trx.client || 'Cliente Anónimo'}
+                        </p>
+                        <div className={`flex items-center gap-1.5 text-[11px] font-medium truncate ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                          <span className="flex items-center gap-1 flex-shrink-0">
+                            <CreditCard size={12} className="opacity-70" />
+                            <span className="font-mono tracking-widest opacity-70">••</span>
+                            <span className="font-mono">{trx.last4}</span>
+                          </span>
+                        </div>
+                      </div>
                     </td>
 
                     {/* Detalles */}
@@ -152,12 +168,6 @@ export default function TransaccionesView() {
                           {trx.status}
                         </Badge>
                         <div className={`flex items-center gap-2 text-[11px] font-medium flex-wrap ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                          <span className="flex items-center gap-1.5">
-                            <CreditCard size={12} className="opacity-70" />
-                            <span className="font-mono tracking-widest opacity-70">••</span>
-                            <span className="font-mono">{trx.last4}</span>
-                          </span>
-                          <span className="opacity-40">•</span>
                           <span className="flex items-center gap-1.5">
                             <trx.ChannelIcon size={12} className="opacity-70" />
                             <span className="hidden xl:inline">{trx.channel}</span>
@@ -248,55 +258,50 @@ export default function TransaccionesView() {
           <motion.div variants={listVariants} initial="hidden" animate="show" className="space-y-3">
             {paginatedData.map((trx) => (
               <motion.div key={trx.id} variants={itemVariants}>
-                <Card className="p-4">
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <AvatarInfo
-                        initials={trx.initials}
-                        primary={trx.client || 'Cliente Anonimo'}
-                        secondary={trx.email || 'Venta en mostrador'}
-                        glow
-                      />
-                    </div>
-                    <span className={`font-mono font-bold text-lg tracking-tight flex-shrink-0 ${
-                      trx.status === 'Reembolsado'
-                        ? 'text-rose-500 line-through opacity-70'
-                        : isDarkMode ? 'text-white' : 'text-[#111113]'
-                    }`}>
-                      ${trx.amount}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Badge variant={trx.statusVariant} icon={trx.StatusIcon}>
-                        {trx.status}
-                      </Badge>
-                      <span className={`text-[11px] font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                        <trx.ChannelIcon size={12} />
-                        {trx.channel.includes('POS') ? 'POS' : 'Link'}
+                <SwipeableCard
+                  actions={[
+                    { label: 'Ver Recibo', icon: FileText, onClick: () => setReceiptTrx(trx) },
+                    trx.status === 'Reembolsado'
+                      ? { label: 'Recibo Dev.', icon: FileText, onClick: () => setRefundTrx(trx) }
+                      : { label: 'Devolución', icon: RotateCcw, variant: 'danger', disabled: trx.status === 'Pendiente', onClick: () => setRefundTrx(trx) }
+                  ]}
+                >
+                  <div className="p-4">
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <p className={`font-bold text-sm truncate ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`} title={trx.client || 'Cliente Anónimo'}>
+                          {trx.client || 'Cliente Anónimo'}
+                        </p>
+                        <div className={`flex items-center gap-1.5 text-[11px] font-medium truncate ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                          <span className="flex items-center gap-1 flex-shrink-0">
+                            <CreditCard size={12} className="opacity-70" />
+                            <span className="font-mono tracking-widest opacity-70">••</span>
+                            <span className="font-mono">{trx.last4}</span>
+                          </span>
+                        </div>
+                      </div>
+                      <span className={`font-mono font-bold text-lg tracking-tight mt-0.5 flex-shrink-0 ${
+                        trx.status === 'Reembolsado'
+                          ? 'text-rose-500 line-through opacity-70'
+                          : isDarkMode ? 'text-white' : 'text-[#111113]'
+                      }`}>
+                        ${trx.amount}
                       </span>
                     </div>
-                    <span className={`text-xs font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                      <Clock size={12} /> {trx.date} {trx.time}
-                    </span>
-                  </div>
 
-                  <div className={`flex items-center gap-2 pt-3 border-t ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
-                    <Button variant="action" size="sm" onClick={() => setReceiptTrx(trx)} className="!px-3 !py-1.5 flex-1">
-                      <FileText size={14} /> Recibo
-                    </Button>
-                    {trx.status === 'Reembolsado' ? (
-                      <Button variant="outline" size="sm" onClick={() => setRefundTrx(trx)} className="!px-3 !py-1.5 flex-1">
-                        <FileText size={14} /> Recibo Dev.
-                      </Button>
-                    ) : (
-                      <Button variant="danger" size="sm" onClick={() => setRefundTrx(trx)} className="!px-3 !py-1.5 flex-1" disabled={trx.status === 'Pendiente'}>
-                        <RotateCcw size={14} /> Devolucion
-                      </Button>
-                    )}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge variant={trx.statusVariant} icon={trx.StatusIcon} title={trx.status} />
+                        <span className={`text-[11px] font-medium flex items-center gap-1 opacity-70 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`} title={trx.channel}>
+                          <trx.ChannelIcon size={14} />
+                        </span>
+                      </div>
+                      <span className={`text-[11px] font-medium flex items-center gap-1.5 opacity-80 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                        <Clock size={12} /> {trx.date} {trx.time}
+                      </span>
+                    </div>
                   </div>
-                </Card>
+                </SwipeableCard>
               </motion.div>
             ))}
           </motion.div>
