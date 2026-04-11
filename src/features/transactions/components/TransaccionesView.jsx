@@ -137,12 +137,18 @@ export default function TransaccionesView() {
 
                     {/* Cliente */}
                     <td className="px-6 py-4">
-                      <AvatarInfo
-                        initials={trx.initials}
-                        primary={trx.client || 'Cliente Anonimo'}
-                        secondary={trx.email || 'Venta en mostrador'}
-                        glow
-                      />
+                      <div className="flex flex-col gap-0.5 min-w-0 max-w-[200px]">
+                        <p className={`font-bold text-sm truncate ${isDarkMode ? 'text-[#D8D7D9] group-hover:text-white' : 'text-[#111113]'}`} title={trx.client || 'Cliente Anónimo'}>
+                          {trx.client || 'Cliente Anónimo'}
+                        </p>
+                        <div className={`flex items-center gap-1.5 text-[11px] font-medium truncate ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                          <span className="flex items-center gap-1 flex-shrink-0">
+                            <CreditCard size={12} className="opacity-70" />
+                            <span className="font-mono tracking-widest opacity-70">••</span>
+                            <span className="font-mono">{trx.last4}</span>
+                          </span>
+                        </div>
+                      </div>
                     </td>
 
                     {/* Detalles */}
@@ -152,12 +158,6 @@ export default function TransaccionesView() {
                           {trx.status}
                         </Badge>
                         <div className={`flex items-center gap-2 text-[11px] font-medium flex-wrap ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                          <span className="flex items-center gap-1.5">
-                            <CreditCard size={12} className="opacity-70" />
-                            <span className="font-mono tracking-widest opacity-70">••</span>
-                            <span className="font-mono">{trx.last4}</span>
-                          </span>
-                          <span className="opacity-40">•</span>
                           <span className="flex items-center gap-1.5">
                             <trx.ChannelIcon size={12} className="opacity-70" />
                             <span className="hidden xl:inline">{trx.channel}</span>
@@ -267,10 +267,6 @@ export default function TransaccionesView() {
                             <CreditCard size={12} className="opacity-70" />
                             <span className="font-mono tracking-widest opacity-70">••</span>
                             <span className="font-mono">{trx.last4}</span>
-                          </span>
-                          <span className="opacity-40 flex-shrink-0">•</span>
-                          <span className="truncate" title={trx.email || 'Venta en mostrador'}>
-                            {trx.email || 'Venta en mostrador'}
                           </span>
                         </div>
                       </div>
