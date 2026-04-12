@@ -13,6 +13,8 @@ Panel de administración para la plataforma de pagos Zwap. Construido con React 
 | Gráficas | Recharts |
 | Animaciones | Framer Motion |
 | Íconos | Lucide React |
+| Calendario | react-day-picker v9 |
+| i18n | react-i18next + i18next |
 
 ## Requisitos
 
@@ -71,11 +73,15 @@ src/
 │
 ├── shared/                 # Código reutilizable
 │   ├── brand/              # Logo y assets de marca
-│   ├── context/            # ThemeContext (dark/light mode)
-│   ├── hooks/              # Custom hooks globales
-│   ├── layout/             # AppShell, Sidebar, GlassBackground
-│   ├── ui/                 # Componentes base (Card, Button, Input…)
+│   ├── context/            # ThemeContext, ToastProvider, ViewSearchContext
+│   ├── hooks/              # Custom hooks globales (useMediaQuery)
+│   ├── layout/             # AppShell, Sidebar, Header, BottomNav
+│   ├── ui/                 # Componentes base (Card, Button, Modal…)
 │   └── utils/              # Helpers y formatters
+│
+├── i18n/
+│   ├── index.js            # Configuración i18next
+│   └── locales/            # es.json, en.json
 │
 ├── router/
 │   ├── index.jsx           # Definición de rutas (lazy-loaded)
@@ -92,8 +98,9 @@ El proyecto sigue el patrón **Bulletproof React** (vertical slices por feature)
 
 - Cada `feature/` es autónoma: vista, modales y estado local.
 - Las vistas no reciben callbacks desde el padre — usan `useNavigate` para rutas y `useState` para modales propios.
-- `AppShell` sólo provee el layout (Sidebar + `<Outlet />`), sin orquestar estado de features.
+- `AppShell` sólo provee el layout (Sidebar/BottomNav + Header + `<Outlet />`), sin orquestar estado de features.
 - Código splitting automático: cada ruta se carga con `lazy()` + `Suspense`.
+- Responsive: Sidebar en desktop (≥1024px), BottomNav en mobile/tablet.
 
 ## Autenticación (mock)
 
@@ -101,4 +108,25 @@ En desarrollo, el login guarda `zwap_token` en `localStorage`. `AuthGuard` prote
 
 ## Diseño
 
-Sistema de diseño **Prism UI**: glassmorphism con backdrop-blur, tokens de color púrpura (`#7C3AED` / `#561BAF`), soporte dark/light mode mediante `ThemeContext`.
+Sistema de diseño **Prism UI**: glassmorphism con backdrop-blur, tokens de color púrpura (`#7C3AED` / `#561BAF`), soporte dark/light mode mediante `ThemeContext`. Animaciones spring-first con Framer Motion.
+
+## Internacionalización
+
+Soporte bilingüe español/inglés con `react-i18next`. Idioma por defecto: español. Selector de idioma en Settings > Mi Perfil. Locales en `src/i18n/locales/`.
+
+## Features principales
+
+| Módulo | Descripción |
+|---|---|
+| **Dashboard** | KPIs, gráficas (Recharts), live feed, acciones rápidas, QR |
+| **Transactions** | Historial con filtros (fecha/estado), recibos, reembolsos |
+| **Payment Links** | Links permanentes y custom, CRUD, fee split configurable |
+| **Settlements** | Control de cierres diarios, filtros, exportación CSV |
+| **Wallet** | Balance, retiros, filtros (estado/fecha), exportación CSV |
+| **Branches** | Gestión de sucursales con búsqueda por nombre/dirección |
+| **Users** | Gestión de usuarios con filtros por rol y estado |
+| **Settings** | Perfil, seguridad, facturación — búsqueda contextual tipo WhatsApp |
+
+## Búsqueda y filtros
+
+La barra de búsqueda del Header se conecta a la vista activa via `ViewSearchContext`. Cada vista registra su placeholder y lógica de filtrado. En mobile, la barra se expande inline con animación spring. Las vistas con filtros muestran un indicador en el ícono de filtros del Header, y ofrecen reset rápido via `TableToolbar`.
