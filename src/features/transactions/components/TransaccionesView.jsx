@@ -121,7 +121,7 @@ export default function TransaccionesView() {
       {/* Table (desktop) */}
       <Card className="pb-2 hidden lg:block">
         <div className="overflow-x-auto">
-          <table aria-label="Historial de transacciones" className="w-full text-left border-collapse min-w-[900px]">
+          <table aria-label={t('transactions.title')} className="w-full text-left border-collapse min-w-[900px]">
             <thead>
               <tr className={`text-[10px] uppercase font-bold tracking-widest ${
                 isDarkMode

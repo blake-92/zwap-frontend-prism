@@ -73,7 +73,7 @@ export default function LiveFeed({ onViewAll }) {
 
       {/* ── Table (desktop) ── */}
       <div className="overflow-x-auto flex-1 hidden lg:block">
-        <table aria-label="Feed en vivo de transacciones" className="w-full text-left border-collapse min-w-[640px]">
+        <table aria-label={t('dashboard.liveFeed')} className="w-full text-left border-collapse min-w-[640px]">
           <thead>
             <tr className={`text-[10px] uppercase font-bold tracking-widest ${
               isDarkMode ? 'text-[#888991] bg-[#111113]/20' : 'text-[#67656E] bg-white/20'

@@ -1,11 +1,13 @@
 import { Bell } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Card, Button, Badge, CardHeader } from '@/shared/ui'
 import { listVariants, cardItemVariants } from '@/shared/utils/motionVariants'
 import { ALERTS } from '@/services/mocks/mockData'
 
 export default function AlertsPanel() {
+  const { t } = useTranslation()
   const { isDarkMode } = useTheme()
 
   const colorMap = {
@@ -17,8 +19,8 @@ export default function AlertsPanel() {
   return (
     <Card className="lg:col-span-1 p-0 flex flex-col">
       <CardHeader
-        title={<><Bell size={18} className="text-amber-500 animate-pulse" /> Requiere Atención</>}
-        description="Alertas de tu operativa hoy"
+        title={<><Bell size={18} className="text-amber-500 animate-pulse" /> {t('dashboard.requiresAttention')}</>}
+        description={t('dashboard.alertsDescription')}
       >
         <Badge variant="warning">{ALERTS.length}</Badge>
       </CardHeader>

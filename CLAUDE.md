@@ -403,18 +403,20 @@ import i18n from '@/i18n'
 i18n.t('errors.somethingWrong')
 ```
 
-### Locale
+### Locales
 
-- Archivo único: `src/i18n/locales/es.json`
-- Idioma fijo: `es` (sin selector de idioma por ahora)
+- Archivos: `src/i18n/locales/es.json` (español) y `src/i18n/locales/en.json` (inglés)
+- Idioma por defecto: `es`
+- Selector de idioma: disponible en SettingsView (pestaña "Mi Perfil"), persiste en `localStorage` key `zwap-language`
 - Namespaces: `common`, `nav`, `header`, `auth`, `dashboard`, `transactions`, `refund`, `links`, `settlements`, `wallet`, `branches`, `users`, `settings`, `filters`, `errors`, `calendar`, `pagination`, `search`, `workflow`
 
 ### Reglas
 
 1. **No hardcodear strings visibles al usuario** — usar siempre `t('namespace.key')`
-2. Agregar claves nuevas en `es.json` bajo el namespace correcto
+2. Agregar claves nuevas en **ambos** archivos de locale (`es.json` y `en.json`) bajo el namespace correcto
 3. Interpolar datos dinámicos con `{{ variable }}`, no template literals
 4. Para arrays (meses, días), usar `t('key', { returnObjects: true })`
+5. Los valores de datos mock (roles, estados) están en español — usar mapas de traducción para display (ej. `ROLE_LABEL` en UsuariosView)
 
 ## Responsive Design
 

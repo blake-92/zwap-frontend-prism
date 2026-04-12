@@ -136,18 +136,18 @@ export default function LiquidacionesView() {
       {/* Table (desktop) */}
       <Card className="pb-2 hidden lg:block">
         <div className="overflow-x-auto">
-          <table aria-label="Liquidaciones y depósitos" className="w-full text-left border-collapse min-w-[1000px]">
+          <table aria-label={t('settlements.title')} className="w-full text-left border-collapse min-w-[1000px]">
             <thead>
               <tr className={`text-[10px] uppercase font-bold tracking-widest ${
                 isDarkMode
                   ? 'text-[#888991] border-b border-white/10 bg-[#111113]/40'
                   : 'text-[#67656E] border-b border-black/5 bg-white/50'
               }`}>
-                <th className="px-8 py-4">Concepto & Cierre</th>
-                <th className="px-6 py-4">Desglose Financiero</th>
-                <th className="px-6 py-4 text-right">Neto Resultante</th>
+                <th className="px-8 py-4">{t('settlements.conceptAndClose')}</th>
+                <th className="px-6 py-4">{t('settlements.financialBreakdown')}</th>
+                <th className="px-6 py-4 text-right">{t('settlements.netResult')}</th>
                 <th className="px-6 py-4 text-center">{t('settlements.depositStatus')}</th>
-                <th className="px-8 py-4 text-right">Acciones</th>
+                <th className="px-8 py-4 text-right">{t('transactions.tableActions')}</th>
               </tr>
             </thead>
             <motion.tbody variants={listVariants} initial="hidden" animate="show">
@@ -194,7 +194,7 @@ export default function LiquidacionesView() {
                       <div className="w-52 flex flex-col gap-1.5 font-mono text-xs">
                         <div className={`flex justify-between ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
                           <span>
-                            Volumen{' '}
+                            {t('settlements.volume')}{' '}
                             <span className="font-sans text-[10px] opacity-60">({lote.trxCount} trx)</span>:
                           </span>
                           <span className="font-bold">${lote.gross.toFixed(2)}</span>
@@ -214,12 +214,12 @@ export default function LiquidacionesView() {
                         {lote.adj !== 0 && (
                           <div className={`flex flex-col mt-1 pt-1.5 border-t ${isDarkMode ? 'border-white/10' : 'border-black/5'}`}>
                             <div className={`flex justify-between ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
-                              <span>Ajuste:</span>
+                              <span>{t('settlements.adjustment')}:</span>
                               <span className="font-bold text-rose-500">-${Math.abs(lote.adj).toFixed(2)}</span>
                             </div>
                             {lote.adjReason && (
                               <span className={`font-sans text-[10px] mt-0.5 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                                Ref: {lote.adjReason}
+                                {t('settlements.ref')}: {lote.adjReason}
                               </span>
                             )}
                           </div>
@@ -246,7 +246,7 @@ export default function LiquidacionesView() {
                         </Badge>
                         {!isDebt && lote.depositDate !== '-' && (
                           <p className={`text-[10px] font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                            <ArrowDownToLine size={10} /> Llega: {lote.depositDate}
+                            <ArrowDownToLine size={10} /> {t('settlements.arrives')}: {lote.depositDate}
                           </p>
                         )}
                       </div>
@@ -255,10 +255,10 @@ export default function LiquidacionesView() {
                     {/* Acciones */}
                     <td className="px-8 py-4 text-right">
                       <div>
-                        <Tooltip content="Inspeccionar lote" position="top">
+                        <Tooltip content={t('settlements.inspectBatch')} position="top">
                           <Button variant="action" size="sm" className="!px-3 !py-2">
                             <Search size={15} />
-                            <span className="hidden xl:inline text-xs ml-1">Inspeccionar</span>
+                            <span className="hidden xl:inline text-xs ml-1">{t('settlements.inspect')}</span>
                           </Button>
                         </Tooltip>
                       </div>
@@ -335,7 +335,7 @@ export default function LiquidacionesView() {
                       isDarkMode ? 'bg-[#111113]/40' : 'bg-gray-50'
                     }`}>
                       <div className={`flex justify-between ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
-                        <span>Volumen <span className="font-sans text-[10px] opacity-60">({lote.trxCount} trx)</span></span>
+                        <span>{t('settlements.volume')} <span className="font-sans text-[10px] opacity-60">({lote.trxCount} trx)</span></span>
                         <span className="font-bold">${lote.gross.toFixed(2)}</span>
                       </div>
                       {lote.fees.pos && (
@@ -352,7 +352,7 @@ export default function LiquidacionesView() {
                       )}
                       {lote.adj !== 0 && (
                         <div className={`flex justify-between pt-1 mt-1 border-t ${isDarkMode ? 'border-white/10' : 'border-black/5'}`}>
-                          <span className={isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}>Ajuste</span>
+                          <span className={isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}>{t('settlements.adjustment')}</span>
                           <span className="font-bold text-rose-500">-${Math.abs(lote.adj).toFixed(2)}</span>
                         </div>
                       )}
@@ -361,7 +361,7 @@ export default function LiquidacionesView() {
                     {/* Action */}
                     <div className={`pt-3 border-t ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
                       <Button variant="action" size="sm" className="!px-3 !py-1.5 w-full justify-center">
-                        <Search size={14} /> Inspeccionar
+                        <Search size={14} /> {t('settlements.inspect')}
                       </Button>
                     </div>
                   </Card>

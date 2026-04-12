@@ -116,7 +116,11 @@
     "charges_one": "{{count}} cobro",
     "charges_other": "{{count}} cobros",
     "mainChannel": "Canal principal",
-    "lastCharge": "Último cobro"
+    "lastCharge": "Último cobro",
+    "requiresAttention": "Requiere Atención",
+    "alertsDescription": "Alertas de tu operativa hoy",
+    "chartPaymentLinks": "Links de Pago",
+    "chartTerminalPos": "Terminal POS"
   },
 
   "transactions": {
@@ -219,7 +223,16 @@
     "tableStatus": "Estado",
     "tableAmount": "Monto (USD)",
     "notFound": "No se encontraron liquidaciones",
-    "notFoundFor": "No se encontraron liquidaciones para \"{{term}}\""
+    "notFoundFor": "No se encontraron liquidaciones para \"{{term}}\"",
+    "conceptAndClose": "Concepto & Cierre",
+    "financialBreakdown": "Desglose Financiero",
+    "netResult": "Neto Resultante",
+    "volume": "Volumen",
+    "adjustment": "Ajuste",
+    "ref": "Ref",
+    "arrives": "Llega",
+    "inspectBatch": "Inspeccionar lote",
+    "inspect": "Inspeccionar"
   },
 
   "wallet": {

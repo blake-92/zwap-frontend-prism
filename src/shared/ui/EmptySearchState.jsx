@@ -1,5 +1,6 @@
 import { SearchX } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import Button from './Button'
 
@@ -15,6 +16,7 @@ const SPRING = { type: 'spring', stiffness: 300, damping: 24 }
  *   onClear  fn      — callback para limpiar la búsqueda
  */
 export default function EmptySearchState({ colSpan, term, onClear }) {
+  const { t } = useTranslation()
   const { isDarkMode } = useTheme()
 
   return (
@@ -36,15 +38,15 @@ export default function EmptySearchState({ colSpan, term, onClear }) {
           <h3 className={`text-lg font-bold mb-2 tracking-tight ${
             isDarkMode ? 'text-white' : 'text-[#111113]'
           }`}>
-            No se encontraron resultados
+            {t('errors.noResults')}
           </h3>
           <p className={`text-sm font-medium max-w-[300px] mx-auto mb-6 ${
             isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'
           }`}>
-            No hay resultados que coincidan con &quot;{term}&quot;.
+            {t('errors.noResultsFor', { term })}
           </p>
           <Button variant="outline" onClick={onClear}>
-            Limpiar búsqueda
+            {t('common.clearSearch')}
           </Button>
         </motion.div>
       </td>

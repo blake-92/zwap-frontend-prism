@@ -116,7 +116,11 @@
     "charges_one": "{{count}} charge",
     "charges_other": "{{count}} charges",
     "mainChannel": "Main channel",
-    "lastCharge": "Last charge"
+    "lastCharge": "Last charge",
+    "requiresAttention": "Requires Attention",
+    "alertsDescription": "Today's operational alerts",
+    "chartPaymentLinks": "Payment Links",
+    "chartTerminalPos": "POS Terminal"
   },
 
   "transactions": {
@@ -219,7 +223,16 @@
     "tableStatus": "Status",
     "tableAmount": "Amount (USD)",
     "notFound": "No settlements found",
-    "notFoundFor": "No settlements found for \"{{term}}\""
+    "notFoundFor": "No settlements found for \"{{term}}\"",
+    "conceptAndClose": "Concept & Close",
+    "financialBreakdown": "Financial Breakdown",
+    "netResult": "Net Result",
+    "volume": "Volume",
+    "adjustment": "Adjustment",
+    "ref": "Ref",
+    "arrives": "Arrives",
+    "inspectBatch": "Inspect batch",
+    "inspect": "Inspect"
   },
 
   "wallet": {

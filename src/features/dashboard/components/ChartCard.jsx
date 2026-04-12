@@ -116,7 +116,7 @@ export default function ChartCard() {
                 <Area 
                   type="monotone" 
                   dataKey="links" 
-                  name="Links de Pago"
+                  name={t('dashboard.chartPaymentLinks')}
                   stroke="#7C3AED" 
                   strokeWidth={3}
                   fillOpacity={1} 
@@ -126,7 +126,7 @@ export default function ChartCard() {
                 <Area 
                   type="monotone" 
                   dataKey="pos" 
-                  name="Terminal POS"
+                  name={t('dashboard.chartTerminalPos')}
                   stroke="#10B981" 
                   strokeWidth={3}
                   fillOpacity={1} 

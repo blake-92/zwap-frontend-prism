@@ -22,7 +22,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
   }
 
   return (
-    <nav aria-label="Paginación" className={`flex items-center justify-between pt-4 border-t ${isDarkMode ? 'border-white/10' : 'border-gray-200'}`}>
+    <nav aria-label={t('pagination.showingPage', { current: currentPage, total: totalPages })} className={`flex items-center justify-between pt-4 border-t ${isDarkMode ? 'border-white/10' : 'border-gray-200'}`}>
       <span className={`text-xs font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
         {t('pagination.showingPage', { current: currentPage, total: totalPages })}
       </span>
