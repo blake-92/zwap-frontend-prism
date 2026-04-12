@@ -52,10 +52,20 @@ export default function Modal({
     return () => { document.body.style.overflow = original }
   }, [])
 
-  // Signal to other components (e.g. BottomNav) that a modal is open
+  // Signal to other components (e.g. BottomNav) that a modal is open.
+  // Uses a counter so stacked modals don't clear the flag prematurely.
   useEffect(() => {
+    const count = parseInt(document.body.dataset.modalCount || '0', 10)
+    document.body.dataset.modalCount = String(count + 1)
     document.body.dataset.modalOpen = 'true'
-    return () => { delete document.body.dataset.modalOpen }
+    return () => {
+      const next = parseInt(document.body.dataset.modalCount || '1', 10) - 1
+      document.body.dataset.modalCount = String(next)
+      if (next <= 0) {
+        delete document.body.dataset.modalOpen
+        delete document.body.dataset.modalCount
+      }
+    }
   }, [])
 
   // Focus trap: keep focus within modal (re-queries on each Tab press)

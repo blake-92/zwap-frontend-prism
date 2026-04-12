@@ -9,13 +9,16 @@ import {
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { useToast } from '@/shared/context/ToastContext'
-import { Card, Button, Badge, AvatarInfo, SectionLabel, Toggle, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
-import { listVariants, itemVariants, pageVariants } from '@/shared/utils/motionVariants'
+import { Card, Button, Badge, SectionLabel, Toggle, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar, SwipeableCard } from '@/shared/ui'
+import { listVariants, itemVariants, cardItemVariants, pageVariants } from '@/shared/utils/motionVariants'
 import { PERMANENT_LINKS, CUSTOM_LINKS } from '@/services/mocks/mockData'
 import NewLinkModal from './NewLinkModal'
+import LinkDetailModal from './LinkDetailModal'
+
+const SPRING = { type: 'spring', stiffness: 400, damping: 30 }
 
 /* ─────────────────────────────────────────────────────────────
-   Permanent Link Card
+   Permanent Link Card (desktop)
 ───────────────────────────────────────────────────────────── */
 function PermanentCard({ link, onToggle }) {
   const { isDarkMode } = useTheme()
@@ -29,7 +32,6 @@ function PermanentCard({ link, onToggle }) {
 
   return (
     <Card className="p-6 relative group">
-      {/* Icon + Toggle */}
       <div className="flex justify-between items-start mb-4">
         <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors duration-300 ${
           link.active
@@ -41,7 +43,6 @@ function PermanentCard({ link, onToggle }) {
         <Toggle active={link.active} onToggle={onToggle} />
       </div>
 
-      {/* Info */}
       <h4 className={`text-lg font-bold tracking-tight mb-1 ${
         link.active
           ? isDarkMode ? 'text-white' : 'text-[#111113]'
@@ -53,7 +54,6 @@ function PermanentCard({ link, onToggle }) {
         {link.desc}
       </p>
 
-      {/* Actions */}
       <div className={`pt-4 border-t flex justify-between items-center ${isDarkMode ? 'border-white/10' : 'border-black/5'}`}>
         <div className="flex gap-2">
           <Tooltip content={t('links.viewQr')} position="top">
@@ -76,17 +76,123 @@ function PermanentCard({ link, onToggle }) {
 }
 
 /* ─────────────────────────────────────────────────────────────
+   Permanent Links — compact mobile accordion
+───────────────────────────────────────────────────────────── */
+function PermanentLinksMobile({ links, onToggle }) {
+  const { isDarkMode } = useTheme()
+  const { addToast } = useToast()
+  const { t } = useTranslation()
+  const [expanded, setExpanded] = useState(false)
+
+  return (
+    <Card className="overflow-hidden">
+      <button
+        onClick={() => setExpanded(v => !v)}
+        className={`w-full flex items-center justify-between px-4 py-3.5 transition-colors ${
+          isDarkMode ? 'hover:bg-white/5' : 'hover:bg-black/[0.02]'
+        }`}
+      >
+        <div className="flex items-center gap-3">
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+            isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/50 text-[#561BAF]'
+          }`}>
+            <QrCode size={15} />
+          </div>
+          <div className="text-left">
+            <p className={`text-sm font-bold ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+              {t('links.quickLinks')}
+            </p>
+            <p className={`text-[10px] font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+              {links.filter(l => l.active).length}/{links.length} {t('links.activeCount')}
+            </p>
+          </div>
+        </div>
+        <motion.div
+          animate={{ rotate: expanded ? 180 : 0 }}
+          transition={SPRING}
+          className={isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}
+        >
+          <ChevronDown size={18} />
+        </motion.div>
+      </button>
+
+      <AnimatePresence initial={false}>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ height: SPRING, opacity: { duration: 0.15 } }}
+            className="overflow-hidden"
+          >
+            <div className={`border-t ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
+              {links.map((link, idx) => (
+                <div
+                  key={link.id}
+                  className={`flex items-center justify-between px-4 py-3 ${
+                    idx < links.length - 1
+                      ? isDarkMode ? 'border-b border-white/5' : 'border-b border-black/5'
+                      : ''
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                      link.active ? 'bg-emerald-500' : isDarkMode ? 'bg-[#45434A]' : 'bg-gray-300'
+                    }`} />
+                    <div className="min-w-0">
+                      <p className={`text-sm font-bold truncate ${
+                        link.active
+                          ? isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'
+                          : isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'
+                      }`}>
+                        {link.name}
+                      </p>
+                      <p className={`text-[10px] font-medium truncate ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                        {link.desc}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+                    <Button
+                      variant="ghost" size="sm" className="!p-1.5"
+                      disabled={!link.active}
+                      onClick={() => {
+                        navigator.clipboard.writeText(`https://zwap.me/pay/${link.id}`)
+                        addToast(t('links.linkCopied', { name: link.name }), 'success')
+                      }}
+                    >
+                      <Copy size={14} />
+                    </Button>
+                    <Toggle active={link.active} onToggle={() => onToggle(link.id)} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Card>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────────
    Custom Links Table
 ───────────────────────────────────────────────────────────── */
-function CustomLinksTable() {
+function CustomLinksTable({ onDetail, onEdit }) {
   const { isDarkMode } = useTheme()
   const { addToast } = useToast()
   const { t } = useTranslation()
   const [search, setSearch] = useState('')
 
   const filtered = useMemo(() => CUSTOM_LINKS.filter(l =>
-    !search || l.client.toLowerCase().includes(search.toLowerCase()) || l.id.toLowerCase().includes(search.toLowerCase())
+    !search || l.client.toLowerCase().includes(search.toLowerCase())
   ), [search])
+
+  const handleCopy = (link) => {
+    navigator.clipboard.writeText(`https://zwap.me/pay/${link.id}`)
+    addToast(t('links.linkCopied', { name: link.client }), 'success')
+  }
 
   return (
     <>
@@ -108,12 +214,12 @@ function CustomLinksTable() {
       {/* Table (desktop) */}
       <Card className="pb-2 hidden lg:block">
         <div className="overflow-x-auto">
-          <table aria-label={t('links.title')} className="w-full text-left border-collapse min-w-[900px]">
+          <table aria-label={t('links.title')} className="w-full text-left border-collapse min-w-[800px]">
             <thead>
               <tr className={`text-[10px] uppercase font-bold tracking-widest ${
                 isDarkMode ? 'text-[#888991] border-b border-white/10 bg-[#111113]/40' : 'text-[#67656E] border-b border-black/5 bg-white/50'
               }`}>
-                <th className="px-6 py-4">{t('settlements.tableId')}</th>
+                <th className="px-8 py-4">{t('transactions.tableClient')}</th>
                 <th className="px-6 py-4">{t('settlements.tableDetail')}</th>
                 <th className="px-6 py-4">{t('settlements.tableTiming')}</th>
                 <th className="px-6 py-4 text-center">{t('filters.status')}</th>
@@ -133,14 +239,16 @@ function CustomLinksTable() {
                       : 'border-b border-black/5 hover:bg-[#DBD3FB]/20 last:border-0'
                   }`}
                 >
-                  {/* ID & Cliente */}
-                  <td className="px-6 py-4">
-                    <AvatarInfo
-                      initials={link.initials}
-                      primary={link.client}
-                      secondary={link.email}
-                      meta={link.id}
-                    />
+                  {/* Cliente */}
+                  <td className="px-8 py-4">
+                    <div>
+                      <p className={`text-sm font-bold ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+                        {link.client}
+                      </p>
+                      <p className={`text-xs font-medium mt-0.5 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                        {link.email}
+                      </p>
+                    </div>
                   </td>
 
                   {/* Detalle */}
@@ -182,21 +290,15 @@ function CustomLinksTable() {
                   <td className="px-8 py-4 text-right">
                     <div className="flex items-center justify-end gap-1">
                       <Tooltip content={t('common.edit')} position="top">
-                        <Button variant="ghost" size="sm" className="!px-2" disabled={link.status === 'Pagado'}>
+                        <Button variant="ghost" size="sm" className="!px-2" disabled={link.status === 'Pagado'} onClick={() => onEdit(link)}>
                           <Edit2 size={15} />
-                          <span className="hidden xl:inline text-xs ml-1">{t('common.edit')}</span>
                         </Button>
                       </Tooltip>
                       <Tooltip content={t('links.copyLink')} position="top">
                         <Button
-                          variant="ghost"
-                          size="sm"
-                          className="!px-2"
+                          variant="ghost" size="sm" className="!px-2"
                           disabled={link.status === 'Expirado'}
-                          onClick={() => {
-                            navigator.clipboard.writeText(`https://zwap.me/pay/${link.id}`)
-                            addToast(t('links.linkCopied', { name: link.id }), 'success')
-                          }}
+                          onClick={() => handleCopy(link)}
                         >
                           <Copy size={15} />
                         </Button>
@@ -224,80 +326,79 @@ function CustomLinksTable() {
         </div>
       </Card>
 
-      {/* Cards (mobile / tablet) */}
-      <div className="lg:hidden space-y-3">
+      {/* Cards (mobile / tablet) — SwipeableCard with swipe-to-edit */}
+      <div className="lg:hidden">
         {filtered.length > 0 ? (
           <motion.div variants={listVariants} initial="hidden" animate="show" className="space-y-3">
             {filtered.map((link) => (
-              <motion.div key={link.id} variants={itemVariants}>
-                <Card className="p-4">
-                  {/* Header: client + amount */}
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <AvatarInfo
-                      initials={link.initials}
-                      primary={link.client}
-                      secondary={link.email}
-                      meta={link.id}
-                    />
-                    <span className={`font-mono font-bold text-lg tracking-tight flex-shrink-0 ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-                      ${link.amount}
-                    </span>
-                  </div>
-
-                  {/* Status + items + views */}
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Badge variant={link.statusVariant} icon={link.StatusIcon}>
-                        {link.status}
-                      </Badge>
-                      <span className={`text-[11px] font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                        <ListTree size={12} /> {link.items} {t('dashboard.items')}
+              <motion.div key={link.id} variants={cardItemVariants}>
+                <SwipeableCard
+                  actions={[
+                    {
+                      label: t('common.edit'),
+                      icon: Edit2,
+                      disabled: link.status === 'Pagado',
+                      onClick: () => onEdit(link),
+                    },
+                  ]}
+                >
+                  {/* Tappable area → opens detail modal */}
+                  <div className="p-4" onClick={() => onDetail(link)}>
+                    {/* Row 1: Client name + Amount */}
+                    <div className="flex items-center justify-between gap-2 mb-2.5">
+                      <p className={`text-sm font-bold truncate min-w-0 ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+                        {link.client}
+                      </p>
+                      <span className={`font-mono font-bold text-lg tracking-tight flex-shrink-0 ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+                        ${link.amount}
                       </span>
                     </div>
-                    <span className={`text-[10px] font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                      <Eye size={10} /> {link.views} {t('links.views')}
-                    </span>
+
+                    {/* Row 2: Status + items/views + expiry */}
+                    <div className="flex items-center justify-between gap-2 mb-3">
+                      <div className="flex items-center gap-2.5">
+                        <Badge variant={link.statusVariant} icon={link.StatusIcon} />
+                        <span className={`text-[10px] font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                          <ListTree size={10} /> {link.items}
+                        </span>
+                        <span className={`text-[10px] font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                          <Eye size={10} /> {link.views}
+                        </span>
+                      </div>
+                      <span className={`text-[11px] font-bold flex items-center gap-1 ${
+                        link.status === 'Expirado' ? 'text-rose-500' : isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'
+                      }`}>
+                        <Timer size={11} />
+                        {link.expires !== '-' ? link.expires : t('links.noExpiration')}
+                      </span>
+                    </div>
                   </div>
 
-                  {/* Times */}
-                  <div className="flex items-center gap-3 mb-3 flex-wrap">
-                    <span className={`text-[11px] font-bold flex items-center gap-1 ${
-                      link.status === 'Expirado' ? 'text-rose-500' : isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'
-                    }`}>
-                      <Timer size={12} />
-                      {link.expires !== '-' ? t('links.expires', { date: link.expires }) : t('links.noExpiration')}
-                    </span>
-                    <span className={`text-[10px] font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                      <CalendarDays size={12} /> {link.createdAt}
-                    </span>
-                  </div>
-
-                  {/* Actions */}
-                  <div className={`flex items-center gap-2 pt-3 border-t ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
-                    <Button variant="ghost" size="sm" className="!px-2 !py-1.5" disabled={link.status === 'Pagado'}>
-                      <Edit2 size={14} />
-                    </Button>
+                  {/* Row 3: Action buttons — outside tap area to prevent detail modal */}
+                  <div className={`flex items-center gap-1.5 px-4 pb-4 ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
                     <Button
-                      variant="ghost" size="sm" className="!px-2 !py-1.5"
-                      disabled={link.status === 'Expirado'}
-                      onClick={() => {
-                        navigator.clipboard.writeText(`https://zwap.me/pay/${link.id}`)
-                        addToast(t('links.linkCopied', { name: link.id }), 'success')
-                      }}
-                    >
-                      <Copy size={14} />
-                    </Button>
-                    <Button variant="ghost" size="sm" className="!px-2 !py-1.5" disabled={link.status === 'Expirado'}>
-                      <QrCode size={14} />
-                    </Button>
-                    <Button
-                      variant="action" size="sm" className="!px-3 !py-1.5 ml-auto"
+                      variant="ghost" size="sm" className="!p-2.5 flex-1 justify-center"
                       disabled={link.status === 'Expirado' || link.status === 'Pagado'}
+                      onClick={(e) => { e.stopPropagation() }}
                     >
-                      <Mail size={14} /> {t('links.send')}
+                      <Mail size={16} />
+                    </Button>
+                    <Button
+                      variant="ghost" size="sm" className="!p-2.5 flex-1 justify-center"
+                      disabled={link.status === 'Expirado'}
+                      onClick={(e) => { e.stopPropagation(); handleCopy(link) }}
+                    >
+                      <Copy size={16} />
+                    </Button>
+                    <Button
+                      variant="ghost" size="sm" className="!p-2.5 flex-1 justify-center"
+                      disabled={link.status === 'Expirado'}
+                      onClick={(e) => { e.stopPropagation() }}
+                    >
+                      <QrCode size={16} />
                     </Button>
                   </div>
-                </Card>
+                </SwipeableCard>
               </motion.div>
             ))}
           </motion.div>
@@ -323,35 +424,69 @@ function CustomLinksTable() {
    LinksView
 ───────────────────────────────────────────────────────────── */
 export default function LinksView() {
+  const { isDarkMode } = useTheme()
   const { t } = useTranslation()
   const [links, setLinks]         = useState(PERMANENT_LINKS)
   const [newLinkOpen, setNewLinkOpen] = useState(false)
+  const [detailLink, setDetailLink]   = useState(null)
+  const [editLink, setEditLink]       = useState(null)
 
   const toggleLink = id =>
     setLinks(prev => prev.map(l => l.id === id ? { ...l, active: !l.active } : l))
 
+  const handleEdit = (link) => {
+    setDetailLink(null)
+    setEditLink(link)
+  }
+
   return (
     <motion.div variants={pageVariants} initial="hidden" animate="show">
       <PageHeader title={t('links.title')} description={t('links.description')}>
-        <Button onClick={() => setNewLinkOpen(true)}>
-          <Plus size={18} /> {t('links.createLink')}
-        </Button>
+        <div className="hidden lg:block">
+          <Button onClick={() => setNewLinkOpen(true)}>
+            <Plus size={18} /> {t('links.createLink')}
+          </Button>
+        </div>
       </PageHeader>
 
-      {/* Permanentes */}
-      <SectionLabel className="uppercase mb-4">{t('links.permanentSection')}</SectionLabel>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 2xl:gap-8 mb-10">
-        {links.map(link => (
-          <PermanentCard key={link.id} link={link} onToggle={() => toggleLink(link.id)} />
-        ))}
+      {/* Permanentes — desktop: grid cards */}
+      <div className="hidden lg:block">
+        <SectionLabel className="uppercase mb-4">{t('links.permanentSection')}</SectionLabel>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 2xl:gap-8 mb-10">
+          {links.map(link => (
+            <PermanentCard key={link.id} link={link} onToggle={() => toggleLink(link.id)} />
+          ))}
+        </div>
+      </div>
+
+      {/* Mobile: accordion + CTA button */}
+      <div className="lg:hidden space-y-3 mb-6">
+        <PermanentLinksMobile links={links} onToggle={toggleLink} />
+        <Button size="lg" className="w-full" onClick={() => setNewLinkOpen(true)}>
+          <Plus size={18} /> {t('dashboard.newReservationLink')}
+        </Button>
       </div>
 
       {/* Personalizados */}
       <SectionLabel className="uppercase mb-4">{t('links.customSection')}</SectionLabel>
-      <CustomLinksTable />
+      <CustomLinksTable onDetail={setDetailLink} onEdit={handleEdit} />
 
+      {/* Modals */}
       <AnimatePresence>
         {newLinkOpen && <NewLinkModal key="new-link" onClose={() => setNewLinkOpen(false)} />}
+      </AnimatePresence>
+      <AnimatePresence>
+        {editLink && <NewLinkModal key="edit-link" link={editLink} onClose={() => setEditLink(null)} />}
+      </AnimatePresence>
+      <AnimatePresence>
+        {detailLink && (
+          <LinkDetailModal
+            key="link-detail"
+            link={detailLink}
+            onClose={() => setDetailLink(null)}
+            onEdit={handleEdit}
+          />
+        )}
       </AnimatePresence>
     </motion.div>
   )

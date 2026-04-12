@@ -204,7 +204,23 @@
     "generateQr": "Generar QR",
     "send": "Enviar",
     "addItem": "Añadir Ítem",
-    "generateDescription": "Genera un enlace de cobro con vencimiento e ítems detallados"
+    "generateDescription": "Genera un enlace de cobro con vencimiento e ítems detallados",
+    "quickLinks": "Links Rápidos",
+    "moreActions": "Más acciones",
+    "linkDetail": "Detalle del Link",
+    "sentTo": "Enviado a",
+    "linkUrl": "Enlace de Pago",
+    "itemsBreakdown": "Desglose de Ítems",
+    "editLink": "Editar Link",
+    "editLinkDesc": "Modifica los datos del enlace de cobro",
+    "saveChanges": "Guardar Cambios",
+    "saving": "Guardando",
+    "feeShared": "Compartida",
+    "feeHotelShare": "Hotel: {{percent}}%",
+    "feeClientShare": "Cliente: {{percent}}%",
+    "feeHotelLabel": "Hotel ({{percent}}%)",
+    "feeClientLabel": "Cliente ({{percent}}%)",
+    "activeCount": "activos"
   },
 
   "settlements": {
@@ -384,7 +400,8 @@
     "monthsShort": ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
     "daysShort": ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"],
     "deadline": "Hora Límite",
-    "confirmDate": "Confirmar Fecha"
+    "confirmDate": "Confirmar Fecha",
+    "selectDateTime": "Seleccionar fecha y hora"
   },
 
   "pagination": {

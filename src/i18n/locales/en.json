@@ -204,7 +204,23 @@
     "generateQr": "Generate QR",
     "send": "Send",
     "addItem": "Add Item",
-    "generateDescription": "Generate a payment link with expiration and detailed items"
+    "generateDescription": "Generate a payment link with expiration and detailed items",
+    "quickLinks": "Quick Links",
+    "moreActions": "More actions",
+    "linkDetail": "Link Detail",
+    "sentTo": "Sent to",
+    "linkUrl": "Payment Link",
+    "itemsBreakdown": "Items Breakdown",
+    "editLink": "Edit Link",
+    "editLinkDesc": "Modify the payment link details",
+    "saveChanges": "Save Changes",
+    "saving": "Saving",
+    "feeShared": "Shared",
+    "feeHotelShare": "Hotel: {{percent}}%",
+    "feeClientShare": "Client: {{percent}}%",
+    "feeHotelLabel": "Hotel ({{percent}}%)",
+    "feeClientLabel": "Client ({{percent}}%)",
+    "activeCount": "active"
   },
 
   "settlements": {
@@ -384,7 +400,8 @@
     "monthsShort": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
     "daysShort": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
     "deadline": "Deadline",
-    "confirmDate": "Confirm Date"
+    "confirmDate": "Confirm Date",
+    "selectDateTime": "Select date and time"
   },
 
   "pagination": {

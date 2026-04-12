@@ -8,6 +8,7 @@ export default function SwipeableCard({ children, actions, className = '' }) {
   const { isDarkMode } = useTheme()
   const controls = useAnimation()
   const [isOpen, setIsOpen] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
 
   const validActions = actions.filter(a => !a.hidden)
   const actionWidth = 76
@@ -33,9 +34,11 @@ export default function SwipeableCard({ children, actions, className = '' }) {
 
   return (
     <div className={`relative overflow-hidden rounded-[24px] ${className}`}>
-      {/* Background actions layer */}
-      <div 
-        className={`absolute inset-y-0 right-0 flex justify-end overflow-hidden ${
+      {/* Background actions layer — hidden until drag/open to prevent flash on mount animation */}
+      <div
+        className={`absolute inset-y-0 right-0 flex justify-end overflow-hidden transition-opacity duration-150 ${
+          isOpen || isDragging ? 'opacity-100' : 'opacity-0'
+        } ${
           isDarkMode ? 'bg-[#111113]/50 border border-white/5' : 'bg-gray-100 border border-black/5'
         } rounded-[24px]`}
         style={{ width: maxDrag }}
@@ -75,7 +78,8 @@ export default function SwipeableCard({ children, actions, className = '' }) {
         dragConstraints={{ left: -maxDrag, right: 0 }}
         dragElastic={0.1}
         animate={controls}
-        onDragEnd={handleDragEnd}
+        onDragStart={() => setIsDragging(true)}
+        onDragEnd={(...args) => { setIsDragging(false); handleDragEnd(...args) }}
         onClick={() => {
           if (isOpen) closeCard()
         }}

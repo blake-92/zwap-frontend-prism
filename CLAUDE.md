@@ -10,6 +10,7 @@ Instrucciones para Claude Code al trabajar en este repositorio.
 - **Lucide React** — íconos
 - **Recharts** — gráficas
 - **Framer Motion** — animaciones (spring como paradigma principal)
+- **react-day-picker v9** — calendario en `DatePickerModal` (estilos Prism en `globals.css`)
 
 ## Alias de paths
 
@@ -43,7 +44,7 @@ features/links/
 | `auth` | LoginView | — |
 | `dashboard` | DashboardView | KpiCard, ChartCard, QuickLinkCard, AlertsPanel, LiveFeed, PendingCharges, QuickActions, ShiftSummary |
 | `transactions` | TransaccionesView | ReceiptModal, RefundModal |
-| `links` | LinksView | NewLinkModal |
+| `links` | LinksView | NewLinkModal, LinkDetailModal |
 | `settlements` | LiquidacionesView | — |
 | `wallet` | WalletView | WithdrawModal, WithdrawReceiptModal |
 | `branches` | SucursalesView | NewBranchModal |
@@ -100,7 +101,7 @@ import {
   Avatar, AvatarInfo, StatCard, Stepper, SegmentControl,
   DropdownFilter, SearchInput, TableToolbar, Pagination,
   PageHeader, SectionLabel, InfoBanner, Skeleton, Tooltip,
-  MiniCalendar, EmptySearchState, ErrorBoundary, PageLoader
+  DatePickerModal, EmptySearchState, ErrorBoundary, PageLoader
 } from '@/shared/ui'
 ```
 
@@ -112,7 +113,7 @@ import {
 | `Input` | `icon` (Lucide) | Input con ícono izquierdo, theme-aware |
 | `Toggle` | `active`, `onToggle`, `disabled` | Switch con animación spring en el knob |
 | `Badge` | `variant` (default/success/warning/danger/outline), `icon` | Label inline con variantes semánticas |
-| `Modal` | `onClose`, `title`, `description`, `icon` | Modal glass con spring; bottom-sheet en mobile (`items-end`, `rounded-t-[24px]`), centered en desktop |
+| `Modal` | `onClose`, `title`, `description`, `icon`, `footer`, `maxWidth` | Modal glass con spring; bottom-sheet en mobile, centered en desktop. Soporta stacking (counter en `dataset.modalCount`) |
 | `Avatar` | `initials`, `size` (sm/md), `variant` (purple/neutral), `glow` | Badge circular con iniciales |
 | `AvatarInfo` | `initials`, `primary`, `secondary`, `meta`, `glow` | Avatar + nombre + texto secundario + ID |
 | `StatCard` | `layout` (kpi/balance), `label`, `value`, `icon`, `variant`, `negative` | Tarjeta de métrica / KPI |
@@ -127,7 +128,7 @@ import {
 | `InfoBanner` | `variant` (warning/info/danger), `message` | Banner de alerta con ícono automático |
 | `Skeleton` | `width`, `height`, `className` | Loader shimmer animado |
 | `Tooltip` | `content`, `position` (top/bottom/left/right) | Tooltip portal con fade |
-| `MiniCalendar` | `selectedDate`, `onSelect`, `timeValue`, `onTimeChange`, `onConfirm` | Selector de fecha + hora con navegación por mes |
+| `DatePickerModal` | `selectedDate`, `onSelect`, `timeValue`, `onTimeChange`, `onConfirm`, `onClose` | Modal de fecha + hora; desktop: react-day-picker, mobile: inputs nativos del OS |
 | `EmptySearchState` | `colSpan`, `term`, `onClear` | Fila vacía para tablas sin resultados |
 | `ErrorBoundary` | `children` | Captura errores runtime, muestra UI de fallback con botón reintentar |
 | `PageLoader` | — | Spinner de carga para Suspense fallback |
