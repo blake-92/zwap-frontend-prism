@@ -1,9 +1,48 @@
 import { motion } from 'framer-motion'
-import { ArrowRight, User } from 'lucide-react'
+import { ArrowRight, Clock, CreditCard } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Card, Button, Badge, CardHeader } from '@/shared/ui'
 import { TRANSACTIONS } from '@/services/mocks/mockData'
 import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
+
+/* ── Status-icon colour by variant ── */
+const STATUS_ICON_CLR = {
+  success: 'text-emerald-500',
+  danger:  'text-rose-500',
+  warning: 'text-amber-500',
+}
+
+/* ── Simplified card-brand avatar ── */
+function CardBrandAvatar({ brand }) {
+  if (brand === 'Mastercard') {
+    return (
+      <div className="w-7 h-7 rounded-full bg-[#1A1A2E] flex items-center justify-center flex-shrink-0 relative overflow-hidden">
+        <div className="absolute w-3 h-3 rounded-full bg-[#EB001B] left-[4px] top-1/2 -translate-y-1/2" />
+        <div className="absolute w-3 h-3 rounded-full bg-[#F79E1B] right-[4px] top-1/2 -translate-y-1/2 opacity-90" />
+      </div>
+    )
+  }
+  if (brand === 'Amex') {
+    return (
+      <div className="w-7 h-7 rounded-full bg-[#006FCF] flex items-center justify-center flex-shrink-0">
+        <span className="text-white font-black text-[7px] tracking-tight leading-none">AX</span>
+      </div>
+    )
+  }
+  if (brand === 'Visa') {
+    return (
+      <div className="w-7 h-7 rounded-full bg-[#1A1F71] flex items-center justify-center flex-shrink-0">
+        <span className="text-white font-black text-[10px] italic leading-none">V</span>
+      </div>
+    )
+  }
+  /* fallback */
+  return (
+    <div className="w-7 h-7 rounded-full bg-gray-500/60 flex items-center justify-center flex-shrink-0">
+      <CreditCard size={12} className="text-white/80" />
+    </div>
+  )
+}
 
 export default function LiveFeed({ onViewAll }) {
   const { isDarkMode } = useTheme()
@@ -30,7 +69,7 @@ export default function LiveFeed({ onViewAll }) {
         </Button>
       </CardHeader>
 
-      {/* Table (desktop) */}
+      {/* ── Table (desktop) ── */}
       <div className="overflow-x-auto flex-1 hidden lg:block">
         <table aria-label="Feed en vivo de transacciones" className="w-full text-left border-collapse min-w-[640px]">
           <thead>
@@ -62,18 +101,20 @@ export default function LiveFeed({ onViewAll }) {
                   </span>
                 </td>
 
-                {/* Origin */}
+                {/* Origin — card brand avatar + name + card info */}
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center bg-gray-100 border border-black/5 flex-shrink-0">
-                      {trx.countryCode === 'xx'
-                        ? <User size={12} className="text-gray-400" />
-                        : <img src={`https://flagcdn.com/w20/${trx.countryCode}.png`} alt={trx.country} loading="lazy" className="w-full h-full object-cover" />
-                      }
+                    <CardBrandAvatar brand={trx.card} />
+                    <div>
+                      <span className={`font-bold text-xs block ${isDarkMode ? 'text-[#D8D7D9] group-hover:text-white' : 'text-[#111113]'}`}>
+                        {trx.client ? trx.client.split(' ')[0] : 'Mostrador'}
+                      </span>
+                      <span className={`flex items-center gap-1 text-[10px] font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                        <CreditCard size={10} className="opacity-70" />
+                        <span className="font-mono tracking-widest opacity-70">••</span>
+                        <span className="font-mono">{trx.last4}</span>
+                      </span>
                     </div>
-                    <span className={`font-bold text-xs ${isDarkMode ? 'text-[#D8D7D9] group-hover:text-white' : 'text-[#111113]'}`}>
-                      {trx.client ? trx.client.split(' ')[0] : 'Mostrador'}
-                    </span>
                   </div>
                 </td>
 
@@ -108,49 +149,53 @@ export default function LiveFeed({ onViewAll }) {
         </table>
       </div>
 
-      {/* Cards (mobile / tablet) */}
+      {/* ── Cards (mobile / tablet) ── */}
       <div className="lg:hidden flex-1 px-4 pb-3">
-        <motion.div variants={listVariants} initial="hidden" animate="show" className="space-y-2">
+        <motion.div variants={listVariants} initial="hidden" animate="show" className="space-y-1">
           {TRANSACTIONS.slice(0, 4).map((trx) => (
             <motion.div
               key={trx.id}
               variants={itemVariants}
-              className={`flex items-center justify-between gap-3 py-2.5 ${
+              className={`grid grid-cols-[1fr_auto_1fr] items-center gap-x-2 py-3 ${
                 isDarkMode ? 'border-b border-white/5 last:border-0' : 'border-b border-black/5 last:border-0'
               }`}
             >
+              {/* LEFT — avatar + name + card info */}
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center bg-gray-100 border border-black/5 flex-shrink-0">
-                  {trx.countryCode === 'xx'
-                    ? <User size={12} className="text-gray-400" />
-                    : <img src={`https://flagcdn.com/w20/${trx.countryCode}.png`} alt={trx.country} loading="lazy" className="w-full h-full object-cover" />
-                  }
-                </div>
+                <CardBrandAvatar brand={trx.card} />
                 <div className="min-w-0">
-                  <span className={`font-bold text-xs block truncate ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`}>
+                  <p className={`font-bold text-xs truncate ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`}>
                     {trx.client ? trx.client.split(' ')[0] : 'Mostrador'}
+                  </p>
+                  <span className={`flex items-center gap-1 text-[10px] font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                    <CreditCard size={10} className="opacity-70 flex-shrink-0" />
+                    <span className="font-mono tracking-widest opacity-70">••</span>
+                    <span className="font-mono">{trx.last4}</span>
                   </span>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className={`text-[10px] font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>{trx.time}</span>
-                    <span className={`text-[10px] font-semibold flex items-center gap-1 ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
-                      <trx.ChannelIcon size={10} className={isDarkMode ? 'text-[#7C3AED]' : 'text-[#561BAF]'} />
-                      {trx.channel.includes('POS') ? 'POS' : 'Link'}
-                    </span>
-                  </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <Badge variant={trx.statusVariant} icon={trx.StatusIcon} className="!py-0.5 !px-2 !text-[9px]">
-                  {trx.status}
-                </Badge>
-                <span className={`font-mono font-bold text-sm tracking-tight ${
-                  trx.status === 'Reembolsado'
-                    ? 'text-rose-500 line-through opacity-70'
-                    : isDarkMode ? 'text-white' : 'text-[#111113]'
-                }`}>
-                  ${trx.amount}
+
+              {/* MIDDLE — time + status/channel icons */}
+              <div className="flex flex-col items-start gap-1 justify-self-center">
+                <span className={`font-bold text-xs flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                  <Clock size={12} className="opacity-70 flex-shrink-0" /> {trx.time}
                 </span>
+                <div className="flex items-center gap-1.5 ml-[16px]">
+                  <trx.StatusIcon size={12} className={STATUS_ICON_CLR[trx.statusVariant] || 'text-gray-400'} />
+                  <span className={`flex items-center opacity-70 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                    <trx.ChannelIcon size={12} />
+                  </span>
+                </div>
               </div>
+
+              {/* RIGHT — amount */}
+              <span className={`font-mono font-bold text-sm tracking-tight justify-self-end text-right ${
+                trx.status === 'Reembolsado'
+                  ? 'text-rose-500 line-through opacity-70'
+                  : isDarkMode ? 'text-white' : 'text-[#111113]'
+              }`}>
+                ${trx.amount}
+              </span>
             </motion.div>
           ))}
         </motion.div>

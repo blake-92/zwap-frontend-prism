@@ -570,6 +570,27 @@ export const BANK_ACCOUNT = {
   last4: '1234',
 }
 
+/* ── Pending charges (links sin cobrar) ── */
+export const PENDING_CHARGES = [
+  { id: 'L-1029', client: 'Alice Smith',    initials: 'AS', email: 'alice@example.com',
+    amount: '350.00',   createdAgo: 'Hace 1 hora',  expires: 'En 2 horas',  url: 'zwap.me/p/L1029' },
+  { id: 'L-1026', client: 'Emma Watson',    initials: 'EW', email: 'emma@agency.uk',
+    amount: '890.00',   createdAgo: 'Hace 20 hrs',  expires: 'En 48 horas', url: 'zwap.me/p/L1026' },
+  { id: 'L-1031', client: 'Ricardo Flores', initials: 'RF', email: 'rflores@hotel.bo',
+    amount: '1,200.00', createdAgo: 'Hace 3 hrs',   expires: 'En 24 horas', url: 'zwap.me/p/L1031' },
+  { id: 'L-1032', client: 'Sophie Laurent', initials: 'SL', email: 'sophie.l@mail.fr',
+    amount: '475.00',   createdAgo: 'Hace 45 min',  expires: 'En 6 horas',  url: 'zwap.me/p/L1032' },
+]
+
+/* ── Today's shift summary ── */
+export const TODAY_SUMMARY = {
+  total: '$1,700.00',
+  count: 3,
+  mainChannel: 'Link de Pago',
+  mainChannelPct: 67,
+  lastChargeAgo: 'Hace 25 min',
+}
+
 /* ── Settlement summary KPIs ── */
 export const SETTLEMENT_SUMMARY = {
   inTransit: '$3,899.00',
