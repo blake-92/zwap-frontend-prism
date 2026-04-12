@@ -6,6 +6,7 @@ import {
   Timer, ListTree,
   CalendarDays,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { useToast } from '@/shared/context/ToastContext'
 import { Card, Button, Badge, AvatarInfo, SectionLabel, Toggle, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
@@ -19,10 +20,11 @@ import NewLinkModal from './NewLinkModal'
 function PermanentCard({ link, onToggle }) {
   const { isDarkMode } = useTheme()
   const { addToast } = useToast()
+  const { t } = useTranslation()
 
   const handleCopy = () => {
     navigator.clipboard.writeText(`https://zwap.me/pay/${link.id}`)
-    addToast(`Enlace "${link.name}" copiado al portapapeles.`, 'success')
+    addToast(t('links.linkCopied', { name: link.name }), 'success')
   }
 
   return (
@@ -54,19 +56,19 @@ function PermanentCard({ link, onToggle }) {
       {/* Actions */}
       <div className={`pt-4 border-t flex justify-between items-center ${isDarkMode ? 'border-white/10' : 'border-black/5'}`}>
         <div className="flex gap-2">
-          <Tooltip content="Ver código QR" position="top">
+          <Tooltip content={t('links.viewQr')} position="top">
             <Button variant="ghost" size="icon" className="!p-1.5" disabled={!link.active}>
               <QrCode size={16} />
             </Button>
           </Tooltip>
-          <Tooltip content="Copiar enlace" position="top">
+          <Tooltip content={t('links.copyLink')} position="top">
             <Button variant="ghost" size="icon" className="!p-1.5" disabled={!link.active} onClick={handleCopy}>
               <Copy size={16} />
             </Button>
           </Tooltip>
         </div>
         <Button variant="outline" size="sm" disabled={!link.active} className="!py-1.5 !px-3 !text-xs">
-          Abrir <ExternalLink size={12} />
+          {t('common.open')} <ExternalLink size={12} />
         </Button>
       </div>
     </Card>
@@ -79,6 +81,7 @@ function PermanentCard({ link, onToggle }) {
 function CustomLinksTable() {
   const { isDarkMode } = useTheme()
   const { addToast } = useToast()
+  const { t } = useTranslation()
   const [search, setSearch] = useState('')
 
   const filtered = useMemo(() => CUSTOM_LINKS.filter(l =>
@@ -92,29 +95,29 @@ function CustomLinksTable() {
           <SearchInput
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Buscar por cliente o ID..."
+            placeholder={t('links.searchPlaceholder')}
           />
         }
-        actions={<Button variant="successExport" size="sm"><Download size={14} /> Exportar CSV</Button>}
+        actions={<Button variant="successExport" size="sm"><Download size={14} /> {t('common.exportCsv')}</Button>}
       >
         <Button variant="outline" size="sm">
-          Estado <ChevronDown size={12} />
+          {t('filters.status')} <ChevronDown size={12} />
         </Button>
       </TableToolbar>
 
       {/* Table (desktop) */}
       <Card className="pb-2 hidden lg:block">
         <div className="overflow-x-auto">
-          <table aria-label="Links de pago personalizados" className="w-full text-left border-collapse min-w-[900px]">
+          <table aria-label={t('links.title')} className="w-full text-left border-collapse min-w-[900px]">
             <thead>
               <tr className={`text-[10px] uppercase font-bold tracking-widest ${
                 isDarkMode ? 'text-[#888991] border-b border-white/10 bg-[#111113]/40' : 'text-[#67656E] border-b border-black/5 bg-white/50'
               }`}>
-                <th className="px-6 py-4">ID & Cliente</th>
-                <th className="px-6 py-4">Detalle / Items</th>
-                <th className="px-6 py-4">Tiempos</th>
-                <th className="px-6 py-4 text-center">Estado</th>
-                <th className="px-8 py-4 text-right">Acciones</th>
+                <th className="px-6 py-4">{t('settlements.tableId')}</th>
+                <th className="px-6 py-4">{t('settlements.tableDetail')}</th>
+                <th className="px-6 py-4">{t('settlements.tableTiming')}</th>
+                <th className="px-6 py-4 text-center">{t('filters.status')}</th>
+                <th className="px-8 py-4 text-right">{t('transactions.tableActions')}</th>
               </tr>
             </thead>
             <motion.tbody variants={listVariants} initial="hidden" animate="show">
@@ -146,7 +149,7 @@ function CustomLinksTable() {
                       ${link.amount}
                     </p>
                     <p className={`text-[11px] font-medium flex items-center gap-1.5 mt-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                      <ListTree size={12} className="opacity-70" /> {link.items} Items
+                      <ListTree size={12} className="opacity-70" /> {link.items} {t('dashboard.items')}
                     </p>
                   </td>
 
@@ -156,10 +159,10 @@ function CustomLinksTable() {
                       link.status === 'Expirado' ? 'text-rose-500' : isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'
                     }`}>
                       <Timer size={14} className="opacity-70" />
-                      {link.expires !== '-' ? `Expira: ${link.expires}` : 'Sin expiración'}
+                      {link.expires !== '-' ? t('links.expires', { date: link.expires }) : t('links.noExpiration')}
                     </p>
                     <p className={`text-[10px] font-medium flex items-center gap-1.5 mt-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                      <CalendarDays size={12} className="opacity-70" /> Creado: {link.createdAt}
+                      <CalendarDays size={12} className="opacity-70" /> {t('links.created', { date: link.createdAt })}
                     </p>
                   </td>
 
@@ -170,7 +173,7 @@ function CustomLinksTable() {
                         {link.status}
                       </Badge>
                       <p className={`text-[10px] font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                        <Eye size={10} /> {link.views} vistas
+                        <Eye size={10} /> {link.views} {t('links.views')}
                       </p>
                     </div>
                   </td>
@@ -178,38 +181,38 @@ function CustomLinksTable() {
                   {/* Acciones */}
                   <td className="px-8 py-4 text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <Tooltip content="Editar" position="top">
+                      <Tooltip content={t('common.edit')} position="top">
                         <Button variant="ghost" size="sm" className="!px-2" disabled={link.status === 'Pagado'}>
                           <Edit2 size={15} />
-                          <span className="hidden xl:inline text-xs ml-1">Editar</span>
+                          <span className="hidden xl:inline text-xs ml-1">{t('common.edit')}</span>
                         </Button>
                       </Tooltip>
-                      <Tooltip content="Copiar enlace" position="top">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="!px-2" 
+                      <Tooltip content={t('links.copyLink')} position="top">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="!px-2"
                           disabled={link.status === 'Expirado'}
                           onClick={() => {
                             navigator.clipboard.writeText(`https://zwap.me/pay/${link.id}`)
-                            addToast(`Enlace "${link.id}" copiado al portapapeles.`, 'success')
+                            addToast(t('links.linkCopied', { name: link.id }), 'success')
                           }}
                         >
                           <Copy size={15} />
                         </Button>
                       </Tooltip>
-                      <Tooltip content="Generar QR" position="top">
+                      <Tooltip content={t('links.generateQr')} position="top">
                         <Button variant="ghost" size="sm" className="!px-2" disabled={link.status === 'Expirado'}>
                           <QrCode size={15} />
                         </Button>
                       </Tooltip>
-                      <Tooltip content="Enviar por Mail" position="top">
+                      <Tooltip content={t('users.sendByEmail')} position="top">
                         <Button
                           variant="action" size="sm" className="!px-3 ml-1"
                           disabled={link.status === 'Expirado' || link.status === 'Pagado'}
                         >
                           <Mail size={15} />
-                          <span className="hidden xl:inline text-xs ml-1">Enviar</span>
+                          <span className="hidden xl:inline text-xs ml-1">{t('links.send')}</span>
                         </Button>
                       </Tooltip>
                     </div>
@@ -248,11 +251,11 @@ function CustomLinksTable() {
                         {link.status}
                       </Badge>
                       <span className={`text-[11px] font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                        <ListTree size={12} /> {link.items} Items
+                        <ListTree size={12} /> {link.items} {t('dashboard.items')}
                       </span>
                     </div>
                     <span className={`text-[10px] font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                      <Eye size={10} /> {link.views} vistas
+                      <Eye size={10} /> {link.views} {t('links.views')}
                     </span>
                   </div>
 
@@ -262,7 +265,7 @@ function CustomLinksTable() {
                       link.status === 'Expirado' ? 'text-rose-500' : isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'
                     }`}>
                       <Timer size={12} />
-                      {link.expires !== '-' ? `Expira: ${link.expires}` : 'Sin expiración'}
+                      {link.expires !== '-' ? t('links.expires', { date: link.expires }) : t('links.noExpiration')}
                     </span>
                     <span className={`text-[10px] font-medium flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
                       <CalendarDays size={12} /> {link.createdAt}
@@ -279,7 +282,7 @@ function CustomLinksTable() {
                       disabled={link.status === 'Expirado'}
                       onClick={() => {
                         navigator.clipboard.writeText(`https://zwap.me/pay/${link.id}`)
-                        addToast(`Enlace "${link.id}" copiado al portapapeles.`, 'success')
+                        addToast(t('links.linkCopied', { name: link.id }), 'success')
                       }}
                     >
                       <Copy size={14} />
@@ -291,7 +294,7 @@ function CustomLinksTable() {
                       variant="action" size="sm" className="!px-3 !py-1.5 ml-auto"
                       disabled={link.status === 'Expirado' || link.status === 'Pagado'}
                     >
-                      <Mail size={14} /> Enviar
+                      <Mail size={14} /> {t('links.send')}
                     </Button>
                   </div>
                 </Card>
@@ -301,11 +304,11 @@ function CustomLinksTable() {
         ) : (
           <Card className="p-8 text-center">
             <p className={`text-sm font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-              No se encontraron links{search ? ` para "${search}"` : ''}.
+              {search ? t('links.notFoundFor', { term: search }) : t('links.notFound')}
             </p>
             {search && (
               <Button variant="ghost" size="sm" onClick={() => setSearch('')} className="mt-2">
-                Limpiar busqueda
+                {t('common.clearSearch')}
               </Button>
             )}
           </Card>
@@ -320,6 +323,7 @@ function CustomLinksTable() {
    LinksView
 ───────────────────────────────────────────────────────────── */
 export default function LinksView() {
+  const { t } = useTranslation()
   const [links, setLinks]         = useState(PERMANENT_LINKS)
   const [newLinkOpen, setNewLinkOpen] = useState(false)
 
@@ -328,14 +332,14 @@ export default function LinksView() {
 
   return (
     <motion.div variants={pageVariants} initial="hidden" animate="show">
-      <PageHeader title="Links de Pago" description="Gestiona cobros rápidos en mostrador y reservas personalizadas.">
+      <PageHeader title={t('links.title')} description={t('links.description')}>
         <Button onClick={() => setNewLinkOpen(true)}>
-          <Plus size={18} /> Nuevo Link de Reserva
+          <Plus size={18} /> {t('links.createLink')}
         </Button>
       </PageHeader>
 
       {/* Permanentes */}
-      <SectionLabel className="uppercase mb-4">Enlaces Permanentes (Monto Abierto)</SectionLabel>
+      <SectionLabel className="uppercase mb-4">{t('links.permanentSection')}</SectionLabel>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 2xl:gap-8 mb-10">
         {links.map(link => (
           <PermanentCard key={link.id} link={link} onToggle={() => toggleLink(link.id)} />
@@ -343,7 +347,7 @@ export default function LinksView() {
       </div>
 
       {/* Personalizados */}
-      <SectionLabel className="uppercase mb-4">Enlaces de Reserva (Personalizados)</SectionLabel>
+      <SectionLabel className="uppercase mb-4">{t('links.customSection')}</SectionLabel>
       <CustomLinksTable />
 
       <AnimatePresence>

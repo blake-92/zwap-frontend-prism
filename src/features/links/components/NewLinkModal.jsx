@@ -5,11 +5,13 @@ import {
   Star, Receipt, Link as LinkIcon,
   CalendarDays,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Card, Button, Input, Modal, SegmentControl, MiniCalendar, SectionLabel } from '@/shared/ui'
 
 export default function NewLinkModal({ onClose }) {
   const { isDarkMode } = useTheme()
+  const { t } = useTranslation()
 
   const [items, setItems]               = useState([{ id: 1, desc: '', amount: '' }])
   const [nextItemId, setNextItemId]     = useState(2)
@@ -77,17 +79,17 @@ export default function NewLinkModal({ onClose }) {
               }`}
             >
               <h3 className={`text-lg font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-                ¿Descartar cambios?
+                {t('common.discardConfirmTitle')}
               </h3>
               <p className={`text-sm mb-6 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                Tienes datos sin guardar. Si cierras ahora, perderás toda la información ingresada.
+                {t('common.discardConfirmBody')}
               </p>
               <div className="flex gap-3 justify-end">
                 <Button variant="ghost" onClick={() => setShowConfirmClose(false)}>
-                  Cancelar
+                  {t('common.cancel')}
                 </Button>
                 <Button variant="danger" onClick={onClose}>
-                  Sí, descartar
+                  {t('common.discardConfirmAction')}
                 </Button>
               </div>
             </motion.div>
@@ -98,8 +100,8 @@ export default function NewLinkModal({ onClose }) {
       <Modal
         onClose={handleClose}
         icon={<LinkIcon size={24} />}
-        title="Crear Link de Reserva"
-        description="Genera un enlace de cobro con vencimiento e ítems detallados."
+        title={t('links.createLink')}
+        description={t('links.generateDescription')}
         maxWidth="1000px"
         className="max-h-[90vh] flex flex-col"
       >
@@ -111,19 +113,19 @@ export default function NewLinkModal({ onClose }) {
 
             {/* Cliente */}
             <div className="mb-8">
-              <SectionLabel className="flex items-center gap-2 mb-4"><User size={14} /> DATOS DEL CLIENTE</SectionLabel>
+              <SectionLabel className="flex items-center gap-2 mb-4"><User size={14} /> {t('links.clientData')}</SectionLabel>
               <div className="space-y-4">
                 <div>
                   <label className={`block text-xs font-bold tracking-wide mb-2 ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
-                    Nombre del Titular
+                    {t('links.clientName')}
                   </label>
-                  <Input type="text" placeholder="Ej: Alice Smith" />
+                  <Input type="text" placeholder={t('links.clientNamePlaceholder')} />
                 </div>
                 <div>
                   <label className={`block text-xs font-bold tracking-wide mb-2 ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
-                    Correo Electrónico
+                    {t('links.clientEmail')}
                   </label>
-                  <Input icon={Mail} type="email" placeholder="alice@example.com" />
+                  <Input icon={Mail} type="email" placeholder={t('links.clientEmailPlaceholder')} />
                 </div>
               </div>
             </div>
@@ -132,10 +134,10 @@ export default function NewLinkModal({ onClose }) {
             <div>
               <div className="flex justify-between items-center mb-4">
                 <h3 className={`text-xs font-bold tracking-widest flex items-center gap-2 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
-                  <ListTree size={14} /> CONSTRUCTOR DE ÍTEMS
+                  <ListTree size={14} /> {t('links.itemBuilder')}
                 </h3>
                 <Button variant="outline" size="sm" onClick={addItem} className="!h-8 !px-3">
-                  <Plus size={14} /> Añadir Ítem
+                  <Plus size={14} /> {t('links.addItem')}
                 </Button>
               </div>
 
@@ -145,7 +147,7 @@ export default function NewLinkModal({ onClose }) {
                     <div className="flex-1">
                       <Input
                         type="text"
-                        placeholder="Concepto (Ej: Habitación Simple x2 noches)"
+                        placeholder={t('links.conceptPlaceholder')}
                         value={item.desc}
                         onChange={e => updateItem(idx, 'desc', e.target.value)}
                       />
@@ -154,7 +156,7 @@ export default function NewLinkModal({ onClose }) {
                       <Input
                         type="number"
                         min="0"
-                        placeholder="Precio ($)"
+                        placeholder={t('links.price')}
                         value={item.amount}
                         onChange={e => updateItem(idx, 'amount', e.target.value)}
                       />
@@ -179,13 +181,13 @@ export default function NewLinkModal({ onClose }) {
             isDarkMode ? 'bg-gradient-to-b from-[#7C3AED]/10 to-transparent' : 'bg-gradient-to-b from-[#DBD3FB]/20 to-transparent'
           }`}>
             <div className="p-5 sm:p-8 flex-1 overflow-y-auto">
-              <SectionLabel className="flex items-center gap-2 mb-6"><Star size={14} /> CONFIGURACIÓN</SectionLabel>
+              <SectionLabel className="flex items-center gap-2 mb-6"><Star size={14} /> {t('links.config')}</SectionLabel>
 
               <div className="space-y-6">
                 {/* Fecha */}
                 <div>
                   <label className={`block text-xs font-bold tracking-wide mb-2 ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
-                    Fecha/Hora de Expiración
+                    {t('links.expirationDate')}
                   </label>
                   <div className="relative">
                     <Button
@@ -194,7 +196,7 @@ export default function NewLinkModal({ onClose }) {
                       onClick={e => { e.stopPropagation(); setCalendarOpen(v => !v) }}
                     >
                       <CalendarDays size={16} className={`mr-2 ${selectedDate ? 'text-[#7C3AED]' : 'opacity-50'}`} />
-                      {selectedDate ? `${selectedDate} a las ${timeValue}` : 'Seleccionar fecha y hora...'}
+                      {selectedDate ? `${selectedDate} a las ${timeValue}` : t('links.selectDateTime')}
                     </Button>
 
                     {calendarOpen && (
@@ -212,10 +214,10 @@ export default function NewLinkModal({ onClose }) {
                 {/* Fee bearer */}
                 <div>
                   <label className={`block text-xs font-bold tracking-wide mb-2 ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
-                    Comisión Bancaria (3%)
+                    {t('links.bankFee')}
                   </label>
                   <SegmentControl
-                    options={[{ value: 'hotel', label: 'El Hotel' }, { value: 'cliente', label: 'El Cliente' }]}
+                    options={[{ value: 'hotel', label: t('refund.hotelBearer') }, { value: 'cliente', label: t('refund.clientBearer') }]}
                     value={feeBearer}
                     onChange={setFeeBearer}
                   />
@@ -225,19 +227,19 @@ export default function NewLinkModal({ onClose }) {
               {/* Summary ticket */}
               <Card className={`mt-8 !rounded-2xl ${isDarkMode ? '!bg-[#111113]/50 border-white/5' : '!bg-white/80 border-white'}`}>
                 <div className="p-5">
-                  <SectionLabel className="flex items-center gap-2 mb-4"><Receipt size={14} /> RESUMEN DEL LINK</SectionLabel>
+                  <SectionLabel className="flex items-center gap-2 mb-4"><Receipt size={14} /> {t('links.linkSummary')}</SectionLabel>
                   <div className="space-y-3 font-mono text-sm">
                     <div className={`flex justify-between ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                      <span>Subtotal ({items.length} ítems):</span>
+                      <span>{t('links.subtotal')} ({items.length}):</span>
                       <span className={isDarkMode ? 'text-white' : 'text-[#111113]'}>${subtotal.toFixed(2)}</span>
                     </div>
                     <div className={`flex justify-between ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                      <span>Comisión Stripe:</span>
-                      <span>{feeBearer === 'cliente' ? `+$${fee.toFixed(2)}` : 'Absorbida'}</span>
+                      <span>{t('links.stripeFee')}:</span>
+                      <span>{feeBearer === 'cliente' ? `+$${fee.toFixed(2)}` : t('links.absorbed')}</span>
                     </div>
                     <div className={`flex justify-between items-end pt-4 mt-4 border-t ${isDarkMode ? 'border-white/10' : 'border-gray-200'}`}>
                       <span className={`font-sans font-bold text-sm ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-                        Total a cobrar:
+                        {t('links.totalCharge')}:
                       </span>
                       <span className="text-3xl font-bold tracking-tighter text-[#7C3AED]">
                         ${total.toFixed(2)}
@@ -258,11 +260,11 @@ export default function NewLinkModal({ onClose }) {
                 {isGenerating ? (
                   <span className="flex items-center gap-2">
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin-slow" />
-                    Generando...
+                    {t('common.generating')}...
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
-                    <LinkIcon size={18} /> Generar Link de Reserva
+                    <LinkIcon size={18} /> {t('links.generateLink')}
                   </span>
                 )}
               </Button>

@@ -135,7 +135,13 @@
     "refund": "Devolución",
     "notFound": "No se encontraron transacciones",
     "notFoundFor": "No se encontraron transacciones para \"{{term}}\"",
-    "paymentReceipt": "Comprobante de Pago"
+    "paymentReceipt": "Comprobante de Pago",
+    "totalAmount": "Monto Total",
+    "dateTime": "Fecha y Hora",
+    "transactionId": "ID Transacción",
+    "paymentMethod": "Método de Pago",
+    "card": "Tarjeta",
+    "processedBy": "Procesado de forma segura por"
   },
 
   "refund": {
@@ -150,7 +156,9 @@
     "hotelBearerDesc": "El cliente recibirá ${{amount}} completos. El hotel asumirá el costo transaccional",
     "clientBearerDesc": "El cliente recibirá ${{amount}} menos la comisión bancaria. El saldo del hotel no se verá afectado",
     "processRefund": "Procesar Devolución",
-    "originalCharge": "Cobro original"
+    "originalCharge": "Cobro original",
+    "hotelBearerLabel": "El Hotel (Reembolso exacto)",
+    "clientBearerLabel": "El Cliente (Menos comisión)"
   },
 
   "links": {
@@ -182,7 +190,17 @@
     "totalCharge": "Total a cobrar",
     "notFound": "No se encontraron links",
     "notFoundFor": "No se encontraron links para \"{{term}}\"",
-    "linkCopied": "Enlace \"{{name}}\" copiado al portapapeles"
+    "linkCopied": "Enlace \"{{name}}\" copiado al portapapeles",
+    "permanentSection": "Enlaces Permanentes (Monto Abierto)",
+    "customSection": "Enlaces de Reserva (Personalizados)",
+    "expires": "Expira: {{date}}",
+    "noExpiration": "Sin expiración",
+    "created": "Creado: {{date}}",
+    "views": "vistas",
+    "generateQr": "Generar QR",
+    "send": "Enviar",
+    "addItem": "Añadir Ítem",
+    "generateDescription": "Genera un enlace de cobro con vencimiento e ítems detallados"
   },
 
   "settlements": {
@@ -226,7 +244,21 @@
     "processing": "Procesando",
     "completed": "Completado",
     "notFound": "No se encontraron retiros",
-    "notFoundFor": "No se encontraron retiros para \"{{term}}\""
+    "notFoundFor": "No se encontraron retiros para \"{{term}}\"",
+    "destinationAccount": "Cuenta Destino",
+    "transactionIdHeader": "ID Transacción",
+    "depositDate": "Fecha Ingreso",
+    "amountHeader": "Monto",
+    "statusHeader": "Estado",
+    "receiptHeader": "Recibo",
+    "viewReceipt": "Ver Recibo",
+    "bankSettlement": "Liquidación Bancaria",
+    "transferReceipt": "Comprobante de Transferencia",
+    "fundsTransferred": "FONDOS TRANSFERIDOS",
+    "settledAmount": "Monto Liquidado",
+    "executionDate": "Fecha de Ejecución",
+    "transferId": "ID Transferencia",
+    "generatedBy": "Documento generado por"
   },
 
   "branches": {
@@ -245,7 +277,8 @@
     "deleteBranch": "Eliminar sucursal",
     "main": "Principal",
     "usersAssigned_one": "{{count}} usuario asignado",
-    "usersAssigned_other": "{{count}} usuarios asignados"
+    "usersAssigned_other": "{{count}} usuarios asignados",
+    "modalDescription": "Agrega una nueva propiedad o punto de venta"
   },
 
   "users": {
@@ -272,7 +305,9 @@
     "roleAccountant": "Contador",
     "roleAccountantDesc": "Acceso a reportes, liquidaciones y exportaciones",
     "roleReceptionist": "Recepcionista",
-    "roleReceptionistDesc": "Cobros, links de pago y transacciones diarias"
+    "roleReceptionistDesc": "Cobros, links de pago y transacciones diarias",
+    "editUser": "Editar usuario",
+    "name": "NOMBRE"
   },
 
   "settings": {
@@ -300,7 +335,11 @@
     "managePlan": "Administrar Plan",
     "primaryCard": "Tarjeta Principal",
     "secondaryCard": "Tarjeta Secundaria",
-    "changesSaved": "Cambios guardados correctamente"
+    "changesSaved": "Cambios guardados correctamente",
+    "language": "Idioma",
+    "languageDesc": "Elige el idioma de la interfaz",
+    "languageEs": "Español",
+    "languageEn": "English"
   },
 
   "filters": {

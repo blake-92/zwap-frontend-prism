@@ -1,51 +1,53 @@
 import { useState } from 'react'
 import { UserPlus, Shield, Calculator, ConciergeBell } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Button, Input, Modal, SectionLabel } from '@/shared/ui'
 import { BRANCH_LIST } from '@/services/mocks/mockData'
 
-const ROLES = [
-  {
-    id: 'Administrador',
-    icon: Shield,
-    desc: 'Acceso total a todas las sucursales y configuraciones.',
-    color: 'default',
-  },
-  {
-    id: 'Contador',
-    icon: Calculator,
-    desc: 'Acceso a reportes, liquidaciones y exportaciones.',
-    color: 'warning',
-  },
-  {
-    id: 'Recepcionista',
-    icon: ConciergeBell,
-    desc: 'Cobros, links de pago y transacciones diarias.',
-    color: 'success',
-  },
-]
-
 const ROLE_SELECTED_STYLE = {
-  Administrador: { dark: 'bg-[#7C3AED]/10 border-[#7C3AED]/50', light: 'bg-[#DBD3FB]/40 border-[#7C3AED]/40' },
-  Contador:      { dark: 'bg-amber-500/10 border-amber-500/50', light: 'bg-amber-50 border-amber-400' },
-  Recepcionista: { dark: 'bg-emerald-500/10 border-emerald-500/50', light: 'bg-emerald-50 border-emerald-400' },
+  admin:         { dark: 'bg-[#7C3AED]/10 border-[#7C3AED]/50', light: 'bg-[#DBD3FB]/40 border-[#7C3AED]/40' },
+  accountant:    { dark: 'bg-amber-500/10 border-amber-500/50', light: 'bg-amber-50 border-amber-400' },
+  receptionist:  { dark: 'bg-emerald-500/10 border-emerald-500/50', light: 'bg-emerald-50 border-emerald-400' },
 }
 
 const ROLE_ICON_STYLE = {
-  Administrador: 'text-[#7C3AED]',
-  Contador:      'text-amber-500',
-  Recepcionista: 'text-emerald-500',
+  admin:        'text-[#7C3AED]',
+  accountant:   'text-amber-500',
+  receptionist: 'text-emerald-500',
 }
 
 export default function NewUserModal({ onClose }) {
   const { isDarkMode } = useTheme()
-  const [role, setRole]         = useState('Recepcionista')
+  const { t } = useTranslation()
+  const [role, setRole]         = useState('receptionist')
   const [branches, setBranches] = useState([])
   const [name, setName]         = useState('')
   const [email, setEmail]       = useState('')
 
   const [emailError, setEmailError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const ROLES = [
+    {
+      id: 'admin',
+      icon: Shield,
+      label: t('users.roleAdmin'),
+      desc: t('users.roleAdminDesc'),
+    },
+    {
+      id: 'accountant',
+      icon: Calculator,
+      label: t('users.roleAccountant'),
+      desc: t('users.roleAccountantDesc'),
+    },
+    {
+      id: 'receptionist',
+      icon: ConciergeBell,
+      label: t('users.roleReceptionist'),
+      desc: t('users.roleReceptionistDesc'),
+    },
+  ]
 
   const validateEmail = (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)
 
@@ -58,7 +60,7 @@ export default function NewUserModal({ onClose }) {
   const handleSubmit = () => {
     if (!name.trim()) return
     if (!email.trim() || !validateEmail(email)) {
-      setEmailError('Ingresa un correo electrónico válido')
+      setEmailError(t('users.invalidEmail'))
       return
     }
     if (branches.length === 0) return
@@ -72,7 +74,7 @@ export default function NewUserModal({ onClose }) {
   const footer = (
     <>
       <Button variant="outline" className="flex-1 !py-3.5" onClick={onClose} disabled={isSubmitting}>
-        Cancelar
+        {t('common.cancel')}
       </Button>
       <Button
         className="flex-1 !py-3.5 relative overflow-hidden"
@@ -82,11 +84,11 @@ export default function NewUserModal({ onClose }) {
         {isSubmitting ? (
           <span className="flex items-center justify-center gap-2">
             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin-slow" />
-            Creando...
+            {t('common.creating')}...
           </span>
         ) : (
           <span className="flex items-center justify-center gap-2">
-            <UserPlus size={18} /> Crear Usuario
+            <UserPlus size={18} /> {t('users.createUser')}
           </span>
         )}
       </Button>
@@ -97,8 +99,8 @@ export default function NewUserModal({ onClose }) {
     <Modal
       onClose={onClose}
       icon={<UserPlus size={24} />}
-      title="Nuevo Usuario"
-      description="Invita a un miembro del equipo"
+      title={t('users.newUser')}
+      description={t('users.newUserDesc')}
       maxWidth="540px"
       footer={footer}
     >
@@ -108,24 +110,24 @@ export default function NewUserModal({ onClose }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={`block text-xs font-bold tracking-widest mb-2 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
-              NOMBRE
+              {t('users.name')}
             </label>
             <Input
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="ej. Carlos Pérez"
+              placeholder={t('users.fullNamePlaceholder')}
             />
           </div>
 
           <div className="relative">
             <label className={`block text-xs font-bold tracking-widest mb-2 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
-              EMAIL
+              {t('users.emailLabel')}
             </label>
             <input
               type="email"
               value={email}
               onChange={handleEmailChange}
-              placeholder="carlos@hotel.com"
+              placeholder={t('users.emailPlaceholder')}
               className={`w-full px-4 py-2.5 rounded-xl border outline-none text-sm font-medium transition-all ${
                 emailError
                   ? isDarkMode
@@ -146,9 +148,9 @@ export default function NewUserModal({ onClose }) {
 
         {/* Role */}
         <div>
-          <SectionLabel className="mb-4">ROL</SectionLabel>
+          <SectionLabel className="mb-4">{t('users.role')}</SectionLabel>
           <div className="grid grid-cols-3 gap-3">
-            {ROLES.map(({ id, icon: Icon, desc }) => (
+            {ROLES.map(({ id, icon: Icon, label, desc }) => (
               <div
                 key={id}
                 onClick={() => setRole(id)}
@@ -159,7 +161,7 @@ export default function NewUserModal({ onClose }) {
                 }`}
               >
                 <Icon size={20} className={`mb-2 ${role === id ? ROLE_ICON_STYLE[id] : isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`} />
-                <p className={`font-bold text-sm ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>{id}</p>
+                <p className={`font-bold text-sm ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>{label}</p>
                 <p className={`text-[10px] mt-1 leading-relaxed ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>{desc}</p>
               </div>
             ))}
@@ -168,7 +170,7 @@ export default function NewUserModal({ onClose }) {
 
         {/* Branches */}
         <div>
-          <SectionLabel className="mb-4">SUCURSALES CON ACCESO</SectionLabel>
+          <SectionLabel className="mb-4">{t('users.branchAccess')}</SectionLabel>
           <div className="flex flex-col gap-2">
             {BRANCH_LIST.map(b => (
               <label
@@ -183,7 +185,7 @@ export default function NewUserModal({ onClose }) {
                   {b.name}
                   {b.isMain && (
                     <span className={`ml-2 text-[10px] font-bold uppercase ${isDarkMode ? 'text-[#7C3AED]' : 'text-[#561BAF]'}`}>
-                      Principal
+                      {t('branches.main')}
                     </span>
                   )}
                 </span>

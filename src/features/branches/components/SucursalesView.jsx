@@ -5,6 +5,7 @@ import {
   Building2, MapPin, Users, Pencil, Trash2,
   PlusCircle, Star,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Card, Button, Badge, Tooltip, PageHeader } from '@/shared/ui'
 import { BRANCH_LIST } from '@/services/mocks/mockData'
@@ -13,6 +14,7 @@ import NewBranchModal from './NewBranchModal'
 /* ─── Branch Card ─────────────────────────────────────────── */
 function BranchCard({ branch }) {
   const { isDarkMode } = useTheme()
+  const { t } = useTranslation()
 
   return (
     <Card hoverEffect className="p-6 cursor-pointer group relative overflow-hidden">
@@ -27,13 +29,13 @@ function BranchCard({ branch }) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Tooltip content="Editar sucursal" position="top">
+          <Tooltip content={t('branches.editBranch')} position="top">
             <Button variant="action" size="sm" className="!px-2.5 !py-2">
               <Pencil size={13} />
             </Button>
           </Tooltip>
           {!branch.isMain && (
-            <Tooltip content="Eliminar sucursal" position="top">
+            <Tooltip content={t('branches.deleteBranch')} position="top">
               <Button variant="danger" size="sm" className="!px-2.5 !py-2">
                 <Trash2 size={13} />
               </Button>
@@ -49,7 +51,7 @@ function BranchCard({ branch }) {
         </h3>
         {branch.isMain && (
           <Badge variant="default">
-            <Star size={9} className="inline mr-0.5" />Principal
+            <Star size={9} className="inline mr-0.5" />{t('branches.main')}
           </Badge>
         )}
       </div>
@@ -64,7 +66,7 @@ function BranchCard({ branch }) {
       <div className={`pt-4 border-t flex items-center gap-2 ${isDarkMode ? 'border-white/10' : 'border-black/5'}`}>
         <Users size={14} className={isDarkMode ? 'text-[#7C3AED]' : 'text-[#561BAF]'} />
         <span className={`text-xs font-bold ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-          {branch.users} {branch.users === 1 ? 'usuario' : 'usuarios'} asignados
+          {t('branches.usersAssigned', { count: branch.users })}
         </span>
       </div>
     </Card>
@@ -74,6 +76,7 @@ function BranchCard({ branch }) {
 /* ─── Add card ────────────────────────────────────────────── */
 function AddBranchCard({ onClick }) {
   const { isDarkMode } = useTheme()
+  const { t } = useTranslation()
   return (
     <button
       onClick={onClick}
@@ -84,21 +87,22 @@ function AddBranchCard({ onClick }) {
       }`}
     >
       <PlusCircle size={28} className="transition-transform duration-300 group-hover:scale-110" />
-      <span className="text-sm font-bold">Nueva Sucursal</span>
+      <span className="text-sm font-bold">{t('branches.newBranch')}</span>
     </button>
   )
 }
 
 /* ─── SucursalesView ──────────────────────────────────────── */
 export default function SucursalesView() {
+  const { t } = useTranslation()
   const [newBranchOpen, setNewBranchOpen] = useState(false)
 
   return (
     <motion.div variants={pageVariants} initial="hidden" animate="show">
 
-      <PageHeader title="Sucursales" description="Gestión de propiedades y puntos de venta">
+      <PageHeader title={t('branches.title')} description={t('branches.description')}>
         <Button onClick={() => setNewBranchOpen(true)}>
-          <PlusCircle size={18} /> Nueva Sucursal
+          <PlusCircle size={18} /> {t('branches.newBranch')}
         </Button>
       </PageHeader>
 

@@ -4,6 +4,7 @@ import {
   ArrowUpFromLine, Landmark, TrendingUp,
   FileText, Loader2,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import useMediaQuery from '@/shared/hooks/useMediaQuery'
 import useInfiniteScroll from '@/shared/hooks/useInfiniteScroll'
@@ -16,6 +17,7 @@ import WithdrawReceiptModal from './WithdrawReceiptModal'
 /* ─── WalletView ──────────────────────────────────────────── */
 export default function WalletView() {
   const { isDarkMode } = useTheme()
+  const { t } = useTranslation()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
   const [modalOpen, setModalOpen] = useState(false)
   const [receiptTrx, setReceiptTrx] = useState(null)
@@ -47,8 +49,8 @@ export default function WalletView() {
     <motion.div variants={pageVariants} initial="hidden" animate="show">
 
       <PageHeader
-        title="Billetera &amp; Retiros"
-        description="Gestiona el saldo disponible y tus cuentas bancarias conectadas"
+        title={t('wallet.title')}
+        description={t('wallet.description')}
       />
 
       {/* Top section: balance (izq) + retiro + cuenta (der) */}
@@ -63,10 +65,10 @@ export default function WalletView() {
           <div className="relative px-6 pt-6 pb-5">
             <div className="flex items-start justify-between mb-4">
               <p className={`text-[10px] font-bold tracking-widest uppercase ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                Saldo Disponible
+                {t('wallet.availableBalance')}
               </p>
               <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${isDarkMode ? 'text-[#888991] border-white/10' : 'text-[#67656E] border-black/5'}`}>
-                USD
+                {t('common.usd')}
               </span>
             </div>
 
@@ -75,7 +77,7 @@ export default function WalletView() {
             </h2>
 
             <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/20">
-              <TrendingUp size={9} /> +$502.09 esta semana
+              <TrendingUp size={9} /> {t('wallet.thisWeek')}
             </span>
           </div>
 
@@ -83,10 +85,10 @@ export default function WalletView() {
 
           <div className="relative px-6 pt-5 pb-6 flex flex-col gap-3 mt-auto">
             <Button onClick={() => setModalOpen(true)} className="w-full !py-3 justify-center">
-              <ArrowUpFromLine size={16} /> Retirar Fondos
+              <ArrowUpFromLine size={16} /> {t('wallet.withdrawFunds')}
             </Button>
             <div className={`flex items-center justify-center gap-1.5 text-[11px] ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-              <span>Próximo autodepósito:</span>
+              <span>{t('wallet.nextAutoDeposit')}:</span>
               <span className={`font-bold ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>24 Oct, 2026</span>
             </div>
           </div>
@@ -101,7 +103,7 @@ export default function WalletView() {
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.8)]" />
                 <p className={`text-sm font-bold ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-                  Retiro en Progreso
+                  {t('wallet.withdrawalInProgress')}
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -128,7 +130,7 @@ export default function WalletView() {
                 </div>
                 <div>
                   <p className={`text-[10px] font-bold uppercase tracking-widest mb-0.5 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                    Cuenta Destino
+                    {t('wallet.destinationAccount')}
                   </p>
                   <p className={`text-sm font-bold ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`}>
                     {BANK_ACCOUNT.name}{' '}
@@ -139,7 +141,7 @@ export default function WalletView() {
               <button className={`text-xs font-bold transition-colors ${
                 isDarkMode ? 'text-[#7C3AED] hover:text-[#A78BFA]' : 'text-[#7C3AED] hover:text-[#561BAF]'
               }`}>
-                Editar
+                {t('common.edit')}
               </button>
             </div>
           </Card>
@@ -152,7 +154,7 @@ export default function WalletView() {
           <SearchInput
             value={search}
             onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
-            placeholder="Buscar por ID o monto..."
+            placeholder={t('wallet.searchPlaceholder')}
           />
         }
       />
@@ -161,23 +163,23 @@ export default function WalletView() {
       <Card className="pb-2 hidden lg:block">
         <div className={`px-8 py-4 border-b ${isDarkMode ? 'border-white/10' : 'border-black/5'}`}>
           <h3 className={`font-bold text-sm ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-            Historial de Retiros
+            {t('wallet.withdrawalHistory')}
           </h3>
         </div>
         <div className="overflow-x-auto">
-          <table aria-label="Historial de retiros" className="w-full text-left border-collapse min-w-[680px]">
+          <table aria-label={t('wallet.withdrawalHistory')} className="w-full text-left border-collapse min-w-[680px]">
             <thead>
               <tr className={`text-[10px] uppercase font-bold tracking-widest ${
                 isDarkMode
                   ? 'text-[#888991] border-b border-white/10 bg-[#111113]/40'
                   : 'text-[#67656E] border-b border-black/5 bg-white/50'
               }`}>
-                <th className="px-8 py-3">ID Transacción</th>
-                <th className="px-6 py-3">Fecha Ingreso</th>
-                <th className="px-6 py-3 text-right">Monto</th>
-                <th className="px-6 py-3">Destino</th>
-                <th className="px-6 py-3 text-center">Estado</th>
-                <th className="px-8 py-3 text-right">Recibo</th>
+                <th className="px-8 py-3">{t('wallet.transactionIdHeader')}</th>
+                <th className="px-6 py-3">{t('wallet.depositDate')}</th>
+                <th className="px-6 py-3 text-right">{t('wallet.amountHeader')}</th>
+                <th className="px-6 py-3">{t('wallet.destination')}</th>
+                <th className="px-6 py-3 text-center">{t('wallet.statusHeader')}</th>
+                <th className="px-8 py-3 text-right">{t('wallet.receiptHeader')}</th>
               </tr>
             </thead>
             <motion.tbody variants={listVariants} initial="hidden" animate="show">
@@ -221,7 +223,7 @@ export default function WalletView() {
                   </td>
                   <td className="px-8 py-3.5 text-right">
                     <div className="flex justify-end">
-                      <Tooltip content="Ver recibo" position="top">
+                      <Tooltip content={t('wallet.viewReceipt')} position="top">
                         <Button
                           variant="action" size="sm"
                           className="!px-2.5 !py-1.5"
@@ -251,7 +253,7 @@ export default function WalletView() {
       <div className="lg:hidden space-y-3">
         <div className="py-2">
           <h3 className={`font-bold text-sm ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-            Historial de Retiros
+            {t('wallet.withdrawalHistory')}
           </h3>
         </div>
         {visibleData.length > 0 ? (
@@ -293,7 +295,7 @@ export default function WalletView() {
                         className="!px-3 !py-1.5 w-full justify-center"
                         onClick={() => setReceiptTrx(w)}
                       >
-                        <FileText size={14} /> Ver Recibo
+                        <FileText size={14} /> {t('wallet.viewReceipt')}
                       </Button>
                     </div>
                   )}
@@ -304,11 +306,11 @@ export default function WalletView() {
         ) : (
           <Card className="p-8 text-center">
             <p className={`text-sm font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-              No se encontraron retiros{search ? ` para "${search}"` : ''}.
+              {search ? t('wallet.notFoundFor', { term: search }) : t('wallet.notFound')}
             </p>
             {search && (
               <Button variant="ghost" size="sm" onClick={() => { setSearch(''); setCurrentPage(1) }} className="mt-2">
-                Limpiar busqueda
+                {t('common.clearSearch')}
               </Button>
             )}
           </Card>

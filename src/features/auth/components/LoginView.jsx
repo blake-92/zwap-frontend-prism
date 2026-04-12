@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Mail, Lock, Sun, Moon, ArrowLeft } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Card, Button, Input } from '@/shared/ui'
 import ZwapLogo from '@/shared/brand/ZwapLogo'
@@ -21,10 +22,11 @@ function GoogleIcon() {
 /* ─── Divider ──────────────────────────────────────────────── */
 function OrDivider() {
   const { isDarkMode } = useTheme()
+  const { t } = useTranslation()
   return (
     <div className="flex items-center gap-4 opacity-60">
       <div className={`flex-1 h-px ${isDarkMode ? 'bg-white/20' : 'bg-black/10'}`} />
-      <span className={`text-xs font-semibold ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#67656E]'}`}>O</span>
+      <span className={`text-xs font-semibold ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#67656E]'}`}>{t('auth.or')}</span>
       <div className={`flex-1 h-px ${isDarkMode ? 'bg-white/20' : 'bg-black/10'}`} />
     </div>
   )
@@ -33,6 +35,7 @@ function OrDivider() {
 /* ─── Legal Footer ─────────────────────────────────────────── */
 function LegalFooter() {
   const { isDarkMode } = useTheme()
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   const linkCls = `hover:underline transition-colors hover:text-[#7C3AED] cursor-pointer`
@@ -42,13 +45,11 @@ function LegalFooter() {
       isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'
     }`}>
       <div className="flex gap-4">
-        <span className={linkCls} onClick={() => navigate('/legal/terminos')}>Términos de Uso</span>
+        <span className={linkCls} onClick={() => navigate('/legal/terminos')}>{t('auth.terms')}</span>
         <span className="opacity-30">•</span>
-        <span className={linkCls} onClick={() => navigate('/legal/privacidad')}>Privacidad</span>
-        <span className="opacity-30">•</span>
-        <span className={linkCls} onClick={() => navigate('/legal/copyright')}>Copyright</span>
+        <span className={linkCls} onClick={() => navigate('/legal/privacidad')}>{t('auth.privacy')}</span>
       </div>
-      <p className="opacity-50 tracking-wide">© 2026 ZOKORP, LLC.</p>
+      <p className="opacity-50 tracking-wide">{t('auth.copyright')}</p>
     </div>
   )
 }
@@ -56,6 +57,7 @@ function LegalFooter() {
 /* ─── Google Button ────────────────────────────────────────── */
 function GoogleButton({ onClick }) {
   const { isDarkMode } = useTheme()
+  const { t } = useTranslation()
   return (
     <button
       onClick={onClick}
@@ -66,7 +68,7 @@ function GoogleButton({ onClick }) {
       }`}
     >
       <GoogleIcon />
-      Continuar con Google
+      {t('auth.continueWithGoogle')}
     </button>
   )
 }
@@ -74,6 +76,7 @@ function GoogleButton({ onClick }) {
 /* ─── Email Form ───────────────────────────────────────────── */
 function EmailForm({ onBack, onSubmit }) {
   const { isDarkMode } = useTheme()
+  const { t } = useTranslation()
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
 
@@ -84,7 +87,7 @@ function EmailForm({ onBack, onSubmit }) {
     >
       <div>
         <label className={`block text-xs font-bold tracking-wide mb-2 ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
-          Correo Electrónico
+          {t('auth.email')}
         </label>
         <Input
           icon={Mail}
@@ -98,12 +101,12 @@ function EmailForm({ onBack, onSubmit }) {
       <div>
         <div className="flex justify-between items-center mb-2">
           <label className={`block text-xs font-bold tracking-wide ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
-            Contraseña
+            {t('auth.password')}
           </label>
           <button className={`text-xs font-semibold transition-colors hover:underline ${
             isDarkMode ? 'text-[#B9A4F8] hover:text-white' : 'text-[#7C3AED] hover:text-[#561BAF]'
           }`}>
-            ¿Olvidaste tu contraseña?
+            {t('auth.forgotPassword')}
           </button>
         </div>
         <Input
@@ -119,7 +122,7 @@ function EmailForm({ onBack, onSubmit }) {
         type="submit"
         className="w-full !py-3.5 !text-base shadow-lg mt-4"
       >
-        Iniciar Sesión
+        {t('auth.login')}
       </Button>
 
       <div className="pt-4 text-center">
@@ -130,7 +133,7 @@ function EmailForm({ onBack, onSubmit }) {
             isDarkMode ? 'text-[#888991] hover:text-white' : 'text-[#67656E] hover:text-[#111113]'
           }`}
         >
-          <ArrowLeft size={14} /> Volver a métodos de ingreso
+          <ArrowLeft size={14} /> {t('auth.backToMethods')}
         </button>
       </div>
     </form>
@@ -140,6 +143,7 @@ function EmailForm({ onBack, onSubmit }) {
 /* ─── LoginView ────────────────────────────────────────────── */
 export default function LoginView() {
   const { isDarkMode, toggleTheme } = useTheme()
+  const { t } = useTranslation()
   const navigate                    = useNavigate()
   const [showEmail, setShowEmail]   = useState(false)
 
@@ -153,7 +157,7 @@ export default function LoginView() {
 
       {/* Theme toggle */}
       <div className="absolute top-6 right-6 md:top-10 md:right-10 z-50">
-        <Button variant="ghost" size="icon" onClick={toggleTheme} title="Cambiar tema">
+        <Button variant="ghost" size="icon" onClick={toggleTheme} title={t('header.themeToggle')}>
           {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
         </Button>
       </div>
@@ -173,10 +177,10 @@ export default function LoginView() {
         {/* Heading */}
         <div className="w-full text-center mb-8">
           <h1 className={`text-2xl font-bold tracking-tight ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-            Bienvenido de vuelta
+            {t('auth.welcomeBack')}
           </h1>
           <p className={`text-sm mt-1 font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-            Ingresa a tu panel de control financiero
+            {t('auth.subtitle')}
           </p>
         </div>
 
@@ -192,7 +196,7 @@ export default function LoginView() {
                 onClick={() => setShowEmail(true)}
               >
                 <Mail size={18} className="mr-2" />
-                Continuar con correo
+                {t('auth.continueWithEmail')}
               </Button>
             </div>
           ) : (

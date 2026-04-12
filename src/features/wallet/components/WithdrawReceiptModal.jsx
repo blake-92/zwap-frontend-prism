@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react'
 import { X, Printer, Download, Landmark, CheckCircle2 } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 
 export default function WithdrawReceiptModal({ trx, onClose }) {
   const { isDarkMode } = useTheme()
+  const { t } = useTranslation()
   const containerRef = useRef(null)
 
   // ESC key handler
@@ -54,7 +56,7 @@ export default function WithdrawReceiptModal({ trx, onClose }) {
       ref={containerRef}
       role="dialog"
       aria-modal="true"
-      aria-label="Comprobante de Transferencia"
+      aria-label={t('wallet.transferReceipt')}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.15 }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
@@ -69,7 +71,7 @@ export default function WithdrawReceiptModal({ trx, onClose }) {
       />
 
         {/* Digital Receipt Card */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -83,34 +85,34 @@ export default function WithdrawReceiptModal({ trx, onClose }) {
           {/* Floating action buttons (Top Right) */}
           <div className="absolute -top-12 right-0 flex gap-2">
             <button className={`p-2 rounded-full backdrop-blur-xl transition-all shadow-lg ${
-              isDarkMode 
-                ? 'bg-[#252429]/80 border border-white/10 text-white hover:bg-white/10' 
+              isDarkMode
+                ? 'bg-[#252429]/80 border border-white/10 text-white hover:bg-white/10'
                 : 'bg-white border border-[#7C3AED]/20 text-[#561BAF] hover:bg-gray-50'
-            }`} title="Imprimir">
+            }`} title={t('common.print')}>
               <Printer size={18} />
             </button>
             <button className={`p-2 rounded-full backdrop-blur-xl transition-all shadow-lg ${
-              isDarkMode 
-                ? 'bg-[#252429]/80 border border-white/10 text-white hover:bg-white/10' 
+              isDarkMode
+                ? 'bg-[#252429]/80 border border-white/10 text-white hover:bg-white/10'
                 : 'bg-white border border-[#7C3AED]/20 text-[#561BAF] hover:bg-gray-50'
-            }`} title="Descargar PDF">
+            }`} title={t('common.downloadPdf')}>
               <Download size={18} />
             </button>
             <button
               onClick={onClose}
               className={`p-2 rounded-full backdrop-blur-xl transition-all shadow-lg ${
-                isDarkMode 
-                  ? 'bg-rose-500/20 border border-rose-500/30 text-rose-400 hover:bg-rose-500/30' 
+                isDarkMode
+                  ? 'bg-rose-500/20 border border-rose-500/30 text-rose-400 hover:bg-rose-500/30'
                   : 'bg-rose-50 border border-rose-200 text-rose-600 hover:bg-rose-100'
-              }`} title="Cerrar">
+              }`} title={t('common.close')}>
               <X size={18} />
             </button>
           </div>
 
           {/* Main Card */}
           <div className={`overflow-hidden rounded-3xl border shadow-2xl backdrop-blur-2xl ${
-            isDarkMode 
-              ? 'bg-[#252429]/90 border-white/10 shadow-[0_30px_80px_rgba(0,0,0,0.8)]' 
+            isDarkMode
+              ? 'bg-[#252429]/90 border-white/10 shadow-[0_30px_80px_rgba(0,0,0,0.8)]'
               : 'bg-white/90 border-white shadow-[0_30px_80px_rgba(124,58,237,0.15)]'
           }`}>
             {/* Header Glow */}
@@ -119,19 +121,19 @@ export default function WithdrawReceiptModal({ trx, onClose }) {
             <div className="px-8 pt-10 pb-8 relative z-10">
               {/* Brand icon */}
               <div className={`w-16 h-16 mx-auto mb-5 rounded-2xl flex items-center justify-center shadow-lg ${
-                isDarkMode 
-                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.3)]' 
+                isDarkMode
+                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.3)]'
                   : 'bg-gradient-to-tr from-emerald-400 to-emerald-600 text-white shadow-[0_10px_20px_rgba(16,185,129,0.3)]'
               }`}>
                 <Landmark size={28} strokeWidth={2} />
               </div>
-              
+
               <div className="text-center mb-8">
                 <h2 className={`text-xl font-bold mb-1 tracking-tight ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-                  Liquidación Bancaria
+                  {t('wallet.bankSettlement')}
                 </h2>
                 <p className={`text-xs font-medium uppercase tracking-widest ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                  Comprobante de Transferencia
+                  {t('wallet.transferReceipt')}
                 </p>
               </div>
 
@@ -141,7 +143,7 @@ export default function WithdrawReceiptModal({ trx, onClose }) {
                   isDarkMode ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
                 }`}>
                   <CheckCircle2 size={14} />
-                  FONDOS TRANSFERIDOS
+                  {t('wallet.fundsTransferred')}
                 </div>
               </div>
 
@@ -149,9 +151,9 @@ export default function WithdrawReceiptModal({ trx, onClose }) {
 
               {/* Total Amount */}
               <div className="text-center my-6">
-                <p className={`text-xs font-bold tracking-widest uppercase mb-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>Monto Liquidado</p>
+                <p className={`text-xs font-bold tracking-widest uppercase mb-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>{t('wallet.settledAmount')}</p>
                 <div className={`text-4xl font-mono font-bold tracking-tighter ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
-                  ${trx.amount} <span className="text-lg opacity-70 font-sans">USD</span>
+                  ${trx.amount} <span className="text-lg opacity-70 font-sans">{t('common.usd')}</span>
                 </div>
               </div>
 
@@ -160,15 +162,15 @@ export default function WithdrawReceiptModal({ trx, onClose }) {
               {/* Data rows */}
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className={`text-xs font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>Fecha de Ejecución</span>
+                  <span className={`text-xs font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>{t('wallet.executionDate')}</span>
                   <span className={`text-sm font-bold ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`}>{trx.date}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className={`text-xs font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>ID Transferencia</span>
+                  <span className={`text-xs font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>{t('wallet.transferId')}</span>
                   <span className={`text-sm font-mono font-bold ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`}>{trx.id}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className={`text-xs font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>Cuenta Destino</span>
+                  <span className={`text-xs font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>{t('wallet.destinationAccount')}</span>
                   <span className={`text-sm font-bold flex items-center gap-1.5 ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`}>
                     {trx.bank}
                   </span>
@@ -178,7 +180,7 @@ export default function WithdrawReceiptModal({ trx, onClose }) {
               {/* Footer text */}
               <div className={`mt-8 pt-6 border-t border-dashed text-center ${isDarkMode ? 'border-white/10' : 'border-gray-200'}`}>
                 <p className={`text-xs font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                  Documento generado por <span className={`font-bold ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>Zwap Settlements</span>
+                  {t('wallet.generatedBy')} <span className={`font-bold ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>Zwap Settlements</span>
                 </p>
               </div>
             </div>

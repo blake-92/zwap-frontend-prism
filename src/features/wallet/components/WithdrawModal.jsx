@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { ArrowUpFromLine, Landmark } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Button, Modal, InfoBanner } from '@/shared/ui'
 import { WALLET_BALANCE, BANK_ACCOUNT } from '@/services/mocks/mockData'
 
 export default function WithdrawModal({ onClose }) {
   const { isDarkMode } = useTheme()
+  const { t } = useTranslation()
   const [amount, setAmount] = useState('')
 
   const balance    = WALLET_BALANCE.raw
@@ -15,7 +17,7 @@ export default function WithdrawModal({ onClose }) {
 
   const description = (
     <>
-      Saldo disponible:{' '}
+      {t('wallet.availableBalance')}:{' '}
       <span className={`font-mono font-bold ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
         ${balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
       </span>
@@ -24,9 +26,9 @@ export default function WithdrawModal({ onClose }) {
 
   const footer = (
     <>
-      <Button variant="outline" className="flex-1 !py-3.5" onClick={onClose}>Cancelar</Button>
+      <Button variant="outline" className="flex-1 !py-3.5" onClick={onClose}>{t('common.cancel')}</Button>
       <Button className="flex-1 !py-3.5" disabled={parsedAmt <= 0 || parsedAmt > balance}>
-        <ArrowUpFromLine size={18} /> Confirmar Retiro
+        <ArrowUpFromLine size={18} /> {t('wallet.confirmWithdraw')}
       </Button>
     </>
   )
@@ -35,7 +37,7 @@ export default function WithdrawModal({ onClose }) {
     <Modal
       onClose={onClose}
       icon={<ArrowUpFromLine size={24} />}
-      title="Retirar Fondos"
+      title={t('wallet.withdrawTitle')}
       description={description}
       footer={footer}
     >
@@ -44,7 +46,7 @@ export default function WithdrawModal({ onClose }) {
         {/* Amount input */}
         <div>
           <label className={`block text-xs font-bold tracking-widest mb-3 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
-            MONTO A RETIRAR (USD)
+            {t('wallet.withdrawAmount')}
           </label>
           <div className="relative">
             <span className={`absolute left-4 top-3.5 font-bold text-lg ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>$</span>
@@ -64,7 +66,7 @@ export default function WithdrawModal({ onClose }) {
             onClick={() => setAmount(balance.toFixed(2))}
             className={`mt-2 text-xs font-bold transition-colors ${isDarkMode ? 'text-[#7C3AED] hover:text-[#A78BFA]' : 'text-[#7C3AED] hover:text-[#561BAF]'}`}
           >
-            Retirar todo el saldo disponible
+            {t('wallet.withdrawAll')}
           </button>
         </div>
 
@@ -78,7 +80,7 @@ export default function WithdrawModal({ onClose }) {
             <Landmark size={18} />
           </div>
           <div>
-            <p className={`text-xs font-bold ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>Destino</p>
+            <p className={`text-xs font-bold ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>{t('wallet.destination')}</p>
             <p className={`text-sm font-bold ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
               {BANK_ACCOUNT.shortName}
             </p>
@@ -94,17 +96,17 @@ export default function WithdrawModal({ onClose }) {
             isDarkMode ? 'bg-[#111113]/30 border-white/10' : 'bg-gray-50/60 border-gray-200'
           }`}>
             <div className={`flex justify-between ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
-              <span>Monto solicitado</span>
+              <span>{t('wallet.requestedAmount')}</span>
               <span className="font-bold">${parsedAmt.toFixed(2)}</span>
             </div>
             <div className={`flex justify-between ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-              <span>Comisión de retiro</span>
-              <span className="text-emerald-500 font-bold">Gratis</span>
+              <span>{t('wallet.withdrawalFee')}</span>
+              <span className="text-emerald-500 font-bold">{t('common.free')}</span>
             </div>
             <div className={`flex justify-between pt-2 border-t font-bold text-base ${
               isDarkMode ? 'border-white/10 text-white' : 'border-black/5 text-[#111113]'
             }`}>
-              <span>Total a depositar</span>
+              <span>{t('wallet.totalDeposit')}</span>
               <span>${net.toFixed(2)}</span>
             </div>
           </div>
@@ -112,7 +114,7 @@ export default function WithdrawModal({ onClose }) {
 
         {/* Info */}
         <InfoBanner>
-          Los retiros se procesan en 1-2 días hábiles. El dinero llegará a tu cuenta bancaria registrada.
+          {t('wallet.withdrawalProcessing')}
         </InfoBanner>
       </div>
     </Modal>

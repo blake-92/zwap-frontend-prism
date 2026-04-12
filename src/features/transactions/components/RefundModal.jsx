@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { RotateCcw } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Button, Modal, SegmentControl, SectionLabel, InfoBanner } from '@/shared/ui'
 
 export default function RefundModal({ trx, onClose }) {
   const { isDarkMode }              = useTheme()
+  const { t }                       = useTranslation()
   const [refundType, setRefundType] = useState('total')
   const [feeBearer, setFeeBearer]   = useState('hotel')
   const [partial, setPartial]       = useState('')
@@ -13,22 +15,22 @@ export default function RefundModal({ trx, onClose }) {
 
   const refundAmount = refundType === 'parcial' ? (partial || '0.00') : trx.amount
   const warningText  = feeBearer === 'hotel'
-    ? `El cliente recibirá $${refundAmount} completos. El hotel asumirá el costo transaccional de $3.50.`
-    : `El cliente recibirá $${refundAmount} menos la comisión bancaria de $3.50. El saldo del hotel no se verá afectado.`
+    ? t('refund.hotelBearerDesc', { amount: refundAmount })
+    : t('refund.clientBearerDesc', { amount: refundAmount })
 
   const description = (
     <>
-      Cobro original:{' '}
+      {t('refund.originalCharge')}:{' '}
       <span className={`font-mono ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>${trx.amount}</span>
-      {' '}a {trx.client || 'Cliente Anónimo'}
+      {' '}a {trx.client || t('common.anonymousClient')}
     </>
   )
 
   const footer = (
     <>
-      <Button variant="outline" className="flex-1 !py-3.5" onClick={onClose}>Cancelar</Button>
+      <Button variant="outline" className="flex-1 !py-3.5" onClick={onClose}>{t('common.cancel')}</Button>
       <Button className="flex-1 !py-3.5 !bg-rose-500 hover:!bg-rose-600 !border-rose-400 !shadow-[0_8px_25px_rgba(244,63,94,0.3)]">
-        <RotateCcw size={18} /> Procesar Devolución
+        <RotateCcw size={18} /> {t('refund.processRefund')}
       </Button>
     </>
   )
@@ -37,7 +39,7 @@ export default function RefundModal({ trx, onClose }) {
     <Modal
       onClose={onClose}
       icon={<RotateCcw className="text-rose-500" size={24} />}
-      title="Solicitar Devolución"
+      title={t('refund.title')}
       description={description}
       maxWidth="600px"
       footer={footer}
@@ -46,11 +48,11 @@ export default function RefundModal({ trx, onClose }) {
 
         {/* Tipo de reembolso */}
         <div>
-          <SectionLabel className="mb-4">TIPO DE REEMBOLSO</SectionLabel>
+          <SectionLabel className="mb-4">{t('refund.type')}</SectionLabel>
           <div className="grid grid-cols-2 gap-4">
             {[
-              { id: 'total',   label: 'Total',   sub: `$${trx.amount}`,      subColor: 'text-rose-500' },
-              { id: 'parcial', label: 'Parcial', sub: 'Monto personalizado', subColor: isDarkMode ? 'text-[#888991]' : 'text-[#67656E]' },
+              { id: 'total',   label: t('refund.total'),   sub: `$${trx.amount}`,          subColor: 'text-rose-500' },
+              { id: 'parcial', label: t('refund.partial'), sub: t('refund.customAmount'), subColor: isDarkMode ? 'text-[#888991]' : 'text-[#67656E]' },
             ].map(opt => (
               <div
                 key={opt.id}
@@ -106,11 +108,11 @@ export default function RefundModal({ trx, onClose }) {
 
         {/* Fee bearer */}
         <div>
-          <SectionLabel className="mb-4">¿QUIÉN ABSORBE LA COMISIÓN BANCARIA?</SectionLabel>
+          <SectionLabel className="mb-4">{t('refund.feeBearer')}</SectionLabel>
           <SegmentControl
             options={[
-              { value: 'hotel',   label: 'El Hotel (Reembolso exacto)' },
-              { value: 'cliente', label: 'El Cliente (Menos comisión)' },
+              { value: 'hotel',   label: t('refund.hotelBearerLabel') },
+              { value: 'cliente', label: t('refund.clientBearerLabel') },
             ]}
             value={feeBearer}
             onChange={setFeeBearer}

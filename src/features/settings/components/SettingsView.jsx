@@ -3,8 +3,9 @@ import { motion } from 'framer-motion'
 import { pageVariants } from '@/shared/utils/motionVariants'
 import {
   User, Shield, CreditCard, Bell, Save,
-  Smartphone, KeyRound, MonitorSmartphone, Mail, Lock
+  Smartphone, KeyRound, MonitorSmartphone, Mail, Lock, Globe
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { useToast } from '@/shared/context/ToastContext'
 import { Card, Button, Input, Toggle, Badge, PageHeader } from '@/shared/ui'
@@ -39,13 +40,8 @@ function SettingRow({ icon: Icon, title, desc, control }) {
   )
 }
 
-const TABS = [
-  { id: 'perfil', label: 'Mi Perfil', icon: User },
-  { id: 'seguridad', label: 'Seguridad', icon: Shield },
-  { id: 'facturacion', label: 'Facturación', icon: CreditCard },
-]
-
 export default function SettingsView() {
+  const { t, i18n } = useTranslation()
   const { isDarkMode } = useTheme()
   const { addToast } = useToast()
   const [activeTab, setActiveTab] = useState('perfil')
@@ -53,16 +49,22 @@ export default function SettingsView() {
   const [pushNotifs, setPushNotifs]   = useState(false)
   const [twoFactor, setTwoFactor]     = useState(false)
 
+  const TABS = [
+    { id: 'perfil', label: t('settings.tabProfile'), icon: User },
+    { id: 'seguridad', label: t('settings.tabSecurity'), icon: Shield },
+    { id: 'facturacion', label: t('settings.tabBilling'), icon: CreditCard },
+  ]
+
   const handleSave = () => {
-    addToast('Cambios guardados correctamente.', 'success')
+    addToast(t('settings.changesSaved'), 'success')
   }
 
   return (
     <motion.div variants={pageVariants} initial="hidden" animate="show" className="max-w-4xl mx-auto">
 
       <PageHeader
-        title="Configuración"
-        description="Administra tus preferencias, seguridad y métodos de pago"
+        title={t('settings.title')}
+        description={t('settings.description')}
       />
 
       {/* Tabs */}
@@ -110,7 +112,7 @@ export default function SettingsView() {
           <>
             <Card className="p-6 md:p-8">
               <h3 className={`text-sm font-bold tracking-widest uppercase mb-6 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
-                Información Personal
+                {t('settings.personalInfo')}
               </h3>
 
               <div className="flex flex-col sm:flex-row gap-8 items-start mb-8">
@@ -124,26 +126,26 @@ export default function SettingsView() {
                     {CURRENT_USER.initials}
                   </div>
                   <div className="absolute inset-0 bg-black/60 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-xs font-bold backdrop-blur-sm">
-                    Cambiar
+                    {t('common.change')}
                   </div>
                 </div>
 
                 <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
                     <label className={`block text-xs font-bold tracking-widest mb-2 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                      NOMBRE COMPLETO
+                      {t('users.fullName')}
                     </label>
                     <Input defaultValue={CURRENT_USER.name} />
                   </div>
                   <div>
                     <label className={`block text-xs font-bold tracking-widest mb-2 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                      CARGO / ROL
+                      {t('users.role')}
                     </label>
-                    <Input defaultValue="Administrador" disabled />
+                    <Input defaultValue={t('users.roleAdmin')} disabled />
                   </div>
                   <div className="md:col-span-2">
                     <label className={`block text-xs font-bold tracking-widest mb-2 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                      CORREO ELECTRÓNICO
+                      {t('users.emailLabel')}
                     </label>
                     <Input icon={Mail} defaultValue={CURRENT_USER.email} />
                   </div>
@@ -151,29 +153,73 @@ export default function SettingsView() {
               </div>
 
               <div className={`pt-6 border-t flex justify-end ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
-                <Button onClick={handleSave}><Save size={16} /> Guardar Cambios</Button>
+                <Button onClick={handleSave}><Save size={16} /> {t('common.save')}</Button>
               </div>
             </Card>
 
             <Card className="p-6 md:p-8">
               <h3 className={`text-sm font-bold tracking-widest uppercase mb-2 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
-                Preferencias de Notificaciones
+                {t('settings.notificationPrefs')}
               </h3>
 
               <div className="flex flex-col">
                 <SettingRow
                   icon={Bell}
-                  title="Alertas de Nuevos Pagos"
-                  desc="Recibe un email cada vez que un link de pago sea completado."
+                  title={t('settings.paymentAlerts')}
+                  desc={t('settings.paymentAlertsDesc')}
                   control={<Toggle active={alertEmails} onToggle={() => setAlertEmails(v => !v)} />}
                 />
                 <SettingRow
                   icon={Smartphone}
-                  title="Notificaciones Push"
-                  desc="Alertas en tiempo real en tu navegador."
+                  title={t('settings.pushNotifications')}
+                  desc={t('settings.pushNotificationsDesc')}
                   control={<Toggle active={pushNotifs} onToggle={() => setPushNotifs(v => !v)} />}
                 />
               </div>
+            </Card>
+
+            <Card className="p-6 md:p-8">
+              <h3 className={`text-sm font-bold tracking-widest uppercase mb-2 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
+                {t('settings.language')}
+              </h3>
+
+              <SettingRow
+                icon={Globe}
+                title={t('settings.language')}
+                desc={t('settings.languageDesc')}
+                control={
+                  <div className={`flex rounded-xl overflow-hidden border ${isDarkMode ? 'border-white/10' : 'border-black/10'}`}>
+                    <button
+                      onClick={() => i18n.changeLanguage('es')}
+                      className={`px-4 py-2 text-sm font-bold transition-colors ${
+                        i18n.language === 'es'
+                          ? isDarkMode
+                            ? 'bg-[#7C3AED]/20 text-[#A78BFA]'
+                            : 'bg-[#DBD3FB]/50 text-[#7C3AED]'
+                          : isDarkMode
+                            ? 'text-[#888991] hover:bg-white/5'
+                            : 'text-[#67656E] hover:bg-black/5'
+                      }`}
+                    >
+                      {t('settings.languageEs')}
+                    </button>
+                    <button
+                      onClick={() => i18n.changeLanguage('en')}
+                      className={`px-4 py-2 text-sm font-bold transition-colors border-l ${
+                        i18n.language === 'en'
+                          ? isDarkMode
+                            ? 'bg-[#7C3AED]/20 text-[#A78BFA] border-white/10'
+                            : 'bg-[#DBD3FB]/50 text-[#7C3AED] border-black/10'
+                          : isDarkMode
+                            ? 'text-[#888991] hover:bg-white/5 border-white/10'
+                            : 'text-[#67656E] hover:bg-black/5 border-black/10'
+                      }`}
+                    >
+                      {t('settings.languageEn')}
+                    </button>
+                  </div>
+                }
+              />
             </Card>
           </>
         )}
@@ -183,20 +229,20 @@ export default function SettingsView() {
           <>
             <Card className="p-6 md:p-8">
               <h3 className={`text-sm font-bold tracking-widest uppercase mb-6 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
-                Autenticación y Accesos
+                {t('settings.authAccess')}
               </h3>
 
               <div className="flex flex-col">
                 <SettingRow
                   icon={KeyRound}
-                  title="Contraseña"
-                  desc="Actualizada hace 3 meses."
-                  control={<Button variant="outline" size="sm">Cambiar</Button>}
+                  title={t('settings.password')}
+                  desc={t('settings.passwordUpdated')}
+                  control={<Button variant="outline" size="sm">{t('common.change')}</Button>}
                 />
                 <SettingRow
                   icon={Lock}
-                  title="Autenticación de Dos Factores (2FA)"
-                  desc="Protege tu cuenta con un código temporal enviado a tu móvil."
+                  title={t('settings.twoFactor')}
+                  desc={t('settings.twoFactorDesc')}
                   control={<Toggle active={twoFactor} onToggle={() => setTwoFactor(v => !v)} />}
                 />
               </div>
@@ -204,7 +250,7 @@ export default function SettingsView() {
 
             <Card className="p-6 md:p-8">
               <h3 className={`text-sm font-bold tracking-widest uppercase mb-6 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
-                Sesiones Activas
+                {t('settings.activeSessions')}
               </h3>
 
               <div className="flex flex-col">
@@ -213,10 +259,10 @@ export default function SettingsView() {
                     key={session.id}
                     icon={session.icon === 'desktop' ? MonitorSmartphone : Smartphone}
                     title={session.device}
-                    desc={`${session.location} • ${session.isCurrent ? 'Sesión actual' : session.lastActive}`}
+                    desc={`${session.location} • ${session.isCurrent ? t('settings.currentSession') : session.lastActive}`}
                     control={session.isCurrent
-                      ? <Badge variant="success">Actual</Badge>
-                      : <Button variant="danger" size="sm" className="!py-1.5 !px-3">Revocar</Button>
+                      ? <Badge variant="success">{t('settings.currentSession')}</Badge>
+                      : <Button variant="danger" size="sm" className="!py-1.5 !px-3">{t('common.revoke')}</Button>
                     }
                   />
                 ))}
@@ -229,7 +275,7 @@ export default function SettingsView() {
         {activeTab === 'facturacion' && (
           <Card className="p-6 md:p-8">
             <h3 className={`text-sm font-bold tracking-widest uppercase mb-6 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
-              Métodos de Pago y Planes
+              {t('settings.paymentMethods')}
             </h3>
 
             <div className={`p-6 rounded-2xl border mb-6 flex justify-between items-center ${
@@ -237,24 +283,24 @@ export default function SettingsView() {
             }`}>
               <div>
                 <p className={`text-xs font-bold tracking-widest uppercase mb-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                  PLAN ACTUAL
+                  {t('settings.currentPlan')}
                 </p>
                 <h4 className={`text-xl font-bold flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
                   {PLAN_INFO.name} <Badge variant="default">{PLAN_INFO.tier}</Badge>
                 </h4>
                 <p className={`text-sm mt-1 font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                  Renueva el {PLAN_INFO.renewDate} ({PLAN_INFO.price})
+                  {PLAN_INFO.renewDate} ({PLAN_INFO.price})
                 </p>
               </div>
-              <Button variant="outline">Administrar Plan</Button>
+              <Button variant="outline">{t('settings.managePlan')}</Button>
             </div>
 
             <div className="flex flex-col">
               <SettingRow
                 icon={CreditCard}
-                title={`${PAYMENT_CARD.brand} terminada en ${PAYMENT_CARD.last4}`}
-                desc={`Expiración: ${PAYMENT_CARD.expiry} • Tarjeta ${PAYMENT_CARD.isPrimary ? 'Principal' : 'Secundaria'}`}
-                control={<Button variant="outline" size="sm">Actualizar</Button>}
+                title={`${PAYMENT_CARD.brand} ••${PAYMENT_CARD.last4}`}
+                desc={`${t('settings.expiration')}: ${PAYMENT_CARD.expiry} • ${PAYMENT_CARD.isPrimary ? t('settings.primaryCard') : t('settings.secondaryCard')}`}
+                control={<Button variant="outline" size="sm">{t('common.update')}</Button>}
               />
             </div>
           </Card>

@@ -4,6 +4,7 @@ import {
   Download, UserPlus,
   Pencil, Trash2,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Card, Button, Badge, AvatarInfo, Toggle, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar, SegmentControl } from '@/shared/ui'
 import { listVariants, itemVariants, pageVariants } from '@/shared/utils/motionVariants'
@@ -19,12 +20,24 @@ const ROLE_VARIANT = {
 
 export default function UsuariosView() {
   const { isDarkMode } = useTheme()
+  const { t } = useTranslation()
   const [users, setUsers]       = useState(USERS)
   const [search, setSearch]     = useState('')
   const [roleFilter, setRoleFilter] = useState('Todos')
   const [newUserOpen, setNewUserOpen] = useState(false)
 
-  const roles = ['Todos', 'Administrador', 'Contador', 'Recepcionista']
+  const roles = [
+    { value: 'Todos', label: t('filters.all') },
+    { value: 'Administrador', label: t('users.roleAdmin') },
+    { value: 'Contador', label: t('users.roleAccountant') },
+    { value: 'Recepcionista', label: t('users.roleReceptionist') },
+  ]
+
+  const ROLE_LABEL = {
+    Administrador: t('users.roleAdmin'),
+    Contador: t('users.roleAccountant'),
+    Recepcionista: t('users.roleReceptionist'),
+  }
 
   const filtered = useMemo(() => users.filter(u => {
     const matchSearch = !search ||
@@ -41,9 +54,9 @@ export default function UsuariosView() {
   return (
     <motion.div variants={pageVariants} initial="hidden" animate="show">
 
-      <PageHeader title="Usuarios" description="Gestión de acceso y permisos del equipo">
+      <PageHeader title={t('users.title')} description={t('users.description')}>
         <Button onClick={() => setNewUserOpen(true)}>
-          <UserPlus size={18} /> Nuevo Usuario
+          <UserPlus size={18} /> {t('users.newUser')}
         </Button>
       </PageHeader>
 
@@ -52,13 +65,13 @@ export default function UsuariosView() {
           <SearchInput
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Buscar por nombre o email..."
+            placeholder={t('users.searchPlaceholder')}
           />
         }
-        actions={<Button variant="successExport" size="sm"><Download size={14} /> Exportar CSV</Button>}
+        actions={<Button variant="successExport" size="sm"><Download size={14} /> {t('common.exportCsv')}</Button>}
       >
         <SegmentControl
-          options={roles.map(r => ({ value: r, label: r }))}
+          options={roles}
           value={roleFilter}
           onChange={setRoleFilter}
         />
@@ -74,11 +87,11 @@ export default function UsuariosView() {
                   ? 'text-[#888991] border-b border-white/10 bg-[#111113]/40'
                   : 'text-[#67656E] border-b border-black/5 bg-white/50'
               }`}>
-                <th className="px-8 py-4 min-w-[240px]">Usuario</th>
-                <th className="px-6 py-4 min-w-[130px]">Rol</th>
-                <th className="px-6 py-4 min-w-[260px]">Sucursales</th>
-                <th className="px-6 py-4 text-center min-w-[100px]">Estado</th>
-                <th className="px-8 py-4 text-right min-w-[120px]">Acciones</th>
+                <th className="px-8 py-4 min-w-[240px]">{t('users.tableUser')}</th>
+                <th className="px-6 py-4 min-w-[130px]">{t('users.tableRole')}</th>
+                <th className="px-6 py-4 min-w-[260px]">{t('users.tableBranches')}</th>
+                <th className="px-6 py-4 text-center min-w-[100px]">{t('filters.status')}</th>
+                <th className="px-8 py-4 text-right min-w-[120px]">{t('transactions.tableActions')}</th>
               </tr>
             </thead>
             <motion.tbody variants={listVariants} initial="hidden" animate="show">
@@ -107,7 +120,7 @@ export default function UsuariosView() {
                   {/* Rol */}
                   <td className="px-6 py-4">
                     <Badge variant={ROLE_VARIANT[user.role] || 'default'}>
-                      {user.role}
+                      {ROLE_LABEL[user.role] || user.role}
                     </Badge>
                   </td>
 
@@ -149,12 +162,12 @@ export default function UsuariosView() {
                   {/* Acciones */}
                   <td className="px-8 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Tooltip content="Editar usuario" position="top">
+                      <Tooltip content={t('users.editUser')} position="top">
                         <Button variant="action" size="sm" className="!px-3 !py-2">
                           <Pencil size={14} />
                         </Button>
                       </Tooltip>
-                      <Tooltip content="Eliminar usuario" position="top">
+                      <Tooltip content={t('users.deleteUser')} position="top">
                         <Button variant="danger" size="sm" className="!px-3 !py-2">
                           <Trash2 size={14} />
                         </Button>
@@ -192,7 +205,7 @@ export default function UsuariosView() {
                   {/* Role + branches */}
                   <div className="flex items-center gap-2 flex-wrap mb-3">
                     <Badge variant={ROLE_VARIANT[user.role] || 'default'}>
-                      {user.role}
+                      {ROLE_LABEL[user.role] || user.role}
                     </Badge>
                     <span className="opacity-40">|</span>
                     {user.branches.slice(0, 2).map(b => (
@@ -221,10 +234,10 @@ export default function UsuariosView() {
                   {/* Actions */}
                   <div className={`flex items-center gap-2 pt-3 border-t ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
                     <Button variant="action" size="sm" className="!px-3 !py-1.5 flex-1">
-                      <Pencil size={14} /> Editar
+                      <Pencil size={14} /> {t('common.edit')}
                     </Button>
                     <Button variant="danger" size="sm" className="!px-3 !py-1.5 flex-1">
-                      <Trash2 size={14} /> Eliminar
+                      <Trash2 size={14} /> {t('common.delete')}
                     </Button>
                   </div>
                 </Card>
@@ -234,11 +247,11 @@ export default function UsuariosView() {
         ) : (
           <Card className="p-8 text-center">
             <p className={`text-sm font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-              No se encontraron usuarios{search ? ` para "${search}"` : ''}.
+              {search ? t('errors.noResultsFor', { term: search }) : t('errors.noResults')}
             </p>
             {search && (
               <Button variant="ghost" size="sm" onClick={() => setSearch('')} className="mt-2">
-                Limpiar busqueda
+                {t('common.clearSearch')}
               </Button>
             )}
           </Card>

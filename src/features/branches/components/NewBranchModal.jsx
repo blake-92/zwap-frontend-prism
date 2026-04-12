@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { X, Building2 } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Button, Input } from '@/shared/ui'
 
@@ -8,6 +9,7 @@ const SPRING = { type: 'spring', stiffness: 400, damping: 30 }
 
 export default function NewBranchModal({ onClose }) {
   const { isDarkMode } = useTheme()
+  const { t } = useTranslation()
   const containerRef = useRef(null)
   const [name, setName]       = useState('')
   const [address, setAddress] = useState('')
@@ -51,9 +53,9 @@ export default function NewBranchModal({ onClose }) {
   }, [])
 
   const fields = [
-    { label: 'Nombre de la Sucursal', val: name, set: setName, ph: 'ej. Hotel del Mar', full: true },
-    { label: 'Dirección',             val: address, set: setAddress, ph: 'Av. Costanera 456', full: false },
-    { label: 'Ciudad / Región',       val: city,    set: setCity,    ph: 'Santa Cruz, Bolivia', full: false },
+    { label: t('branches.branchName'), val: name, set: setName, ph: t('branches.branchNamePlaceholder'), full: true },
+    { label: t('branches.address'),    val: address, set: setAddress, ph: t('branches.addressPlaceholder'), full: false },
+    { label: t('branches.cityRegion'), val: city,    set: setCity,    ph: t('branches.cityRegionPlaceholder'), full: false },
   ]
 
   return (
@@ -61,7 +63,7 @@ export default function NewBranchModal({ onClose }) {
       ref={containerRef}
       role="dialog"
       aria-modal="true"
-      aria-label="Nueva Sucursal"
+      aria-label={t('branches.newBranch')}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.15 }}
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
@@ -95,10 +97,10 @@ export default function NewBranchModal({ onClose }) {
         <div className={`px-5 sm:px-8 py-5 sm:py-6 border-b flex justify-between items-start ${isDarkMode ? 'border-white/10' : 'border-black/5'}`}>
           <div>
             <h2 className={`text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-              <Building2 className="text-[#7C3AED]" size={24} /> Nueva Sucursal
+              <Building2 className="text-[#7C3AED]" size={24} /> {t('branches.newBranch')}
             </h2>
             <p className={`text-sm mt-1 font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-              Agrega una nueva propiedad o punto de venta
+              {t('branches.modalDescription')}
             </p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}><X size={20} /></Button>
@@ -134,15 +136,15 @@ export default function NewBranchModal({ onClose }) {
           </div>
 
           <p className={`text-xs font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-            Podrás asignar usuarios y configurar links de pago una vez creada la sucursal.
+            {t('branches.postCreateHint')}
           </p>
         </div>
 
         {/* Footer */}
         <div className={`px-5 sm:px-8 py-5 sm:py-6 flex gap-3 sm:gap-4 border-t ${isDarkMode ? 'bg-[#111113]/40 border-white/10' : 'bg-gray-50/50 border-black/5'}`}>
-          <Button variant="outline" className="flex-1 !py-3.5" onClick={onClose}>Cancelar</Button>
+          <Button variant="outline" className="flex-1 !py-3.5" onClick={onClose}>{t('common.cancel')}</Button>
           <Button className="flex-1 !py-3.5" disabled={!name.trim() || !address.trim() || !city.trim()}>
-            <Building2 size={18} /> Crear Sucursal
+            <Building2 size={18} /> {t('branches.createBranch')}
           </Button>
         </div>
       </motion.div>
