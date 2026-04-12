@@ -9,7 +9,8 @@ import {
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { useToast } from '@/shared/context/ToastContext'
-import { Card, Button, Badge, SectionLabel, Toggle, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar, SwipeableCard } from '@/shared/ui'
+import { useViewSearch } from '@/shared/context/ViewSearchContext'
+import { Card, Button, Badge, SectionLabel, Toggle, EmptySearchState, Tooltip, PageHeader, TableToolbar, SwipeableCard } from '@/shared/ui'
 import { listVariants, itemVariants, cardItemVariants, pageVariants } from '@/shared/utils/motionVariants'
 import { PERMANENT_LINKS, CUSTOM_LINKS } from '@/services/mocks/mockData'
 import NewLinkModal from './NewLinkModal'
@@ -179,11 +180,10 @@ function PermanentLinksMobile({ links, onToggle }) {
 /* ─────────────────────────────────────────────────────────────
    Custom Links Table
 ───────────────────────────────────────────────────────────── */
-function CustomLinksTable({ onDetail, onEdit }) {
+function CustomLinksTable({ onDetail, onEdit, search, onClearSearch }) {
   const { isDarkMode } = useTheme()
   const { addToast } = useToast()
   const { t } = useTranslation()
-  const [search, setSearch] = useState('')
 
   const filtered = useMemo(() => CUSTOM_LINKS.filter(l =>
     !search || l.client.toLowerCase().includes(search.toLowerCase())
@@ -197,13 +197,6 @@ function CustomLinksTable({ onDetail, onEdit }) {
   return (
     <>
       <TableToolbar
-        search={
-          <SearchInput
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder={t('links.searchPlaceholder')}
-          />
-        }
         actions={<Button variant="successExport" size="sm"><Download size={14} /> {t('common.exportCsv')}</Button>}
       >
         <Button variant="outline" size="sm">
@@ -228,7 +221,7 @@ function CustomLinksTable({ onDetail, onEdit }) {
             </thead>
             <motion.tbody variants={listVariants} initial="hidden" animate="show">
               {filtered.length === 0 ? (
-                <EmptySearchState colSpan={5} term={search} onClear={() => setSearch('')} />
+                <EmptySearchState colSpan={5} term={search} onClear={() => onClearSearch()} />
               ) : filtered.map((link) => (
                 <motion.tr
                   variants={itemVariants}
@@ -408,7 +401,7 @@ function CustomLinksTable({ onDetail, onEdit }) {
               {search ? t('links.notFoundFor', { term: search }) : t('links.notFound')}
             </p>
             {search && (
-              <Button variant="ghost" size="sm" onClick={() => setSearch('')} className="mt-2">
+              <Button variant="ghost" size="sm" onClick={() => onClearSearch()} className="mt-2">
                 {t('common.clearSearch')}
               </Button>
             )}
@@ -430,6 +423,7 @@ export default function LinksView() {
   const [newLinkOpen, setNewLinkOpen] = useState(false)
   const [detailLink, setDetailLink]   = useState(null)
   const [editLink, setEditLink]       = useState(null)
+  const { query: search, setQuery: setSearch } = useViewSearch(t('links.searchPlaceholder'))
 
   const toggleLink = id =>
     setLinks(prev => prev.map(l => l.id === id ? { ...l, active: !l.active } : l))
@@ -469,7 +463,7 @@ export default function LinksView() {
 
       {/* Personalizados */}
       <SectionLabel className="uppercase mb-4">{t('links.customSection')}</SectionLabel>
-      <CustomLinksTable onDetail={setDetailLink} onEdit={handleEdit} />
+      <CustomLinksTable onDetail={setDetailLink} onEdit={handleEdit} search={search} onClearSearch={() => setSearch('')} />
 
       {/* Modals */}
       <AnimatePresence>

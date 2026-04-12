@@ -1,14 +1,15 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowUpFromLine, Landmark, TrendingUp,
-  FileText, Loader2,
+  FileText, Loader2, Calendar, Filter, Download,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
+import { useViewSearch } from '@/shared/context/ViewSearchContext'
 import useMediaQuery from '@/shared/hooks/useMediaQuery'
 import useInfiniteScroll from '@/shared/hooks/useInfiniteScroll'
-import { Card, Button, Badge, Stepper, Pagination, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
+import { Card, Button, Badge, Stepper, Pagination, DropdownFilter, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
 import { listVariants, itemVariants, pageVariants } from '@/shared/utils/motionVariants'
 import { WITHDRAWALS, WALLET_BALANCE, WALLET_STEPS, BANK_ACCOUNT } from '@/services/mocks/mockData'
 import WithdrawModal from './WithdrawModal'
@@ -21,18 +22,79 @@ export default function WalletView() {
   const isDesktop = useMediaQuery('(min-width: 1024px)')
   const [modalOpen, setModalOpen] = useState(false)
   const [receiptTrx, setReceiptTrx] = useState(null)
-  const [search, setSearch] = useState('')
+  const { query: search, setQuery: setSearch, setActiveFilterCount } = useViewSearch(t('wallet.searchPlaceholder'))
   const [currentPage, setCurrentPage] = useState(1)
 
+  const defaultStatus = t('filters.all')
+  const defaultDate   = t('filters.anyDate')
+  const [statusFilter, setStatusFilter] = useState(defaultStatus)
+  const [dateFilter, setDateFilter]     = useState(defaultDate)
+
+  const filtersActive = (statusFilter !== defaultStatus ? 1 : 0) + (dateFilter !== defaultDate ? 1 : 0)
+  useEffect(() => { setActiveFilterCount(filtersActive) }, [filtersActive, setActiveFilterCount])
+
+  const resetFilters = () => {
+    setStatusFilter(defaultStatus)
+    setDateFilter(defaultDate)
+    setCurrentPage(1)
+  }
+
   const ITEMS_PER_PAGE = 5
+  useEffect(() => { setCurrentPage(1) }, [search])
+
   const filtered = useMemo(() => WITHDRAWALS.filter(w => {
-    if (!search) return true
-    const q = search.toLowerCase()
-    const amountNormalized = w.amount.replace(/,/g, '')
-    return w.id.toLowerCase().includes(q) ||
-      w.amount.includes(search) ||
-      amountNormalized.includes(search)
-  }), [search])
+    // Search
+    if (search) {
+      const q = search.toLowerCase()
+      const amountNormalized = w.amount.replace(/,/g, '')
+      const matchSearch = w.id.toLowerCase().includes(q) ||
+        w.amount.includes(search) ||
+        amountNormalized.includes(search)
+      if (!matchSearch) return false
+    }
+
+    // Status filter
+    if (statusFilter !== defaultStatus) {
+      if (w.status !== statusFilter) return false
+    }
+
+    // Date filter
+    if (dateFilter !== defaultDate) {
+      if (dateFilter === t('filters.today')) {
+        const today = new Date()
+        const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+        const monthStr = months[today.getMonth()]
+        if (!w.date.includes(`${today.getDate()} ${monthStr}`)) return false
+      }
+      if (dateFilter === t('filters.last7days')) {
+        // Mock: show recent dates
+        const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+        const today = new Date()
+        const weekAgo = new Date(today)
+        weekAgo.setDate(today.getDate() - 7)
+        // Parse date like "20 Oct, 2026"
+        const parts = w.date.replace(',', '').split(' ')
+        if (parts.length >= 3) {
+          const day = parseInt(parts[0])
+          const monthIdx = months.indexOf(parts[1])
+          const year = parseInt(parts[2])
+          if (monthIdx !== -1) {
+            const wDate = new Date(year, monthIdx, day)
+            if (wDate < weekAgo || wDate > today) return false
+          }
+        }
+      }
+      if (dateFilter === t('filters.thisMonth')) {
+        const today = new Date()
+        const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+        const monthStr = months[today.getMonth()]
+        if (!w.date.includes(monthStr)) return false
+      }
+    }
+
+    return true
+  }), [search, statusFilter, dateFilter, defaultStatus, defaultDate, t])
+
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
   const paginatedWithdrawals = filtered.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -149,15 +211,33 @@ export default function WalletView() {
         </div>
       </div>
 
+      {/* Filters toolbar */}
       <TableToolbar
-        search={
-          <SearchInput
-            value={search}
-            onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
-            placeholder={t('wallet.searchPlaceholder')}
-          />
+        onReset={filtersActive > 0 ? resetFilters : undefined}
+        actions={
+          <Button variant="successExport" size="sm" className="!px-3">
+            <Download size={14} />
+            <span className="ml-1.5">{t('common.exportCsv')}</span>
+          </Button>
         }
-      />
+      >
+        <DropdownFilter
+          label={t('filters.date')}
+          icon={Calendar}
+          options={[defaultDate, t('filters.today'), t('filters.last7days'), t('filters.thisMonth')]}
+          defaultValue={defaultDate}
+          value={dateFilter}
+          onChange={(val) => { setDateFilter(val); setCurrentPage(1) }}
+        />
+        <DropdownFilter
+          label={t('filters.status')}
+          icon={Filter}
+          options={[defaultStatus, t('wallet.processing'), t('wallet.completed'), t('wallet.failed')]}
+          defaultValue={defaultStatus}
+          value={statusFilter}
+          onChange={(val) => { setStatusFilter(val); setCurrentPage(1) }}
+        />
+      </TableToolbar>
 
       {/* Historial de Retiros (desktop) */}
       <Card className="pb-2 hidden lg:block">

@@ -272,6 +272,7 @@
     "withdrawalProcessing": "Los retiros se procesan en 1-2 días hábiles. El dinero llegará a tu cuenta bancaria registrada",
     "processing": "Procesando",
     "completed": "Completado",
+    "failed": "Fallido",
     "notFound": "No se encontraron retiros",
     "notFoundFor": "No se encontraron retiros para \"{{term}}\"",
     "destinationAccount": "Cuenta Destino",
@@ -307,7 +308,10 @@
     "main": "Principal",
     "usersAssigned_one": "{{count}} usuario asignado",
     "usersAssigned_other": "{{count}} usuarios asignados",
-    "modalDescription": "Agrega una nueva propiedad o punto de venta"
+    "modalDescription": "Agrega una nueva propiedad o punto de venta",
+    "searchPlaceholder": "Buscar por nombre o dirección...",
+    "notFound": "No se encontraron sucursales",
+    "notFoundFor": "No se encontraron sucursales para \"{{term}}\""
   },
 
   "users": {
@@ -365,6 +369,8 @@
     "primaryCard": "Tarjeta Principal",
     "secondaryCard": "Tarjeta Secundaria",
     "changesSaved": "Cambios guardados correctamente",
+    "searchPlaceholder": "Buscar configuración...",
+    "noResultsFor": "No se encontraron configuraciones para \"{{term}}\"",
     "language": "Idioma",
     "languageDesc": "Elige el idioma de la interfaz",
     "languageEs": "Español",
@@ -385,7 +391,13 @@
     "pendingAch": "Pendiente (ACH)",
     "date": "Fecha",
     "status": "Estado",
-    "filterBy": "Filtrar por {{label}}"
+    "filterBy": "Filtrar por {{label}}",
+    "filtersTitle": "Filtros",
+    "clearFilters": "Limpiar filtros",
+    "activeCount_one": "{{count}} filtro activo",
+    "activeCount_other": "{{count}} filtros activos",
+    "active": "Activo",
+    "inactive": "Inactivo"
   },
 
   "errors": {

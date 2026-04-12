@@ -3,17 +3,19 @@ import { motion } from 'framer-motion'
 import { Search, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
+import { useHeaderSearch } from '@/shared/context/ViewSearchContext'
 
 const SPRING = { type: 'spring', stiffness: 400, damping: 30 }
 
 /**
  * SearchPanel — dropdown panel that appears below the header.
- * Renders a search input + results area in a floating card.
+ * Connected to ViewSearchContext: types filter the active view's data.
  * Click outside or ESC to close.
  */
 export default function SearchPanel({ onClose }) {
   const { t } = useTranslation()
   const { isDarkMode } = useTheme()
+  const { query, setQuery, placeholder } = useHeaderSearch()
   const inputRef = useRef(null)
   const panelRef = useRef(null)
 
@@ -37,7 +39,6 @@ export default function SearchPanel({ onClose }) {
         onClose()
       }
     }
-    // Use setTimeout to avoid the opening click triggering close
     const timer = setTimeout(() => {
       document.addEventListener('mousedown', handler)
     }, 10)
@@ -69,11 +70,13 @@ export default function SearchPanel({ onClose }) {
       <div className={`flex items-center gap-3 px-4 py-3.5 ${
         isDarkMode ? 'border-b border-white/10' : 'border-b border-black/5'
       }`}>
-        <Search size={18} className={isDarkMode ? 'text-[#7C3AED]' : 'text-[#7C3AED]'} />
+        <Search size={18} className="text-[#7C3AED]" />
         <input
           ref={inputRef}
           type="text"
-          placeholder={t('header.searchPlaceholder')}
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder={placeholder || t('header.searchPlaceholder')}
           className={`flex-1 bg-transparent border-none outline-none text-sm font-medium placeholder:opacity-50 ${
             isDarkMode ? 'text-[#D8D7D9] placeholder:text-[#888991]' : 'text-[#111113] placeholder:text-[#B0AFB4]'
           }`}
@@ -90,12 +93,14 @@ export default function SearchPanel({ onClose }) {
         </motion.button>
       </div>
 
-      {/* Results area / empty state */}
-      <div className="px-4 py-6">
-        <p className={`text-xs font-medium text-center ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-          {t('search.emptyHint')}
-        </p>
-      </div>
+      {/* Hint / results area */}
+      {!query && (
+        <div className="px-4 py-6">
+          <p className={`text-xs font-medium text-center ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+            {t('search.emptyHint')}
+          </p>
+        </div>
+      )}
     </motion.div>
   )
 }

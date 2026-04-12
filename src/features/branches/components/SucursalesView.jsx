@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { listVariants, cardItemVariants, pageVariants } from '@/shared/utils/motionVariants'
 import {
@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
+import { useViewSearch } from '@/shared/context/ViewSearchContext'
 import { Card, Button, Badge, Tooltip, PageHeader } from '@/shared/ui'
 import { BRANCH_LIST } from '@/services/mocks/mockData'
 import NewBranchModal from './NewBranchModal'
@@ -95,7 +96,18 @@ function AddBranchCard({ onClick }) {
 /* ─── SucursalesView ──────────────────────────────────────── */
 export default function SucursalesView() {
   const { t } = useTranslation()
+  const { isDarkMode } = useTheme()
+  const { query: search, setQuery: setSearch } = useViewSearch(t('branches.searchPlaceholder'))
   const [newBranchOpen, setNewBranchOpen] = useState(false)
+
+  const filtered = useMemo(() => {
+    if (!search) return BRANCH_LIST
+    const q = search.toLowerCase()
+    return BRANCH_LIST.filter(b =>
+      b.name.toLowerCase().includes(q) ||
+      b.address.toLowerCase().includes(q)
+    )
+  }, [search])
 
   return (
     <motion.div variants={pageVariants} initial="hidden" animate="show">
@@ -107,16 +119,31 @@ export default function SucursalesView() {
       </PageHeader>
 
       {/* Cards grid */}
-      <motion.div variants={listVariants} initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 2xl:gap-8">
-        {BRANCH_LIST.map(b => (
-          <motion.div key={b.id} variants={cardItemVariants}>
-            <BranchCard branch={b} />
-          </motion.div>
-        ))}
-        <motion.div variants={cardItemVariants}>
-          <AddBranchCard onClick={() => setNewBranchOpen(true)} />
+      {filtered.length > 0 ? (
+        <motion.div variants={listVariants} initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 2xl:gap-8">
+          {filtered.map(b => (
+            <motion.div key={b.id} variants={cardItemVariants}>
+              <BranchCard branch={b} />
+            </motion.div>
+          ))}
+          {!search && (
+            <motion.div variants={cardItemVariants}>
+              <AddBranchCard onClick={() => setNewBranchOpen(true)} />
+            </motion.div>
+          )}
         </motion.div>
-      </motion.div>
+      ) : (
+        <Card className="p-8 text-center">
+          <p className={`text-sm font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+            {search ? t('branches.notFoundFor', { term: search }) : t('branches.notFound')}
+          </p>
+          {search && (
+            <Button variant="ghost" size="sm" onClick={() => setSearch('')} className="mt-2">
+              {t('common.clearSearch')}
+            </Button>
+          )}
+        </Card>
+      )}
 
       <AnimatePresence>
         {newBranchOpen && <NewBranchModal key="new-branch" onClose={() => setNewBranchOpen(false)} />}

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
+import { useViewSearch } from '@/shared/context/ViewSearchContext'
 import { pageVariants } from '@/shared/utils/motionVariants'
 import { Button, PageHeader, SegmentControl } from '@/shared/ui'
 import { KPIS, CURRENT_USER } from '@/services/mocks/mockData'
@@ -22,6 +23,7 @@ import { NewLinkModal } from '@/features/links'
 export default function DashboardView() {
   const { t }          = useTranslation()
   const navigate       = useNavigate()
+  useViewSearch()
   const [newLinkOpen, setNewLinkOpen] = useState(false)
   const [activeTab, setActiveTab]     = useState('operations')
 

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   Download, Calendar, Search,
@@ -7,9 +7,10 @@ import {
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
+import { useViewSearch } from '@/shared/context/ViewSearchContext'
 import useMediaQuery from '@/shared/hooks/useMediaQuery'
 import useInfiniteScroll from '@/shared/hooks/useInfiniteScroll'
-import { Card, Button, Badge, StatCard, DropdownFilter, Pagination, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
+import { Card, Button, Badge, StatCard, DropdownFilter, Pagination, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
 import { listVariants, itemVariants, pageVariants } from '@/shared/utils/motionVariants'
 import { PAYOUTS, WALLET_BALANCE, SETTLEMENT_SUMMARY } from '@/services/mocks/mockData'
 
@@ -20,11 +21,27 @@ export default function LiquidacionesView() {
   const { t }          = useTranslation()
   const { isDarkMode } = useTheme()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
-  const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('Todos')
-  const [dateFilter, setDateFilter]     = useState('Cualquier fecha')
+  const { query: search, setQuery: setSearch, setActiveFilterCount } = useViewSearch(t('settlements.searchPlaceholder'))
+
+  const defaultStatus = t('filters.all')
+  const defaultDate   = t('filters.anyDate')
+  const tThisWeek     = t('filters.thisWeek')
+  const tThisMonth    = t('filters.thisMonth')
+  const [statusFilter, setStatusFilter] = useState(defaultStatus)
+  const [dateFilter, setDateFilter]     = useState(defaultDate)
   const [currentPage, setCurrentPage]   = useState(1)
   const ITEMS_PER_PAGE = 7
+
+  useEffect(() => { setCurrentPage(1) }, [search])
+
+  const filtersActive = (statusFilter !== defaultStatus ? 1 : 0) + (dateFilter !== defaultDate ? 1 : 0)
+  useEffect(() => { setActiveFilterCount(filtersActive) }, [filtersActive, setActiveFilterCount])
+
+  const resetFilters = () => {
+    setStatusFilter(defaultStatus)
+    setDateFilter(defaultDate)
+    setCurrentPage(1)
+  }
 
   const filtered = useMemo(() => {
     return PAYOUTS.filter(p => {
@@ -32,31 +49,31 @@ export default function LiquidacionesView() {
         p.type.toLowerCase().includes(search.toLowerCase()) ||
         p.closeDate.toLowerCase().includes(search.toLowerCase())
 
-      const matchStatus = statusFilter === 'Todos' || p.status === statusFilter
+      const matchStatus = statusFilter === defaultStatus || p.status === statusFilter
 
       let matchDate = true
-      if (dateFilter === 'Esta semana') {
-        const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
-        const today = new Date()
-        const weekAgo = new Date(today)
-        weekAgo.setDate(today.getDate() - 7)
-        // Parse closeDate like "28 Mar 2026"
-        const parts = p.closeDate.split(' ')
-        if (parts.length === 3) {
-          const day = parseInt(parts[0])
-          const monthIdx = months.indexOf(parts[1])
-          const year = parseInt(parts[2])
-          if (monthIdx !== -1) {
-            const closeD = new Date(year, monthIdx, day)
-            matchDate = closeD >= weekAgo && closeD <= today
+      if (dateFilter !== defaultDate) {
+        if (dateFilter === tThisWeek) {
+          const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+          const today = new Date()
+          const weekAgo = new Date(today)
+          weekAgo.setDate(today.getDate() - 7)
+          const parts = p.closeDate.split(' ')
+          if (parts.length === 3) {
+            const day = parseInt(parts[0])
+            const monthIdx = months.indexOf(parts[1])
+            const year = parseInt(parts[2])
+            if (monthIdx !== -1) {
+              const closeD = new Date(year, monthIdx, day)
+              matchDate = closeD >= weekAgo && closeD <= today
+            }
           }
+        } else if (dateFilter === tThisMonth) {
+          const today = new Date()
+          const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+          const monthStr = months[today.getMonth()]
+          matchDate = p.closeDate.includes(monthStr)
         }
-      }
-      if (dateFilter === 'Este mes') {
-        const today = new Date()
-        const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
-        const monthStr = months[today.getMonth()]
-        matchDate = p.closeDate.includes(monthStr)
       }
 
       return matchSearch && matchStatus && matchDate
@@ -107,27 +124,27 @@ export default function LiquidacionesView() {
       </div>
 
       <TableToolbar
-        search={
-          <SearchInput
-            value={search}
-            onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
-            placeholder={t('settlements.searchPlaceholder')}
-          />
+        onReset={filtersActive > 0 ? resetFilters : undefined}
+        actions={
+          <Button variant="successExport" size="sm" className="!px-3">
+            <Download size={14} />
+            <span className="ml-1.5">{t('common.exportCsv')}</span>
+          </Button>
         }
       >
         <DropdownFilter
           label={t('filters.date')}
           icon={Calendar}
-          options={[t('filters.anyDate'), t('filters.thisWeek'), t('filters.thisMonth')]}
-          defaultValue={t('filters.anyDate')}
+          options={[defaultDate, t('filters.thisWeek'), t('filters.thisMonth')]}
+          defaultValue={defaultDate}
           value={dateFilter}
           onChange={(val) => { setDateFilter(val); setCurrentPage(1) }}
         />
         <DropdownFilter
           label={t('filters.status')}
           icon={Filter}
-          options={[t('filters.all'), t('filters.deposited'), t('filters.pendingAch')]}
-          defaultValue={t('filters.all')}
+          options={[defaultStatus, t('filters.deposited'), t('filters.pendingAch')]}
+          defaultValue={defaultStatus}
           value={statusFilter}
           onChange={(val) => { setStatusFilter(val); setCurrentPage(1) }}
         />

@@ -272,6 +272,7 @@
     "withdrawalProcessing": "Withdrawals are processed within 1-2 business days. Funds will arrive at your registered bank account",
     "processing": "Processing",
     "completed": "Completed",
+    "failed": "Failed",
     "notFound": "No withdrawals found",
     "notFoundFor": "No withdrawals found for \"{{term}}\"",
     "destinationAccount": "Destination Account",
@@ -307,7 +308,10 @@
     "main": "Main",
     "usersAssigned_one": "{{count}} user assigned",
     "usersAssigned_other": "{{count}} users assigned",
-    "modalDescription": "Add a new property or point of sale"
+    "modalDescription": "Add a new property or point of sale",
+    "searchPlaceholder": "Search by name or address...",
+    "notFound": "No branches found",
+    "notFoundFor": "No branches found for \"{{term}}\""
   },
 
   "users": {
@@ -365,6 +369,8 @@
     "primaryCard": "Primary Card",
     "secondaryCard": "Secondary Card",
     "changesSaved": "Changes saved successfully",
+    "searchPlaceholder": "Search settings...",
+    "noResultsFor": "No settings found for \"{{term}}\"",
     "language": "Language",
     "languageDesc": "Choose the display language for the interface",
     "languageEs": "Español",
@@ -385,7 +391,13 @@
     "pendingAch": "Pending (ACH)",
     "date": "Date",
     "status": "Status",
-    "filterBy": "Filter by {{label}}"
+    "filterBy": "Filter by {{label}}",
+    "filtersTitle": "Filters",
+    "clearFilters": "Clear filters",
+    "activeCount_one": "{{count}} active filter",
+    "activeCount_other": "{{count}} active filters",
+    "active": "Active",
+    "inactive": "Inactive"
   },
 
   "errors": {

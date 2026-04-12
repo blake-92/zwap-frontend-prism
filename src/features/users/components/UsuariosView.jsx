@@ -1,12 +1,13 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Download, UserPlus,
-  Pencil, Trash2,
+  Download, UserPlus, Users,
+  Pencil, Trash2, Filter,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
-import { Card, Button, Badge, AvatarInfo, Toggle, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar, SegmentControl } from '@/shared/ui'
+import { useViewSearch } from '@/shared/context/ViewSearchContext'
+import { Card, Button, Badge, AvatarInfo, Toggle, DropdownFilter, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
 import { listVariants, itemVariants, pageVariants } from '@/shared/utils/motionVariants'
 import { USERS } from '@/services/mocks/mockData'
 import NewUserModal from './NewUserModal'
@@ -21,17 +22,22 @@ const ROLE_VARIANT = {
 export default function UsuariosView() {
   const { isDarkMode } = useTheme()
   const { t } = useTranslation()
-  const [users, setUsers]       = useState(USERS)
-  const [search, setSearch]     = useState('')
-  const [roleFilter, setRoleFilter] = useState('Todos')
+  const [users, setUsers] = useState(USERS)
+  const { query: search, setQuery: setSearch, setActiveFilterCount } = useViewSearch(t('users.searchPlaceholder'))
   const [newUserOpen, setNewUserOpen] = useState(false)
 
-  const roles = [
-    { value: 'Todos', label: t('filters.all') },
-    { value: 'Administrador', label: t('users.roleAdmin') },
-    { value: 'Contador', label: t('users.roleAccountant') },
-    { value: 'Recepcionista', label: t('users.roleReceptionist') },
-  ]
+  const defaultRole   = t('filters.all')
+  const defaultStatus = t('filters.all')
+  const [roleFilter, setRoleFilter]     = useState(defaultRole)
+  const [statusFilter, setStatusFilter] = useState(defaultStatus)
+
+  const filtersActive = (roleFilter !== defaultRole ? 1 : 0) + (statusFilter !== defaultStatus ? 1 : 0)
+  useEffect(() => { setActiveFilterCount(filtersActive) }, [filtersActive, setActiveFilterCount])
+
+  const resetFilters = () => {
+    setRoleFilter(defaultRole)
+    setStatusFilter(defaultStatus)
+  }
 
   const ROLE_LABEL = {
     Administrador: t('users.roleAdmin'),
@@ -43,9 +49,23 @@ export default function UsuariosView() {
     const matchSearch = !search ||
       u.name.toLowerCase().includes(search.toLowerCase()) ||
       u.email.toLowerCase().includes(search.toLowerCase())
-    const matchRole = roleFilter === 'Todos' || u.role === roleFilter
-    return matchSearch && matchRole
-  }), [users, search, roleFilter])
+
+    // Role filter: compare against translated label or raw value
+    let matchRole = true
+    if (roleFilter !== defaultRole) {
+      const translatedRole = ROLE_LABEL[u.role] || u.role
+      matchRole = translatedRole === roleFilter || u.role === roleFilter
+    }
+
+    // Status filter
+    let matchStatus = true
+    if (statusFilter !== defaultStatus) {
+      const isActive = statusFilter === t('filters.active')
+      matchStatus = u.active === isActive
+    }
+
+    return matchSearch && matchRole && matchStatus
+  }), [users, search, roleFilter, statusFilter, defaultRole, defaultStatus, t])
 
   const toggleUser = id =>
     setUsers(prev => prev.map(u => u.id === id ? { ...u, active: !u.active } : u))
@@ -61,19 +81,29 @@ export default function UsuariosView() {
       </PageHeader>
 
       <TableToolbar
-        search={
-          <SearchInput
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder={t('users.searchPlaceholder')}
-          />
+        onReset={filtersActive > 0 ? resetFilters : undefined}
+        actions={
+          <Button variant="successExport" size="sm" className="!px-3">
+            <Download size={14} />
+            <span className="ml-1.5">{t('common.exportCsv')}</span>
+          </Button>
         }
-        actions={<Button variant="successExport" size="sm"><Download size={14} /> {t('common.exportCsv')}</Button>}
       >
-        <SegmentControl
-          options={roles}
+        <DropdownFilter
+          label={t('users.tableRole')}
+          icon={Users}
+          options={[defaultRole, t('users.roleAdmin'), t('users.roleAccountant'), t('users.roleReceptionist')]}
+          defaultValue={defaultRole}
           value={roleFilter}
           onChange={setRoleFilter}
+        />
+        <DropdownFilter
+          label={t('filters.status')}
+          icon={Filter}
+          options={[defaultStatus, t('filters.active'), t('filters.inactive')]}
+          defaultValue={defaultStatus}
+          value={statusFilter}
+          onChange={setStatusFilter}
         />
       </TableToolbar>
 

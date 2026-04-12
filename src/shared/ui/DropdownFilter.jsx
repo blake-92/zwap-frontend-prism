@@ -15,7 +15,7 @@ const panelVariants = {
   exit:    { opacity: 0, scale: 0.95, y: -4, transition: { type: 'spring', stiffness: 500, damping: 30 } },
 }
 
-export default function DropdownFilter({ label, options, value, onChange, icon: Icon, defaultValue }) {
+export default function DropdownFilter({ label, options, value, onChange, icon: Icon, defaultValue, sheetMode }) {
   const { t } = useTranslation()
   const { isDarkMode } = useTheme()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
@@ -64,6 +64,33 @@ export default function DropdownFilter({ label, options, value, onChange, icon: 
       ))}
     </div>
   )
+
+  /* ── Sheet mode: full-width row for BottomSheet context ── */
+  if (sheetMode) {
+    return (
+      <>
+        <button
+          onClick={() => setIsOpen(true)}
+          className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl border transition-colors ${
+            isDarkMode
+              ? 'bg-[#252429]/60 border-white/10 hover:bg-[#252429]'
+              : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+          }`}
+        >
+          <span className="flex items-center gap-2.5">
+            <DisplayIcon size={16} className={isFiltered ? 'text-[#7C3AED]' : isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'} />
+            <span className={`text-sm font-semibold ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>{label}</span>
+          </span>
+          <span className={`text-sm font-medium ${isFiltered ? 'text-[#7C3AED]' : isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+            {value}
+          </span>
+        </button>
+        <BottomSheet isOpen={isOpen} onClose={() => setIsOpen(false)} title={t('filters.filterBy', { label: label.toLowerCase() })}>
+          {renderOptions(true)}
+        </BottomSheet>
+      </>
+    )
+  }
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -129,3 +156,5 @@ export default function DropdownFilter({ label, options, value, onChange, icon: 
     </div>
   )
 }
+
+DropdownFilter.displayName = 'DropdownFilter'

@@ -119,9 +119,8 @@ import {
 | `StatCard` | `layout` (kpi/balance), `label`, `value`, `icon`, `variant`, `negative` | Tarjeta de métrica / KPI |
 | `Stepper` | `steps[]` (cada step: `label`, `sub`, `icon`, `done`, `active`) | Stepper horizontal con estados done/active/pending |
 | `SegmentControl` | `options[]`, `value`, `onChange`, `layoutId?` | Selector de segmentos con pill animado (layoutId) |
-| `DropdownFilter` | `label`, `options[]`, `value`, `onChange`, `icon` | Dropdown select con spring |
-| `SearchInput` | `value`, `onChange`, `placeholder` | Input con ícono de búsqueda |
-| `TableToolbar` | left slot (filtros), right slot (acciones) | Toolbar glass para tablas |
+| `DropdownFilter` | `label`, `options[]`, `value`, `onChange`, `icon`, `defaultValue`, `sheetMode` | Dropdown select con spring; `sheetMode` renderiza fila full-width para BottomSheet; `displayName` para detección en `cloneElement` |
+| `TableToolbar` | `children` (filtros), `actions`, `onReset`, `className` | Desktop: barra glass con filtros + acciones. Mobile: registra callback en ViewSearchContext para que el Header abra un BottomSheet de filtros. `onReset` muestra botón "Limpiar filtros" |
 | `Pagination` | `currentPage`, `totalPages`, `onPageChange` | Controles de paginación con elipsis |
 | `PageHeader` | `title`, `description` + right slot | Encabezado de página (h1) |
 | `SectionLabel` | `children`, `className` | Etiqueta uppercase secundaria |
@@ -372,12 +371,44 @@ El sidebar usa `ZwapIsotipo` + `ZwapWordmark` por separado para poder animar la 
 |------|----------|---------|-----------------|
 | `useTheme()` | `ThemeProvider` | `{ isDarkMode, toggleTheme }` | `zwap-theme` (`'dark'`/`'light'`) |
 | `useToast()` | `ToastProvider` | `{ addToast(message, type?, duration?) }` | — |
+| `useViewSearch(placeholder?)` | `ViewSearchProvider` | `{ query, setQuery, setActiveFilterCount }` | — |
+| `useHeaderSearch()` | `ViewSearchProvider` | `{ query, setQuery, placeholder, hasFilters, activeFilterCount, openFilters, setFilterOpener, ... }` | — |
 
 - `useTheme` — si no hay valor guardado, usa `prefers-color-scheme` del OS como default
 - `useToast` tipos: `'success'` (emerald) · `'error'` (rose) · `'info'` (purple). Default: `'success'`, duración: 3000ms
+- `useViewSearch` — hook para vistas. Registra placeholder de búsqueda al montar. Retorna `{ query, setQuery, setActiveFilterCount }`. Vistas sin búsqueda llaman `useViewSearch()` sin args para limpiar contexto
+- `useHeaderSearch` — hook para Header. Retorna el contexto completo incluyendo `openFilters()` y `activeFilterCount`
 - Token de auth: `localStorage.getItem('zwap_token')` — usado por `AuthGuard` y `api.js`
 - Sidebar state: `localStorage.getItem('zwap-sidebar')` — `'collapsed'`/`'expanded'`, usado por `AppShell`
-- Ambos providers están en `App.jsx` envolviendo el router
+- Todos los providers están en `App.jsx` envolviendo el router
+
+### Flujo de búsqueda contextual
+
+```
+Vista monta → useViewSearch(placeholder) registra config
+  ↓
+Header lee query/placeholder via useHeaderSearch()
+  ↓
+Desktop: search bar siempre visible con placeholder contextual
+Mobile: ícono de búsqueda → se expande a barra inline con spring
+  ↓
+Usuario escribe → query se actualiza → vista filtra sus datos
+```
+
+### Flujo de filtros (mobile)
+
+```
+TableToolbar monta → setFilterOpener(openSheet) registra callback
+  ↓
+Header muestra ícono SlidersHorizontal (si hasFilters)
+  + dot púrpura si activeFilterCount > 0
+  ↓
+Usuario toca filtros → openFilters() → TableToolbar abre BottomSheet
+  ↓
+DropdownFilter renderiza en sheetMode (fila full-width, drill-down)
+  ↓
+onReset disponible para limpiar todos los filtros
+```
 
 ## Internacionalización (i18n)
 
@@ -447,14 +478,14 @@ Usado en `AppShell` para condicionar Sidebar vs BottomNav, y en `Header` para se
 
 **BottomNav** — 4 tabs fijos (Dashboard, Transacciones, Links, Liquidaciones) + botón "Más" que abre un sheet con opciones secundarias (Sucursales, Usuarios, Wallet, Configuración). Safe area padding via `pb-[env(safe-area-inset-bottom)]`. Scroll lock cuando el sheet está abierto. El sheet de "Más" **no usa `<BottomSheet>`** — usa implementación inline con z-index inferior al nav (`z-30` backdrop, `z-[35]` panel vs `z-40` nav) para que la barra permanezca visible encima del sheet.
 
-**Header** — en desktop muestra search bar inline; en mobile muestra icono de búsqueda que abre `SearchPanel` (dropdown flotante debajo del header).
+**Header** — en desktop muestra search bar inline conectado a `ViewSearchContext`; en mobile muestra icono de búsqueda que expande una barra inline con spring animation (oculta los botones de acción). Si la vista registra filtros, aparece un icono de filtro con dot indicator cuando hay filtros activos.
 
 ### Componentes de layout responsive
 
 | Componente | Archivo | Descripción |
 |---|---|---|
 | `BottomNav` | `shared/layout/BottomNav.jsx` | Bottom navigation con 4+1 tabs y sheet de "Más" |
-| `SearchPanel` | `shared/layout/SearchOverlay.jsx` | Dropdown de búsqueda, `fixed` debajo del header |
+| `SearchOverlay` | `shared/layout/SearchOverlay.jsx` | Overlay de búsqueda (legacy, ya no se importa activamente) |
 | `useMediaQuery` | `shared/hooks/useMediaQuery.js` | Hook para detectar breakpoints via `matchMedia` |
 
 ### Patrón tabla → cards (mobile)

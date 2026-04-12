@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -8,9 +8,10 @@ import {
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
+import { useViewSearch } from '@/shared/context/ViewSearchContext'
 import useMediaQuery from '@/shared/hooks/useMediaQuery'
 import useInfiniteScroll from '@/shared/hooks/useInfiniteScroll'
-import { Card, Button, Badge, AvatarInfo, DropdownFilter, Pagination, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar, SwipeableCard } from '@/shared/ui'
+import { Card, Button, Badge, AvatarInfo, DropdownFilter, Pagination, EmptySearchState, Tooltip, PageHeader, TableToolbar, SwipeableCard } from '@/shared/ui'
 import { listVariants, itemVariants, pageVariants } from '@/shared/utils/motionVariants'
 import { TRANSACTIONS } from '@/services/mocks/mockData'
 import { ROUTES } from '@/router/routes'
@@ -22,14 +23,31 @@ export default function TransaccionesView() {
   const { isDarkMode } = useTheme()
   const navigate       = useNavigate()
   const isDesktop      = useMediaQuery('(min-width: 1024px)')
-  const [search, setSearch]         = useState('')
+  const { query: search, setQuery: setSearch, setActiveFilterCount } = useViewSearch(t('transactions.searchPlaceholder'))
   const [receiptTrx, setReceiptTrx] = useState(null)
   const [refundTrx, setRefundTrx]   = useState(null)
 
-  const [statusFilter, setStatusFilter] = useState('Todos')
-  const [dateFilter, setDateFilter]     = useState('Cualquier fecha')
+  const defaultStatus = t('filters.all')
+  const defaultDate   = t('filters.anyDate')
+  const tToday        = t('filters.today')
+  const tLast7        = t('filters.last7days')
+  const tThisMonth    = t('filters.thisMonth')
+  const [statusFilter, setStatusFilter] = useState(defaultStatus)
+  const [dateFilter, setDateFilter]     = useState(defaultDate)
   const [currentPage, setCurrentPage]   = useState(1)
   const ITEMS_PER_PAGE = 7
+
+  useEffect(() => { setCurrentPage(1) }, [search])
+
+  // Track active filter count for header indicator
+  const filtersActive = (statusFilter !== defaultStatus ? 1 : 0) + (dateFilter !== defaultDate ? 1 : 0)
+  useEffect(() => { setActiveFilterCount(filtersActive) }, [filtersActive, setActiveFilterCount])
+
+  const resetFilters = () => {
+    setStatusFilter(defaultStatus)
+    setDateFilter(defaultDate)
+    setCurrentPage(1)
+  }
 
   const filtered = useMemo(() => {
     return TRANSACTIONS.filter(t => {
@@ -38,26 +56,26 @@ export default function TransaccionesView() {
         t.email?.toLowerCase().includes(search.toLowerCase()) ||
         t.id.toLowerCase().includes(search.toLowerCase())
 
-      const matchStatus = statusFilter === 'Todos' || t.status === statusFilter
+      const matchStatus = statusFilter === defaultStatus || t.status === statusFilter
 
       let matchDate = true
-      if (dateFilter === 'Hoy') {
-        const today = new Date()
-        const day = today.getDate()
-        const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
-        const monthStr = months[today.getMonth()]
-        const yearStr = today.getFullYear()
-        matchDate = t.date.includes(`${day} ${monthStr}`) && t.date.includes(`${yearStr}`)
-      }
-      if (dateFilter === 'Últimos 7 días') {
-        // Mock: show last 3 days of data (27-29 Mar)
-        matchDate = t.date.includes('29 Mar') || t.date.includes('28 Mar') || t.date.includes('27 Mar')
-      }
-      if (dateFilter === 'Este mes') {
-        const today = new Date()
-        const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
-        const monthStr = months[today.getMonth()]
-        matchDate = t.date.includes(monthStr)
+      if (dateFilter !== defaultDate) {
+        if (dateFilter === tToday) {
+          const today = new Date()
+          const day = today.getDate()
+          const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+          const monthStr = months[today.getMonth()]
+          const yearStr = today.getFullYear()
+          matchDate = t.date.includes(`${day} ${monthStr}`) && t.date.includes(`${yearStr}`)
+        } else if (dateFilter === tLast7) {
+          // Mock: show last 3 days of data (27-29 Mar)
+          matchDate = t.date.includes('29 Mar') || t.date.includes('28 Mar') || t.date.includes('27 Mar')
+        } else if (dateFilter === tThisMonth) {
+          const today = new Date()
+          const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+          const monthStr = months[today.getMonth()]
+          matchDate = t.date.includes(monthStr)
+        }
       }
 
       return matchSearch && matchStatus && matchDate
@@ -84,20 +102,13 @@ export default function TransaccionesView() {
         </Button>
       </PageHeader>
 
-      <TableToolbar 
+      <TableToolbar
+        onReset={filtersActive > 0 ? resetFilters : undefined}
         actions={
-          <Button variant="successExport" size="sm" className="!px-2 sm:!px-3">
+          <Button variant="successExport" size="sm" className="!px-3">
             <Download size={14} />
-            <span className="hidden sm:inline ml-1.5">{t('common.export')}</span>
+            <span className="ml-1.5">{t('common.exportCsv')}</span>
           </Button>
-        }
-        search={
-          <SearchInput
-            value={search}
-            onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
-            placeholder={t('transactions.searchPlaceholder')}
-            className="w-full sm:w-72"
-          />
         }
       >
         <DropdownFilter

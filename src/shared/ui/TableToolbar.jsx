@@ -1,139 +1,125 @@
-import { useState, useRef, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Search, X } from 'lucide-react'
+import { useState, useEffect, useCallback, Children, isValidElement, cloneElement } from 'react'
+import { RotateCcw } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
+import { useHeaderSearch } from '@/shared/context/ViewSearchContext'
 import useMediaQuery from '@/shared/hooks/useMediaQuery'
 import Button from './Button'
-
-const SPRING = { type: 'spring', stiffness: 400, damping: 30 }
+import BottomSheet from './BottomSheet'
 
 /**
  * TableToolbar — Prism UI
  *
- * Barra glass estándar de filtros y acciones sobre tablas.
- *
- * Desktop (≥ lg): fila con search + filtros + acciones.
- * Mobile  (< lg): fila compacta de íconos. Al tocar búsqueda, se expande
- *                  con spring tomando todo el ancho; los filtros se ocultan.
+ * Desktop (≥ lg): barra glass con filtros + acciones.
+ * Mobile  (< lg): invisible en el DOM de la vista. Registra un callback
+ *                  en ViewSearchContext para que el Header pueda abrir el
+ *                  BottomSheet de filtros. La búsqueda vive en el Header.
  *
  * Props:
- *   search     node?   — SearchInput element (rendered expandable on mobile)
- *   children   node?   — filtros (DropdownFilter, SegmentControl, etc.)
- *   actions    node?   — controles derechos (botón exportar, etc.)
- *   className  string? — clase extra sobre el wrapper
+ *   children   node?      — filtros (DropdownFilter, SegmentControl, etc.)
+ *   actions    node?      — controles derechos (botón exportar, etc.)
+ *   onReset    function?  — callback para limpiar todos los filtros
+ *   className  string?    — clase extra sobre el wrapper
  */
-export default function TableToolbar({ search, children, actions, className = '' }) {
+export default function TableToolbar({ children, actions, onReset, className = '' }) {
   const { isDarkMode } = useTheme()
+  const { t } = useTranslation()
+  const { setFilterOpener } = useHeaderSearch()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
-  const [searchExpanded, setSearchExpanded] = useState(false)
-  const inputContainerRef = useRef(null)
+  const [sheetOpen, setSheetOpen] = useState(false)
 
-  // Auto-focus the search input when expanded on mobile
+  const hasFiltersOrActions = !!(children || actions)
+
+  // Register filter opener callback with ViewSearchContext
+  const openSheet = useCallback(() => setSheetOpen(true), [])
+
   useEffect(() => {
-    if (searchExpanded && inputContainerRef.current) {
-      const input = inputContainerRef.current.querySelector('input')
-      if (input) input.focus()
+    if (!isDesktop && hasFiltersOrActions) {
+      setFilterOpener(openSheet)
+      return () => setFilterOpener(null)
     }
-  }, [searchExpanded])
+  }, [isDesktop, hasFiltersOrActions, setFilterOpener, openSheet])
 
   const glassClasses = isDarkMode
     ? 'bg-[#252429]/20 backdrop-blur-xl border-white/10'
     : 'bg-white/40 backdrop-blur-xl border-white shadow-sm'
 
+  const handleReset = () => {
+    onReset?.()
+    setSheetOpen(false)
+  }
+
   /* ── Desktop: layout original ── */
   if (isDesktop) {
-    return (
-      <div className={`relative z-20 mb-6 p-2 rounded-2xl border flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between ${glassClasses} ${className}`}>
-        {search && (
-          <div className="w-full sm:flex-1">
-            {search}
-          </div>
-        )}
+    if (!children && !actions) return null
 
-        {(children || actions) && (
-          <div className="flex items-center justify-between gap-2 w-full sm:w-auto">
-            {children && (
-              <div className="flex items-center gap-2 flex-wrap">
-                {children}
-              </div>
+    return (
+      <div className={`relative z-20 mb-6 p-2 rounded-2xl border flex items-center justify-between gap-2 ${glassClasses} ${className}`}>
+        {(children || onReset) && (
+          <div className="flex items-center gap-2 flex-wrap">
+            {children}
+            {onReset && (
+              <button
+                onClick={onReset}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                  isDarkMode
+                    ? 'text-[#888991] hover:text-[#D8D7D9] hover:bg-white/5'
+                    : 'text-[#67656E] hover:text-[#111113] hover:bg-black/5'
+                }`}
+              >
+                <RotateCcw size={12} />
+                {t('filters.clearFilters')}
+              </button>
             )}
-            {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
           </div>
         )}
+        {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
       </div>
     )
   }
 
-  /* ── Mobile: compact icon row with expandable search ── */
+  /* ── Mobile: only BottomSheet (trigger is in Header via context) ── */
+  if (!hasFiltersOrActions) return null
+
+  // Clone DropdownFilter children with sheetMode prop for full-width rendering
+  const sheetChildren = Children.map(children, child => {
+    if (isValidElement(child) && child.type?.displayName === 'DropdownFilter') {
+      return cloneElement(child, { sheetMode: true })
+    }
+    return child
+  })
+
   return (
-    <div className={`relative z-20 mb-6 p-2 rounded-2xl border ${glassClasses} ${className}`}>
-      <div className="flex items-center gap-2 min-h-[40px]">
-        <AnimatePresence mode="wait" initial={false}>
-          {searchExpanded ? (
-            /* ── Expanded search ── */
-            <motion.div
-              key="search-expanded"
-              initial={{ opacity: 0, width: 0 }}
-              animate={{ opacity: 1, width: '100%' }}
-              exit={{ opacity: 0, width: 0 }}
-              transition={SPRING}
-              className="flex items-center gap-2 w-full overflow-hidden"
-              ref={inputContainerRef}
-            >
-              <div className="flex-1 min-w-0">
-                {search}
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSearchExpanded(false)}
-                className="flex-shrink-0 !w-10 !h-10"
-              >
-                <X size={18} />
-              </Button>
-            </motion.div>
-          ) : (
-            /* ── Compact icon row ── */
-            <motion.div
-              key="search-collapsed"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="flex items-center gap-2 w-full"
-            >
-              {/* Search icon trigger */}
-              {search && (
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setSearchExpanded(true)}
-                  className="!w-10 !h-10 !p-0 flex items-center justify-center flex-shrink-0"
-                >
-                  <Search size={18} className="opacity-70" />
-                </Button>
-              )}
+    <BottomSheet
+      isOpen={sheetOpen}
+      onClose={() => setSheetOpen(false)}
+      title={t('filters.filtersTitle')}
+    >
+      <div className="px-5 pb-6 space-y-3">
+        {sheetChildren}
 
-              {/* Filter icons */}
-              {children && (
-                <div className="flex items-center gap-2">
-                  {children}
-                </div>
-              )}
+        {onReset && (
+          <button
+            onClick={handleReset}
+            className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-sm font-semibold transition-colors ${
+              isDarkMode
+                ? 'text-[#888991] hover:text-[#D8D7D9] hover:bg-white/5 border border-white/10'
+                : 'text-[#67656E] hover:text-[#111113] hover:bg-black/5 border border-gray-200'
+            }`}
+          >
+            <RotateCcw size={14} />
+            {t('filters.clearFilters')}
+          </button>
+        )}
 
-              {/* Spacer */}
-              <div className="flex-1" />
-
-              {/* Actions (export, etc.) */}
-              {actions && (
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  {actions}
-                </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {actions && (
+          <div className={`pt-3 mt-1 border-t ${isDarkMode ? 'border-white/10' : 'border-black/5'}`}>
+            <div className="flex flex-col gap-2">
+              {actions}
+            </div>
+          </div>
+        )}
       </div>
-    </div>
+    </BottomSheet>
   )
 }
