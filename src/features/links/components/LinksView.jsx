@@ -87,12 +87,16 @@ function CustomLinksTable() {
 
   return (
     <>
-      <TableToolbar actions={<Button variant="successExport" size="sm"><Download size={14} /> Exportar CSV</Button>}>
-        <SearchInput
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Buscar por cliente o ID..."
-        />
+      <TableToolbar
+        search={
+          <SearchInput
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Buscar por cliente o ID..."
+          />
+        }
+        actions={<Button variant="successExport" size="sm"><Download size={14} /> Exportar CSV</Button>}
+      >
         <Button variant="outline" size="sm">
           Estado <ChevronDown size={12} />
         </Button>

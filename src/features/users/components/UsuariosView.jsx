@@ -47,12 +47,16 @@ export default function UsuariosView() {
         </Button>
       </PageHeader>
 
-      <TableToolbar actions={<Button variant="successExport" size="sm"><Download size={14} /> Exportar CSV</Button>}>
-        <SearchInput
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Buscar por nombre o email..."
-        />
+      <TableToolbar
+        search={
+          <SearchInput
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Buscar por nombre o email..."
+          />
+        }
+        actions={<Button variant="successExport" size="sm"><Download size={14} /> Exportar CSV</Button>}
+      >
         <SegmentControl
           options={roles.map(r => ({ value: r, label: r }))}
           value={roleFilter}

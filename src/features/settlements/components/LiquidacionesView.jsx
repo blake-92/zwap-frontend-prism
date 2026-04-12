@@ -3,9 +3,11 @@ import { motion } from 'framer-motion'
 import {
   Download, Calendar, Search,
   CheckCircle2, Landmark, AlertOctagon,
-  CalendarDays, Clock, ArrowDownToLine, Filter
+  CalendarDays, Clock, ArrowDownToLine, Filter, Loader2
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
+import useMediaQuery from '@/shared/hooks/useMediaQuery'
+import useInfiniteScroll from '@/shared/hooks/useInfiniteScroll'
 import { Card, Button, Badge, StatCard, DropdownFilter, Pagination, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
 import { listVariants, itemVariants, pageVariants } from '@/shared/utils/motionVariants'
 import { PAYOUTS, WALLET_BALANCE, SETTLEMENT_SUMMARY } from '@/services/mocks/mockData'
@@ -15,6 +17,7 @@ import { PAYOUTS, WALLET_BALANCE, SETTLEMENT_SUMMARY } from '@/services/mocks/mo
 ───────────────────────────────────────────────────────────── */
 export default function LiquidacionesView() {
   const { isDarkMode } = useTheme()
+  const isDesktop = useMediaQuery('(min-width: 1024px)')
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('Todos')
   const [dateFilter, setDateFilter]     = useState('Cualquier fecha')
@@ -64,6 +67,11 @@ export default function LiquidacionesView() {
     currentPage * ITEMS_PER_PAGE
   )
 
+  const { visibleData, hasMore, sentinelRef } = useInfiniteScroll(filtered, {
+    batchSize: 10,
+    enabled: !isDesktop,
+  })
+
   return (
     <motion.div variants={pageVariants} initial="hidden" animate="show">
 
@@ -96,12 +104,15 @@ export default function LiquidacionesView() {
         />
       </div>
 
-      <TableToolbar>
-        <SearchInput
-          value={search}
-          onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
-          placeholder="Buscar concepto o fecha..."
-        />
+      <TableToolbar
+        search={
+          <SearchInput
+            value={search}
+            onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
+            placeholder="Buscar concepto o fecha..."
+          />
+        }
+      >
         <DropdownFilter
           label="Fecha"
           icon={Calendar}
@@ -267,9 +278,9 @@ export default function LiquidacionesView() {
 
       {/* Cards (mobile / tablet) */}
       <div className="lg:hidden space-y-3">
-        {paginatedData.length > 0 ? (
+        {visibleData.length > 0 ? (
           <motion.div variants={listVariants} initial="hidden" animate="show" className="space-y-3">
-            {paginatedData.map((lote, idx) => {
+            {visibleData.map((lote, idx) => {
               const isDebt = lote.net < 0
               return (
                 <motion.div key={`${lote.type}-${lote.closeDate}-${idx}`} variants={itemVariants}>
@@ -368,11 +379,10 @@ export default function LiquidacionesView() {
             )}
           </Card>
         )}
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
+        {/* Infinite scroll sentinel */}
+        <div ref={sentinelRef} className="flex justify-center py-4">
+          {hasMore && <Loader2 size={20} className="animate-spin text-[#7C3AED]" />}
+        </div>
       </div>
     </motion.div>
   )

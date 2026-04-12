@@ -4,9 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Calendar, Download,
   LinkIcon, Clock, CreditCard, Globe2,
-  FileText, RotateCcw, Filter
+  FileText, RotateCcw, Filter, Loader2
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
+import useMediaQuery from '@/shared/hooks/useMediaQuery'
+import useInfiniteScroll from '@/shared/hooks/useInfiniteScroll'
 import { Card, Button, Badge, AvatarInfo, DropdownFilter, Pagination, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar, SwipeableCard } from '@/shared/ui'
 import { listVariants, itemVariants, pageVariants } from '@/shared/utils/motionVariants'
 import { TRANSACTIONS } from '@/services/mocks/mockData'
@@ -17,6 +19,7 @@ import RefundModal  from './RefundModal'
 export default function TransaccionesView() {
   const { isDarkMode } = useTheme()
   const navigate       = useNavigate()
+  const isDesktop      = useMediaQuery('(min-width: 1024px)')
   const [search, setSearch]         = useState('')
   const [receiptTrx, setReceiptTrx] = useState(null)
   const [refundTrx, setRefundTrx]   = useState(null)
@@ -65,11 +68,16 @@ export default function TransaccionesView() {
     currentPage * ITEMS_PER_PAGE
   )
 
+  const { visibleData, hasMore, sentinelRef } = useInfiniteScroll(filtered, {
+    batchSize: 10,
+    enabled: !isDesktop,
+  })
+
   return (
     <motion.div variants={pageVariants} initial="hidden" animate="show">
 
       <PageHeader title="Transacciones" description="Historial de cobros y pagos procesados">
-        <Button onClick={() => navigate(ROUTES.LINKS)}>
+        <Button onClick={() => navigate(ROUTES.LINKS)} className="hidden sm:flex">
           <LinkIcon size={18} /> Ver Links de Pago
         </Button>
       </PageHeader>
@@ -256,9 +264,9 @@ export default function TransaccionesView() {
 
       {/* Cards (mobile / tablet) */}
       <div className="lg:hidden space-y-3">
-        {paginatedData.length > 0 ? (
+        {visibleData.length > 0 ? (
           <motion.div variants={listVariants} initial="hidden" animate="show" className="space-y-3">
-            {paginatedData.map((trx) => (
+            {visibleData.map((trx) => (
               <motion.div key={trx.id} variants={itemVariants}>
                 <SwipeableCard
                   actions={[
@@ -319,11 +327,10 @@ export default function TransaccionesView() {
             )}
           </Card>
         )}
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
+        {/* Infinite scroll sentinel */}
+        <div ref={sentinelRef} className="flex justify-center py-4">
+          {hasMore && <Loader2 size={20} className="animate-spin text-[#7C3AED]" />}
+        </div>
       </div>
 
       {/* Modals */}

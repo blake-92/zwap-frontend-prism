@@ -2,9 +2,11 @@ import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowUpFromLine, Landmark, TrendingUp,
-  FileText,
+  FileText, Loader2,
 } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
+import useMediaQuery from '@/shared/hooks/useMediaQuery'
+import useInfiniteScroll from '@/shared/hooks/useInfiniteScroll'
 import { Card, Button, Badge, Stepper, Pagination, SearchInput, EmptySearchState, Tooltip, PageHeader, TableToolbar } from '@/shared/ui'
 import { listVariants, itemVariants, pageVariants } from '@/shared/utils/motionVariants'
 import { WITHDRAWALS, WALLET_BALANCE, WALLET_STEPS, BANK_ACCOUNT } from '@/services/mocks/mockData'
@@ -14,6 +16,7 @@ import WithdrawReceiptModal from './WithdrawReceiptModal'
 /* ─── WalletView ──────────────────────────────────────────── */
 export default function WalletView() {
   const { isDarkMode } = useTheme()
+  const isDesktop = useMediaQuery('(min-width: 1024px)')
   const [modalOpen, setModalOpen] = useState(false)
   const [receiptTrx, setReceiptTrx] = useState(null)
   const [search, setSearch] = useState('')
@@ -33,6 +36,11 @@ export default function WalletView() {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   )
+
+  const { visibleData, hasMore, sentinelRef } = useInfiniteScroll(filtered, {
+    batchSize: 5,
+    enabled: !isDesktop,
+  })
 
 
   return (
@@ -139,13 +147,15 @@ export default function WalletView() {
         </div>
       </div>
 
-      <TableToolbar>
-        <SearchInput
-          value={search}
-          onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
-          placeholder="Buscar por ID o monto..."
-        />
-      </TableToolbar>
+      <TableToolbar
+        search={
+          <SearchInput
+            value={search}
+            onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
+            placeholder="Buscar por ID o monto..."
+          />
+        }
+      />
 
       {/* Historial de Retiros (desktop) */}
       <Card className="pb-2 hidden lg:block">
@@ -244,9 +254,9 @@ export default function WalletView() {
             Historial de Retiros
           </h3>
         </div>
-        {paginatedWithdrawals.length > 0 ? (
+        {visibleData.length > 0 ? (
           <motion.div variants={listVariants} initial="hidden" animate="show" className="space-y-3">
-            {paginatedWithdrawals.map((w) => (
+            {visibleData.map((w) => (
               <motion.div key={w.id} variants={itemVariants}>
                 <Card className="p-4">
                   {/* Header: ID + amount */}
@@ -303,11 +313,10 @@ export default function WalletView() {
             )}
           </Card>
         )}
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
+        {/* Infinite scroll sentinel */}
+        <div ref={sentinelRef} className="flex justify-center py-4">
+          {hasMore && <Loader2 size={20} className="animate-spin text-[#7C3AED]" />}
+        </div>
       </div>
 
       <AnimatePresence>

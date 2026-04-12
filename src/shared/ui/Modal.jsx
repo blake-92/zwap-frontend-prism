@@ -52,6 +52,12 @@ export default function Modal({
     return () => { document.body.style.overflow = original }
   }, [])
 
+  // Signal to other components (e.g. BottomNav) that a modal is open
+  useEffect(() => {
+    document.body.dataset.modalOpen = 'true'
+    return () => { delete document.body.dataset.modalOpen }
+  }, [])
+
   // Focus trap: keep focus within modal (re-queries on each Tab press)
   useEffect(() => {
     const el = containerRef.current
@@ -107,26 +113,38 @@ export default function Modal({
             if (info.offset.y > 100 || info.velocity.y > 500) onClose()
           },
         })}
-        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 10 }}
-        transition={{
-          opacity: { duration: 0.15 },
-          scale: { type: 'spring', stiffness: 400, damping: 30 },
-          y: { type: 'spring', stiffness: 400, damping: 30 },
-        }}
+        initial={isMobile
+          ? { y: '100%' }
+          : { opacity: 0, scale: 0.95, y: 10 }
+        }
+        animate={isMobile
+          ? { y: 0 }
+          : { opacity: 1, scale: 1, y: 0 }
+        }
+        exit={isMobile
+          ? { y: '100%' }
+          : { opacity: 0, scale: 0.95, y: 10 }
+        }
+        transition={isMobile
+          ? { type: 'spring', stiffness: 380, damping: 36 }
+          : {
+              opacity: { duration: 0.15 },
+              scale: { type: 'spring', stiffness: 400, damping: 30 },
+              y: { type: 'spring', stiffness: 400, damping: 30 },
+            }
+        }
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
         style={{ maxWidth }}
-        className={`relative w-full rounded-t-[24px] sm:rounded-[24px] border overflow-hidden shadow-2xl max-h-[95vh] sm:max-h-[90vh] pb-[env(safe-area-inset-bottom)] sm:pb-0 ${
+        className={`relative w-full flex flex-col rounded-t-[24px] sm:rounded-[24px] border overflow-hidden shadow-2xl max-h-[95vh] sm:max-h-[90vh] pb-[env(safe-area-inset-bottom)] sm:pb-0 ${
           isDarkMode
             ? 'bg-[#252429]/80 backdrop-blur-3xl border-white/20 border-t-white/30'
             : 'bg-white/90 backdrop-blur-3xl border-white shadow-[0_20px_60px_rgba(0,0,0,0.15)]'
         } ${className}`}
       >
         {/* Handle bar mobile */}
-        <div className="sm:hidden flex justify-center pt-3 pb-1">
+        <div className="sm:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
           <div className={`w-10 h-1 rounded-full ${isDarkMode ? 'bg-white/20' : 'bg-black/10'}`} />
         </div>
 
@@ -152,10 +170,12 @@ export default function Modal({
           </Button>
         </div>
 
-        {/* Body */}
-        {children}
+        {/* Body — scrollable, also flex-col so children using flex-1 (e.g. NewLinkModal) still stretch */}
+        <div className="flex-1 overflow-y-auto min-h-0 flex flex-col">
+          {children}
+        </div>
 
-        {/* Footer */}
+        {/* Footer — always visible */}
         {footer && (
           <div className={`px-5 sm:px-8 py-5 sm:py-6 flex gap-3 sm:gap-4 border-t flex-shrink-0 ${
             isDarkMode ? 'bg-[#111113]/40 border-white/10' : 'bg-gray-50/50 border-black/5'

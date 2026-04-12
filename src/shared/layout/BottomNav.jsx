@@ -43,8 +43,18 @@ export default function BottomNav() {
   const navigate       = useNavigate()
   const location       = useLocation()
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [hidden, setHidden]       = useState(false)
 
   const isMoreActive = MORE_ITEMS.some(item => location.pathname === item.route)
+
+  // Hide bottom nav when a modal is open (data-modal-open on body)
+  useEffect(() => {
+    const check = () => setHidden(document.body.dataset.modalOpen === 'true')
+    check()
+    const observer = new MutationObserver(check)
+    observer.observe(document.body, { attributes: true, attributeFilter: ['data-modal-open'] })
+    return () => observer.disconnect()
+  }, [])
 
   // Lock body scroll when sheet is open
   useEffect(() => {
@@ -62,10 +72,14 @@ export default function BottomNav() {
   return (
     <>
       {/* ── Bottom bar ── */}
-      <nav className={`fixed bottom-0 inset-x-0 z-40 flex items-stretch justify-around border-t backdrop-blur-2xl pb-[env(safe-area-inset-bottom)] ${
+      <motion.nav
+        initial={{ y: 0 }}
+        animate={{ y: hidden ? '100%' : 0 }}
+        transition={SPRING}
+        className={`fixed bottom-0 inset-x-0 z-40 flex items-stretch justify-around border-t backdrop-blur-2xl backdrop-saturate-150 pb-[env(safe-area-inset-bottom)] ${
         isDarkMode
-          ? 'bg-[#111113]/90 border-white/10'
-          : 'bg-white/90 border-black/5 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]'
+          ? 'bg-[#111113]/45 border-white/10 border-t-white/15'
+          : 'bg-white/50 border-black/5 border-t-white/60 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]'
       }`}>
         <LayoutGroup id="bottomnav">
         {TABS.map(({ id, labelKey, icon: Icon, route }) => {
@@ -126,7 +140,7 @@ export default function BottomNav() {
           </span>
         </button>
         </LayoutGroup>
-      </nav>
+      </motion.nav>
 
       {/* ── More sheet ── */}
       <AnimatePresence>
