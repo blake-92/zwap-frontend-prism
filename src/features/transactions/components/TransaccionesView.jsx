@@ -6,6 +6,7 @@ import {
   LinkIcon, Clock, CreditCard, Globe2,
   FileText, RotateCcw, Filter, Loader2
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import useMediaQuery from '@/shared/hooks/useMediaQuery'
 import useInfiniteScroll from '@/shared/hooks/useInfiniteScroll'
@@ -17,6 +18,7 @@ import ReceiptModal from './ReceiptModal'
 import RefundModal  from './RefundModal'
 
 export default function TransaccionesView() {
+  const { t }          = useTranslation()
   const { isDarkMode } = useTheme()
   const navigate       = useNavigate()
   const isDesktop      = useMediaQuery('(min-width: 1024px)')
@@ -76,41 +78,41 @@ export default function TransaccionesView() {
   return (
     <motion.div variants={pageVariants} initial="hidden" animate="show">
 
-      <PageHeader title="Transacciones" description="Historial de cobros y pagos procesados">
+      <PageHeader title={t('transactions.title')} description={t('transactions.description')}>
         <Button onClick={() => navigate(ROUTES.LINKS)} className="hidden sm:flex">
-          <LinkIcon size={18} /> Ver Links de Pago
+          <LinkIcon size={18} /> {t('transactions.viewLinks')}
         </Button>
       </PageHeader>
 
       <TableToolbar 
         actions={
           <Button variant="successExport" size="sm" className="!px-2 sm:!px-3">
-            <Download size={14} /> 
-            <span className="hidden sm:inline ml-1.5">Exportar</span>
+            <Download size={14} />
+            <span className="hidden sm:inline ml-1.5">{t('common.export')}</span>
           </Button>
         }
         search={
           <SearchInput
             value={search}
             onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
-            placeholder="Buscar por cliente o email..."
+            placeholder={t('transactions.searchPlaceholder')}
             className="w-full sm:w-72"
           />
         }
       >
         <DropdownFilter
-          label="Fecha"
+          label={t('filters.date')}
           icon={Calendar}
-          options={['Cualquier fecha', 'Hoy', 'Últimos 7 días', 'Este mes']}
-          defaultValue="Cualquier fecha"
+          options={[t('filters.anyDate'), t('filters.today'), t('filters.last7days'), t('filters.thisMonth')]}
+          defaultValue={t('filters.anyDate')}
           value={dateFilter}
           onChange={(val) => { setDateFilter(val); setCurrentPage(1) }}
         />
         <DropdownFilter
-          label="Estado"
+          label={t('filters.status')}
           icon={Filter}
-          options={['Todos', 'Exitoso', 'Pendiente', 'Reembolsado']}
-          defaultValue="Todos"
+          options={[t('filters.all'), t('filters.successful'), t('filters.pending'), t('filters.refunded')]}
+          defaultValue={t('filters.all')}
           value={statusFilter}
           onChange={(val) => { setStatusFilter(val); setCurrentPage(1) }}
         />
@@ -126,11 +128,11 @@ export default function TransaccionesView() {
                   ? 'text-[#888991] border-b border-white/10 bg-[#111113]/40'
                   : 'text-[#67656E] border-b border-black/5 bg-white/50'
               }`}>
-                <th className="px-8 py-4 min-w-[140px]">Fecha</th>
-                <th className="px-6 py-4 min-w-[220px]">Cliente</th>
-                <th className="px-6 py-4 min-w-[280px]">Detalles de Operacion</th>
-                <th className="px-6 py-4 text-right min-w-[140px]">Monto (USD)</th>
-                <th className="px-8 py-4 text-right min-w-[160px]">Acciones</th>
+                <th className="px-8 py-4 min-w-[140px]">{t('transactions.tableDate')}</th>
+                <th className="px-6 py-4 min-w-[220px]">{t('transactions.tableClient')}</th>
+                <th className="px-6 py-4 min-w-[280px]">{t('transactions.tableDetails')}</th>
+                <th className="px-6 py-4 text-right min-w-[140px]">{t('transactions.tableAmount')}</th>
+                <th className="px-8 py-4 text-right min-w-[160px]">{t('transactions.tableActions')}</th>
               </tr>
             </thead>
             <motion.tbody variants={listVariants} initial="hidden" animate="show">
@@ -158,8 +160,8 @@ export default function TransaccionesView() {
                     {/* Cliente */}
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-0.5 min-w-0 max-w-[200px]">
-                        <p className={`font-bold text-sm truncate ${isDarkMode ? 'text-[#D8D7D9] group-hover:text-white' : 'text-[#111113]'}`} title={trx.client || 'Cliente Anónimo'}>
-                          {trx.client || 'Cliente Anónimo'}
+                        <p className={`font-bold text-sm truncate ${isDarkMode ? 'text-[#D8D7D9] group-hover:text-white' : 'text-[#111113]'}`} title={trx.client || t('common.anonymousClient')}>
+                          {trx.client || t('common.anonymousClient')}
                         </p>
                         <div className={`flex items-center gap-1.5 text-[11px] font-medium truncate ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
                           <span className="flex items-center gap-1 flex-shrink-0">
@@ -209,29 +211,29 @@ export default function TransaccionesView() {
                     {/* Acciones */}
                     <td className="px-8 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <Tooltip content="Ver Recibo" position="top">
+                        <Tooltip content={t('transactions.viewReceipt')} position="top">
                           <Button
                             variant="action" size="sm"
                             onClick={() => setReceiptTrx(trx)}
                             className="!px-3 !py-2"
                           >
                             <FileText size={15} />
-                            <span className="hidden xl:inline ml-1">Recibo</span>
+                            <span className="hidden xl:inline ml-1">{t('transactions.receiptShort')}</span>
                           </Button>
                         </Tooltip>
                         {trx.status === 'Reembolsado' ? (
-                          <Tooltip content="Recibo de Devolucion" position="top">
+                          <Tooltip content={t('transactions.refundReceipt')} position="top">
                             <Button
                               variant="outline" size="sm"
                               onClick={() => setRefundTrx(trx)}
                               className="!px-3 !py-2"
                             >
                               <FileText size={15} />
-                              <span className="hidden xl:inline ml-1">Recibo Dev.</span>
+                              <span className="hidden xl:inline ml-1">{t('transactions.refundReceipt')}</span>
                             </Button>
                           </Tooltip>
                         ) : (
-                          <Tooltip content="Devolucion" position="top">
+                          <Tooltip content={t('transactions.refund')} position="top">
                             <Button
                               variant="danger" size="sm"
                               onClick={() => setRefundTrx(trx)}
@@ -239,7 +241,7 @@ export default function TransaccionesView() {
                               disabled={trx.status === 'Pendiente'}
                             >
                               <RotateCcw size={15} />
-                              <span className="hidden xl:inline ml-1">Devolucion</span>
+                              <span className="hidden xl:inline ml-1">{t('transactions.refund')}</span>
                             </Button>
                           </Tooltip>
                         )}
@@ -270,17 +272,17 @@ export default function TransaccionesView() {
               <motion.div key={trx.id} variants={itemVariants}>
                 <SwipeableCard
                   actions={[
-                    { label: 'Ver Recibo', icon: FileText, onClick: () => setReceiptTrx(trx) },
+                    { label: t('transactions.viewReceipt'), icon: FileText, onClick: () => setReceiptTrx(trx) },
                     trx.status === 'Reembolsado'
-                      ? { label: 'Recibo Dev.', icon: FileText, onClick: () => setRefundTrx(trx) }
-                      : { label: 'Devolución', icon: RotateCcw, variant: 'danger', disabled: trx.status === 'Pendiente', onClick: () => setRefundTrx(trx) }
+                      ? { label: t('transactions.refundReceipt'), icon: FileText, onClick: () => setRefundTrx(trx) }
+                      : { label: t('transactions.refund'), icon: RotateCcw, variant: 'danger', disabled: trx.status === 'Pendiente', onClick: () => setRefundTrx(trx) }
                   ]}
                 >
                   <div className="p-4">
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="flex flex-col gap-0.5 min-w-0">
-                        <p className={`font-bold text-sm truncate ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`} title={trx.client || 'Cliente Anónimo'}>
-                          {trx.client || 'Cliente Anónimo'}
+                        <p className={`font-bold text-sm truncate ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`} title={trx.client || t('common.anonymousClient')}>
+                          {trx.client || t('common.anonymousClient')}
                         </p>
                         <div className={`flex items-center gap-1.5 text-[11px] font-medium truncate ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
                           <span className="flex items-center gap-1 flex-shrink-0">

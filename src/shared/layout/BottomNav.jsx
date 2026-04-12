@@ -3,13 +3,25 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import {
   LayoutDashboard, ArrowRightLeft, Link as LinkIcon, Landmark,
-  MoreHorizontal, X, Building2, Users, Wallet, Settings,
+  MoreHorizontal, Building2, Users, Wallet, Settings,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { ROUTES } from '@/router/routes'
 
 const SPRING = { type: 'spring', stiffness: 400, damping: 30 }
+
+const backdropVariants = {
+  hidden:  { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.15 } },
+  exit:    { opacity: 0, transition: { duration: 0.15 } },
+}
+
+const sheetVariants = {
+  hidden:  { y: '100%' },
+  visible: { y: 0, transition: SPRING },
+  exit:    { y: '100%', transition: { type: 'spring', stiffness: 400, damping: 36 } },
+}
 
 const TABS = [
   { id: 'dashboard',     labelKey: 'nav.dashboard',     icon: LayoutDashboard, route: ROUTES.DASHBOARD    },
@@ -25,17 +37,6 @@ const MORE_ITEMS = [
   { id: 'settings',   labelKey: 'nav.settings', icon: Settings,  route: ROUTES.SETTINGS },
 ]
 
-const sheetVariants = {
-  hidden: { y: '100%' },
-  visible: { y: 0, transition: SPRING },
-  exit: { y: '100%', transition: { type: 'spring', stiffness: 400, damping: 36 } },
-}
-
-const backdropVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.15 } },
-  exit: { opacity: 0, transition: { duration: 0.15 } },
-}
 
 export default function BottomNav() {
   const { t } = useTranslation()
@@ -56,7 +57,6 @@ export default function BottomNav() {
     return () => observer.disconnect()
   }, [])
 
-  // Lock body scroll when sheet is open
   useEffect(() => {
     if (!sheetOpen) return
     const original = document.body.style.overflow
@@ -142,15 +142,13 @@ export default function BottomNav() {
         </LayoutGroup>
       </motion.nav>
 
-      {/* ── More sheet ── */}
+      {/* ── More sheet (z-30/35 so the nav bar at z-40 stays visible) ── */}
       <AnimatePresence>
         {sheetOpen && (
           <motion.div
             key="sheet-backdrop"
             variants={backdropVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
+            initial="hidden" animate="visible" exit="exit"
             className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm"
             onClick={() => setSheetOpen(false)}
           />
@@ -162,9 +160,7 @@ export default function BottomNav() {
           <motion.div
             key="sheet-panel"
             variants={sheetVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
+            initial="hidden" animate="visible" exit="exit"
             drag="y"
             dragConstraints={{ top: 0 }}
             dragElastic={0.2}
@@ -177,27 +173,14 @@ export default function BottomNav() {
                 : 'bg-white border-black/5 shadow-[0_-8px_40px_rgba(0,0,0,0.1)]'
             }`}
           >
-            {/* Handle bar */}
             <div className="flex justify-center py-3">
               <div className={`w-10 h-1 rounded-full ${isDarkMode ? 'bg-white/20' : 'bg-black/10'}`} />
             </div>
 
-            {/* Sheet header */}
-            <div className="flex items-center justify-between px-6 pb-4">
-              <h3 className={`text-sm font-bold ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-                {t('nav.moreOptions')}
-              </h3>
-              <button
-                onClick={() => setSheetOpen(false)}
-                className={`w-11 h-11 flex items-center justify-center -mr-2 rounded-xl transition-colors ${
-                  isDarkMode ? 'text-[#888991] hover:bg-white/10' : 'text-[#67656E] hover:bg-black/5'
-                }`}
-              >
-                <X size={20} />
-              </button>
-            </div>
+            <h3 className={`px-5 py-3 text-sm font-bold opacity-50 ${isDarkMode ? 'text-white' : 'text-black'}`}>
+              {t('nav.moreOptions')}
+            </h3>
 
-            {/* Sheet items */}
             <div className="px-4 grid grid-cols-4 gap-2">
               {MORE_ITEMS.map(({ id, labelKey, icon: Icon, route }) => {
                 const isActive = location.pathname === route

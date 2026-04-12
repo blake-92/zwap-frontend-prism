@@ -1,10 +1,12 @@
 import { Plus, Smartphone, Send } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { useToast } from '@/shared/context/ToastContext'
 import { Card, SectionLabel } from '@/shared/ui'
 import { PENDING_CHARGES } from '@/services/mocks/mockData'
 
 export default function QuickActions({ onNewCharge }) {
+  const { t }          = useTranslation()
   const { isDarkMode } = useTheme()
   const { addToast }   = useToast()
 
@@ -12,25 +14,25 @@ export default function QuickActions({ onNewCharge }) {
     if (PENDING_CHARGES.length > 0) {
       const last = PENDING_CHARGES[0]
       navigator.clipboard.writeText(last.url)
-      addToast(`Link de ${last.client} copiado al portapapeles.`, 'success')
+      addToast(t('dashboard.lastLinkCopied', { client: last.client }), 'success')
     }
   }
 
   const actions = [
     {
-      label: 'Nuevo Cobro',
+      label: t('dashboard.newCharge'),
       icon: Plus,
       onClick: onNewCharge,
       accent: true,
     },
     {
-      label: 'Cobro POS',
+      label: t('dashboard.posCharge'),
       icon: Smartphone,
-      onClick: () => addToast('Cobro POS estará disponible próximamente.', 'info'),
+      onClick: () => addToast(t('dashboard.posComingSoon'), 'info'),
       accent: false,
     },
     {
-      label: 'Reenviar Último Link',
+      label: t('dashboard.resendLastLink'),
       icon: Send,
       onClick: handleResendLast,
       accent: false,
@@ -39,7 +41,7 @@ export default function QuickActions({ onNewCharge }) {
 
   return (
     <Card className="p-4 flex flex-col gap-3">
-      <SectionLabel>Acciones Rápidas</SectionLabel>
+      <SectionLabel>{t('dashboard.quickActions')}</SectionLabel>
 
       <div className="flex flex-col gap-2">
         {actions.map(({ label, icon: Icon, onClick, accent }) => (

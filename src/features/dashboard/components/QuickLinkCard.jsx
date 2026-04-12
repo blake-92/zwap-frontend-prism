@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { MousePointerClick, QrCode, Copy, ExternalLink, Maximize } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { useToast } from '@/shared/context/ToastContext'
 import { Card, Button, SegmentControl } from '@/shared/ui'
 import { PERMANENT_LINKS } from '@/services/mocks/mockData'
 
 export default function QuickLinkCard() {
+  const { t }               = useTranslation()
   const { isDarkMode }    = useTheme()
   const { addToast }      = useToast()
   const activeLinks       = PERMANENT_LINKS.filter(l => l.active)
@@ -15,10 +17,22 @@ export default function QuickLinkCard() {
   
   const [isQrMaximized, setIsQrMaximized] = useState(false)
 
+  useEffect(() => {
+    if (!isQrMaximized) return
+    const handleKeyDown = (e) => { if (e.key === 'Escape') setIsQrMaximized(false) }
+    const original = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = original
+    }
+  }, [isQrMaximized])
+
   const handleCopy = () => {
     if (selected?.url) {
       navigator.clipboard.writeText(selected.url)
-      addToast(`Enlace "${selected.name}" copiado al portapapeles.`, 'success')
+      addToast(t('links.linkCopied', { name: selected.name }), 'success')
     }
   }
 
@@ -30,10 +44,10 @@ export default function QuickLinkCard() {
           <div>
             <h3 className={`font-bold text-lg flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
               <MousePointerClick size={18} className="text-[#7C3AED]" />
-              Cobro Rápido
+              {t('dashboard.quickCharge')}
             </h3>
             <p className={`text-xs font-medium mt-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-              Escanea para pagar
+              {t('dashboard.scanToPay')}
             </p>
           </div>
         </div>
@@ -70,10 +84,10 @@ export default function QuickLinkCard() {
             </p>
             <div className="grid grid-cols-2 gap-3 w-full">
               <Button variant="outline" className="w-full !py-2.5 shadow-sm" onClick={handleCopy}>
-                <Copy size={16} /> Copiar
+                <Copy size={16} /> {t('dashboard.copy')}
               </Button>
               <Button className="w-full !py-2.5 shadow-lg" onClick={() => window.open(selected.url, '_blank')}>
-                <ExternalLink size={16} /> Abrir
+                <ExternalLink size={16} /> {t('common.open')}
               </Button>
             </div>
           </div>

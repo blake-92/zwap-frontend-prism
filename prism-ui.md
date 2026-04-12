@@ -1105,13 +1105,12 @@ Reservadas para casos donde Framer Motion no aplica:
 
 | Clase | Keyframe | Duración | Uso |
 |---|---|---|---|
-| `animate-fade-in` | `opacity: 0 → 1` | 0.4s ease | Entrada de vistas completas |
 | `animate-slide-up` | `opacity 0→1 + translateY 12px→0` | 0.4s ease | Formularios de email en login |
 | `animate-pulse-glow` | box-shadow pulsante morado | 2s ease-in-out ∞ | Elementos que requieren atención |
 | `animate-spin-slow` | `rotate 0→360deg` | 2s linear ∞ | Íconos de carga |
 | `animate-pulse` (Tailwind) | opacidad pulsante | built-in | Live dot del feed |
 
-> `animate-scale-in` fue reemplazado por Framer Motion en modales y dropdowns. No usar en componentes nuevos.
+> `animate-scale-in` y `animate-fade-in` fueron reemplazados por Framer Motion (spring). No usar en componentes nuevos.
 
 ---
 

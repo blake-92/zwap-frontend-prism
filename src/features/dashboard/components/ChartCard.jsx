@@ -3,21 +3,17 @@ import { CreditCard } from 'lucide-react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Card, SegmentControl } from '@/shared/ui'
 
 import { CHART_DATA, CONVERSION_DATA, PAYMENT_METHODS } from '@/services/mocks/mockData'
 
-const CHART_TABS = [
-  { value: 'volumen',    label: 'Volumen' },
-  { value: 'conversion', label: 'Conversión' },
-  { value: 'metodos',    label: 'Métodos' },
-]
-
-const CHART_TITLES = {
-  volumen:    { h: 'Volumen por Canal',      sub: 'Terminal POS vs. Links de Pago (Últimos 7 días)' },
-  conversion: { h: 'Tasa de Conversión',     sub: 'Links pagados vs. expirados' },
-  metodos:    { h: 'Métodos de Pago',        sub: 'Distribución por tipo de tarjeta' },
+const FADE_SPRING = {
+  hidden: { opacity: 0 },
+  show:   { opacity: 1, transition: { type: 'spring', stiffness: 300, damping: 24 } },
+  exit:   { opacity: 0, transition: { duration: 0.15 } },
 }
 
 function ChartTooltip({ active, payload, label, isDarkMode }) {
@@ -43,8 +39,15 @@ function ChartTooltip({ active, payload, label, isDarkMode }) {
 }
 
 export default function ChartCard() {
+  const { t }          = useTranslation()
   const { isDarkMode } = useTheme()
   const [chart, setChart] = useState('volumen')
+
+  const CHART_TITLES = {
+    volumen:    { h: t('dashboard.volumeByChannel'),  sub: t('dashboard.volumeByChannelDesc') },
+    conversion: { h: t('dashboard.conversionRate'),   sub: t('dashboard.conversionRateDesc') },
+    metodos:    { h: t('dashboard.paymentMethods'),   sub: t('dashboard.paymentMethodsDesc') },
+  }
 
   return (
     <Card className="lg:col-span-2 p-8 flex flex-col">
@@ -61,7 +64,11 @@ export default function ChartCard() {
 
         {/* Tab switcher */}
         <SegmentControl
-          options={CHART_TABS}
+          options={[
+            { value: 'volumen',    label: t('dashboard.volume') },
+            { value: 'conversion', label: t('dashboard.conversion') },
+            { value: 'metodos',    label: t('dashboard.methods') },
+          ]}
           value={chart}
           onChange={setChart}
           layoutId="chartTabIndicator"
@@ -70,10 +77,11 @@ export default function ChartCard() {
 
       {/* Chart area */}
       <div className="flex-1 relative min-h-[220px] flex items-end">
+        <AnimatePresence mode="wait">
 
         {/* ── Volumen: área line chart ── */}
         {chart === 'volumen' && (
-          <div className="w-full h-[200px] animate-fade-in">
+          <motion.div key="volumen" variants={FADE_SPRING} initial="hidden" animate="show" exit="exit" className="w-full h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={CHART_DATA} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
                 <defs>
@@ -127,12 +135,12 @@ export default function ChartCard() {
                 />
               </AreaChart>
             </ResponsiveContainer>
-          </div>
+          </motion.div>
         )}
 
         {/* ── Conversión: bar chart ── */}
         {chart === 'conversion' && (
-          <div className="w-full h-[200px] flex items-end justify-between px-4 pb-6 animate-fade-in">
+          <motion.div key="conversion" variants={FADE_SPRING} initial="hidden" animate="show" exit="exit" className="w-full h-[200px] flex items-end justify-between px-4 pb-6">
             {CONVERSION_DATA.map((item) => (
               <div key={item.day} className="flex flex-col items-center gap-2 group cursor-pointer">
                 <span className={`text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity ${isDarkMode ? 'text-[#B9A4F8]' : 'text-[#7C3AED]'}`}>
@@ -155,12 +163,12 @@ export default function ChartCard() {
                 </span>
               </div>
             ))}
-          </div>
+          </motion.div>
         )}
 
         {/* ── Métodos: horizontal bars ── */}
         {chart === 'metodos' && (
-          <div className="w-full h-[200px] flex flex-col justify-center gap-6 px-4 animate-fade-in">
+          <motion.div key="metodos" variants={FADE_SPRING} initial="hidden" animate="show" exit="exit" className="w-full h-[200px] flex flex-col justify-center gap-6 px-4">
             {PAYMENT_METHODS.map((item) => (
               <div key={item.label} className="flex items-center gap-4">
                 <div className={`w-8 flex justify-center ${isDarkMode ? 'text-[#888991]' : 'text-[#A1A1AA]'}`}>
@@ -184,8 +192,9 @@ export default function ChartCard() {
                 </div>
               </div>
             ))}
-          </div>
+          </motion.div>
         )}
+        </AnimatePresence>
       </div>
     </Card>
   )

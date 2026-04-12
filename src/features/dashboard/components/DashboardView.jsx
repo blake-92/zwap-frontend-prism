@@ -2,9 +2,10 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { pageVariants } from '@/shared/utils/motionVariants'
 import { Button, PageHeader, SegmentControl } from '@/shared/ui'
-import { KPIS } from '@/services/mocks/mockData'
+import { KPIS, CURRENT_USER } from '@/services/mocks/mockData'
 import { ROUTES } from '@/router/routes'
 import KpiCard        from './KpiCard'
 import QuickLinkCard  from './QuickLinkCard'
@@ -18,12 +19,8 @@ import ShiftSummary   from './ShiftSummary'
 // via its public re-export. This avoids duplicating the modal component.
 import { NewLinkModal } from '@/features/links'
 
-const DASHBOARD_TABS = [
-  { value: 'operations', label: 'Operaciones' },
-  { value: 'metrics',    label: 'Métricas' },
-]
-
 export default function DashboardView() {
+  const { t }          = useTranslation()
   const navigate       = useNavigate()
   const [newLinkOpen, setNewLinkOpen] = useState(false)
   const [activeTab, setActiveTab]     = useState('operations')
@@ -31,19 +28,22 @@ export default function DashboardView() {
   return (
     <motion.div variants={pageVariants} initial="hidden" animate="show">
       <PageHeader
-        title="Buenas noches, Admin 👋"
-        description="Aquí tienes el pulso financiero de tus sucursales hoy."
+        title={t('dashboard.greeting', { name: CURRENT_USER.displayName })}
+        description={t('dashboard.subtitle')}
         className="mb-6"
       >
         <Button onClick={() => setNewLinkOpen(true)} className="hidden sm:flex">
-          <Plus size={18} /> Nuevo Link de Reserva
+          <Plus size={18} /> {t('dashboard.newReservationLink')}
         </Button>
       </PageHeader>
 
       {/* Sub-view selector */}
       <div className="max-w-xs mb-6 sm:mb-8">
         <SegmentControl
-          options={DASHBOARD_TABS}
+          options={[
+            { value: 'operations', label: t('dashboard.tabOperations') },
+            { value: 'metrics',    label: t('dashboard.tabMetrics') },
+          ]}
           value={activeTab}
           onChange={setActiveTab}
           layoutId="dashboardTab"
@@ -53,7 +53,7 @@ export default function DashboardView() {
       {/* Mobile only: Full-width button */}
       <div className="sm:hidden mb-6">
         <Button size="lg" className="w-full" onClick={() => setNewLinkOpen(true)}>
-          <Plus size={18} /> Nuevo Link de Reserva
+          <Plus size={18} /> {t('dashboard.newReservationLink')}
         </Button>
       </div>
 

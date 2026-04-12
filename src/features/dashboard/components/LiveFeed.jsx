@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { ArrowRight, Clock, CreditCard } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Card, Button, Badge, CardHeader } from '@/shared/ui'
 import { TRANSACTIONS } from '@/services/mocks/mockData'
@@ -45,6 +46,7 @@ function CardBrandAvatar({ brand }) {
 }
 
 export default function LiveFeed({ onViewAll }) {
+  const { t }          = useTranslation()
   const { isDarkMode } = useTheme()
 
   return (
@@ -58,14 +60,14 @@ export default function LiveFeed({ onViewAll }) {
               transition={{ duration: 2, times: [0, 0.2, 0.4, 0.6, 1], repeat: Infinity, repeatDelay: 1 }}
               className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] inline-block"
             />
-            Feed en Vivo
+            {t('dashboard.liveFeed')}
           </>
         }
-        description="Últimas operaciones procesadas"
+        description={t('dashboard.liveFeedDesc')}
         className="p-6 pb-5"
       >
         <Button variant="ghost" size="sm" onClick={onViewAll} className="!text-[#7C3AED] !h-8 !px-2">
-          Ver Todas <ArrowRight size={14} className="ml-1" />
+          {t('dashboard.viewAll')} <ArrowRight size={14} className="ml-1" />
         </Button>
       </CardHeader>
 
@@ -76,11 +78,11 @@ export default function LiveFeed({ onViewAll }) {
             <tr className={`text-[10px] uppercase font-bold tracking-widest ${
               isDarkMode ? 'text-[#888991] bg-[#111113]/20' : 'text-[#67656E] bg-white/20'
             }`}>
-              <th className="px-6 py-3">Tiempo</th>
-              <th className="px-4 py-3">Origen</th>
-              <th className="px-4 py-3">Canal</th>
-              <th className="px-4 py-3 text-center">Estado</th>
-              <th className="px-6 py-3 text-right">Monto</th>
+              <th className="px-6 py-3">{t('dashboard.tableTime')}</th>
+              <th className="px-4 py-3">{t('dashboard.tableOrigin')}</th>
+              <th className="px-4 py-3">{t('dashboard.tableChannel')}</th>
+              <th className="px-4 py-3 text-center">{t('dashboard.tableStatus')}</th>
+              <th className="px-6 py-3 text-right">{t('dashboard.tableAmount')}</th>
             </tr>
           </thead>
           <motion.tbody variants={listVariants} initial="hidden" animate="show">
@@ -107,7 +109,7 @@ export default function LiveFeed({ onViewAll }) {
                     <CardBrandAvatar brand={trx.card} />
                     <div>
                       <span className={`font-bold text-xs block ${isDarkMode ? 'text-[#D8D7D9] group-hover:text-white' : 'text-[#111113]'}`}>
-                        {trx.client ? trx.client.split(' ')[0] : 'Mostrador'}
+                        {trx.client ? trx.client.split(' ')[0] : t('dashboard.counter')}
                       </span>
                       <span className={`flex items-center gap-1 text-[10px] font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
                         <CreditCard size={10} className="opacity-70" />
@@ -165,7 +167,7 @@ export default function LiveFeed({ onViewAll }) {
                 <CardBrandAvatar brand={trx.card} />
                 <div className="min-w-0">
                   <p className={`font-bold text-xs truncate ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`}>
-                    {trx.client ? trx.client.split(' ')[0] : 'Mostrador'}
+                    {trx.client ? trx.client.split(' ')[0] : t('dashboard.counter')}
                   </p>
                   <span className={`flex items-center gap-1 text-[10px] font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
                     <CreditCard size={10} className="opacity-70 flex-shrink-0" />

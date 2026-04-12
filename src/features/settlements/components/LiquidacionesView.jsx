@@ -5,6 +5,7 @@ import {
   CheckCircle2, Landmark, AlertOctagon,
   CalendarDays, Clock, ArrowDownToLine, Filter, Loader2
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import useMediaQuery from '@/shared/hooks/useMediaQuery'
 import useInfiniteScroll from '@/shared/hooks/useInfiniteScroll'
@@ -16,6 +17,7 @@ import { PAYOUTS, WALLET_BALANCE, SETTLEMENT_SUMMARY } from '@/services/mocks/mo
    LiquidacionesView
 ───────────────────────────────────────────────────────────── */
 export default function LiquidacionesView() {
+  const { t }          = useTranslation()
   const { isDarkMode } = useTheme()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
   const [search, setSearch] = useState('')
@@ -75,9 +77,9 @@ export default function LiquidacionesView() {
   return (
     <motion.div variants={pageVariants} initial="hidden" animate="show">
 
-      <PageHeader title="Liquidaciones" description="Control de Cierres Diarios y Depósitos Bancarios.">
+      <PageHeader title={t('settlements.title')} description={t('settlements.description')}>
         <Button variant="outline">
-          <Download size={18} /> Descargar Reporte Fiscal
+          <Download size={18} /> {t('settlements.downloadFiscal')}
         </Button>
       </PageHeader>
 
@@ -85,19 +87,19 @@ export default function LiquidacionesView() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 2xl:gap-8 mb-10">
         <StatCard layout="balance"
           icon={CheckCircle2} iconVariant="success"
-          label="Depositado (Disponible)"
+          label={t('settlements.deposited')}
           value={WALLET_BALANCE.display}
-          badge="Últimos 30 días" badgeVariant="success"
+          badge={t('settlements.last30days')} badgeVariant="success"
         />
         <StatCard layout="balance"
           icon={Landmark} iconVariant="warning"
-          label="En Tránsito (Bancos)"
+          label={t('settlements.inTransitBanks')}
           value={SETTLEMENT_SUMMARY.inTransit}
           badge={SETTLEMENT_SUMMARY.inTransitBadge} badgeVariant="warning"
         />
         <StatCard layout="balance"
           icon={AlertOctagon} iconVariant="danger"
-          label="Retenciones / Ajustes"
+          label={t('settlements.retentions')}
           value={SETTLEMENT_SUMMARY.adjustments}
           badge={SETTLEMENT_SUMMARY.adjustmentsBadge} badgeVariant="danger"
           negative
@@ -109,23 +111,23 @@ export default function LiquidacionesView() {
           <SearchInput
             value={search}
             onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
-            placeholder="Buscar concepto o fecha..."
+            placeholder={t('settlements.searchPlaceholder')}
           />
         }
       >
         <DropdownFilter
-          label="Fecha"
+          label={t('filters.date')}
           icon={Calendar}
-          options={['Cualquier fecha', 'Esta semana', 'Este mes']}
-          defaultValue="Cualquier fecha"
+          options={[t('filters.anyDate'), t('filters.thisWeek'), t('filters.thisMonth')]}
+          defaultValue={t('filters.anyDate')}
           value={dateFilter}
           onChange={(val) => { setDateFilter(val); setCurrentPage(1) }}
         />
         <DropdownFilter
-          label="Estado"
+          label={t('filters.status')}
           icon={Filter}
-          options={['Todos', 'Depositado', 'Pendiente (ACH)']}
-          defaultValue="Todos"
+          options={[t('filters.all'), t('filters.deposited'), t('filters.pendingAch')]}
+          defaultValue={t('filters.all')}
           value={statusFilter}
           onChange={(val) => { setStatusFilter(val); setCurrentPage(1) }}
         />
@@ -144,7 +146,7 @@ export default function LiquidacionesView() {
                 <th className="px-8 py-4">Concepto & Cierre</th>
                 <th className="px-6 py-4">Desglose Financiero</th>
                 <th className="px-6 py-4 text-right">Neto Resultante</th>
-                <th className="px-6 py-4 text-center">Estado del Depósito</th>
+                <th className="px-6 py-4 text-center">{t('settlements.depositStatus')}</th>
                 <th className="px-8 py-4 text-right">Acciones</th>
               </tr>
             </thead>
@@ -370,11 +372,11 @@ export default function LiquidacionesView() {
         ) : (
           <Card className="p-8 text-center">
             <p className={`text-sm font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-              No se encontraron liquidaciones{search ? ` para "${search}"` : ''}.
+              {search ? t('settlements.notFoundFor', { term: search }) : t('settlements.notFound')}
             </p>
             {search && (
               <Button variant="ghost" size="sm" onClick={() => setSearch('')} className="mt-2">
-                Limpiar busqueda
+                {t('common.clearSearch')}
               </Button>
             )}
           </Card>

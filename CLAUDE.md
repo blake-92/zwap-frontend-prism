@@ -41,7 +41,7 @@ features/links/
 | Feature | Vista principal | Modales / subcomponentes |
 |---------|----------------|--------------------------|
 | `auth` | LoginView | — |
-| `dashboard` | DashboardView | KpiCard, ChartCard, QuickLinkCard, AlertsPanel, LiveFeed |
+| `dashboard` | DashboardView | KpiCard, ChartCard, QuickLinkCard, AlertsPanel, LiveFeed, PendingCharges, QuickActions, ShiftSummary |
 | `transactions` | TransaccionesView | ReceiptModal, RefundModal |
 | `links` | LinksView | NewLinkModal |
 | `settlements` | LiquidacionesView | — |
@@ -378,6 +378,44 @@ El sidebar usa `ZwapIsotipo` + `ZwapWordmark` por separado para poder animar la 
 - Sidebar state: `localStorage.getItem('zwap-sidebar')` — `'collapsed'`/`'expanded'`, usado por `AppShell`
 - Ambos providers están en `App.jsx` envolviendo el router
 
+## Internacionalización (i18n)
+
+Se usa `react-i18next` + `i18next`. Configurado en `src/i18n/index.js`, importado en `App.jsx`.
+
+### Uso
+
+```jsx
+import { useTranslation } from 'react-i18next'
+
+const { t } = useTranslation()
+
+// Texto simple
+t('nav.dashboard')
+
+// Con interpolación
+t('dashboard.greeting', { name: 'Admin' })
+
+// Pluralización
+t('dashboard.charges', { count: 5 })  // → "5 cobros"
+
+// En class components (no hooks)
+import i18n from '@/i18n'
+i18n.t('errors.somethingWrong')
+```
+
+### Locale
+
+- Archivo único: `src/i18n/locales/es.json`
+- Idioma fijo: `es` (sin selector de idioma por ahora)
+- Namespaces: `common`, `nav`, `header`, `auth`, `dashboard`, `transactions`, `refund`, `links`, `settlements`, `wallet`, `branches`, `users`, `settings`, `filters`, `errors`, `calendar`, `pagination`, `search`, `workflow`
+
+### Reglas
+
+1. **No hardcodear strings visibles al usuario** — usar siempre `t('namespace.key')`
+2. Agregar claves nuevas en `es.json` bajo el namespace correcto
+3. Interpolar datos dinámicos con `{{ variable }}`, no template literals
+4. Para arrays (meses, días), usar `t('key', { returnObjects: true })`
+
 ## Responsive Design
 
 ### Estrategia general
@@ -404,7 +442,7 @@ Usado en `AppShell` para condicionar Sidebar vs BottomNav, y en `Header` para se
 | ≥ 1024px (lg) | Sidebar colapsable | `shared/layout/Sidebar.jsx` |
 | < 1024px | Bottom navigation | `shared/layout/BottomNav.jsx` |
 
-**BottomNav** — 4 tabs fijos (Dashboard, Transacciones, Links, Liquidaciones) + botón "Más" que abre un sheet con opciones secundarias (Sucursales, Usuarios, Wallet, Configuración). Safe area padding via `pb-[env(safe-area-inset-bottom)]`. Scroll lock cuando el sheet está abierto.
+**BottomNav** — 4 tabs fijos (Dashboard, Transacciones, Links, Liquidaciones) + botón "Más" que abre un sheet con opciones secundarias (Sucursales, Usuarios, Wallet, Configuración). Safe area padding via `pb-[env(safe-area-inset-bottom)]`. Scroll lock cuando el sheet está abierto. El sheet de "Más" **no usa `<BottomSheet>`** — usa implementación inline con z-index inferior al nav (`z-30` backdrop, `z-[35]` panel vs `z-40` nav) para que la barra permanezca visible encima del sheet.
 
 **Header** — en desktop muestra search bar inline; en mobile muestra icono de búsqueda que abre `SearchPanel` (dropdown flotante debajo del header).
 

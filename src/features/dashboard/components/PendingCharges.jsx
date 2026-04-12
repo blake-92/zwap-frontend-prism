@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Clock, Copy, Send, ExternalLink } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { useToast } from '@/shared/context/ToastContext'
 import { Card, Button, Badge, Avatar, CardHeader } from '@/shared/ui'
@@ -9,29 +10,30 @@ import { PENDING_CHARGES } from '@/services/mocks/mockData'
 import { ROUTES } from '@/router/routes'
 
 export default function PendingCharges() {
+  const { t }          = useTranslation()
   const { isDarkMode } = useTheme()
   const { addToast }   = useToast()
   const navigate       = useNavigate()
 
   const handleCopy = (charge) => {
     navigator.clipboard.writeText(charge.url)
-    addToast(`Link de ${charge.client} copiado.`, 'success')
+    addToast(t('dashboard.linkCopied', { client: charge.client }), 'success')
   }
 
   const handleResend = (charge) => {
-    addToast(`Link reenviado a ${charge.email}`, 'success')
+    addToast(t('dashboard.linkResent', { email: charge.email }), 'success')
   }
 
   return (
     <Card className="lg:col-span-2 p-0 flex flex-col">
       <CardHeader
-        title={<><Clock size={18} className="text-amber-500" /> Cobros Pendientes</>}
-        description="Links de pago esperando cobro"
+        title={<><Clock size={18} className="text-amber-500" /> {t('dashboard.pendingCharges')}</>}
+        description={t('dashboard.pendingChargesDesc')}
       >
         <div className="flex items-center gap-2">
           <Badge variant="warning">{PENDING_CHARGES.length}</Badge>
           <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.LINKS)}>
-            Ver Todos
+            {t('dashboard.viewAllShort')}
           </Button>
         </div>
       </CardHeader>
@@ -83,7 +85,7 @@ export default function PendingCharges() {
                   className={`p-1.5 rounded-lg transition-colors ${
                     isDarkMode ? 'hover:bg-white/10 text-[#888991] hover:text-white' : 'hover:bg-black/5 text-[#67656E] hover:text-[#111113]'
                   }`}
-                  title="Copiar link"
+                  title={t('dashboard.copyLink')}
                 >
                   <Copy size={14} />
                 </button>
@@ -92,7 +94,7 @@ export default function PendingCharges() {
                   className={`p-1.5 rounded-lg transition-colors ${
                     isDarkMode ? 'hover:bg-[#7C3AED]/20 text-[#888991] hover:text-[#A78BFA]' : 'hover:bg-[#DBD3FB]/40 text-[#67656E] hover:text-[#7C3AED]'
                   }`}
-                  title="Reenviar link"
+                  title={t('dashboard.resendLink')}
                 >
                   <Send size={14} />
                 </button>
