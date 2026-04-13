@@ -561,6 +561,13 @@ export default function LinksView() {
         </div>
       </div>
 
+      {/* Mobile only: Full-width new link button */}
+      <div className="lg:hidden mb-6">
+        <Button size="lg" className="w-full" onClick={() => setNewLinkOpen(true)}>
+          <Plus size={18} /> {t('links.createLink')}
+        </Button>
+      </div>
+
       {/* Mobile: compact quick-charge card */}
       <div className="lg:hidden mb-6">
         <SectionLabel className="uppercase mb-3">{t('links.quickLinks')}</SectionLabel>

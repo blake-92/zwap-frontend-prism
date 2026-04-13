@@ -40,7 +40,9 @@
     "myWallet": "Mi Billetera",
     "logout": "Cerrar Sesión",
     "moreOptions": "Más opciones",
-    "moreShort": "Más"
+    "moreShort": "Más",
+    "theme": "Tema",
+    "notifications": "Alertas"
   },
 
   "header": {
@@ -166,7 +168,7 @@
 
   "links": {
     "title": "Links de Pago",
-    "createLink": "Crear Link de Reserva",
+    "createLink": "Nuevo Link de Reserva",
     "generateLink": "Generar Link de Reserva",
     "searchPlaceholder": "Buscar por cliente o ID...",
     "viewQr": "Ver código QR",

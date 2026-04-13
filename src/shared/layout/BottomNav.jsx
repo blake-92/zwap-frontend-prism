@@ -4,6 +4,7 @@ import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import {
   LayoutDashboard, ArrowRightLeft, Link as LinkIcon, Landmark,
   MoreHorizontal, Building2, Users, Wallet, Settings,
+  Sun, Moon, Bell,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
@@ -40,7 +41,7 @@ const MORE_ITEMS = [
 
 export default function BottomNav() {
   const { t } = useTranslation()
-  const { isDarkMode } = useTheme()
+  const { isDarkMode, toggleTheme } = useTheme()
   const navigate       = useNavigate()
   const location       = useLocation()
   const [sheetOpen, setSheetOpen] = useState(false)
@@ -216,6 +217,49 @@ export default function BottomNav() {
                   </button>
                 )
               })}
+            </div>
+
+            {/* Quick actions divider */}
+            <div className={`mx-5 my-3 border-t ${isDarkMode ? 'border-white/10' : 'border-black/5'}`} />
+
+            <div className="px-4 grid grid-cols-4 gap-2">
+              {/* Theme toggle */}
+              <button
+                onClick={toggleTheme}
+                className={`flex flex-col items-center gap-2 py-4 rounded-xl transition-colors ${
+                  isDarkMode ? 'text-[#888991] hover:bg-white/5' : 'text-[#67656E] hover:bg-black/5'
+                }`}
+              >
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                  isDarkMode ? 'bg-white/5' : 'bg-black/5'
+                }`}>
+                  {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+                </div>
+                <span className="text-[11px] leading-none font-medium">
+                  {t('nav.theme')}
+                </span>
+              </button>
+
+              {/* Notifications */}
+              <button
+                className={`flex flex-col items-center gap-2 py-4 rounded-xl transition-colors ${
+                  isDarkMode ? 'text-[#888991] hover:bg-white/5' : 'text-[#67656E] hover:bg-black/5'
+                }`}
+              >
+                <div className={`relative w-10 h-10 rounded-xl flex items-center justify-center ${
+                  isDarkMode ? 'bg-white/5' : 'bg-black/5'
+                }`}>
+                  <Bell size={20} />
+                  <span className={`absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full border-[2px] ${
+                    isDarkMode
+                      ? 'bg-[#7C3AED] border-[#1A1A1D] shadow-[0_0_10px_rgba(124,58,237,0.9)]'
+                      : 'bg-red-500 border-white shadow-[0_0_10px_rgba(239,68,68,0.6)]'
+                  }`} />
+                </div>
+                <span className="text-[11px] leading-none font-medium">
+                  {t('nav.notifications')}
+                </span>
+              </button>
             </div>
           </motion.div>
         )}

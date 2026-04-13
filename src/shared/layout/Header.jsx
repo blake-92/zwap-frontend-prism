@@ -8,8 +8,18 @@ import { useHeaderSearch } from '@/shared/context/ViewSearchContext'
 import { ROUTES } from '@/router/routes'
 import { Button, Tooltip } from '@/shared/ui'
 import { BRANCHES } from '@/services/mocks/mockData'
+import ZwapIsotipo  from '@/shared/brand/ZwapIsotipo'
+import ZwapWordmark from '@/shared/brand/ZwapWordmark'
 
 const SPRING = { type: 'spring', stiffness: 400, damping: 30 }
+
+const WORDMARK_VARIANTS = {
+  hidden: { opacity: 0, filter: 'blur(4px)', x: -8 },
+  show:   { opacity: 1, filter: 'blur(0px)', x: 0,
+            transition: { type: 'spring', stiffness: 400, damping: 30, delay: 0.06 } },
+  exit:   { opacity: 0, filter: 'blur(4px)', x: -8,
+            transition: { type: 'spring', stiffness: 320, damping: 28 } },
+}
 
 const panelVariants = {
   hidden:  { opacity: 0, scale: 0.95, y: -4 },
@@ -133,146 +143,154 @@ export default function Header({ selectedBranch, onBranchChange, isDesktop }) {
         : 'bg-white/30 backdrop-blur-2xl border-b border-white/80'
     }`}>
 
-      {/* ── Left section: search ── */}
       {isDesktop ? (
-        /* Desktop: always-visible search bar */
-        <div className={`flex items-center px-4 py-2.5 rounded-xl border w-[240px] md:w-[300px] lg:w-[340px] xl:w-[400px] transition-all duration-300 ${
-          isDarkMode
-            ? 'bg-[#252429]/30 backdrop-blur-xl border-white/10 border-t-white/20 focus-within:border-[#7C3AED]/60 focus-within:shadow-[0_0_20px_rgba(124,58,237,0.2)] focus-within:bg-[#252429]/50'
-            : 'bg-white/50 backdrop-blur-xl border-white focus-within:border-[#7C3AED]/40 focus-within:shadow-[0_0_20px_rgba(124,58,237,0.15)] focus-within:bg-white/80 shadow-[0_4px_15px_rgb(0,0,0,0.02)]'
-        }`}>
-          <Search size={16} className={isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'} />
-          <input
-            type="text"
-            placeholder={placeholder || t('header.searchPlaceholder')}
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            className={`bg-transparent border-none outline-none text-sm ml-3 w-full font-medium placeholder:opacity-60 ${
-              isDarkMode ? 'text-[#D8D7D9] placeholder:text-[#888991]' : 'text-[#111113] placeholder:text-[#B0AFB4]'
-            }`}
-          />
-          {query && (
-            <button onClick={() => setQuery('')} className={`ml-1 p-0.5 rounded-md transition-colors ${isDarkMode ? 'text-[#888991] hover:text-white' : 'text-[#67656E] hover:text-[#111113]'}`}>
-              <span className="text-xs font-bold">✕</span>
-            </button>
-          )}
-        </div>
-      ) : (
-        /* Mobile: expandable search bar */
-        <AnimatePresence mode="wait">
-          {searchExpanded ? (
-            <motion.div
-              key="search-bar"
-              initial={{ width: 40, opacity: 0.5 }}
-              animate={{ width: '100%', opacity: 1 }}
-              exit={{ width: 40, opacity: 0 }}
-              transition={SPRING}
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl border mr-3 overflow-hidden ${
-                isDarkMode
-                  ? 'bg-[#252429]/50 backdrop-blur-xl border-[#7C3AED]/40 shadow-[0_0_15px_rgba(124,58,237,0.15)]'
-                  : 'bg-white/70 backdrop-blur-xl border-[#7C3AED]/30 shadow-[0_0_15px_rgba(124,58,237,0.1)]'
+        /* ══════════════ Desktop layout ══════════════ */
+        <>
+          {/* Desktop: always-visible search bar */}
+          <div className={`flex items-center px-4 py-2.5 rounded-xl border w-[240px] md:w-[300px] lg:w-[340px] xl:w-[400px] transition-all duration-300 ${
+            isDarkMode
+              ? 'bg-[#252429]/30 backdrop-blur-xl border-white/10 border-t-white/20 focus-within:border-[#7C3AED]/60 focus-within:shadow-[0_0_20px_rgba(124,58,237,0.2)] focus-within:bg-[#252429]/50'
+              : 'bg-white/50 backdrop-blur-xl border-white focus-within:border-[#7C3AED]/40 focus-within:shadow-[0_0_20px_rgba(124,58,237,0.15)] focus-within:bg-white/80 shadow-[0_4px_15px_rgb(0,0,0,0.02)]'
+          }`}>
+            <Search size={16} className={isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'} />
+            <input
+              type="text"
+              placeholder={placeholder || t('header.searchPlaceholder')}
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              className={`bg-transparent border-none outline-none text-sm ml-3 w-full font-medium placeholder:opacity-60 ${
+                isDarkMode ? 'text-[#D8D7D9] placeholder:text-[#888991]' : 'text-[#111113] placeholder:text-[#B0AFB4]'
               }`}
-            >
-              <Search size={16} className="text-[#7C3AED] flex-shrink-0" />
-              <input
-                ref={searchInputRef}
-                type="text"
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                placeholder={placeholder || t('header.searchPlaceholder')}
-                className={`bg-transparent border-none outline-none text-sm w-full font-medium placeholder:opacity-50 ${
-                  isDarkMode ? 'text-[#D8D7D9] placeholder:text-[#888991]' : 'text-[#111113] placeholder:text-[#B0AFB4]'
-                }`}
-              />
-              <motion.button
-                onClick={() => setSearchExpanded(false)}
-                whileTap={{ scale: 0.85 }}
-                transition={SPRING}
-                className={`p-1 rounded-lg flex-shrink-0 transition-colors ${
-                  isDarkMode ? 'text-[#888991] hover:text-white' : 'text-[#67656E] hover:text-[#111113]'
-                }`}
-              >
-                <X size={16} />
-              </motion.button>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="search-icons"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.12 }}
-              className="flex items-center gap-1"
-            >
-              <Button variant="ghost" size="icon" onClick={() => setSearchExpanded(true)}>
-                <Search size={20} />
+            />
+            {query && (
+              <button onClick={() => setQuery('')} className={`ml-1 p-0.5 rounded-md transition-colors ${isDarkMode ? 'text-[#888991] hover:text-white' : 'text-[#67656E] hover:text-[#111113]'}`}>
+                <span className="text-xs font-bold">✕</span>
+              </button>
+            )}
+          </div>
+
+          {/* Desktop actions */}
+          <div className="flex items-center gap-4">
+            <Tooltip content={t('header.themeToggle')} position="bottom">
+              <Button variant="ghost" size="icon" onClick={toggleTheme}>
+                {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
               </Button>
-              {hasFilters && (
-                <Button variant="ghost" size="icon" onClick={openFilters} className="relative">
-                  <SlidersHorizontal size={19} />
-                  {activeFilterCount > 0 && (
-                    <span className={`absolute top-1.5 right-1.5 w-2 h-2 rounded-full ${
-                      isDarkMode
-                        ? 'bg-[#7C3AED] shadow-[0_0_8px_rgba(124,58,237,0.8)]'
-                        : 'bg-[#7C3AED] shadow-[0_0_8px_rgba(124,58,237,0.6)]'
-                    }`} />
-                  )}
-                </Button>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      )}
+            </Tooltip>
 
-      {/* ── Right actions ── */}
-      <div className="flex items-center gap-2 sm:gap-4">
-        <AnimatePresence>
-          {(!searchExpanded || isDesktop) && (
-            <motion.div
-              initial={isDesktop ? false : { opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              transition={{ ...SPRING, stiffness: 500 }}
-              className="flex items-center gap-2 sm:gap-4"
-            >
-              <Tooltip content={t('header.themeToggle')} position="bottom">
-                <Button variant="ghost" size="icon" onClick={toggleTheme}>
-                  {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-                </Button>
-              </Tooltip>
+            <Tooltip content={t('header.settings')} position="bottom">
+              <Button variant="ghost" size="icon" onClick={() => navigate(ROUTES.SETTINGS)}>
+                <Settings size={20} />
+              </Button>
+            </Tooltip>
 
-              {/* Settings — desktop only */}
-              {isDesktop && (
-                <Tooltip content={t('header.settings')} position="bottom">
-                  <Button variant="ghost" size="icon" onClick={() => navigate(ROUTES.SETTINGS)}>
-                    <Settings size={20} />
-                  </Button>
-                </Tooltip>
-              )}
+            <Tooltip content={t('header.notifications')} position="bottom">
+              <Button variant="ghost" size="icon" className="relative">
+                <motion.span
+                  whileHover={{ rotate: [0, -18, 14, -10, 6, 0] }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+                  className="flex items-center justify-center"
+                >
+                  <Bell size={20} />
+                </motion.span>
+                <span className={`absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full border-[2px] ${
+                  isDarkMode
+                    ? 'bg-[#7C3AED] border-[#111113] shadow-[0_0_10px_rgba(124,58,237,0.9)]'
+                    : 'bg-red-500 border-white shadow-[0_0_10px_rgba(239,68,68,0.6)]'
+                }`} />
+              </Button>
+            </Tooltip>
 
-              <Tooltip content={t('header.notifications')} position="bottom">
-                <Button variant="ghost" size="icon" className="relative">
-                  <motion.span
-                    whileHover={{ rotate: [0, -18, 14, -10, 6, 0] }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-                    className="flex items-center justify-center"
-                  >
-                    <Bell size={20} />
-                  </motion.span>
-                  <span className={`absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full border-[2px] ${
+            {branchSelector}
+          </div>
+        </>
+      ) : (
+        /* ══════════════ Mobile layout ══════════════ */
+        <>
+          {/* Brand + expandable search */}
+          <div className="flex items-center gap-2.5 flex-1 min-w-0 mr-3">
+            <ZwapIsotipo isDarkMode={isDarkMode} className="h-7 flex-shrink-0" />
+            <AnimatePresence initial={false} mode="wait">
+              {searchExpanded ? (
+                <motion.div
+                  key="search-bar"
+                  initial={{ opacity: 0, filter: 'blur(4px)', x: -8 }}
+                  animate={{ opacity: 1, filter: 'blur(0px)', x: 0 }}
+                  exit={{ opacity: 0, filter: 'blur(4px)', x: -8 }}
+                  transition={SPRING}
+                  className={`flex-1 min-w-0 flex items-center gap-2 px-3 py-2 rounded-xl border overflow-hidden ${
                     isDarkMode
-                      ? 'bg-[#7C3AED] border-[#111113] shadow-[0_0_10px_rgba(124,58,237,0.9)]'
-                      : 'bg-red-500 border-white shadow-[0_0_10px_rgba(239,68,68,0.6)]'
-                  }`} />
-                </Button>
-              </Tooltip>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                      ? 'bg-[#252429]/50 backdrop-blur-xl border-[#7C3AED]/40 shadow-[0_0_15px_rgba(124,58,237,0.15)]'
+                      : 'bg-white/70 backdrop-blur-xl border-[#7C3AED]/30 shadow-[0_0_15px_rgba(124,58,237,0.1)]'
+                  }`}
+                >
+                  <Search size={16} className="text-[#7C3AED] flex-shrink-0" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={query}
+                    onChange={e => setQuery(e.target.value)}
+                    placeholder={placeholder || t('header.searchPlaceholder')}
+                    className={`bg-transparent border-none outline-none text-sm w-full font-medium placeholder:opacity-50 ${
+                      isDarkMode ? 'text-[#D8D7D9] placeholder:text-[#888991]' : 'text-[#111113] placeholder:text-[#B0AFB4]'
+                    }`}
+                  />
+                  <motion.button
+                    onClick={() => setSearchExpanded(false)}
+                    whileTap={{ scale: 0.85 }}
+                    transition={SPRING}
+                    className={`p-1 rounded-lg flex-shrink-0 transition-colors ${
+                      isDarkMode ? 'text-[#888991] hover:text-white' : 'text-[#67656E] hover:text-[#111113]'
+                    }`}
+                  >
+                    <X size={16} />
+                  </motion.button>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="wordmark"
+                  variants={WORDMARK_VARIANTS}
+                  initial="hidden" animate="show" exit="exit"
+                >
+                  <ZwapWordmark isDarkMode={isDarkMode} className="h-[18px]" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
-        {/* Branch selector — always visible */}
-        {branchSelector}
-      </div>
+          {/* Mobile actions */}
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <AnimatePresence>
+              {!searchExpanded && (
+                <motion.div
+                  key="search-filter-icons"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  transition={{ ...SPRING, stiffness: 500 }}
+                  className="flex items-center gap-1"
+                >
+                  <Button variant="ghost" size="icon" onClick={() => setSearchExpanded(true)}>
+                    <Search size={20} />
+                  </Button>
+                  {hasFilters && (
+                    <Button variant="ghost" size="icon" onClick={openFilters} className="relative">
+                      <SlidersHorizontal size={19} />
+                      {activeFilterCount > 0 && (
+                        <span className={`absolute top-1.5 right-1.5 w-2 h-2 rounded-full ${
+                          isDarkMode
+                            ? 'bg-[#7C3AED] shadow-[0_0_8px_rgba(124,58,237,0.8)]'
+                            : 'bg-[#7C3AED] shadow-[0_0_8px_rgba(124,58,237,0.6)]'
+                        }`} />
+                      )}
+                    </Button>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+            {branchSelector}
+          </div>
+        </>
+      )}
     </header>
   )
 }

@@ -40,7 +40,9 @@
     "myWallet": "My Wallet",
     "logout": "Log Out",
     "moreOptions": "More options",
-    "moreShort": "More"
+    "moreShort": "More",
+    "theme": "Theme",
+    "notifications": "Alerts"
   },
 
   "header": {
@@ -166,7 +168,7 @@
 
   "links": {
     "title": "Payment Links",
-    "createLink": "Create Reservation Link",
+    "createLink": "New Reservation Link",
     "generateLink": "Generate Reservation Link",
     "searchPlaceholder": "Search by client or ID...",
     "viewQr": "View QR code",
