@@ -1,5 +1,7 @@
 # Zwap Frontend — Prism
 
+> **v0.9.1** · [Changelog](./CHANGELOG.md)
+
 Panel de administración para la plataforma de pagos Zwap. Construido con React + Vite, diseño Glassmorphism, arquitectura Bulletproof React.
 
 ## Stack
@@ -139,3 +141,13 @@ La app está diseñada para sentirse nativa tanto en desktop como en mobile:
 - **Sin selección de texto:** `user-select: none` global con excepciones para inputs, tablas y código
 - **Toasts responsivos:** Centrados abajo en mobile (sobre BottomNav), esquina inferior derecha en desktop; mensajes más cortos en mobile
 - **PageHeader oculto en mobile:** Los títulos de sección se ocultan en mobile ya que BottomNav provee el contexto; las vistas con botón de acción muestran un botón full-width separado en mobile
+
+## Versionamiento
+
+El proyecto usa [Semantic Versioning](https://semver.org/lang/es/) (`MAJOR.MINOR.PATCH`):
+
+- **MAJOR** — release a producción / cambios que rompen compatibilidad
+- **MINOR** — features nuevas, vistas, integraciones
+- **PATCH** — bug fixes, ajustes visuales, refactors, parches de seguridad
+
+Los parches de seguridad se identifican con la sección `### Security` en el [CHANGELOG](./CHANGELOG.md). Mientras la versión sea `0.x.x`, el proyecto está en pre-release.

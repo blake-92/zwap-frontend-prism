@@ -752,6 +752,27 @@ En mobile, LiveFeed usa un patrón de ticker de una línea por transacción con 
 - **Touch feedback:** `active:opacity-70 transition-opacity cursor-pointer`.
 - **Máximo 4 transacciones** — `TRANSACTIONS.slice(0, 4)`.
 
+## Versionamiento
+
+Semantic Versioning (`MAJOR.MINOR.PATCH`):
+
+| Segmento | Cuándo incrementar |
+|---|---|
+| **MAJOR** | Release a producción, cambio que rompe compatibilidad |
+| **MINOR** | Feature nueva, vista nueva, integración de API |
+| **PATCH** | Bug fix, ajuste visual, refactor, parche de seguridad |
+
+- La versión actual está en `package.json` → campo `version`
+- El historial de cambios está en `CHANGELOG.md` (formato [Keep a Changelog](https://keepachangelog.com/))
+- Los parches de seguridad se documentan bajo la sección `### Security` en el CHANGELOG
+- Mientras `MAJOR` sea `0`, el proyecto está en pre-release (alpha/beta)
+
+Al hacer un release:
+1. Actualizar `version` en `package.json`
+2. Agregar entrada en `CHANGELOG.md` con fecha y secciones (Added/Changed/Fixed/Security/Removed)
+3. Commit: `chore: bump version to X.Y.Z`
+4. Tag: `git tag vX.Y.Z`
+
 ## No hacer
 
 - No crear CSS modules ni archivos `.css` — Tailwind inline únicamente
