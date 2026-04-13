@@ -3,8 +3,7 @@ import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import Button from './Button'
-
-const SPRING = { type: 'spring', stiffness: 300, damping: 24 }
+import { SPRING_SOFT as SPRING } from '@/shared/utils/springs'
 
 /**
  * EmptySearchState — fila de estado vacío para tablas con búsqueda.

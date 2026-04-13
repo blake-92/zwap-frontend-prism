@@ -162,33 +162,45 @@ Nunca usar clases `dark:` de Tailwind — el modo se controla vía `isDarkMode`.
 
 ### Glassmorphism
 
-Patrón estándar para cards y paneles:
+Patrón estándar para cards y paneles. Los helpers reutilizables están en `src/shared/utils/cardClasses.js`:
 
-```jsx
-// Dark
-'bg-[#252429]/40 backdrop-blur-md border border-white/10'
+```js
+import { getCardClasses, getModalGlass, getDropdownGlass } from '@/shared/utils/cardClasses'
 
-// Light
-'bg-white/60 backdrop-blur-md border border-white shadow-sm'
+getCardClasses(isDarkMode)       // Cards y SwipeableCard
+getModalGlass(isDarkMode)        // Modales (Modal, modales custom)
+getDropdownGlass(isDarkMode)     // Dropdowns y popovers
 ```
+
+Para variantes contextuales (search bar, tooltip, toolbar) se usan clases inline porque sus opacidades y blur son específicos.
 
 ## Animaciones — Framer Motion
 
 Spring es el paradigma principal. Nunca usar `ease` o `tween` en interacciones de UI.
 
+**Excepción:** animaciones decorativas de loop infinito (ej. shimmer de `Skeleton`) pueden usar `ease`/`tween` porque spring no tiene sentido semántico en repeticiones continuas.
+
 ### Constantes spring
 
-Cada componente de layout define su propio `SPRING` local ajustado a su caso de uso. Valores típicos:
+Las constantes spring están centralizadas en `src/shared/utils/springs.js`. Importar desde ahí en vez de definir `SPRING` local:
 
 ```js
-// motionVariants.js — stagger items
-{ type: 'spring', stiffness: 300, damping: 24 }
+import { SPRING } from '@/shared/utils/springs'           // UI default (400/30)
+import { SPRING_SIDEBAR } from '@/shared/utils/springs'    // Sidebar (380/42, critically damped)
+import { SPRING_SOFT } from '@/shared/utils/springs'       // Stagger items (300/24, más suave)
+```
 
-// Sidebar — collapse/expand (critically damped, sin rebote)
+Valores:
+
+```js
+// SPRING — interacciones de UI, dropdowns, modales, botones
+{ type: 'spring', stiffness: 400, damping: 30 }
+
+// SPRING_SIDEBAR — collapse/expand (critically damped, sin rebote)
 { type: 'spring', stiffness: 380, damping: 42 }
 
-// AppShell — toggle button
-{ type: 'spring', stiffness: 400, damping: 30 }
+// SPRING_SOFT — entradas de lista, stagger items
+{ type: 'spring', stiffness: 300, damping: 24 }
 ```
 
 ### Variantes compartidas (motionVariants.js)

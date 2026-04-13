@@ -11,8 +11,8 @@ import { Button, Tooltip } from '@/shared/ui'
 import { BRANCHES } from '@/services/mocks/mockData'
 import ZwapIsotipo  from '@/shared/brand/ZwapIsotipo'
 import ZwapWordmark from '@/shared/brand/ZwapWordmark'
-
-const SPRING = { type: 'spring', stiffness: 400, damping: 30 }
+import { SPRING } from '@/shared/utils/springs'
+import { getDropdownGlass } from '@/shared/utils/cardClasses'
 
 const WORDMARK_VARIANTS = {
   hidden: { opacity: 0, filter: 'blur(4px)', x: -8 },
@@ -115,10 +115,8 @@ export default function Header({ selectedBranch, onBranchChange, isDesktop }) {
             animate="visible"
             exit="exit"
             style={{ transformOrigin: 'top right' }}
-            className={`absolute right-0 mt-4 w-56 rounded-2xl z-50 overflow-hidden border shadow-2xl ${
-              isDarkMode
-                ? 'bg-[#252429]/95 backdrop-blur-3xl border-white/20 shadow-[0_40px_80px_rgba(0,0,0,0.9)]'
-                : 'bg-white/95 backdrop-blur-3xl border-white/80 shadow-[0_40px_80px_rgba(0,0,0,0.15)]'
+            className={`absolute right-0 mt-4 w-56 rounded-2xl z-50 overflow-hidden ${
+              getDropdownGlass(isDarkMode)
             }`}
           >
             <div className="p-2 flex flex-col gap-0.5">

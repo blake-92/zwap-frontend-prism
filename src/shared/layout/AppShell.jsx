@@ -9,8 +9,7 @@ import useMediaQuery from '@/shared/hooks/useMediaQuery'
 import Sidebar   from './Sidebar'
 import Header    from './Header'
 import BottomNav from './BottomNav'
-
-const SPRING = { type: 'spring', stiffness: 400, damping: 30 }
+import { SPRING } from '@/shared/utils/springs'
 
 export default function AppShell() {
   const { isDarkMode }      = useTheme()

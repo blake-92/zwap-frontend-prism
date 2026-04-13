@@ -9,8 +9,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { ROUTES } from '@/router/routes'
-
-const SPRING = { type: 'spring', stiffness: 400, damping: 30 }
+import { SPRING } from '@/shared/utils/springs'
 
 const backdropVariants = {
   hidden:  { opacity: 0 },

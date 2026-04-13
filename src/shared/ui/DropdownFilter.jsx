@@ -6,8 +6,7 @@ import { useTheme } from '@/shared/context/ThemeContext'
 import useMediaQuery from '@/shared/hooks/useMediaQuery'
 import Button from './Button'
 import BottomSheet from './BottomSheet'
-
-const SPRING = { type: 'spring', stiffness: 400, damping: 30 }
+import { SPRING } from '@/shared/utils/springs'
 
 const panelVariants = {
   hidden:  { opacity: 0, scale: 0.95, y: -4 },

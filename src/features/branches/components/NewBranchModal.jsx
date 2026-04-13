@@ -4,8 +4,8 @@ import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Button, Input } from '@/shared/ui'
-
-const SPRING = { type: 'spring', stiffness: 400, damping: 30 }
+import { SPRING } from '@/shared/utils/springs'
+import { getModalGlass } from '@/shared/utils/cardClasses'
 
 export default function NewBranchModal({ onClose }) {
   const { isDarkMode } = useTheme()
@@ -87,10 +87,8 @@ export default function NewBranchModal({ onClose }) {
           scale: SPRING,
           y: SPRING,
         }}
-        className={`relative w-full max-w-[480px] rounded-t-[24px] sm:rounded-[24px] border overflow-hidden shadow-2xl max-h-[95vh] sm:max-h-[90vh] ${
-        isDarkMode
-          ? 'bg-[#252429]/80 backdrop-blur-3xl border-white/20 border-t-white/30'
-          : 'bg-white/90 backdrop-blur-3xl border-white shadow-[0_20px_60px_rgba(0,0,0,0.15)]'
+        className={`relative w-full max-w-[480px] rounded-t-[24px] sm:rounded-[24px] overflow-hidden max-h-[95vh] sm:max-h-[90vh] ${
+        getModalGlass(isDarkMode)
       }`}>
 
         {/* Header */}

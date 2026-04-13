@@ -1,11 +1,15 @@
 /**
- * getCardClasses — Prism UI
+ * Glass classes — Prism UI
  *
- * Clases base del glass card de Prism. Usado por `Card` y `SwipeableCard`
- * para mantener un único origen de verdad del estilo glass.
- *
+ * Origen centralizado de los patrones glassmorphism del design system.
+ * Variantes más específicas (search bar, tooltip) se definen inline
+ * porque sus opacidades y blur son contextuales.
+ */
+
+/**
+ * Card glass — usado por Card y SwipeableCard.
  * @param {boolean} isDarkMode
- * @param {boolean} [hoverEffect=false] — aplica elevación + sombra reforzada en hover
+ * @param {boolean} [hoverEffect=false]
  */
 export function getCardClasses(isDarkMode, hoverEffect = false) {
   const base = isDarkMode
@@ -20,3 +24,13 @@ export function getCardClasses(isDarkMode, hoverEffect = false) {
 
   return { base, hover }
 }
+
+/** Modal panel glass — usado por Modal y modales custom. */
+export const getModalGlass = (isDarkMode) => isDarkMode
+  ? 'bg-[#252429]/80 backdrop-blur-3xl border border-white/20 border-t-white/30 shadow-[0_40px_80px_rgba(0,0,0,0.9)]'
+  : 'bg-white/80 backdrop-blur-3xl border border-white/80 shadow-[0_40px_80px_rgba(0,0,0,0.15)]'
+
+/** Dropdown/popover panel glass — usado por selectores y filtros. */
+export const getDropdownGlass = (isDarkMode) => isDarkMode
+  ? 'bg-[#252429]/95 backdrop-blur-3xl border border-white/20 shadow-[0_40px_80px_rgba(0,0,0,0.9)]'
+  : 'bg-white/95 backdrop-blur-3xl border border-white/80 shadow-[0_40px_80px_rgba(0,0,0,0.15)]'

@@ -3,6 +3,7 @@ import { X } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useTheme } from '@/shared/context/ThemeContext'
 import useMediaQuery from '@/shared/hooks/useMediaQuery'
+import { getModalGlass } from '@/shared/utils/cardClasses'
 import Button from './Button'
 
 /**
@@ -147,10 +148,8 @@ export default function Modal({
         aria-modal="true"
         aria-labelledby="modal-title"
         style={{ maxWidth }}
-        className={`relative w-full flex flex-col rounded-t-[24px] sm:rounded-[24px] border overflow-hidden shadow-2xl max-h-[95vh] sm:max-h-[90vh] pb-[env(safe-area-inset-bottom)] sm:pb-0 ${
-          isDarkMode
-            ? 'bg-[#252429]/80 backdrop-blur-3xl border-white/20 border-t-white/30'
-            : 'bg-white/90 backdrop-blur-3xl border-white shadow-[0_20px_60px_rgba(0,0,0,0.15)]'
+        className={`relative w-full flex flex-col rounded-t-[24px] sm:rounded-[24px] overflow-hidden max-h-[95vh] sm:max-h-[90vh] pb-[env(safe-area-inset-bottom)] sm:pb-0 ${
+          getModalGlass(isDarkMode)
         } ${className}`}
       >
         {/* Handle bar mobile */}

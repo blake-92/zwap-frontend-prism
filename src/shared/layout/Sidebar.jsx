@@ -13,6 +13,7 @@ import ZwapWordmark from '@/shared/brand/ZwapWordmark'
 import { ROUTES }  from '@/router/routes'
 import { Avatar } from '@/shared/ui'
 import { CURRENT_USER, WALLET_BALANCE } from '@/services/mocks/mockData'
+import { SPRING_SIDEBAR as SPRING } from '@/shared/utils/springs'
 
 const NAV_ITEMS = [
   { id: 'dashboard',     labelKey: 'nav.dashboard',     icon: LayoutDashboard, route: ROUTES.DASHBOARD    },
@@ -22,8 +23,6 @@ const NAV_ITEMS = [
   { id: 'usuarios',      labelKey: 'nav.users',         icon: Users,           route: ROUTES.USERS        },
   { id: 'sucursales',    labelKey: 'nav.branches',      icon: Building2,       route: ROUTES.BRANCHES     },
 ]
-
-const SPRING = { type: 'spring', stiffness: 380, damping: 42 }
 
 // Liquid label reveal: blur + slide spring con delay para esperar al sidebar
 const LABEL_VARIANTS = {

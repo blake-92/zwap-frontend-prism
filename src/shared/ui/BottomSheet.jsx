@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '@/shared/context/ThemeContext'
+import { SPRING } from '@/shared/utils/springs'
 
 /**
  * BottomSheet — Prism UI
@@ -19,7 +20,6 @@ import { useTheme } from '@/shared/context/ThemeContext'
  *   title     string?  — título opcional renderizado sobre el contenido
  *   children  node     — contenido del sheet
  */
-const SPRING = { type: 'spring', stiffness: 400, damping: 30 }
 
 const sheetVariants = {
   hidden:  { y: '100%' },
