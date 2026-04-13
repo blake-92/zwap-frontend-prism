@@ -154,15 +154,16 @@ Toda superficie sigue la fórmula:
 
 ### 3.4 Modal
 
+Centralizado en `getModalGlass(isDarkMode)` de `src/shared/utils/cardClasses.js`:
+
 ```jsx
-// Contenedor modal
 // Dark
-'bg-[#252429]/80 backdrop-blur-3xl border-white/20 border-t-white/30 shadow-2xl'
+'bg-[#252429]/80 backdrop-blur-3xl border border-white/20 border-t-white/30 shadow-[0_40px_80px_rgba(0,0,0,0.9)]'
 
 // Light
-'bg-white/90 backdrop-blur-3xl border-white shadow-[0_20px_60px_rgba(0,0,0,0.15)]'
+'bg-white/80 backdrop-blur-3xl border border-white/80 shadow-[0_40px_80px_rgba(0,0,0,0.15)]'
 
-// Siempre: rounded-[24px] border overflow-hidden
+// Siempre: rounded-[24px] overflow-hidden
 // Entrada: motion spring — ver sección 11.3
 ```
 
@@ -184,14 +185,16 @@ Toda superficie sigue la fórmula:
 
 ### 3.6 Dropdown / Popover
 
+Centralizado en `getDropdownGlass(isDarkMode)` de `src/shared/utils/cardClasses.js`:
+
 ```jsx
 // Dark
-'bg-[#252429]/95 backdrop-blur-3xl border-white/20 shadow-[0_40px_80px_rgba(0,0,0,0.9)]'
+'bg-[#252429]/95 backdrop-blur-3xl border border-white/20 shadow-[0_40px_80px_rgba(0,0,0,0.9)]'
 
 // Light
-'bg-white/95 backdrop-blur-xl border-gray-200 shadow-[0_40px_80px_rgba(0,0,0,0.15)]'
+'bg-white/95 backdrop-blur-3xl border border-white/80 shadow-[0_40px_80px_rgba(0,0,0,0.15)]'
 
-// Siempre: rounded-2xl border overflow-hidden
+// Siempre: rounded-2xl overflow-hidden
 // Entrada: motion spring — ver sección 11.4
 ```
 
@@ -540,12 +543,19 @@ Toda superficie sigue la fórmula:
 ```
 GlassBackground (fixed, z-0)
 └── AppShell (min-h-screen flex)
-    ├── Sidebar (w-64 h-screen z-20)
+    ├── Sidebar (w-64 h-screen z-20) — solo ≥ lg (1024px)
+    ├── BottomNav (fixed bottom z-40) — solo < lg
     └── Main column (flex-1 flex flex-col h-screen overflow-hidden z-10)
-        ├── Header (h-20 z-50)
-        └── <main> (flex-1 overflow-auto p-8 xl:p-10 pb-16 xl:pb-24)
-            └── <div> max-w-[1400px] mx-auto
+        ├── Header (h-16 lg:h-20 z-50)
+        │   ├── Desktop: search bar inline + branch dropdown + acciones
+        │   └── Mobile: isotipo + wordmark/search + branch pill + search/filter icons
+        └── <main> (flex-1 overflow-auto p-4 sm:p-6 lg:p-8 xl:p-10 pb-28 lg:pb-16)
+            └── <div> max-w-[1400px] 2xl:max-w-[1600px] mx-auto
 ```
+
+**Header mobile:** muestra isotipo Zwap + wordmark animado (blur reveal con `AnimatePresence`). Al expandir búsqueda, el wordmark se reemplaza por la barra de búsqueda con spring. El selector de sucursales es un pill circular que abre un bottom sheet vía `createPortal`. Filtros e íconos de acción se ocultan cuando la búsqueda está expandida.
+
+**BottomNav:** 4 tabs fijos (Dashboard, Transacciones, Links, Liquidaciones) + botón "Más" que abre sheet con opciones secundarias (Sucursales, Usuarios, Wallet, Configuración, toggle de tema, alertas).
 
 ### 7.2 Grid de KPIs
 
@@ -835,26 +845,33 @@ Prism UI usa **Framer Motion** como sistema de animación principal. Las animaci
 
 ### 11.1 Sistema Spring — Constantes
 
-Todas las animaciones de interacción usan spring, no ease. Cada componente declara su `SPRING` local ajustado a su caso:
+Todas las animaciones de interacción usan spring, no ease. Las constantes principales están centralizadas en `src/shared/utils/springs.js`:
 
 ```js
-// motionVariants.js — stagger items (tablas, cards)
-{ type: 'spring', stiffness: 300, damping: 24 }
+// springs.js — constantes compartidas
+export const SPRING         = { type: 'spring', stiffness: 400, damping: 30 }  // default (botones, toggles, paneles)
+export const SPRING_SIDEBAR = { type: 'spring', stiffness: 380, damping: 42 }  // sidebar collapse (critically damped)
+export const SPRING_SOFT    = { type: 'spring', stiffness: 300, damping: 24 }  // stagger items (tablas, cards)
+```
 
-// Sidebar — collapse/expand (critically damped, sin rebote)
-{ type: 'spring', stiffness: 380, damping: 42 }
+Importar desde `@/shared/utils/springs`:
+```js
+import { SPRING } from '@/shared/utils/springs'
+import { SPRING_SIDEBAR } from '@/shared/utils/springs'
+import { SPRING_SOFT } from '@/shared/utils/springs'
+```
 
-// AppShell toggle, buttons — interacciones rápidas
-{ type: 'spring', stiffness: 400, damping: 30 }
+Otras constantes locales que no se centralizan:
 
+```js
 // DropdownFilter panel — apertura de paneles
 { type: 'spring', stiffness: 500, damping: 30 }
 
-// pageVariants — page entry
+// pageVariants — page entry (en motionVariants.js)
 { type: 'spring', stiffness: 260, damping: 26 }
 ```
 
-Estas constantes se declaran al nivel del módulo (fuera del componente) para evitar re-creaciones.
+Las constantes centralizadas se importan a nivel de módulo. Los componentes de layout (Sidebar, AppShell, Header, BottomNav, Modal, BottomSheet, DropdownFilter, EmptySearchState) ya usan `springs.js`.
 
 ---
 
@@ -1177,9 +1194,13 @@ function MiComponente() {
 
 | Breakpoint | Uso principal |
 |---|---|
-| `md` | Sidebar visible, grids de 2 col, modal split vertical→horizontal |
-| `lg` | Grids de 3 col (dashboard, liquidaciones, saldo) |
-| `xl` | Grid de 4 col (KPIs), padding mayor (`xl:p-10`, `xl:pb-24`), texto largo en tablas |
+| `sm` (640px) | Modal centered vs bottom-sheet, padding responsivo (`px-5→px-8`), grids `grid-cols-2` en formularios |
+| `md` (768px) | Grids de 2 col en KPIs/cards, modal split vertical→horizontal |
+| `lg` (1024px) | **Principal:** Sidebar vs BottomNav, tabla vs cards mobile, grids de 3 col, `hidden lg:block` / `lg:hidden` |
+| `xl` (1280px) | Grid de 4 col (KPIs), padding mayor (`xl:p-10`), texto largo en tablas |
+| `2xl` (1536px) | Max-width de contenido `2xl:max-w-[1600px]`, padding `2xl:p-12` |
+
+**Breakpoint principal:** `lg: 1024px` — switch entre Sidebar (desktop) y BottomNav (mobile/tablet). Hook: `useMediaQuery('(min-width: 1024px)')`.
 
 ---
 
