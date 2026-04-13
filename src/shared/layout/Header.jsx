@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useId } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, Moon, Sun, Bell, ChevronDown, Building2, Settings, SlidersHorizontal, X } from 'lucide-react'
+import { Search, Moon, Sun, Bell, ChevronDown, Building2, Settings, SlidersHorizontal, X, Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { useHeaderSearch } from '@/shared/context/ViewSearchContext'
@@ -27,12 +28,25 @@ const panelVariants = {
   exit:    { opacity: 0, scale: 0.95, y: -4,  transition: { type: 'spring', stiffness: 500, damping: 30 } },
 }
 
+const sheetBackdropVariants = {
+  hidden:  { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.15 } },
+  exit:    { opacity: 0, transition: { duration: 0.15 } },
+}
+
+const sheetVariants = {
+  hidden:  { y: '100%' },
+  visible: { y: 0, transition: SPRING },
+  exit:    { y: '100%', transition: { type: 'spring', stiffness: 400, damping: 36 } },
+}
+
 export default function Header({ selectedBranch, onBranchChange, isDesktop }) {
   const { t } = useTranslation()
   const { isDarkMode, toggleTheme } = useTheme()
   const { query, setQuery, placeholder, hasFilters, openFilters, activeFilterCount } = useHeaderSearch()
   const navigate                    = useNavigate()
   const [menuOpen, setMenuOpen]     = useState(false)
+  const [branchSheetOpen, setBranchSheetOpen] = useState(false)
   const [searchExpanded, setSearchExpanded] = useState(false)
   const menuRef                     = useRef(null)
   const searchInputRef              = useRef(null)
@@ -46,6 +60,14 @@ export default function Header({ selectedBranch, onBranchChange, isDesktop }) {
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
+  // Lock scroll when branch sheet is open
+  useEffect(() => {
+    if (!branchSheetOpen) return
+    const original = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = original }
+  }, [branchSheetOpen])
+
   // Auto-focus search input when expanded
   useEffect(() => {
     if (searchExpanded) {
@@ -54,15 +76,15 @@ export default function Header({ selectedBranch, onBranchChange, isDesktop }) {
     }
   }, [searchExpanded])
 
-  /* ── Branch selector (shared between normal & search-expanded modes) ── */
-  const branchSelector = (
+  /* ── Desktop: branch dropdown ── */
+  const desktopBranchSelector = (
     <div ref={menuRef} className="relative">
       <button
         onClick={() => setMenuOpen(v => !v)}
         onKeyDown={e => { if (e.key === 'Escape') setMenuOpen(false) }}
         aria-haspopup="listbox"
         aria-expanded={menuOpen}
-        className={`flex items-center gap-2 sm:gap-3 cursor-pointer pl-3 sm:pl-6 border-l h-10 transition-colors select-none ${
+        className={`flex items-center gap-3 cursor-pointer pl-6 border-l h-10 transition-colors select-none ${
           isDarkMode ? 'border-white/10' : 'border-black/5'
         }`}
       >
@@ -73,12 +95,9 @@ export default function Header({ selectedBranch, onBranchChange, isDesktop }) {
         }`}>
           {selectedBranch.charAt(0)}
         </div>
-        {/* Branch name — hidden on small screens and when search is expanded */}
-        {(!searchExpanded || isDesktop) && (
-          <span className={`text-sm font-semibold hidden sm:inline ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`}>
-            {selectedBranch}
-          </span>
-        )}
+        <span className={`text-sm font-semibold ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`}>
+          {selectedBranch}
+        </span>
         <motion.span
           animate={{ rotate: menuOpen ? 180 : 0 }}
           transition={SPRING}
@@ -136,7 +155,23 @@ export default function Header({ selectedBranch, onBranchChange, isDesktop }) {
     </div>
   )
 
+  /* ── Mobile: branch pill (opens bottom sheet) ── */
+  const mobileBranchPill = (
+    <button
+      onClick={() => setBranchSheetOpen(true)}
+      aria-label={t('nav.branches')}
+      className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0 transition-all ${
+        isDarkMode
+          ? 'bg-[#7C3AED]/15 backdrop-blur-xl border border-[#7C3AED]/40 text-[#7C3AED] shadow-[0_0_15px_rgba(124,58,237,0.2)]'
+          : 'bg-white/90 border border-white shadow-md text-[#7C3AED] backdrop-blur-xl'
+      }`}
+    >
+      {selectedBranch.charAt(0)}
+    </button>
+  )
+
   return (
+  <>
     <header className={`relative z-50 h-16 lg:h-20 flex items-center justify-between px-4 sm:px-6 lg:px-10 flex-shrink-0 transition-all duration-500 ${
       isDarkMode
         ? 'bg-[#111113]/20 backdrop-blur-2xl border-b border-white/10'
@@ -200,14 +235,14 @@ export default function Header({ selectedBranch, onBranchChange, isDesktop }) {
               </Button>
             </Tooltip>
 
-            {branchSelector}
+            {desktopBranchSelector}
           </div>
         </>
       ) : (
         /* ══════════════ Mobile layout ══════════════ */
         <>
           {/* Brand + expandable search */}
-          <div className="flex items-center gap-2.5 flex-1 min-w-0 mr-3">
+          <div className="flex items-center flex-1 min-w-0 mr-3">
             <ZwapIsotipo isDarkMode={isDarkMode} className="h-7 flex-shrink-0" />
             <AnimatePresence initial={false} mode="wait">
               {searchExpanded ? (
@@ -217,7 +252,7 @@ export default function Header({ selectedBranch, onBranchChange, isDesktop }) {
                   animate={{ opacity: 1, filter: 'blur(0px)', x: 0 }}
                   exit={{ opacity: 0, filter: 'blur(4px)', x: -8 }}
                   transition={SPRING}
-                  className={`flex-1 min-w-0 flex items-center gap-2 px-3 py-2 rounded-xl border overflow-hidden ${
+                  className={`flex-1 min-w-0 flex items-center gap-2 ml-2 px-3 py-2 rounded-xl border overflow-hidden ${
                     isDarkMode
                       ? 'bg-[#252429]/50 backdrop-blur-xl border-[#7C3AED]/40 shadow-[0_0_15px_rgba(124,58,237,0.15)]'
                       : 'bg-white/70 backdrop-blur-xl border-[#7C3AED]/30 shadow-[0_0_15px_rgba(124,58,237,0.1)]'
@@ -250,6 +285,7 @@ export default function Header({ selectedBranch, onBranchChange, isDesktop }) {
                   key="wordmark"
                   variants={WORDMARK_VARIANTS}
                   initial="hidden" animate="show" exit="exit"
+                  className="-ml-[2.4px]"
                 >
                   <ZwapWordmark isDarkMode={isDarkMode} className="h-[18px]" />
                 </motion.div>
@@ -287,10 +323,93 @@ export default function Header({ selectedBranch, onBranchChange, isDesktop }) {
                 </motion.div>
               )}
             </AnimatePresence>
-            {branchSelector}
+            {mobileBranchPill}
           </div>
         </>
       )}
+
     </header>
+
+    {/* ── Mobile: branch bottom sheet (portal to body to escape stacking contexts) ── */}
+    {createPortal(
+      <>
+        <AnimatePresence>
+          {branchSheetOpen && (
+            <motion.div
+              key="branch-backdrop"
+              variants={sheetBackdropVariants}
+              initial="hidden" animate="visible" exit="exit"
+              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+              onClick={() => setBranchSheetOpen(false)}
+            />
+          )}
+        </AnimatePresence>
+        <AnimatePresence>
+          {branchSheetOpen && (
+            <motion.div
+              key="branch-sheet"
+              variants={sheetVariants}
+              initial="hidden" animate="visible" exit="exit"
+              drag="y"
+              dragConstraints={{ top: 0 }}
+              dragElastic={0.2}
+              onDragEnd={(e, info) => {
+                if (info.offset.y > 100 || info.velocity.y > 500) setBranchSheetOpen(false)
+              }}
+              className={`fixed bottom-0 inset-x-0 z-50 rounded-t-2xl border-t pb-[env(safe-area-inset-bottom)] ${
+                isDarkMode
+                  ? 'bg-[#1A1A1D] border-white/10'
+                  : 'bg-white border-black/5 shadow-[0_-8px_40px_rgba(0,0,0,0.1)]'
+              }`}
+            >
+              {/* Drag handle */}
+              <div className="flex justify-center py-3">
+                <div className={`w-10 h-1 rounded-full ${isDarkMode ? 'bg-white/20' : 'bg-black/10'}`} />
+              </div>
+
+              {/* Title */}
+              <h3 className={`px-5 pb-2 text-sm font-bold opacity-50 ${isDarkMode ? 'text-white' : 'text-black'}`}>
+                {t('nav.branches')}
+              </h3>
+
+              {/* Branch list */}
+              <div className="px-4 pb-6 flex flex-col gap-1">
+                {BRANCHES.map(branch => {
+                  const isSelected = selectedBranch === branch
+                  return (
+                    <button
+                      key={branch}
+                      onClick={() => { onBranchChange(branch); setBranchSheetOpen(false) }}
+                      className={`relative w-full text-left px-4 py-3.5 rounded-xl text-[15px] font-medium flex items-center gap-3 transition-colors ${
+                        isSelected
+                          ? isDarkMode ? 'text-white' : 'text-[#561BAF]'
+                          : isDarkMode ? 'text-[#888991] active:bg-white/5' : 'text-[#67656E] active:bg-black/5'
+                      }`}
+                    >
+                      {isSelected && (
+                        <motion.div
+                          layoutId="branch-sheet-pill"
+                          className={`absolute inset-0 rounded-xl ${
+                            isDarkMode ? 'bg-[#7C3AED]/15' : 'bg-[#DBD3FB]/40'
+                          }`}
+                          transition={SPRING}
+                        />
+                      )}
+                      <Building2 size={18} className={`relative z-10 ${isSelected ? 'text-[#7C3AED]' : 'opacity-50'}`} />
+                      <span className="relative z-10 flex-1">{branch}</span>
+                      {isSelected && (
+                        <Check size={18} className="relative z-10 text-[#7C3AED]" />
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </>,
+      document.body
+    )}
+  </>
   )
 }

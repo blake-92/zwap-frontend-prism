@@ -74,7 +74,7 @@ export default function Sidebar({ isCollapsed }) {
               initial="hidden"
               animate="show"
               exit="exit"
-              className="overflow-hidden ml-2.5"
+              className="overflow-hidden -ml-[2.4px]"
             >
               <ZwapWordmark isDarkMode={isDarkMode} className="h-[18px]" />
             </motion.div>
