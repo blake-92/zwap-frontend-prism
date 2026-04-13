@@ -74,11 +74,17 @@ export default function UsuariosView() {
   return (
     <motion.div variants={pageVariants} initial="hidden" animate="show">
 
-      <PageHeader title={t('users.title')} description={t('users.description')}>
+      <PageHeader title={t('users.title')}>
         <Button onClick={() => setNewUserOpen(true)}>
           <UserPlus size={18} /> {t('users.newUser')}
         </Button>
       </PageHeader>
+
+      <div className="sm:hidden mb-6">
+        <Button size="lg" className="w-full" onClick={() => setNewUserOpen(true)}>
+          <UserPlus size={18} /> {t('users.newUser')}
+        </Button>
+      </div>
 
       <TableToolbar
         onReset={filtersActive > 0 ? resetFilters : undefined}

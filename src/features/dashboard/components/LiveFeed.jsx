@@ -1,17 +1,12 @@
-import { motion } from 'framer-motion'
-import { ArrowRight, Clock, CreditCard } from 'lucide-react'
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ArrowRight, CreditCard } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Card, Button, Badge, CardHeader } from '@/shared/ui'
 import { TRANSACTIONS } from '@/services/mocks/mockData'
 import { listVariants, itemVariants } from '@/shared/utils/motionVariants'
-
-/* ── Status-icon colour by variant ── */
-const STATUS_ICON_CLR = {
-  success: 'text-emerald-500',
-  danger:  'text-rose-500',
-  warning: 'text-amber-500',
-}
+import { ReceiptModal } from '@/features/transactions'
 
 /* ── Simplified card-brand avatar ── */
 function CardBrandAvatar({ brand }) {
@@ -48,8 +43,10 @@ function CardBrandAvatar({ brand }) {
 export default function LiveFeed({ onViewAll }) {
   const { t }          = useTranslation()
   const { isDarkMode } = useTheme()
+  const [receiptTrx, setReceiptTrx] = useState(null)
 
   return (
+    <>
     <Card className="lg:col-span-2 pb-2 flex flex-col">
       <CardHeader
         title={
@@ -151,48 +148,49 @@ export default function LiveFeed({ onViewAll }) {
         </table>
       </div>
 
-      {/* ── Cards (mobile / tablet) ── */}
-      <div className="lg:hidden flex-1 px-4 pb-3">
-        <motion.div variants={listVariants} initial="hidden" animate="show" className="space-y-1">
-          {TRANSACTIONS.slice(0, 4).map((trx) => (
+      {/* ── Ticker Feed (mobile / tablet) ── */}
+      <div className="lg:hidden flex-1 px-4 pb-2 pt-1">
+        <motion.div variants={listVariants} initial="hidden" animate="show" className="space-y-0.5">
+          {TRANSACTIONS.slice(0, 4).map((trx, i) => (
             <motion.div
               key={trx.id}
               variants={itemVariants}
-              className={`grid grid-cols-[1fr_auto_1fr] items-center gap-x-2 py-3 ${
-                isDarkMode ? 'border-b border-white/5 last:border-0' : 'border-b border-black/5 last:border-0'
+              onClick={() => setReceiptTrx(trx)}
+              className={`flex items-center gap-2.5 py-2 cursor-pointer active:opacity-70 transition-opacity ${
+                i < 3
+                  ? isDarkMode ? 'border-b border-white/5' : 'border-b border-black/5'
+                  : ''
               }`}
             >
-              {/* LEFT — avatar + name + card info */}
-              <div className="flex items-center gap-2.5 min-w-0">
-                <CardBrandAvatar brand={trx.card} />
-                <div className="min-w-0">
-                  <p className={`font-bold text-xs truncate ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`}>
-                    {trx.client ? trx.client.split(' ')[0] : t('dashboard.counter')}
-                  </p>
-                  <span className={`flex items-center gap-1 text-[10px] font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                    <CreditCard size={10} className="opacity-70 flex-shrink-0" />
-                    <span className="font-mono tracking-widest opacity-70">••</span>
-                    <span className="font-mono">{trx.last4}</span>
-                  </span>
+              {/* Avatar with status ring */}
+              <div className={`relative flex-shrink-0 rounded-full p-[2px] ${
+                trx.statusVariant === 'success'
+                  ? 'bg-gradient-to-br from-emerald-400 to-emerald-600'
+                  : trx.statusVariant === 'danger'
+                    ? 'bg-gradient-to-br from-rose-400 to-rose-600'
+                    : 'bg-gradient-to-br from-amber-400 to-amber-600'
+              }`}>
+                <div className={`rounded-full p-[1.5px] ${isDarkMode ? 'bg-[#252429]' : 'bg-white'}`}>
+                  <CardBrandAvatar brand={trx.card} />
                 </div>
               </div>
 
-              {/* MIDDLE — time + status/channel icons */}
-              <div className="flex flex-col items-start gap-1 justify-self-center">
-                <span className={`font-bold text-xs flex items-center gap-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                  <Clock size={12} className="opacity-70 flex-shrink-0" /> {trx.time}
+              {/* Name · time · channel */}
+              <div className="flex items-center gap-1.5 min-w-0 flex-1 text-[11px]">
+                <span className={`font-bold truncate ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'}`}>
+                  {trx.client ? trx.client.split(' ')[0] : t('dashboard.counter')}
                 </span>
-                <div className="flex items-center gap-1.5 ml-[16px]">
-                  <trx.StatusIcon size={12} className={STATUS_ICON_CLR[trx.statusVariant] || 'text-gray-400'} />
-                  <span className={`flex items-center opacity-70 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                    <trx.ChannelIcon size={12} />
-                  </span>
-                </div>
+                <span className={`opacity-30 ${isDarkMode ? 'text-white' : 'text-black'}`}>·</span>
+                <span className={`text-[10px] flex-shrink-0 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                  {trx.time}
+                </span>
+                <span className={`opacity-30 ${isDarkMode ? 'text-white' : 'text-black'}`}>·</span>
+                <trx.ChannelIcon size={10} className={`flex-shrink-0 ${isDarkMode ? 'text-[#7C3AED] opacity-70' : 'text-[#561BAF] opacity-60'}`} />
               </div>
 
-              {/* RIGHT — amount */}
-              <span className={`font-mono font-bold text-sm tracking-tight justify-self-end text-right ${
-                trx.status === 'Reembolsado'
+              {/* Amount */}
+              <span className={`font-mono font-bold text-[13px] tracking-tight flex-shrink-0 ${
+                trx.statusVariant === 'danger'
                   ? 'text-rose-500 line-through opacity-70'
                   : isDarkMode ? 'text-white' : 'text-[#111113]'
               }`}>
@@ -203,5 +201,10 @@ export default function LiveFeed({ onViewAll }) {
         </motion.div>
       </div>
     </Card>
+
+    <AnimatePresence>
+      {receiptTrx && <ReceiptModal trx={receiptTrx} onClose={() => setReceiptTrx(null)} />}
+    </AnimatePresence>
+    </>
   )
 }

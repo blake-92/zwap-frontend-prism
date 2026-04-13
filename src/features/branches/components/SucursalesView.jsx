@@ -112,11 +112,17 @@ export default function SucursalesView() {
   return (
     <motion.div variants={pageVariants} initial="hidden" animate="show">
 
-      <PageHeader title={t('branches.title')} description={t('branches.description')}>
+      <PageHeader title={t('branches.title')}>
         <Button onClick={() => setNewBranchOpen(true)}>
           <PlusCircle size={18} /> {t('branches.newBranch')}
         </Button>
       </PageHeader>
+
+      <div className="sm:hidden mb-6">
+        <Button size="lg" className="w-full" onClick={() => setNewBranchOpen(true)}>
+          <PlusCircle size={18} /> {t('branches.newBranch')}
+        </Button>
+      </div>
 
       {/* Cards grid */}
       {filtered.length > 0 ? (

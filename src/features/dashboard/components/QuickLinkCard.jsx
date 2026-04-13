@@ -45,7 +45,8 @@ export default function QuickLinkCard() {
   const handleCopy = () => {
     if (desktopSelected?.url) {
       navigator.clipboard.writeText(desktopSelected.url)
-      addToast(t('links.linkCopied', { name: desktopSelected.name }), 'success')
+      const key = window.innerWidth < 640 ? 'links.linkCopiedShort' : 'links.linkCopied'
+      addToast(t(key, { name: desktopSelected.name }), 'success')
     }
   }
 

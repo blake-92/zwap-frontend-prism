@@ -110,10 +110,7 @@ export default function WalletView() {
   return (
     <motion.div variants={pageVariants} initial="hidden" animate="show">
 
-      <PageHeader
-        title={t('wallet.title')}
-        description={t('wallet.description')}
-      />
+      <PageHeader title={t('wallet.title')} />
 
       {/* Top section: balance (izq) + retiro + cuenta (der) */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-6">

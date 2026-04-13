@@ -140,10 +140,7 @@ export default function SettingsView() {
   return (
     <motion.div variants={pageVariants} initial="hidden" animate="show" className="max-w-4xl mx-auto">
 
-      <PageHeader
-        title={t('settings.title')}
-        description={t('settings.description')}
-      />
+      <PageHeader title={t('settings.title')} />
 
       {/* Tabs — hidden during search */}
       <AnimatePresence>

@@ -118,7 +118,7 @@ Soporte bilingüe español/inglés con `react-i18next`. Idioma por defecto: espa
 
 | Módulo | Descripción |
 |---|---|
-| **Dashboard** | KPIs, gráficas (Recharts), live feed, acciones rápidas, QR swipeable (mobile) con lightbox fullscreen |
+| **Dashboard** | KPIs, gráficas (Recharts), live feed (desktop: tabla, mobile: ticker con tap→receipt), acciones rápidas, QR swipeable (mobile) con lightbox fullscreen, header fusionado (título + SegmentControl + acción) |
 | **Transactions** | Historial con filtros (fecha/estado), recibos, reembolsos |
 | **Payment Links** | Links permanentes (desktop: grid cards, mobile: swipeable con QR lightbox + action column), links custom CRUD, fee split configurable |
 | **Settlements** | Control de cierres diarios, filtros, exportación CSV |
@@ -130,3 +130,12 @@ Soporte bilingüe español/inglés con `react-i18next`. Idioma por defecto: espa
 ## Búsqueda y filtros
 
 La barra de búsqueda del Header se conecta a la vista activa via `ViewSearchContext`. Cada vista registra su placeholder y lógica de filtrado. En mobile, la barra se expande inline con animación spring. Las vistas con filtros muestran un indicador en el ícono de filtros del Header, y ofrecen reset rápido via `TableToolbar`.
+
+## Experiencia nativa
+
+La app está diseñada para sentirse nativa tanto en desktop como en mobile:
+
+- **Touch feedback:** Todos los botones y cards interactivos tienen `active:` states para respuesta táctil inmediata
+- **Sin selección de texto:** `user-select: none` global con excepciones para inputs, tablas y código
+- **Toasts responsivos:** Centrados abajo en mobile (sobre BottomNav), esquina inferior derecha en desktop; mensajes más cortos en mobile
+- **PageHeader oculto en mobile:** Los títulos de sección se ocultan en mobile ya que BottomNav provee el contexto; las vistas con botón de acción muestran un botón full-width separado en mobile

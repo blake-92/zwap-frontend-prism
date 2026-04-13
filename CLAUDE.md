@@ -42,8 +42,8 @@ features/links/
 | Feature | Vista principal | Modales / subcomponentes |
 |---------|----------------|--------------------------|
 | `auth` | LoginView | — |
-| `dashboard` | DashboardView | KpiCard, ChartCard, QuickLinkCard (responsive: desktop tabs / mobile swipeable), AlertsPanel, LiveFeed, PendingCharges, QuickActions, ShiftSummary |
-| `transactions` | TransaccionesView | ReceiptModal, RefundModal |
+| `dashboard` | DashboardView | KpiCard, ChartCard, QuickLinkCard (responsive: desktop tabs / mobile swipeable), AlertsPanel, LiveFeed (desktop: table, mobile: ticker with tap→receipt), PendingCharges, QuickActions, ShiftSummary |
+| `transactions` | TransaccionesView | ReceiptModal (also re-exported for cross-feature use by LiveFeed), RefundModal |
 | `links` | LinksView | NewLinkModal, LinkDetailModal |
 | `settlements` | LiquidacionesView | — |
 | `wallet` | WalletView | WithdrawModal, WithdrawReceiptModal |
@@ -122,7 +122,7 @@ import {
 | `DropdownFilter` | `label`, `options[]`, `value`, `onChange`, `icon`, `defaultValue`, `sheetMode` | Dropdown select con spring; `sheetMode` renderiza fila full-width para BottomSheet; `displayName` para detección en `cloneElement` |
 | `TableToolbar` | `children` (filtros), `actions`, `onReset`, `className` | Desktop: barra glass con filtros + acciones. Mobile: registra callback en ViewSearchContext para que el Header abra un BottomSheet de filtros. `onReset` muestra botón "Limpiar filtros" |
 | `Pagination` | `currentPage`, `totalPages`, `onPageChange` | Controles de paginación con elipsis |
-| `PageHeader` | `title`, `description` + right slot | Encabezado de página (h1) |
+| `PageHeader` | `title`, `children` (action slot) | Encabezado de página (h1). Hidden on mobile (`hidden sm:flex`). Vistas con botón de acción usan un bloque `sm:hidden` separado con `Button size="lg" className="w-full"` |
 | `SectionLabel` | `children`, `className` | Etiqueta uppercase secundaria |
 | `InfoBanner` | `variant` (warning/info/danger), `message` | Banner de alerta con ícono automático |
 | `Skeleton` | `width`, `height`, `className` | Loader shimmer animado |
@@ -518,7 +518,7 @@ const { t } = useTranslation()
 t('nav.dashboard')
 
 // Con interpolación
-t('dashboard.greeting', { name: 'Admin' })
+t('links.linkCopied', { name: 'Alice' })
 
 // Pluralización
 t('dashboard.charges', { count: 5 })  // → "5 cobros"
@@ -663,6 +663,83 @@ Exports disponibles:
 | `BANK_ACCOUNT` | Datos de cuenta bancaria |
 
 Importar desde ahí, no hardcodear datos en las vistas.
+
+## Native App Feel
+
+La app busca sentirse como una app nativa tanto en desktop como en mobile. Desktop = app de escritorio (hover states correctos, tablas, toast abajo-derecha). Mobile = app táctil (active states, sin selección de texto, toast centrado abajo).
+
+### Global touch optimizations (`globals.css`)
+
+```css
+body {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Excepciones — contenido que sí debe ser seleccionable */
+input, textarea, [contenteditable="true"], td, th,
+pre, code, .selectable {
+  user-select: text;
+  -webkit-user-select: text;
+}
+```
+
+### Active states (touch feedback)
+
+Todos los variants de `Button` incluyen un `active:` state más intenso que el hover. Ejemplo:
+
+| Variant | Hover | Active |
+|---|---|---|
+| default | `hover:bg-[#6D28D9]` | `active:bg-[#4C1599]` |
+| outline (dark) | `hover:bg-white/10` | `active:bg-white/15` |
+| ghost (dark) | `hover:bg-white/10` | `active:bg-white/15` |
+
+Cards con `hoverEffect` también incluyen `active:translate-y-0 active:bg-...` para feedback de press-down en mobile.
+
+### Toast responsive
+
+El contenedor de toasts se posiciona de forma responsive:
+
+- **Mobile (< 640px):** Centrado abajo, sobre el BottomNav (`bottom-20 left-1/2 -translate-x-1/2`)
+- **Desktop (≥ 640px):** Abajo-derecha (`sm:bottom-6 sm:right-6 sm:left-auto sm:translate-x-0`)
+
+### Mensajes de toast responsivos
+
+Para toasts con contenido largo, usar claves i18n cortas en mobile:
+
+```jsx
+const key = window.innerWidth < 640 ? 'links.linkCopiedShort' : 'links.linkCopied'
+addToast(t(key, { name: link.client }), 'success')
+```
+
+Patrón: clave base `namespace.key` para desktop, `namespace.keyShort` para mobile. Claves existentes: `dashboard.linkCopied/Short`, `dashboard.lastLinkCopied/Short`, `links.linkCopied/Short`.
+
+## Dashboard — Fused Header
+
+DashboardView no usa `PageHeader`. En su lugar tiene un header fusionado: título + SegmentControl + botón de acción en una sola fila flex:
+
+```jsx
+<div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 mb-6 sm:mb-8">
+  <h1 className="... hidden sm:block">{t('nav.dashboard')}</h1>
+  <div className="flex-1 sm:max-w-xs">
+    <SegmentControl options={[...]} value={activeTab} onChange={setActiveTab} layoutId="dashboardTab" />
+  </div>
+  <Button onClick={...} className="hidden sm:flex sm:ml-auto">...</Button>
+</div>
+```
+
+En mobile: solo el SegmentControl (full-width), sin título ni botón (BottomNav provee contexto).
+
+## LiveFeed — Ticker Mobile
+
+En mobile, LiveFeed usa un patrón de ticker de una línea por transacción con status ring + tap-to-receipt:
+
+- **Status ring:** Gradient ring alrededor del avatar de marca de tarjeta indica el estado sin texto (emerald=success, rose=danger, amber=warning). Inspirado en stories de Instagram.
+- **Layout por fila:** `Avatar con ring · Nombre · tiempo · ChannelIcon · $amount` — todo en una línea flex.
+- **Tap-to-receipt:** `onClick={() => setReceiptTrx(trx)}` abre `ReceiptModal` (importado cross-feature desde `@/features/transactions`).
+- **Touch feedback:** `active:opacity-70 transition-opacity cursor-pointer`.
+- **Máximo 4 transacciones** — `TRANSACTIONS.slice(0, 4)`.
 
 ## No hacer
 

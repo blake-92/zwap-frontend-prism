@@ -17,7 +17,8 @@ export default function PendingCharges() {
 
   const handleCopy = (charge) => {
     navigator.clipboard.writeText(charge.url)
-    addToast(t('dashboard.linkCopied', { client: charge.client }), 'success')
+    const key = window.innerWidth < 640 ? 'dashboard.linkCopiedShort' : 'dashboard.linkCopied'
+    addToast(t(key, { client: charge.client }), 'success')
   }
 
   const handleResend = (charge) => {

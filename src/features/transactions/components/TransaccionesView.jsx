@@ -96,7 +96,7 @@ export default function TransaccionesView() {
   return (
     <motion.div variants={pageVariants} initial="hidden" animate="show">
 
-      <PageHeader title={t('transactions.title')} description={t('transactions.description')}>
+      <PageHeader title={t('transactions.title')}>
         <Button onClick={() => navigate(ROUTES.LINKS)} className="hidden sm:flex">
           <LinkIcon size={18} /> {t('transactions.viewLinks')}
         </Button>
@@ -331,11 +331,11 @@ export default function TransaccionesView() {
         ) : (
           <Card className="p-8 text-center">
             <p className={`text-sm font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-              No se encontraron transacciones{search ? ` para "${search}"` : ''}.
+              {search ? t('transactions.notFoundFor', { term: search }) : t('transactions.notFound')}
             </p>
             {search && (
               <Button variant="ghost" size="sm" onClick={() => setSearch('')} className="mt-2">
-                Limpiar busqueda
+                {t('common.clearSearch')}
               </Button>
             )}
           </Card>

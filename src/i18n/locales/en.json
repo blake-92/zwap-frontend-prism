@@ -67,8 +67,6 @@
   },
 
   "dashboard": {
-    "greeting": "Good evening, {{name}} 👋",
-    "subtitle": "Here's the financial pulse of your branches today",
     "volumeToday": "Volume Today",
     "pendingLinks": "Pending (Links)",
     "inTransit": "In Transit",
@@ -104,14 +102,16 @@
     "viewAllShort": "View All",
     "copyLink": "Copy link",
     "resendLink": "Resend link",
-    "linkCopied": "Link for {{client}} copied.",
+    "linkCopied": "Link copied · {{client}}",
+    "linkCopiedShort": "Copied · {{client}}",
     "linkResent": "Link resent to {{email}}",
     "quickActions": "Quick Actions",
     "newCharge": "New Charge",
     "posCharge": "POS Charge",
     "posComingSoon": "POS Charge will be available soon.",
     "resendLastLink": "Resend Last Link",
-    "lastLinkCopied": "Link for {{client}} copied to clipboard.",
+    "lastLinkCopied": "Link copied · {{client}}",
+    "lastLinkCopiedShort": "Copied · {{client}}",
     "todaySummary": "Today's Summary",
     "charges_one": "{{count}} charge",
     "charges_other": "{{count}} charges",
@@ -125,7 +125,6 @@
 
   "transactions": {
     "title": "Transactions",
-    "description": "History of processed charges and payments",
     "viewLinks": "View Payment Links",
     "searchPlaceholder": "Search by client or email...",
     "tableDate": "Date",
@@ -167,7 +166,6 @@
 
   "links": {
     "title": "Payment Links",
-    "description": "Manage quick counter charges and custom reservations",
     "createLink": "Create Reservation Link",
     "generateLink": "Generate Reservation Link",
     "searchPlaceholder": "Search by client or ID...",
@@ -194,7 +192,8 @@
     "totalCharge": "Total to charge",
     "notFound": "No links found",
     "notFoundFor": "No links found for \"{{term}}\"",
-    "linkCopied": "Link \"{{name}}\" copied to clipboard",
+    "linkCopied": "Link copied · {{name}}",
+    "linkCopiedShort": "Copied · {{name}}",
     "permanentSection": "Permanent Links (Open Amount)",
     "customSection": "Reservation Links (Custom)",
     "expires": "Expires: {{date}}",
@@ -226,7 +225,6 @@
 
   "settlements": {
     "title": "Settlements",
-    "description": "Daily Close Control and Bank Deposits",
     "searchPlaceholder": "Search concept or date...",
     "deposited": "Deposited (Available)",
     "last30days": "Last 30 days",
@@ -254,7 +252,6 @@
 
   "wallet": {
     "title": "Wallet & Withdrawals",
-    "description": "Manage available balance and connected bank accounts",
     "availableBalance": "Available Balance",
     "thisWeek": "+$502.09 this week",
     "nextAutoDeposit": "Next auto-deposit",
@@ -294,7 +291,6 @@
 
   "branches": {
     "title": "Branches",
-    "description": "Property and point-of-sale management",
     "newBranch": "New Branch",
     "createBranch": "Create Branch",
     "branchName": "Branch Name",
@@ -317,7 +313,6 @@
 
   "users": {
     "title": "Users",
-    "description": "Team access and permissions management",
     "newUser": "New User",
     "createUser": "Create User",
     "newUserDesc": "Invite a team member",
@@ -346,7 +341,6 @@
 
   "settings": {
     "title": "Settings",
-    "description": "Manage your preferences, security, and payment methods",
     "tabProfile": "My Profile",
     "tabSecurity": "Security",
     "tabBilling": "Billing",

@@ -14,7 +14,8 @@ export default function QuickActions({ onNewCharge }) {
     if (PENDING_CHARGES.length > 0) {
       const last = PENDING_CHARGES[0]
       navigator.clipboard.writeText(last.url)
-      addToast(t('dashboard.lastLinkCopied', { client: last.client }), 'success')
+      const key = window.innerWidth < 640 ? 'dashboard.lastLinkCopiedShort' : 'dashboard.lastLinkCopied'
+      addToast(t(key, { client: last.client }), 'success')
     }
   }
 

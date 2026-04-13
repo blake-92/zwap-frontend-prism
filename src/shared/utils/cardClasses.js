@@ -14,8 +14,8 @@ export function getCardClasses(isDarkMode, hoverEffect = false) {
 
   const hover = hoverEffect
     ? isDarkMode
-      ? 'hover:-translate-y-1 hover:bg-[#252429]/50 hover:shadow-[0_20px_40px_rgba(0,0,0,0.6),0_0_30px_rgba(124,58,237,0.10)]'
-      : 'hover:-translate-y-1 hover:bg-white/80 hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)]'
+      ? 'hover:-translate-y-1 hover:bg-[#252429]/50 hover:shadow-[0_20px_40px_rgba(0,0,0,0.6),0_0_30px_rgba(124,58,237,0.10)] active:translate-y-0 active:bg-[#252429]/60'
+      : 'hover:-translate-y-1 hover:bg-white/80 hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] active:translate-y-0 active:bg-white/90'
     : ''
 
   return { base, hover }

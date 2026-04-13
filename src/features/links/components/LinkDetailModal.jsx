@@ -13,7 +13,8 @@ export default function LinkDetailModal({ link, onClose, onEdit }) {
 
   const handleCopy = () => {
     navigator.clipboard.writeText(url)
-    addToast(t('links.linkCopied', { name: link.client }), 'success')
+    const key = window.innerWidth < 640 ? 'links.linkCopiedShort' : 'links.linkCopied'
+    addToast(t(key, { name: link.client }), 'success')
   }
 
   const footer = (

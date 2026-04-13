@@ -25,7 +25,8 @@ function PermanentCard({ link, onToggle }) {
 
   const handleCopy = () => {
     navigator.clipboard.writeText(`https://zwap.me/pay/${link.id}`)
-    addToast(t('links.linkCopied', { name: link.name }), 'success')
+    const key = window.innerWidth < 640 ? 'links.linkCopiedShort' : 'links.linkCopied'
+    addToast(t(key, { name: link.name }), 'success')
   }
 
   return (
@@ -213,7 +214,8 @@ function QuickLinkSwipeable({ links, onToggle }) {
               onClick={() => {
                 if (!selected.active) return
                 navigator.clipboard.writeText(`https://${selected.url}`)
-                addToast(t('links.linkCopied', { name: selected.name }), 'success')
+                const key = window.innerWidth < 640 ? 'links.linkCopiedShort' : 'links.linkCopied'
+                addToast(t(key, { name: selected.name }), 'success')
               }}
               className={`p-2 rounded-xl transition-colors ${
                 selected.active
@@ -297,7 +299,8 @@ function CustomLinksTable({ onDetail, onEdit, search, onClearSearch }) {
 
   const handleCopy = (link) => {
     navigator.clipboard.writeText(`https://zwap.me/pay/${link.id}`)
-    addToast(t('links.linkCopied', { name: link.client }), 'success')
+    const key = window.innerWidth < 640 ? 'links.linkCopiedShort' : 'links.linkCopied'
+    addToast(t(key, { name: link.client }), 'success')
   }
 
   return (
@@ -540,7 +543,7 @@ export default function LinksView() {
 
   return (
     <motion.div variants={pageVariants} initial="hidden" animate="show">
-      <PageHeader title={t('links.title')} description={t('links.description')}>
+      <PageHeader title={t('links.title')}>
         <div className="hidden lg:block">
           <Button onClick={() => setNewLinkOpen(true)}>
             <Plus size={18} /> {t('links.createLink')}

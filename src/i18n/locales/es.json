@@ -67,8 +67,6 @@
   },
 
   "dashboard": {
-    "greeting": "Buenas noches, {{name}} 👋",
-    "subtitle": "Aquí tienes el pulso financiero de tus sucursales hoy",
     "volumeToday": "Volumen Hoy",
     "pendingLinks": "Por Cobrar (Links)",
     "inTransit": "En Tránsito",
@@ -104,14 +102,16 @@
     "viewAllShort": "Ver Todos",
     "copyLink": "Copiar link",
     "resendLink": "Reenviar link",
-    "linkCopied": "Link de {{client}} copiado.",
+    "linkCopied": "Link copiado · {{client}}",
+    "linkCopiedShort": "Copiado · {{client}}",
     "linkResent": "Link reenviado a {{email}}",
     "quickActions": "Acciones Rápidas",
     "newCharge": "Nuevo Cobro",
     "posCharge": "Cobro POS",
     "posComingSoon": "Cobro POS estará disponible próximamente.",
     "resendLastLink": "Reenviar Último Link",
-    "lastLinkCopied": "Link de {{client}} copiado al portapapeles.",
+    "lastLinkCopied": "Link copiado · {{client}}",
+    "lastLinkCopiedShort": "Copiado · {{client}}",
     "todaySummary": "Resumen de Hoy",
     "charges_one": "{{count}} cobro",
     "charges_other": "{{count}} cobros",
@@ -125,7 +125,6 @@
 
   "transactions": {
     "title": "Transacciones",
-    "description": "Historial de cobros y pagos procesados",
     "viewLinks": "Ver Links de Pago",
     "searchPlaceholder": "Buscar por cliente o email...",
     "tableDate": "Fecha",
@@ -167,7 +166,6 @@
 
   "links": {
     "title": "Links de Pago",
-    "description": "Gestiona cobros rápidos en mostrador y reservas personalizadas",
     "createLink": "Crear Link de Reserva",
     "generateLink": "Generar Link de Reserva",
     "searchPlaceholder": "Buscar por cliente o ID...",
@@ -194,7 +192,8 @@
     "totalCharge": "Total a cobrar",
     "notFound": "No se encontraron links",
     "notFoundFor": "No se encontraron links para \"{{term}}\"",
-    "linkCopied": "Enlace \"{{name}}\" copiado al portapapeles",
+    "linkCopied": "Link copiado · {{name}}",
+    "linkCopiedShort": "Copiado · {{name}}",
     "permanentSection": "Enlaces Permanentes (Monto Abierto)",
     "customSection": "Enlaces de Reserva (Personalizados)",
     "expires": "Expira: {{date}}",
@@ -226,7 +225,6 @@
 
   "settlements": {
     "title": "Liquidaciones",
-    "description": "Control de Cierres Diarios y Depósitos Bancarios",
     "searchPlaceholder": "Buscar concepto o fecha...",
     "deposited": "Depositado (Disponible)",
     "last30days": "Últimos 30 días",
@@ -254,7 +252,6 @@
 
   "wallet": {
     "title": "Billetera & Retiros",
-    "description": "Gestiona el saldo disponible y tus cuentas bancarias conectadas",
     "availableBalance": "Saldo Disponible",
     "thisWeek": "+$502.09 esta semana",
     "nextAutoDeposit": "Próximo autodepósito",
@@ -294,7 +291,6 @@
 
   "branches": {
     "title": "Sucursales",
-    "description": "Gestión de propiedades y puntos de venta",
     "newBranch": "Nueva Sucursal",
     "createBranch": "Crear Sucursal",
     "branchName": "Nombre de la Sucursal",
@@ -317,7 +313,6 @@
 
   "users": {
     "title": "Usuarios",
-    "description": "Gestión de acceso y permisos del equipo",
     "newUser": "Nuevo Usuario",
     "createUser": "Crear Usuario",
     "newUserDesc": "Invita a un miembro del equipo",
@@ -346,7 +341,6 @@
 
   "settings": {
     "title": "Configuración",
-    "description": "Administra tus preferencias, seguridad y métodos de pago",
     "tabProfile": "Mi Perfil",
     "tabSecurity": "Seguridad",
     "tabBilling": "Facturación",

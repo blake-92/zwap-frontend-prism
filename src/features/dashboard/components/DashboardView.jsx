@@ -5,8 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useViewSearch } from '@/shared/context/ViewSearchContext'
 import { pageVariants } from '@/shared/utils/motionVariants'
-import { Button, PageHeader, SegmentControl } from '@/shared/ui'
-import { KPIS, CURRENT_USER } from '@/services/mocks/mockData'
+import { Button, SegmentControl } from '@/shared/ui'
+import { useTheme } from '@/shared/context/ThemeContext'
+import { KPIS } from '@/services/mocks/mockData'
 import { ROUTES } from '@/router/routes'
 import KpiCard        from './KpiCard'
 import QuickLinkCard  from './QuickLinkCard'
@@ -22,6 +23,7 @@ import { NewLinkModal } from '@/features/links'
 
 export default function DashboardView() {
   const { t }          = useTranslation()
+  const { isDarkMode } = useTheme()
   const navigate       = useNavigate()
   useViewSearch()
   const [newLinkOpen, setNewLinkOpen] = useState(false)
@@ -29,27 +31,27 @@ export default function DashboardView() {
 
   return (
     <motion.div variants={pageVariants} initial="hidden" animate="show">
-      <PageHeader
-        title={t('dashboard.greeting', { name: CURRENT_USER.displayName })}
-        description={t('dashboard.subtitle')}
-        className="mb-6"
-      >
-        <Button onClick={() => setNewLinkOpen(true)} className="hidden sm:flex">
+      {/* Header bar: title + segment + action */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <h1 className={`text-xl sm:text-2xl font-bold tracking-tight hidden sm:block ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+          {t('nav.dashboard')}
+        </h1>
+
+        <div className="flex-1 sm:max-w-xs">
+          <SegmentControl
+            options={[
+              { value: 'operations', label: t('dashboard.tabOperations') },
+              { value: 'metrics',    label: t('dashboard.tabMetrics') },
+            ]}
+            value={activeTab}
+            onChange={setActiveTab}
+            layoutId="dashboardTab"
+          />
+        </div>
+
+        <Button onClick={() => setNewLinkOpen(true)} className="hidden sm:flex sm:ml-auto">
           <Plus size={18} /> {t('dashboard.newReservationLink')}
         </Button>
-      </PageHeader>
-
-      {/* Sub-view selector */}
-      <div className="max-w-xs mb-6 sm:mb-8">
-        <SegmentControl
-          options={[
-            { value: 'operations', label: t('dashboard.tabOperations') },
-            { value: 'metrics',    label: t('dashboard.tabMetrics') },
-          ]}
-          value={activeTab}
-          onChange={setActiveTab}
-          layoutId="dashboardTab"
-        />
       </div>
 
       {/* Mobile only: Full-width button */}

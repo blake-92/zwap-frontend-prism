@@ -94,11 +94,17 @@ export default function LiquidacionesView() {
   return (
     <motion.div variants={pageVariants} initial="hidden" animate="show">
 
-      <PageHeader title={t('settlements.title')} description={t('settlements.description')}>
+      <PageHeader title={t('settlements.title')}>
         <Button variant="outline">
           <Download size={18} /> {t('settlements.downloadFiscal')}
         </Button>
       </PageHeader>
+
+      <div className="sm:hidden mb-6">
+        <Button variant="outline" size="lg" className="w-full" >
+          <Download size={18} /> {t('settlements.downloadFiscal')}
+        </Button>
+      </div>
 
       {/* KPI row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 2xl:gap-8 mb-10">
