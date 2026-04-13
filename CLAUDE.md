@@ -581,16 +581,15 @@ Usado en `AppShell` para condicionar Sidebar vs BottomNav, en `Header` para sear
 | ≥ 1024px (lg) | Sidebar colapsable | `shared/layout/Sidebar.jsx` |
 | < 1024px | Bottom navigation | `shared/layout/BottomNav.jsx` |
 
-**BottomNav** — 4 tabs fijos (Dashboard, Transacciones, Links, Liquidaciones) + botón "Más" que abre un sheet con opciones secundarias (Sucursales, Usuarios, Wallet, Configuración). Safe area padding via `pb-[env(safe-area-inset-bottom)]`. Scroll lock cuando el sheet está abierto. El sheet de "Más" **no usa `<BottomSheet>`** — usa implementación inline con z-index inferior al nav (`z-30` backdrop, `z-[35]` panel vs `z-40` nav) para que la barra permanezca visible encima del sheet.
+**BottomNav** — 4 tabs fijos (Dashboard, Transacciones, Links, Liquidaciones) + botón "Más" que abre un sheet con opciones secundarias (Sucursales, Usuarios, Wallet, Configuración) y acciones rápidas (Tema, Alertas) separadas por divider. Safe area padding via `pb-[env(safe-area-inset-bottom)]`. Scroll lock cuando el sheet está abierto. El sheet de "Más" **no usa `<BottomSheet>`** — usa implementación inline con z-index inferior al nav (`z-30` backdrop, `z-[35]` panel vs `z-40` nav) para que la barra permanezca visible encima del sheet.
 
-**Header** — en desktop muestra search bar inline conectado a `ViewSearchContext`; en mobile muestra icono de búsqueda que expande una barra inline con spring animation (oculta los botones de acción). Si la vista registra filtros, aparece un icono de filtro con dot indicator cuando hay filtros activos.
+**Header** — en desktop muestra search bar inline conectado a `ViewSearchContext`, botones de tema/settings/notificaciones, y selector de sucursal (dropdown). En mobile muestra ZwapIsotipo + ZwapWordmark a la izquierda; al expandir búsqueda, el wordmark desaparece con animación blur+slide (`WORDMARK_VARIANTS`) y la barra de búsqueda ocupa su lugar. Los iconos de búsqueda y filtros desaparecen al expandir. El selector de sucursal en mobile es solo una pill con la inicial que abre un bottom sheet (`createPortal` al body para escapar stacking contexts). Tema y notificaciones no están en el Header mobile — viven en el sheet de "Más" del BottomNav.
 
 ### Componentes de layout responsive
 
 | Componente | Archivo | Descripción |
 |---|---|---|
-| `BottomNav` | `shared/layout/BottomNav.jsx` | Bottom navigation con 4+1 tabs y sheet de "Más" |
-| `SearchOverlay` | `shared/layout/SearchOverlay.jsx` | Overlay de búsqueda (legacy, ya no se importa activamente) |
+| `BottomNav` | `shared/layout/BottomNav.jsx` | Bottom navigation con 4+1 tabs, sheet de "Más" con nav + tema/alertas |
 | `useMediaQuery` | `shared/hooks/useMediaQuery.js` | Hook para detectar breakpoints via `matchMedia` |
 
 ### Patrón tabla → cards (mobile)
