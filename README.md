@@ -118,9 +118,9 @@ Soporte bilingüe español/inglés con `react-i18next`. Idioma por defecto: espa
 
 | Módulo | Descripción |
 |---|---|
-| **Dashboard** | KPIs, gráficas (Recharts), live feed, acciones rápidas, QR |
+| **Dashboard** | KPIs, gráficas (Recharts), live feed, acciones rápidas, QR swipeable (mobile) con lightbox fullscreen |
 | **Transactions** | Historial con filtros (fecha/estado), recibos, reembolsos |
-| **Payment Links** | Links permanentes y custom, CRUD, fee split configurable |
+| **Payment Links** | Links permanentes (desktop: grid cards, mobile: swipeable con QR lightbox + action column), links custom CRUD, fee split configurable |
 | **Settlements** | Control de cierres diarios, filtros, exportación CSV |
 | **Wallet** | Balance, retiros, filtros (estado/fecha), exportación CSV |
 | **Branches** | Gestión de sucursales con búsqueda por nombre/dirección |

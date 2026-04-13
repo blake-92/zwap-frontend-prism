@@ -220,7 +220,8 @@
     "feeClientShare": "Cliente: {{percent}}%",
     "feeHotelLabel": "Hotel ({{percent}}%)",
     "feeClientLabel": "Cliente ({{percent}}%)",
-    "activeCount": "activos"
+    "activeCount": "activos",
+    "inactive": "Inactivo"
   },
 
   "settlements": {

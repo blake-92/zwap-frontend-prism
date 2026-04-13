@@ -1,10 +1,9 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Plus, QrCode, Copy, ExternalLink,
+  Plus, QrCode, Copy, ExternalLink, Maximize,
   Download, ChevronDown, Edit2, Mail, Eye,
-  Timer, ListTree,
-  CalendarDays,
+  Timer, ListTree, CalendarDays,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
@@ -15,8 +14,6 @@ import { listVariants, itemVariants, cardItemVariants, pageVariants } from '@/sh
 import { PERMANENT_LINKS, CUSTOM_LINKS } from '@/services/mocks/mockData'
 import NewLinkModal from './NewLinkModal'
 import LinkDetailModal from './LinkDetailModal'
-
-const SPRING = { type: 'spring', stiffness: 400, damping: 30 }
 
 /* ─────────────────────────────────────────────────────────────
    Permanent Link Card (desktop)
@@ -77,103 +74,212 @@ function PermanentCard({ link, onToggle }) {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   Permanent Links — compact mobile accordion
+   Quick Link Card — swipeable + glass action column (mobile)
 ───────────────────────────────────────────────────────────── */
-function PermanentLinksMobile({ links, onToggle }) {
+const SPRING_DOTS = { type: 'spring', stiffness: 420, damping: 32 }
+
+function QuickLinkSwipeable({ links, onToggle }) {
   const { isDarkMode } = useTheme()
-  const { addToast } = useToast()
-  const { t } = useTranslation()
-  const [expanded, setExpanded] = useState(false)
+  const { addToast }   = useToast()
+  const { t }          = useTranslation()
+
+  const [index, setIndex] = useState(
+    () => Math.max(0, links.findIndex(l => l.active))
+  )
+  const [isQrOpen, setIsQrOpen] = useState(false)
+
+  const selected = links[index]
+
+  useEffect(() => {
+    if (!isQrOpen) return
+    const onKey = (e) => { if (e.key === 'Escape') setIsQrOpen(false) }
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prev
+    }
+  }, [isQrOpen])
+
+  const goNext = () => setIndex(i => (i + 1) % links.length)
+  const goPrev = () => setIndex(i => (i - 1 + links.length) % links.length)
 
   return (
-    <Card className="overflow-hidden">
-      <button
-        onClick={() => setExpanded(v => !v)}
-        className={`w-full flex items-center justify-between px-4 py-3.5 transition-colors ${
-          isDarkMode ? 'hover:bg-white/5' : 'hover:bg-black/[0.02]'
-        }`}
-      >
-        <div className="flex items-center gap-3">
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-            isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/50 text-[#561BAF]'
-          }`}>
-            <QrCode size={15} />
-          </div>
-          <div className="text-left">
-            <p className={`text-sm font-bold ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-              {t('links.quickLinks')}
-            </p>
-            <p className={`text-[10px] font-medium ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-              {links.filter(l => l.active).length}/{links.length} {t('links.activeCount')}
-            </p>
-          </div>
-        </div>
-        <motion.div
-          animate={{ rotate: expanded ? 180 : 0 }}
-          transition={SPRING}
-          className={isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}
-        >
-          <ChevronDown size={18} />
-        </motion.div>
-      </button>
+    <>
+      <Card className="p-0 overflow-hidden bg-gradient-to-b from-[#7C3AED]/5 to-transparent">
+        <div className="flex items-stretch">
 
-      <AnimatePresence initial={false}>
-        {expanded && (
+          {/* ── Izquierda: área swipeable — QR + nombre/url + dots ── */}
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ height: SPRING, opacity: { duration: 0.15 } }}
-            className="overflow-hidden"
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.12}
+            style={{ touchAction: 'pan-y' }}
+            onDragEnd={(_, info) => {
+              if (info.velocity.x < -200 || info.offset.x < -50) goNext()
+              else if (info.velocity.x > 200 || info.offset.x > 50) goPrev()
+            }}
+            className="flex-1 flex items-center gap-4 px-4 py-4 min-w-0 cursor-grab active:cursor-grabbing select-none"
           >
-            <div className={`border-t ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
-              {links.map((link, idx) => (
-                <div
-                  key={link.id}
-                  className={`flex items-center justify-between px-4 py-3 ${
-                    idx < links.length - 1
-                      ? isDarkMode ? 'border-b border-white/5' : 'border-b border-black/5'
-                      : ''
-                  }`}
-                >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                      link.active ? 'bg-emerald-500' : isDarkMode ? 'bg-[#45434A]' : 'bg-gray-300'
-                    }`} />
-                    <div className="min-w-0">
-                      <p className={`text-sm font-bold truncate ${
-                        link.active
-                          ? isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]'
-                          : isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'
-                      }`}>
-                        {link.name}
-                      </p>
-                      <p className={`text-[10px] font-medium truncate ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                        {link.desc}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 flex-shrink-0 ml-3">
-                    <Button
-                      variant="ghost" size="sm" className="!p-1.5"
-                      disabled={!link.active}
-                      onClick={() => {
-                        navigator.clipboard.writeText(`https://zwap.me/pay/${link.id}`)
-                        addToast(t('links.linkCopied', { name: link.name }), 'success')
-                      }}
-                    >
-                      <Copy size={14} />
-                    </Button>
-                    <Toggle active={link.active} onToggle={() => onToggle(link.id)} />
+            {/* QR — tap abre lightbox */}
+            <motion.div
+              layoutId="ql-qr-mini"
+              onClick={() => selected.active && setIsQrOpen(true)}
+              className={`relative flex-shrink-0 bg-white p-3 rounded-2xl shadow-lg border border-gray-100 group ${
+                selected.active ? 'cursor-pointer' : 'cursor-default'
+              }`}
+            >
+              <QrCode
+                size={84}
+                className={`text-black transition-opacity duration-300 ${
+                  selected.active ? 'opacity-100' : 'opacity-10'
+                }`}
+                strokeWidth={1.5}
+              />
+              <AnimatePresence>
+                {!selected.active && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.18 }}
+                    className="absolute inset-0 flex items-center justify-center rounded-2xl bg-white/80 backdrop-blur-[2px]"
+                  >
+                    <span className="text-[9px] font-bold text-[#888991] uppercase tracking-wide">
+                      {t('links.inactive')}
+                    </span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              {selected.active && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/[0.04] rounded-2xl opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity pointer-events-none">
+                  <div className="bg-[#7C3AED] rounded-full p-1.5 shadow-md">
+                    <Maximize size={11} className="text-white" />
                   </div>
                 </div>
-              ))}
+              )}
+            </motion.div>
+
+            {/* Nombre + URL + dots */}
+            <div className="flex flex-col gap-1 min-w-0 flex-1">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={selected.id}
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  transition={{ duration: 0.13 }}
+                >
+                  <p className={`text-sm font-bold truncate ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
+                    {selected.name}
+                  </p>
+                  <p className={`text-[10px] font-mono truncate mt-0.5 ${
+                    selected.active
+                      ? isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'
+                      : isDarkMode ? 'text-[#45434A]' : 'text-[#C5C3CC]'
+                  }`}>
+                    {selected.url}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Pill dots — la activa se expande */}
+              <div className="flex gap-1.5 mt-2.5">
+                {links.map((_, i) => (
+                  <motion.div
+                    key={i}
+                    animate={{
+                      width: i === index ? 16 : 6,
+                      backgroundColor: i === index
+                        ? '#7C3AED'
+                        : isDarkMode ? '#45434A' : '#D1D0D6',
+                    }}
+                    transition={SPRING_DOTS}
+                    className="h-1.5 rounded-full"
+                  />
+                ))}
+              </div>
             </div>
           </motion.div>
+
+          {/* ── Divisor ── */}
+          <div className={`w-px my-3 flex-shrink-0 ${isDarkMode ? 'bg-white/8' : 'bg-black/5'}`} />
+
+          {/* ── Derecha: columna de acciones ── */}
+          <div className="flex flex-col items-center justify-center gap-2.5 px-3 py-4 flex-shrink-0">
+            <button
+              disabled={!selected.active}
+              onClick={() => {
+                if (!selected.active) return
+                navigator.clipboard.writeText(`https://${selected.url}`)
+                addToast(t('links.linkCopied', { name: selected.name }), 'success')
+              }}
+              className={`p-2 rounded-xl transition-colors ${
+                selected.active
+                  ? isDarkMode
+                    ? 'text-[#D8D7D9] hover:bg-white/8 active:bg-white/12'
+                    : 'text-[#45434A] hover:bg-black/5 active:bg-black/8'
+                  : 'opacity-25 cursor-not-allowed'
+              }`}
+            >
+              <Copy size={16} />
+            </button>
+
+            <div className={`w-5 border-t ${isDarkMode ? 'border-white/8' : 'border-black/6'}`} />
+
+            <button
+              disabled={!selected.active}
+              onClick={() => {
+                if (!selected.active) return
+                window.open(`https://${selected.url}`, '_blank')
+              }}
+              className={`p-2 rounded-xl transition-colors ${
+                selected.active
+                  ? isDarkMode
+                    ? 'text-[#D8D7D9] hover:bg-white/8 active:bg-white/12'
+                    : 'text-[#45434A] hover:bg-black/5 active:bg-black/8'
+                  : 'opacity-25 cursor-not-allowed'
+              }`}
+            >
+              <ExternalLink size={16} />
+            </button>
+
+            <div className={`w-5 border-t ${isDarkMode ? 'border-white/8' : 'border-black/6'}`} />
+
+            <Toggle
+              active={selected.active}
+              onToggle={() => onToggle(selected.id)}
+            />
+          </div>
+        </div>
+      </Card>
+
+      {/* Lightbox fullscreen */}
+      <AnimatePresence>
+        {isQrOpen && selected && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-md"
+              onClick={() => setIsQrOpen(false)}
+            />
+            <motion.div
+              layoutId="ql-qr-mini"
+              className="relative bg-white p-8 sm:p-12 rounded-[32px] shadow-2xl flex flex-col items-center"
+              onClick={e => e.stopPropagation()}
+            >
+              <QrCode size={260} className="text-black mb-5" strokeWidth={1.5} />
+              <p className="text-[#111113] font-bold text-xl mb-1 text-center">{selected.name}</p>
+              <p className="text-[#67656E] font-mono text-sm text-center">{selected.url}</p>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
-    </Card>
+    </>
   )
 }
 
@@ -417,7 +523,6 @@ function CustomLinksTable({ onDetail, onEdit, search, onClearSearch }) {
    LinksView
 ───────────────────────────────────────────────────────────── */
 export default function LinksView() {
-  const { isDarkMode } = useTheme()
   const { t } = useTranslation()
   const [links, setLinks]         = useState(PERMANENT_LINKS)
   const [newLinkOpen, setNewLinkOpen] = useState(false)
@@ -453,12 +558,10 @@ export default function LinksView() {
         </div>
       </div>
 
-      {/* Mobile: accordion + CTA button */}
-      <div className="lg:hidden space-y-3 mb-6">
-        <PermanentLinksMobile links={links} onToggle={toggleLink} />
-        <Button size="lg" className="w-full" onClick={() => setNewLinkOpen(true)}>
-          <Plus size={18} /> {t('dashboard.newReservationLink')}
-        </Button>
+      {/* Mobile: compact quick-charge card */}
+      <div className="lg:hidden mb-6">
+        <SectionLabel className="uppercase mb-3">{t('links.quickLinks')}</SectionLabel>
+        <QuickLinkSwipeable links={links} onToggle={toggleLink} />
       </div>
 
       {/* Personalizados */}

@@ -42,7 +42,7 @@ features/links/
 | Feature | Vista principal | Modales / subcomponentes |
 |---------|----------------|--------------------------|
 | `auth` | LoginView | — |
-| `dashboard` | DashboardView | KpiCard, ChartCard, QuickLinkCard, AlertsPanel, LiveFeed, PendingCharges, QuickActions, ShiftSummary |
+| `dashboard` | DashboardView | KpiCard, ChartCard, QuickLinkCard (responsive: desktop tabs / mobile swipeable), AlertsPanel, LiveFeed, PendingCharges, QuickActions, ShiftSummary |
 | `transactions` | TransaccionesView | ReceiptModal, RefundModal |
 | `links` | LinksView | NewLinkModal, LinkDetailModal |
 | `settlements` | LiquidacionesView | — |
@@ -365,6 +365,99 @@ El sidebar usa `ZwapIsotipo` + `ZwapWordmark` por separado para poder animar la 
 
 **Nota:** El root `motion.div` NO anima opacity en initial/animate — solo en exit. Cada hijo (backdrop y panel) controla su propia opacity. Esto evita desincronización donde el backdrop-blur era imperceptible a baja opacidad del root.
 
+### Patrón QR lightbox (layoutId morph)
+
+QR codes usan `layoutId` para animar un morph fluido entre la miniatura in-card y el lightbox fullscreen:
+
+```jsx
+// 1. Miniatura en el card
+<motion.div
+  layoutId="qr-code"
+  onClick={() => setIsQrOpen(true)}
+  className="bg-white p-3 rounded-2xl shadow-lg cursor-pointer group"
+>
+  <QrCode size={84} className="text-black" strokeWidth={1.5} />
+  {/* Hover hint con Maximize icon */}
+</motion.div>
+
+// 2. Lightbox fullscreen — mismo layoutId → Framer anima el morph
+<AnimatePresence>
+  {isQrOpen && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <motion.div /* backdrop */ initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setIsQrOpen(false)} />
+      <motion.div layoutId="qr-code"
+        className="relative bg-white p-8 rounded-[32px] shadow-2xl flex flex-col items-center">
+        <QrCode size={260} className="text-black mb-5" strokeWidth={1.5} />
+        <p className="font-bold text-xl">{name}</p>
+        <p className="font-mono text-sm">{url}</p>
+      </motion.div>
+    </div>
+  )}
+</AnimatePresence>
+```
+
+**Nota:** Cada instancia usa un `layoutId` único (`"qr-code"` en dashboard, `"ql-qr-mini"` en links). ESC cierra + scroll lock vía `useEffect`. Usado por `QuickLinkCard` (dashboard) y `QuickLinkSwipeable` (links).
+
+### Patrón swipeable card (drag-to-switch)
+
+Para navegar entre N items con swipe horizontal. Usa `drag="x"` de Framer Motion con snap-back elástico:
+
+```jsx
+const [index, setIndex] = useState(0)
+const goNext = () => setIndex(i => (i + 1) % items.length)
+const goPrev = () => setIndex(i => (i - 1 + items.length) % items.length)
+
+<motion.div
+  drag="x"
+  dragConstraints={{ left: 0, right: 0 }}
+  dragElastic={0.12}
+  style={{ touchAction: 'pan-y' }}
+  onDragEnd={(_, info) => {
+    if (info.velocity.x < -200 || info.offset.x < -50) goNext()
+    else if (info.velocity.x > 200 || info.offset.x > 50) goPrev()
+  }}
+  className="cursor-grab active:cursor-grabbing select-none"
+>
+  {/* Contenido del item actual */}
+  <AnimatePresence mode="wait">
+    <motion.div key={item.id}
+      initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
+      transition={{ duration: 0.13 }}>
+      ...
+    </motion.div>
+  </AnimatePresence>
+
+  {/* Pill dots — activo se expande a pill */}
+  <div className="flex gap-1.5">
+    {items.map((_, i) => (
+      <motion.div key={i}
+        animate={{ width: i === index ? 16 : 6, backgroundColor: i === index ? '#7C3AED' : '#D1D0D6' }}
+        transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+        className="h-1.5 rounded-full" />
+    ))}
+  </div>
+</motion.div>
+```
+
+**Nota:** `touchAction: 'pan-y'` permite scroll vertical normal mientras captura swipe horizontal. Threshold dual: velocidad (`200px/s`) o distancia (`50px`). Usado por `QuickLinkCard` mobile y `QuickLinkSwipeable`.
+
+### Patrón widget responsive (useMediaQuery branching)
+
+Para componentes con layouts radicalmente diferentes entre mobile y desktop, usar `useMediaQuery` con render condicional en vez de CSS `hidden/block`:
+
+```jsx
+const isDesktop = useMediaQuery('(min-width: 1024px)')
+
+return isDesktop ? (
+  <Card>{/* Desktop: layout completo */}</Card>
+) : (
+  <Card>{/* Mobile: layout compacto */}</Card>
+)
+```
+
+**Cuándo usar:** Cuando desktop y mobile tienen estructura DOM tan distinta que CSS no basta (ej. QuickLinkCard: tabs+QR vertical en desktop → swipeable horizontal en mobile). Para diferencias menores (ocultar/mostrar), preferir `hidden lg:block`.
+
 ## Contextos
 
 | Hook | Provider | Retorna | localStorage key |
@@ -467,7 +560,7 @@ import useMediaQuery from '@/shared/hooks/useMediaQuery'
 const isDesktop = useMediaQuery('(min-width: 1024px)')
 ```
 
-Usado en `AppShell` para condicionar Sidebar vs BottomNav, y en `Header` para search bar vs search icon.
+Usado en `AppShell` para condicionar Sidebar vs BottomNav, en `Header` para search bar vs search icon, y en `QuickLinkCard` para widget completo (desktop) vs swipeable compacto (mobile).
 
 ### Navegación responsive
 
