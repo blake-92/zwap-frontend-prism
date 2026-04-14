@@ -15,6 +15,14 @@ import { ROUTES } from '@/router/routes'
 import useMediaQuery from '@/shared/hooks/useMediaQuery'
 
 const MAX_ITEMS = 10
+const MAX_ITEMS_MOBILE = 5
+
+/* Umbrales del motor de decisión.
+ * Cuando la clasificación la haga el backend, estos valores pueden desaparecer
+ * del frontend — el API devolverá `action` pre-computada por link. */
+const LIFE_EARLY_THRESHOLD = 0.30
+const LIFE_LATE_THRESHOLD  = 0.70
+const HIGH_FRICTION_VIEWS  = 5
 
 /* ───────────── Motor de decisión ─────────────
  * Combina views × lifeElapsedPct para recomendar acción.
@@ -24,9 +32,9 @@ const MAX_ITEMS = 10
  * - 2-4 views → INTERÉS (early/mid) / AYUDAR (late sin conversión)
  */
 function classifyAction(views, lifeElapsedPct) {
-  const early = lifeElapsedPct < 0.30
-  const late  = lifeElapsedPct >= 0.70
-  if (views >= 5) return 'ayudar'
+  const early = lifeElapsedPct < LIFE_EARLY_THRESHOLD
+  const late  = lifeElapsedPct >= LIFE_LATE_THRESHOLD
+  if (views >= HIGH_FRICTION_VIEWS) return 'ayudar'
   if (views === 0) {
     if (early) return 'esperar'
     if (late)  return 'llamar'
@@ -40,7 +48,6 @@ function classifyAction(views, lifeElapsedPct) {
 const ACTIONS = {
   esperar: {
     text: 'text-[#888991]',
-    bar:  'bg-[#888991]',
     chip: 'bg-[#888991]/10 border-[#888991]/15',
     tint: 'bg-[#888991]/8 border-[#888991]/20',
     Icon: Hourglass,
@@ -50,7 +57,6 @@ const ACTIONS = {
   },
   interes: {
     text: 'text-emerald-500',
-    bar:  'bg-emerald-500',
     chip: 'bg-emerald-500/10 border-emerald-500/15',
     tint: 'bg-emerald-500/8 border-emerald-500/20',
     Icon: Eye,
@@ -60,7 +66,6 @@ const ACTIONS = {
   },
   reenviar: {
     text: 'text-amber-500',
-    bar:  'bg-amber-500',
     chip: 'bg-amber-500/10 border-amber-500/15',
     tint: 'bg-amber-500/8 border-amber-500/20',
     Icon: RefreshCw,
@@ -70,7 +75,6 @@ const ACTIONS = {
   },
   ayudar: {
     text: 'text-orange-500',
-    bar:  'bg-orange-500',
     chip: 'bg-orange-500/10 border-orange-500/15',
     tint: 'bg-orange-500/8 border-orange-500/20',
     Icon: LifeBuoy,
@@ -80,7 +84,6 @@ const ACTIONS = {
   },
   llamar: {
     text: 'text-rose-500',
-    bar:  'bg-rose-500',
     chip: 'bg-rose-500/10 border-rose-500/15',
     tint: 'bg-rose-500/8 border-rose-500/20',
     Icon: Phone,
@@ -98,8 +101,6 @@ function formatTimeRemaining(mins) {
   return `${Math.floor(mins / 1440)}d`
 }
 
-const MAX_ITEMS_MOBILE = 5
-
 /* ───────────── Widget ───────────── */
 export default function PendingCharges() {
   const { t }          = useTranslation()
@@ -110,6 +111,9 @@ export default function PendingCharges() {
   const [detail, setDetail] = useState(null)
 
   // Hasta MAX_ITEMS pendings, ordenados por urgencia de acción (y luego expiración).
+  // TODO(api): cuando CUSTOM_LINKS se reemplace por data del backend (hook/query),
+  // incluir esa fuente en las deps. Si el backend devuelve `action` pre-computada,
+  // eliminar el .map() de clasificación y dejar solo sort + slice.
   const links = useMemo(() => (
     CUSTOM_LINKS
       .filter((l) => l.status === 'Pendiente')
@@ -161,6 +165,7 @@ export default function PendingCharges() {
                   key={link.id}
                   variants={itemVariants}
                   onClick={() => setDetail(link)}
+                  aria-label={`${link.client} — $${link.amount} — ${t(ACTIONS[link.action].labelKey)}`}
                   className={`w-full flex items-stretch gap-3 px-4 py-2.5 text-left cursor-pointer active:opacity-70 transition-opacity ${
                     i < mobileLinks.length - 1
                       ? isDarkMode ? 'border-b border-white/5' : 'border-b border-black/5'
@@ -221,7 +226,7 @@ export default function PendingCharges() {
       </CardHeader>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse min-w-[820px]">
+        <table className="w-full text-left border-collapse min-w-[820px]" aria-label={t('dashboard.pendingLinks')}>
           <thead>
             <tr className={`text-[10px] uppercase font-bold tracking-widest ${
               isDarkMode
@@ -231,7 +236,7 @@ export default function PendingCharges() {
               <th className="px-6 py-3">{t('transactions.tableClient')}</th>
               <th className="px-6 py-3">{t('settlements.tableDetail')}</th>
               <th className="px-4 py-3 text-center">{t('dashboard.views')}</th>
-              <th className="px-6 py-3">{t('settlements.tableTiming')}</th>
+              <th className="px-6 py-3">{t('dashboard.expiresIn')}</th>
               <th className="px-4 py-3 text-center">{t('dashboard.recommendation')}</th>
               <th className="px-6 py-3 text-right">{t('transactions.tableActions')}</th>
             </tr>
