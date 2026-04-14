@@ -566,18 +566,27 @@ GlassBackground (fixed, z-0)
 ### 7.3 Grid dashboard (1 + 2 columnas)
 
 ```jsx
-// Fila media: Cobro Rápido (1) + Chart (2)
+// Operaciones — Fila 1: Cobro Rápido (1) + Live Feed (2)
 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
   <QuickLinkCard />          {/* col-span-1 */}
-  <ChartCard />              {/* lg:col-span-2 */}
+  <LiveFeed />               {/* lg:col-span-2 */}
 </div>
 
-// Fila bottom: Feed (2) + Alertas (1)
+// Operaciones — Fila 2: Pending Charges full-width
+<div className="grid grid-cols-1 gap-6">
+  <PendingCharges />
+</div>
+
+// Métricas — KPIs + Chart
+<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+  {KPIS.map(k => <KpiCard key={k.label} kpi={k} />)}
+</div>
 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-  <LiveFeed />               {/* lg:col-span-2 */}
-  <AlertsPanel />            {/* col-span-1 */}
+  <ChartCard />
 </div>
 ```
+
+**Nota:** El dashboard se divide en dos tabs (`operations` / `metrics`) vía `SegmentControl`. `PendingCharges` es un widget de triage con lógica propia (ver `docs/pending-links-decision-matrix.md`); su versión mobile usa un ticker denso con stat chips coloreados por acción y un modal de detalle al tap.
 
 ### 7.4 Grid de cards (Sucursales, Links permanentes)
 

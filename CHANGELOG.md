@@ -7,6 +7,26 @@ Versionamiento según [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
+## [0.10.0] — 2026-04-14
+
+### Added
+- Widget PendingCharges rediseñado como **tablero de triage** para Dashboard
+  - Motor de decisión 2D: `views × lifeElapsedPct` → 5 acciones (esperar / interés / reenviar / ayudar / llamar)
+  - Ordenamiento por prioridad operativa (llamar primero), tiebreaker por `expiresInMinutes`
+  - Desktop: tabla con columnas consecutivas Vistas / Tiempo / Recomendación
+  - Mobile: ticker denso de 5 items con stat chips tintados por acción
+  - Modal `TriageDetailModal` (tap mobile) con recomendación + razón + inputs del triage, alineado a Prism UI (glass tintado)
+- Nuevos campos en `CUSTOM_LINKS`: `createdMinutesAgo`, `expiresInMinutes`
+- Documentación completa en `docs/pending-links-decision-matrix.md`
+- i18n ES/EN: claves `dashboard.views`, `dashboard.recommendation`, `dashboard.expiresIn`, `dashboard.action{Esperar,Reenviar,Llamar,Interes,Ayudar}`, `dashboard.reason{Esperar,Reenviar,Llamar,Interes,Ayudar}`
+
+### Removed
+- Widgets obsoletos del Dashboard: `AlertsPanel.jsx`, `QuickActions.jsx`, `ShiftSummary.jsx`
+
+### Docs
+- CLAUDE.md: detalle del widget de triage en feature `dashboard`
+- prism-ui.md: sincronizada sección 7.3 (grid dashboard) con el layout actual (tabs operations/metrics)
+
 ## [0.9.1] — 2026-04-13
 
 ### Changed

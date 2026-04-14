@@ -495,26 +495,92 @@ export const BRANCH_LIST = [
   { id: '3', name: 'Hotel de Madera',    address: 'Beni, Bolivia',             users: 1, isMain: false },
 ]
 
+/* ── Custom Links ──
+ * createdMinutesAgo + expiresInMinutes → se combinan para calcular
+ * lifeElapsedPct y recomendar acción en base a views.
+ */
 export const CUSTOM_LINKS = [
+  // LLAMAR: 0 vistas + muy tarde
   {
-    id: 'L-1029', client: 'Alice Smith',   email: 'alice@example.com',  initials: 'AS',
-    amount: '350.00',   items: 2, expires: 'En 2 horas',   createdAt: '29 Mar 2026, 08:30', views: 3,
+    id: 'L-1040', client: 'Diego Paredes', email: 'dparedes@mail.com', initials: 'DP',
+    amount: '520.00',   items: 2, expires: 'En 10 min',    expiresInMinutes: 10,
+    createdMinutesAgo: 80,  createdAt: '29 Mar 2026, 10:40', views: 0,
     status: 'Pendiente', statusVariant: 'warning', StatusIcon: Timer,
   },
+  // LLAMAR: 1 vista + tarde
   {
-    id: 'L-1028', client: 'Bob Jones',     email: 'bob@example.com',    initials: 'BJ',
+    id: 'L-1041', client: 'Valentina Rojas', email: 'vrojas@viajes.cl', initials: 'VR',
+    amount: '980.00',   items: 3, expires: 'En 30 min',    expiresInMinutes: 30,
+    createdMinutesAgo: 150, createdAt: '29 Mar 2026, 09:30', views: 1,
+    status: 'Pendiente', statusVariant: 'warning', StatusIcon: Timer,
+  },
+  // AYUDAR: 2-4 vistas + tarde → fricción
+  {
+    id: 'L-1032', client: 'Sophie Laurent', email: 'sophie.l@mail.fr', initials: 'SL',
+    amount: '475.00',   items: 2, expires: 'En 30 min',    expiresInMinutes: 30,
+    createdMinutesAgo: 120, createdAt: '29 Mar 2026, 10:00', views: 3,
+    status: 'Pendiente', statusVariant: 'warning', StatusIcon: Timer,
+  },
+  // AYUDAR: 6 vistas (5+) → fricción
+  {
+    id: 'L-1042', client: 'Olivia Chen', email: 'ochen@corp.io', initials: 'OC',
+    amount: '1,450.00', items: 4, expires: 'En 2 horas',   expiresInMinutes: 120,
+    createdMinutesAgo: 60,  createdAt: '29 Mar 2026, 11:00', views: 6,
+    status: 'Pendiente', statusVariant: 'warning', StatusIcon: Timer,
+  },
+  // AYUDAR: 5 vistas → fricción
+  {
+    id: 'L-1026', client: 'Emma Watson', email: 'emma@agency.uk', initials: 'EW',
+    amount: '890.00',   items: 3, expires: 'En 48 horas',  expiresInMinutes: 2880,
+    createdMinutesAgo: 600, createdAt: '29 Mar 2026, 02:00', views: 5,
+    status: 'Pendiente', statusVariant: 'warning', StatusIcon: Timer,
+  },
+  // REENVIAR: 0 vistas + mid-life
+  {
+    id: 'L-1031', client: 'Ricardo Flores', email: 'rflores@hotel.bo', initials: 'RF',
+    amount: '1,200.00', items: 5, expires: 'En 6 horas',   expiresInMinutes: 360,
+    createdMinutesAgo: 360, createdAt: '29 Mar 2026, 06:00', views: 0,
+    status: 'Pendiente', statusVariant: 'warning', StatusIcon: Timer,
+  },
+  // INTERÉS: 3 vistas + early
+  {
+    id: 'L-1029', client: 'Alice Smith', email: 'alice@example.com', initials: 'AS',
+    amount: '350.00',   items: 2, expires: 'En 2 horas',   expiresInMinutes: 120,
+    createdMinutesAgo: 50,  createdAt: '29 Mar 2026, 11:10', views: 3,
+    status: 'Pendiente', statusVariant: 'warning', StatusIcon: Timer,
+  },
+  // INTERÉS: 4 vistas + mid
+  {
+    id: 'L-1043', client: 'Hiro Tanaka', email: 'hiro.t@jp.co', initials: 'HT',
+    amount: '2,150.00', items: 6, expires: 'En 5 horas',   expiresInMinutes: 300,
+    createdMinutesAgo: 200, createdAt: '29 Mar 2026, 08:40', views: 4,
+    status: 'Pendiente', statusVariant: 'warning', StatusIcon: Timer,
+  },
+  // ESPERAR: 1 vista + early
+  {
+    id: 'L-1044', client: 'Leila Navarro', email: 'lnavarro@ar.net', initials: 'LN',
+    amount: '680.00',   items: 3, expires: 'En 3 horas',   expiresInMinutes: 165,
+    createdMinutesAgo: 15,  createdAt: '29 Mar 2026, 11:45', views: 1,
+    status: 'Pendiente', statusVariant: 'warning', StatusIcon: Timer,
+  },
+  // ESPERAR: 0 vistas + muy early
+  {
+    id: 'L-1045', client: 'Marco Bianchi', email: 'mbianchi@it.eu', initials: 'MB',
+    amount: '395.00',   items: 2, expires: 'En 2 horas',   expiresInMinutes: 115,
+    createdMinutesAgo: 5,   createdAt: '29 Mar 2026, 11:55', views: 0,
+    status: 'Pendiente', statusVariant: 'warning', StatusIcon: Timer,
+  },
+  // Non-pending: Pagado
+  {
+    id: 'L-1028', client: 'Bob Jones', email: 'bob@example.com', initials: 'BJ',
     amount: '1,200.00', items: 4, expires: '-',             createdAt: '28 Mar 2026, 14:15', views: 1,
     status: 'Pagado',   statusVariant: 'success', StatusIcon: CheckCircle2,
   },
+  // Non-pending: Expirado
   {
-    id: 'L-1027', client: 'Carlos Ruiz',   email: 'cr@example.com',     initials: 'CR',
+    id: 'L-1027', client: 'Carlos Ruiz', email: 'cr@example.com', initials: 'CR',
     amount: '150.00',   items: 1, expires: 'Ayer, 18:00',  createdAt: '27 Mar 2026, 18:00', views: 0,
     status: 'Expirado', statusVariant: 'danger', StatusIcon: XCircle,
-  },
-  {
-    id: 'L-1026', client: 'Emma Watson',   email: 'emma@agency.uk',     initials: 'EW',
-    amount: '890.00',   items: 3, expires: 'En 48 horas',  createdAt: '28 Mar 2026, 09:20', views: 5,
-    status: 'Pendiente', statusVariant: 'warning', StatusIcon: Timer,
   },
 ]
 
