@@ -13,10 +13,7 @@ import KpiCard        from './KpiCard'
 import QuickLinkCard  from './QuickLinkCard'
 import ChartCard      from './ChartCard'
 import LiveFeed       from './LiveFeed'
-import AlertsPanel    from './AlertsPanel'
 import PendingCharges from './PendingCharges'
-import QuickActions   from './QuickActions'
-import ShiftSummary   from './ShiftSummary'
 // Cross-feature dependency: Dashboard reuses the NewLinkModal from links feature
 // via its public re-export. This avoids duplicating the modal component.
 import { NewLinkModal } from '@/features/links'
@@ -69,18 +66,9 @@ export default function DashboardView() {
             <LiveFeed onViewAll={() => navigate(ROUTES.TRANSACTIONS)} />
           </div>
 
-          {/* Row 2: Cobros Pendientes + Acciones/Resumen */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 2xl:gap-8 mb-6 sm:mb-8">
-            <PendingCharges />
-            <div className="flex flex-col gap-4 sm:gap-6 2xl:gap-8">
-              <QuickActions onNewCharge={() => setNewLinkOpen(true)} />
-              <ShiftSummary />
-            </div>
-          </div>
-
-          {/* Row 3: Requiere Atención */}
+          {/* Row 2: Cobros Pendientes */}
           <div className="grid grid-cols-1 gap-4 sm:gap-6 2xl:gap-8">
-            <AlertsPanel />
+            <PendingCharges />
           </div>
         </>
       )}

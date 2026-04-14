@@ -42,7 +42,7 @@ features/links/
 | Feature | Vista principal | Modales / subcomponentes |
 |---------|----------------|--------------------------|
 | `auth` | LoginView | — |
-| `dashboard` | DashboardView | KpiCard, ChartCard, QuickLinkCard (responsive: desktop tabs / mobile swipeable), AlertsPanel, LiveFeed (desktop: table, mobile: ticker with tap→receipt), PendingCharges, QuickActions, ShiftSummary |
+| `dashboard` | DashboardView | KpiCard, ChartCard, QuickLinkCard (responsive: desktop tabs / mobile swipeable), LiveFeed (desktop: table, mobile: ticker with tap→receipt), PendingCharges (widget de triage — desktop: tabla con columnas Vistas/Tiempo/Recomendación; mobile: ticker compacto con stat chips y tap→TriageDetailModal — ver `docs/pending-links-decision-matrix.md`) |
 | `transactions` | TransaccionesView | ReceiptModal (also re-exported for cross-feature use by LiveFeed), RefundModal |
 | `links` | LinksView | NewLinkModal, LinkDetailModal |
 | `settlements` | LiquidacionesView | — |

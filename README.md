@@ -1,6 +1,6 @@
 # Zwap Frontend — Prism
 
-> **v0.9.1** · [Changelog](./CHANGELOG.md)
+> **v0.9.1** · [Changelog](./CHANGELOG.md) · Disponible en Cloudflare Pages
 
 Panel de administración para la plataforma de pagos Zwap. Construido con React + Vite, diseño Glassmorphism, arquitectura Bulletproof React.
 
