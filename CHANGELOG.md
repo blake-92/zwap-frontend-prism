@@ -10,8 +10,8 @@ Versionamiento según [Semantic Versioning](https://semver.org/lang/es/).
 ## [0.11.1] — 2026-04-14
 
 ### Fixed
-- **iOS Safari blank screen on reload:** eliminado `overflow: hidden` en `document.documentElement` (`<html>`) — causa conocida de blank screen en BFCache de Safari; solo se aplica en `document.body`
 - **iOS Safari BFCache stale chunks:** handler `pageshow` en `main.jsx` detecta restauración desde BFCache (`e.persisted`) y fuerza un reload para que Safari re-evalúe los chunks con los hashes actuales
+- **AppShell scroll lock:** restaurado `overflow: hidden` en `document.documentElement` — iOS Safari requiere ambos (`html` + `body`) para contener el scroll en `main`; sin el lock en `html`, el `paddingBottom` de `main` no era respetado en iOS
 
 ## [0.11.0] — 2026-04-14
 
