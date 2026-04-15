@@ -78,10 +78,11 @@ export default function AppShell() {
       <div className="flex-1 flex flex-col h-screen overflow-hidden z-10 relative">
         <Header selectedBranch={branch} onBranchChange={setBranch} isDesktop={isDesktop} />
 
-        <main className={`flex-1 overflow-auto p-4 sm:p-6 lg:p-8 xl:p-10 2xl:p-12 ${
-          isDesktop ? 'pb-24 xl:pb-32' : 'pb-28'
-        }`}>
-          <div className="max-w-[1400px] 2xl:max-w-[1600px] mx-auto h-full">
+        <main
+          className="flex-1 overflow-auto px-4 pt-4 sm:px-6 sm:pt-6 lg:px-8 lg:pt-8 xl:px-10 xl:pt-10 2xl:px-12 2xl:pt-12 lg:pb-10 xl:pb-12 2xl:pb-16"
+          style={!isDesktop ? { paddingBottom: 'calc(5rem + env(safe-area-inset-bottom))' } : undefined}
+        >
+          <div className="max-w-[1400px] 2xl:max-w-[1600px] mx-auto">
             <ErrorBoundary>
               <Suspense fallback={<PageLoader />}>
                 <Outlet />

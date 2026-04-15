@@ -268,7 +268,7 @@ export default function Header({ selectedBranch, onBranchChange, isDesktop }) {
                     }`}
                   />
                   <motion.button
-                    onClick={() => setSearchExpanded(false)}
+                    onClick={() => { if (query) setQuery(''); else setSearchExpanded(false) }}
                     whileTap={{ scale: 0.85 }}
                     transition={SPRING}
                     className={`p-1 rounded-lg flex-shrink-0 transition-colors ${

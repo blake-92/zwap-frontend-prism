@@ -7,6 +7,15 @@ Versionamiento según [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
+## [0.10.1] — 2026-04-14
+
+### Fixed
+- **AppShell:** eliminado `h-full` del div contenedor interior — el contenido desbordaba visualmente sobre el padding inferior de `main` en lugar de activar el scroll, haciendo que los últimos ítems de cualquier vista invadieran la zona de holgura del layout
+- **AppShell mobile:** padding inferior reemplazado por `calc(5rem + env(safe-area-inset-bottom))` via style prop — compensa correctamente el BottomNav (~56px) más el safe area del dispositivo (34px en iPhone), eliminando el exceso de espacio muerto anterior (`pb-28` = 112px)
+- **AppShell desktop:** padding inferior separado del shorthand `p-*` para evitar que clases responsivas (`lg:p-8` etc.) lo sobreescribieran; ahora `lg:pb-10 xl:pb-12 2xl:pb-16` aplica correctamente
+- **Header mobile:** botón X en barra de búsqueda ahora limpia el query si hay texto, y colapsa la barra solo si el query ya está vacío (antes solo colapsaba sin limpiar)
+- **main.jsx:** handler `vite:preloadError` para recargar automáticamente cuando Cloudflare Pages despliega una nueva versión y los chunks cacheados quedan stale (pantalla en blanco)
+
 ## [0.10.0] — 2026-04-14
 
 ### Added
