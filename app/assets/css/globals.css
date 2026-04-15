@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   ZWAP PRISM UI — Global Styles
+   Design System: Glass Morphism + Inter + JetBrains Mono
+   ============================================================ */
+
+:root {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Allow text selection on data & input elements */
+input, textarea, [contenteditable],
+td, .selectable, pre, code {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* ─── Overlay scroll lock ────────────────────────────────── */
+/* Bloquea el scroll de <main> cuando hay modales/sheets abiertos.
+   Coordinado por useScrollLock() via html.has-overlay.
+   AppShell ya bloquea html+body permanentemente para iOS Safari;
+   este selector complementa bloqueando el contenedor de scroll real. */
+html.has-overlay main {
+  overflow: hidden;
+}
+
+/* ─── Scrollbar Prism ─────────────────────────────────────── */
+::-webkit-scrollbar             { width: 6px; height: 6px; }
+::-webkit-scrollbar-track       { background: transparent; margin: 12px; }
+::-webkit-scrollbar-thumb       {
+  background: rgba(124,58,237,0.30);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(124,58,237,0.55); border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-button      { display:none; width:0; height:0; }
+::-webkit-scrollbar-corner      { background: transparent; }
+*  { scrollbar-width: thin; scrollbar-color: rgba(124,58,237,0.30) transparent; }
+
+.no-scrollbar::-webkit-scrollbar { display:none; }
+.no-scrollbar                     { -ms-overflow-style:none; scrollbar-width:none; }
+
+/* ─── Font utilities ─────────────────────────────────────── */
+.font-sans  { font-family: var(--font-sans);  }
+.font-mono  { font-family: var(--font-mono);  }
+
+/* ─── Animations ─────────────────────────────────────────── */
+@keyframes fadeIn      { from { opacity:0; }                       to { opacity:1; } }
+@keyframes slideUp     { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+@keyframes spinSlow    { from { transform:rotate(0deg); }           to { transform:rotate(360deg); } }
+
+.animate-fade-in  { animation: fadeIn  .4s ease both; }
+.animate-slide-up { animation: slideUp .4s ease both; }
+.animate-spin-slow{ animation: spinSlow 2s linear infinite; }
+
+/* ─── react-day-picker — Prism UI Theme ─────────────────── */
+/* Used by: DatePickerModal (src/shared/ui/DatePickerModal.jsx) */
+
+/* Base — shared sizing, typography, layout (both themes) */
+.rdp-prism-light .rdp-root,
+.rdp-prism-dark .rdp-root {
+  --rdp-day-height: 36px;
+  --rdp-day-width: 36px;
+  --rdp-day_button-border-radius: 10px;
+  --rdp-day_button-border: 2px solid transparent;
+  --rdp-day_button-height: 34px;
+  --rdp-day_button-width: 34px;
+  --rdp-selected-border: 2px solid #7C3AED;
+  --rdp-nav_button-height: 28px;
+  --rdp-nav_button-width: 28px;
+  --rdp-nav-height: 36px;
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: 13px;
+}
+.rdp-prism-light .rdp-months,
+.rdp-prism-dark .rdp-months { width: 100%; max-width: 100%; }
+.rdp-prism-light .rdp-month,
+.rdp-prism-dark .rdp-month { width: 100%; }
+.rdp-prism-light .rdp-month_grid,
+.rdp-prism-dark .rdp-month_grid { width: 100%; }
+.rdp-prism-light .rdp-month_caption,
+.rdp-prism-dark .rdp-month_caption { font-size: 13px; font-weight: 700; }
+.rdp-prism-light .rdp-weekdays,
+.rdp-prism-dark .rdp-weekdays { display: flex; }
+.rdp-prism-light .rdp-weekday,
+.rdp-prism-dark .rdp-weekday { flex: 1; text-align: center; font-size: 11px; font-weight: 600; opacity: 1; }
+.rdp-prism-light .rdp-week,
+.rdp-prism-dark .rdp-week { display: flex; }
+.rdp-prism-light .rdp-day,
+.rdp-prism-dark .rdp-day { flex: 1; display: flex; justify-content: center; align-items: center; height: 42px; }
+.rdp-prism-light .rdp-day_button,
+.rdp-prism-dark .rdp-day_button { width: 38px; height: 38px; font-weight: 600; font-size: 12px; }
+.rdp-prism-light .rdp-selected .rdp-day_button,
+.rdp-prism-dark .rdp-selected .rdp-day_button { background: #7C3AED; color: white; border-color: #7C3AED; }
+
+/* Light — color tokens only */
+.rdp-prism-light .rdp-root {
+  --rdp-accent-color: #7C3AED;
+  --rdp-accent-background-color: rgba(124, 58, 237, 0.08);
+  --rdp-today-color: #7C3AED;
+  --rdp-outside-opacity: 0.3;
+  color: #45434A;
+}
+.rdp-prism-light .rdp-month_caption { color: #111113; }
+.rdp-prism-light .rdp-weekday { color: #B0AFB4; }
+.rdp-prism-light .rdp-day_button:hover { background: rgba(124, 58, 237, 0.08); }
+.rdp-prism-light .rdp-selected .rdp-day_button { box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3); }
+.rdp-prism-light .rdp-today:not(.rdp-outside) .rdp-day_button { background: rgba(124, 58, 237, 0.1); }
+.rdp-prism-light .rdp-chevron { fill: #7C3AED; }
+.rdp-prism-light .rdp-button_next:hover,
+.rdp-prism-light .rdp-button_previous:hover { background: rgba(124, 58, 237, 0.08); border-radius: 8px; }
+
+/* Dark — color tokens only */
+.rdp-prism-dark .rdp-root {
+  --rdp-accent-color: #A78BFA;
+  --rdp-accent-background-color: rgba(124, 58, 237, 0.15);
+  --rdp-today-color: #A78BFA;
+  --rdp-outside-opacity: 0.2;
+  color: #D8D7D9;
+}
+.rdp-prism-dark .rdp-month_caption { color: white; }
+.rdp-prism-dark .rdp-weekday { color: #888991; }
+.rdp-prism-dark .rdp-day_button:hover { background: rgba(255, 255, 255, 0.08); }
+.rdp-prism-dark .rdp-selected .rdp-day_button { box-shadow: 0 4px 12px rgba(124, 58, 237, 0.35); }
+.rdp-prism-dark .rdp-today:not(.rdp-outside) .rdp-day_button { background: rgba(124, 58, 237, 0.15); }
+.rdp-prism-dark .rdp-chevron { fill: #A78BFA; }
+.rdp-prism-dark .rdp-button_next:hover,
+.rdp-prism-dark .rdp-button_previous:hover { background: rgba(255, 255, 255, 0.1); border-radius: 8px; }
+
+/* ─── Page & layout transitions ──────────────────────────── */
+.page-enter-active,
+.page-leave-active,
+.layout-enter-active,
+.layout-leave-active { transition: opacity 0.18s ease, transform 0.18s ease; }
+.page-enter-from,
+.layout-enter-from { opacity: 0; transform: translateY(8px); }
+.page-leave-to,
+.layout-leave-to { opacity: 0; transform: translateY(-8px); }
