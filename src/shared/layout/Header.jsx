@@ -11,7 +11,7 @@ import { Button, Tooltip } from '@/shared/ui'
 import { BRANCHES } from '@/services/mocks/mockData'
 import ZwapIsotipo  from '@/shared/brand/ZwapIsotipo'
 import ZwapWordmark from '@/shared/brand/ZwapWordmark'
-import { SPRING } from '@/shared/utils/springs'
+import { SPRING, SPRING_SIDEBAR } from '@/shared/utils/springs'
 import { getDropdownGlass } from '@/shared/utils/cardClasses'
 
 const WORDMARK_VARIANTS = {
@@ -40,7 +40,7 @@ const sheetVariants = {
   exit:    { y: '100%', transition: { type: 'spring', stiffness: 400, damping: 36 } },
 }
 
-export default function Header({ selectedBranch, onBranchChange, isDesktop }) {
+export default function Header({ selectedBranch, onBranchChange, isDesktop, headerVisible = true }) {
   const { t } = useTranslation()
   const { isDarkMode, toggleTheme } = useTheme()
   const { query, setQuery, placeholder, hasFilters, openFilters, activeFilterCount } = useHeaderSearch()
@@ -170,11 +170,17 @@ export default function Header({ selectedBranch, onBranchChange, isDesktop }) {
 
   return (
   <>
-    <header className={`relative z-50 h-16 lg:h-20 flex items-center justify-between px-4 sm:px-6 lg:px-10 flex-shrink-0 transition-all duration-500 ${
-      isDarkMode
-        ? 'bg-[#111113]/20 backdrop-blur-2xl border-b border-white/10'
-        : 'bg-white/30 backdrop-blur-2xl border-b border-white/80'
-    }`}>
+    <motion.header
+      animate={{ y: !isDesktop && !headerVisible ? -64 : 0 }}
+      transition={SPRING_SIDEBAR}
+      className={`z-50 h-16 lg:h-20 flex items-center justify-between px-4 sm:px-6 lg:px-10 flex-shrink-0 transition-colors duration-500 ${
+        isDesktop ? 'relative' : 'fixed inset-x-0 top-0'
+      } ${
+        isDarkMode
+          ? 'bg-[#111113]/20 backdrop-blur-2xl border-b border-white/10'
+          : 'bg-white/30 backdrop-blur-2xl border-b border-white/80'
+      }`}
+    >
 
       {isDesktop ? (
         /* ══════════════ Desktop layout ══════════════ */
@@ -326,7 +332,7 @@ export default function Header({ selectedBranch, onBranchChange, isDesktop }) {
         </>
       )}
 
-    </header>
+    </motion.header>
 
     {/* ── Mobile: branch bottom sheet (portal to body to escape stacking contexts) ── */}
     {createPortal(

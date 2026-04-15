@@ -7,6 +7,18 @@ Versionamiento según [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
+## [0.11.0] — 2026-04-14
+
+### Added
+- **Header scroll-aware (mobile):** el header se desliza hacia arriba al scrollear hacia abajo y reaparece al scrollear hacia arriba, usando `motion.header` con spring `SPRING_SIDEBAR`. Siempre visible cuando `scrollTop ≤ 4px`
+- **`public/_headers`:** configuración de cache para Cloudflare Pages — HTML con `no-cache`, assets con hash con `immutable` (max-age 1 año)
+
+### Fixed
+- **Body scroll lock:** `useEffect` en AppShell bloquea `overflow` en `html` y `body` mientras la app está montada, garantizando que `main` sea siempre el scroll container. Prevenía que iOS Safari y Chrome Android propagaran el scroll al documento (header desaparecía, Chrome entraba en fullscreen)
+- **Overscroll chaining:** `overscroll-y-contain` en `main` evita que el rebote al llegar al límite del scroll se propague al documento
+- **Header fijo en mobile:** `position: fixed inset-x-0 top-0` en mobile para que el header nunca sea arrastrado por scroll del documento; `pt-20` en `main` para compensar (header 64px + respiro 16px)
+- **Blank screen en iOS Safari al recargar:** meta tags `Cache-Control: no-cache` en `index.html` como segunda capa de defensa contra HTML stale cacheado que apunta a chunk URLs viejos
+
 ## [0.10.1] — 2026-04-14
 
 ### Fixed

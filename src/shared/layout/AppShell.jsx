@@ -1,4 +1,4 @@
-import { useState, Suspense } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import { Outlet } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
@@ -19,6 +19,42 @@ export default function AppShell() {
   const [isCollapsed, setIsCollapsed] = useState(
     () => localStorage.getItem('zwap-sidebar') === 'collapsed'
   )
+
+  // Scroll-aware header (mobile only)
+  const mainRef       = useRef(null)
+  const lastScrollY   = useRef(0)
+  const [headerVisible, setHeaderVisible] = useState(true)
+
+  // Prevent document scroll — ensures main is always the scroll container.
+  // Without this, iOS Safari and Chrome Android propagate scroll to the body,
+  // causing the header to disappear and the browser chrome to auto-hide.
+  useEffect(() => {
+    document.documentElement.style.overflow = 'hidden'
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.documentElement.style.overflow = ''
+      document.body.style.overflow = ''
+    }
+  }, [])
+
+  useEffect(() => {
+    if (isDesktop) {
+      setHeaderVisible(true)
+      return
+    }
+    const el = mainRef.current
+    if (!el) return
+    const onScroll = () => {
+      const y     = el.scrollTop
+      const delta = y - lastScrollY.current
+      if (y <= 4)       setHeaderVisible(true)
+      else if (delta > 8)  setHeaderVisible(false)
+      else if (delta < -8) setHeaderVisible(true)
+      lastScrollY.current = Math.max(0, y)
+    }
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => el.removeEventListener('scroll', onScroll)
+  }, [isDesktop])
 
   const toggle = () => {
     const next = !isCollapsed
@@ -76,10 +112,15 @@ export default function AppShell() {
 
       {/* ── Main content ── */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden z-10 relative">
-        <Header selectedBranch={branch} onBranchChange={setBranch} isDesktop={isDesktop} />
+        <Header selectedBranch={branch} onBranchChange={setBranch} isDesktop={isDesktop} headerVisible={headerVisible} />
 
         <main
-          className="flex-1 overflow-auto px-4 pt-4 sm:px-6 sm:pt-6 lg:px-8 lg:pt-8 xl:px-10 xl:pt-10 2xl:px-12 2xl:pt-12 lg:pb-10 xl:pb-12 2xl:pb-16"
+          ref={mainRef}
+          className={`flex-1 overflow-auto overscroll-y-contain ${
+            isDesktop
+              ? 'px-4 pt-4 sm:px-6 sm:pt-6 lg:px-8 lg:pt-8 xl:px-10 xl:pt-10 2xl:px-12 2xl:pt-12 lg:pb-10 xl:pb-12 2xl:pb-16'
+              : 'px-4 sm:px-6 pt-20'
+          }`}
           style={!isDesktop ? { paddingBottom: 'calc(5rem + env(safe-area-inset-bottom))' } : undefined}
         >
           <div className="max-w-[1400px] 2xl:max-w-[1600px] mx-auto">
