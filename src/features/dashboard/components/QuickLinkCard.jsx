@@ -1,20 +1,20 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { MousePointerClick, QrCode, Copy, ExternalLink, Maximize } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { useToast } from '@/shared/context/ToastContext'
-import { Card, Button, SegmentControl } from '@/shared/ui'
+import { Card, Button, SegmentControl, QrLightbox } from '@/shared/ui'
 import { PERMANENT_LINKS } from '@/services/mocks/mockData'
 import useMediaQuery from '@/shared/hooks/useMediaQuery'
-
-const SPRING_DOTS = { type: 'spring', stiffness: 420, damping: 32 }
+import { SPRING_DOTS } from '@/shared/utils/springs'
 
 export default function QuickLinkCard() {
   const { t }          = useTranslation()
   const { isDarkMode } = useTheme()
   const { addToast }   = useToast()
   const isDesktop      = useMediaQuery('(min-width: 1024px)')
+  const isMobile       = useMediaQuery('(max-width: 639px)')
 
   // Desktop: SegmentControl por link activo
   const activeLinks         = PERMANENT_LINKS.filter(l => l.active)
@@ -30,22 +30,10 @@ export default function QuickLinkCard() {
   // Link que muestra el lightbox según modo activo
   const lightboxLink = isDesktop ? desktopSelected : mobileSelected
 
-  useEffect(() => {
-    if (!isQrMaximized) return
-    const onKey = (e) => { if (e.key === 'Escape') setIsQrMaximized(false) }
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = prev
-    }
-  }, [isQrMaximized])
-
   const handleCopy = () => {
     if (desktopSelected?.url) {
       navigator.clipboard.writeText(desktopSelected.url)
-      const key = window.innerWidth < 640 ? 'links.linkCopiedShort' : 'links.linkCopied'
+      const key = isMobile ? 'links.linkCopiedShort' : 'links.linkCopied'
       addToast(t(key, { name: desktopSelected.name }), 'success')
     }
   }
@@ -193,9 +181,9 @@ export default function QuickLinkCard() {
               </AnimatePresence>
 
               <div className="flex gap-1.5 mt-2.5">
-                {PERMANENT_LINKS.map((_, i) => (
+                {PERMANENT_LINKS.map((link, i) => (
                   <motion.div
-                    key={i}
+                    key={link.id}
                     animate={{
                       width: i === mobileIndex ? 16 : 6,
                       backgroundColor: i === mobileIndex
@@ -213,29 +201,13 @@ export default function QuickLinkCard() {
       )}
 
       {/* Lightbox compartido */}
-      <AnimatePresence>
-        {isQrMaximized && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-md"
-              onClick={() => setIsQrMaximized(false)}
-            />
-            <motion.div
-              layoutId="qr-code"
-              className="relative bg-white p-8 sm:p-12 rounded-[32px] shadow-2xl flex flex-col items-center"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <QrCode size={280} className="text-black mb-6" strokeWidth={1.5} />
-              <p className="text-[#111113] font-bold text-xl mb-1 text-center">{lightboxLink?.name}</p>
-              <p className="text-[#67656E] font-mono text-sm text-center">{lightboxLink?.url}</p>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      <QrLightbox
+        isOpen={isQrMaximized}
+        onClose={() => setIsQrMaximized(false)}
+        layoutId="qr-code"
+        name={lightboxLink?.name}
+        url={lightboxLink?.url}
+      />
     </>
   )
 }

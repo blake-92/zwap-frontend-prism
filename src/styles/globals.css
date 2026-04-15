@@ -32,6 +32,15 @@ td, .selectable, pre, code {
   user-select: text;
 }
 
+/* ─── Overlay scroll lock ────────────────────────────────── */
+/* Bloquea el scroll de <main> cuando hay modales/sheets abiertos.
+   Coordinado por useScrollLock() via html.has-overlay.
+   AppShell ya bloquea html+body permanentemente para iOS Safari;
+   este selector complementa bloqueando el contenedor de scroll real. */
+html.has-overlay main {
+  overflow: hidden;
+}
+
 /* ─── Scrollbar Prism ─────────────────────────────────────── */
 ::-webkit-scrollbar             { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track       { background: transparent; margin: 12px; }

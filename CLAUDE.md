@@ -128,6 +128,7 @@ import {
 | `Skeleton` | `width`, `height`, `className` | Loader shimmer animado |
 | `Tooltip` | `content`, `position` (top/bottom/left/right) | Tooltip portal con fade |
 | `DatePickerModal` | `selectedDate`, `onSelect`, `timeValue`, `onTimeChange`, `onConfirm`, `onClose` | Modal de fecha + hora; desktop: react-day-picker, mobile: inputs nativos del OS |
+| `BottomSheet` | `isOpen`, `onClose`, `title?`, `children` | Panel deslizante desde el borde inferior; backdrop + drag-to-dismiss + safe-area; se portaliza al body. Solo usar bajo `lg` |
 | `EmptySearchState` | `colSpan`, `term`, `onClear` | Fila vacía para tablas sin resultados |
 | `ErrorBoundary` | `children` | Captura errores runtime, muestra UI de fallback con botón reintentar |
 | `PageLoader` | — | Spinner de carga para Suspense fallback |
@@ -666,6 +667,7 @@ Exports disponibles:
 | `SETTLEMENT_SUMMARY` | KPIs de liquidaciones |
 | `USERS` | Usuarios del sistema |
 | `CURRENT_USER` | `{ displayName, role, email }` — usuario logueado actual |
+| `BUSINESS_NAME` | `string` — nombre del negocio (usado en ReceiptModal y similares) |
 | `BRANCH_LIST` | Sucursales con detalle (address, users, isMain) |
 | `CUSTOM_LINKS` | Links de pago customizados por cliente |
 | `PLAN_INFO` | Detalles del plan de suscripción |
@@ -772,6 +774,36 @@ Al hacer un release:
 2. Agregar entrada en `CHANGELOG.md` con fecha y secciones (Added/Changed/Fixed/Security/Removed)
 3. Commit: `chore: bump version to X.Y.Z`
 4. Tag: `git tag vX.Y.Z`
+
+## Full-attention overlays — patrón estándar
+
+Cualquier elemento que requiera atención total del usuario (modales, recibos, lightboxes, bottom sheets) **debe** cumplir dos cosas para que el chrome de la app (Sidebar, BottomNav) se difumine correctamente y el overlay escape los stacking contexts del layout:
+
+1. **Portalizar a `document.body`** — evita que el contenedor quede atrapado en el `z-10` del main content wrapper de `AppShell`. Sin esto, `BottomNav` (`fixed z-40` en el root) aparece por encima del overlay.
+
+2. **Señalizar con `useChromeBlur()`** — setea `data-modal-open` en el body con un contador para overlays apilados. Sidebar y BottomNav observan este atributo y aplican `blur-sm saturate-50 pointer-events-none`.
+
+```jsx
+import { createPortal } from 'react-dom'
+import useChromeBlur from '@/shared/hooks/useChromeBlur'
+
+export default function MyOverlay({ onClose }) {
+  useChromeBlur()  // si está dentro de AnimatePresence — usa useIsPresent
+
+  if (typeof document === 'undefined') return null
+
+  return createPortal(
+    <motion.div exit={{ opacity: 0 }} className="fixed inset-0 z-50 ...">
+      ...
+    </motion.div>,
+    document.body
+  )
+}
+```
+
+- Para componentes que controlan su propia visibilidad vía prop `isOpen` (ej. `BottomSheet`), pasar el flag: `useChromeBlur(isOpen)`. El cleanup se dispara cuando `isOpen` pasa a `false`, sincronizado con el inicio de la animación de exit.
+- El hook usa `useIsPresent` de Framer Motion cuando no se le pasa arg, así que limpia el flag al **inicio** del exit (no al unmount) — el sidebar/bottomnav se des-difuminan al mismo tiempo que el backdrop.
+- Componentes que ya cumplen el patrón: `Modal`, `QrLightbox`, `BottomSheet`, `ReceiptModal`, `WithdrawReceiptModal`, `NewBranchModal`. Cualquier modal nuevo que use `<Modal>` lo hereda gratis.
 
 ## No hacer
 

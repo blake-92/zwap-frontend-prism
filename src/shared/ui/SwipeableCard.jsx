@@ -43,11 +43,12 @@ export default function SwipeableCard({ children, actions, className = '' }) {
         } rounded-[24px]`}
         style={{ width: maxDrag }}
       >
-        {validActions.map((act, i) => {
+        {validActions.map((act) => {
            const Icon = act.icon
            return (
-             <button 
-               key={i}
+             <button
+               key={act.label}
+               aria-label={act.label}
                onClick={(e) => {
                  e.stopPropagation()
                  if (!act.disabled) {

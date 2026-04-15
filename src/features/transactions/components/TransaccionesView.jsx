@@ -94,7 +94,7 @@ export default function TransaccionesView() {
   })
 
   return (
-    <motion.div variants={pageVariants} initial="hidden" animate="show">
+    <motion.div variants={pageVariants} initial="hidden" animate="show" exit="exit">
 
       <PageHeader title={t('transactions.title')}>
         <Button onClick={() => navigate(ROUTES.LINKS)} className="hidden sm:flex">

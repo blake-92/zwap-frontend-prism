@@ -45,23 +45,18 @@ export default function WithdrawModal({ onClose }) {
 
         {/* Amount input */}
         <div>
-          <label className={`block text-xs font-bold tracking-widest mb-3 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
+          <label htmlFor="withdraw-amount" className={`block text-xs font-bold tracking-widest mb-3 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
             {t('wallet.withdrawAmount')}
           </label>
-          <div className="relative">
-            <span className={`absolute left-4 top-3.5 font-bold text-lg ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>$</span>
-            <input
-              type="number"
-              placeholder="0.00"
-              value={amount}
-              onChange={e => setAmount(e.target.value)}
-              className={`w-full pl-8 pr-4 py-3 rounded-xl border outline-none font-mono font-bold text-xl transition-all ${
-                isDarkMode
-                  ? 'bg-[#111113]/50 border-white/10 text-white focus:border-[#7C3AED]/50 placeholder-[#45434A]'
-                  : 'bg-white/60 border-white text-[#111113] focus:border-[#7C3AED]/40 shadow-sm placeholder-gray-300'
-              }`}
-            />
-          </div>
+          <Input
+            id="withdraw-amount"
+            type="number"
+            prefix="$"
+            placeholder="0.00"
+            value={amount}
+            onChange={e => setAmount(e.target.value)}
+            className="font-mono font-bold text-xl"
+          />
           <button
             onClick={() => setAmount(balance.toFixed(2))}
             className={`mt-2 text-xs font-bold transition-colors ${isDarkMode ? 'text-[#7C3AED] hover:text-[#A78BFA]' : 'text-[#7C3AED] hover:text-[#561BAF]'}`}

@@ -1,13 +1,20 @@
 import { useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { X, Printer, Download, Landmark, CheckCircle2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
+import useScrollLock from '@/shared/hooks/useScrollLock'
+import useChromeBlur from '@/shared/hooks/useChromeBlur'
+import { SPRING_SOFT } from '@/shared/utils/springs'
 
 export default function WithdrawReceiptModal({ trx, onClose }) {
   const { isDarkMode } = useTheme()
   const { t } = useTranslation()
   const containerRef = useRef(null)
+
+  useScrollLock(true)
+  useChromeBlur()
 
   // ESC key handler
   useEffect(() => {
@@ -16,14 +23,6 @@ export default function WithdrawReceiptModal({ trx, onClose }) {
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [trx, onClose])
-
-  // Body scroll lock
-  useEffect(() => {
-    if (!trx) return
-    const original = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = original }
-  }, [trx])
 
   // Focus trap
   useEffect(() => {
@@ -50,8 +49,9 @@ export default function WithdrawReceiptModal({ trx, onClose }) {
   }, [trx])
 
   if (!trx) return null
+  if (typeof document === 'undefined') return null
 
-  return (
+  return createPortal(
     <motion.div
       ref={containerRef}
       role="dialog"
@@ -77,8 +77,8 @@ export default function WithdrawReceiptModal({ trx, onClose }) {
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{
             opacity: { duration: 0.15 },
-            y: { type: "spring", stiffness: 300, damping: 25 },
-            scale: { type: "spring", stiffness: 300, damping: 25 },
+            y: SPRING_SOFT,
+            scale: SPRING_SOFT,
           }}
           className="relative w-full max-w-[400px]"
         >
@@ -186,6 +186,7 @@ export default function WithdrawReceiptModal({ trx, onClose }) {
             </div>
           </div>
         </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body
   )
 }

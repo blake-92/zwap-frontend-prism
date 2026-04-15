@@ -3,17 +3,19 @@ import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { useToast } from '@/shared/context/ToastContext'
 import { Button, Badge, Modal, SectionLabel } from '@/shared/ui'
+import useMediaQuery from '@/shared/hooks/useMediaQuery'
 
 export default function LinkDetailModal({ link, onClose, onEdit }) {
   const { isDarkMode } = useTheme()
   const { t } = useTranslation()
   const { addToast } = useToast()
+  const isMobile = useMediaQuery('(max-width: 639px)')
 
   const url = `https://zwap.me/pay/${link.id}`
 
   const handleCopy = () => {
     navigator.clipboard.writeText(url)
-    const key = window.innerWidth < 640 ? 'links.linkCopiedShort' : 'links.linkCopied'
+    const key = isMobile ? 'links.linkCopiedShort' : 'links.linkCopied'
     addToast(t(key, { name: link.client }), 'success')
   }
 

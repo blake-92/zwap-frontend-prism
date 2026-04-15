@@ -7,6 +7,45 @@ Versionamiento según [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
+## [0.12.0] — 2026-04-15
+
+### Added
+- **Patrón full-attention overlay estandarizado:** hook `useChromeBlur()` en `src/shared/hooks/` que setea `data-modal-open` con counter para overlays apilados y usa `useIsPresent` de Framer Motion para limpiar el flag al **inicio** del exit (no al unmount) — sidebar y BottomNav des-difuminan en sync con el backdrop. Acepta `active` opcional para componentes que controlan visibilidad vía prop `isOpen` (ej. `BottomSheet`).
+- **`<QrLightbox>`:** componente compartido en `src/shared/ui/` que extrae el lightbox de QR usado por `QuickLinkCard` y `QuickLinkSwipeable`. Portalea al body, maneja ESC, `useScrollLock` y `useChromeBlur()`. Acepta `qrSize` (default 280).
+- **`useModalOpen()` hook:** observa `data-modal-open` del body vía `MutationObserver`. Usado por `AppShell` y `BottomNav` para aplicar blur al chrome cuando hay overlay activo.
+- **`Input` extendido:** props `error` (boolean — estilos rose en border/bg/focus/shadow) y `prefix` (string — prefijo inline con `pl-8`, ej. `$`). Reemplaza `<input>` raw en `NewUserModal` (email con error state) y `WithdrawModal` (amount con `$`).
+- **Page exit animations:** `pageVariants.exit` + `AnimatePresence mode="wait"` en `AppShell` con `key={location.pathname}`. Todas las vistas (`DashboardView`, `TransaccionesView`, `LinksView`, `LiquidacionesView`, `WalletView`, `SucursalesView`, `UsuariosView`, `SettingsView`) con `exit="exit"` en su root.
+- **i18n `settings.activeAgo*`:** keys `activeAgoMinutes`/`activeAgoHours` con pluralización i18next. Reemplaza el string hardcoded `'Activo hace 2 horas'` en `SESSIONS` mock por `lastActive: 120` (minutos) + helper `formatLastActive()` en `SettingsView`.
+
+### Changed
+- **`Modal` portalea a `document.body`** con `createPortal`. Antes quedaba dentro del stacking context `z-10` del main content, causando que `BottomNav` (`fixed z-40` root) apareciera por encima del modal. Ahora escape total de stacking contexts.
+- **`Modal` confirm sub-modal en `NewLinkModal`:** reemplazado `motion.div` custom con z-[60] por `<Modal>` reutilizable. Se renderiza después del parent Modal en JSX — mismo z-50, DOM order garantiza stacking correcto.
+- **`ReceiptModal`, `WithdrawReceiptModal`, `NewBranchModal`:** refactorizados para portalear + llamar `useChromeBlur()`. Ahora siguen el patrón estándar.
+- **`BottomSheet`:** ahora llama `useChromeBlur(isOpen)` — antes las bottom sheets no difuminaban el chrome.
+- **`BottomNav` + `Sidebar` wrapper:** aplican `blur-sm saturate-50 pointer-events-none` cuando `modalOpen === true` (del hook `useModalOpen`). `BottomNav` ya no hace slide-hide — ahora usa blur consistente con el sidebar (mismo filtro, timing y transición).
+- **`ReceiptModal` status:** comparaciones `=== 'Exitoso'` / `=== 'Reembolsado'` migradas a `statusVariant === 'success'` / `=== 'danger'` (el campo ya existía en `TRANSACTIONS`). Resiliente a i18n y refactor del display string.
+- **LoginView Framer Motion:** clases CSS `animate-fade-in` y `animate-slide-up` eliminadas. Root usa `pageVariants`. El toggle entre Google methods y email form usa `AnimatePresence mode="wait"` con spring `y: 8 → 0`.
+- **QR lightboxes:** ambos (`QuickLinkCard`, `QuickLinkSwipeable`) migrados a `<QrLightbox>` compartido. ~20 líneas de JSX + effects eliminadas en cada uno.
+
+### Fixed
+- **Chrome no difuminaba cuando se abría modal:** sidebar (desktop) y BottomNav (mobile) quedaban visibles sin blur por encontrarse en stacking contexts distintos al backdrop del modal. Resuelto con `useModalOpen` hook + filtros Tailwind en los wrappers.
+- **Desync entre backdrop fade y chrome unblur:** el flag `data-modal-open` se limpiaba en el cleanup del `useEffect` (unmount), 150ms después que el backdrop empezaba a desvanecer. Ahora `useChromeBlur` usa `useIsPresent` — el cleanup del effect se dispara cuando empieza el exit, perfectamente sincronizado.
+- **BottomNav sobre modal en mobile:** causa raíz era que `Modal` vivía en el stacking context `z-10` del main content, mientras BottomNav (`fixed z-40`) estaba en el root. Resuelto portaleando Modal al body.
+- **QR lightbox sobre BottomNav y sin chrome blur:** QR lightboxes custom tenían el mismo problema de stacking + no seteaban flag. Al extraer a `<QrLightbox>` + portal + hook, quedaron alineados al patrón.
+- **Drag snap-back incompleto en `Modal`/`BottomSheet`:** cuando el usuario arrastraba el modal/sheet pero soltaba antes del threshold de dismiss, no volvía a posición. Ahora usan `useAnimation()` imperativo para snap-back con spring.
+
+### Security / A11y
+- **Focus restoration en `Modal`:** `useEffect` captura `document.activeElement` antes de montar el focus trap, restaura el foco al trigger element en cleanup.
+- **ARIA radio pattern en `NewUserModal`:** selector de rol con `role="radiogroup"`, `role="radio"`, `aria-checked`, `tabIndex={0}`, handler `Enter`/`Space`.
+- **Labels `htmlFor`/`id`:** agregados a LoginView, NewUserModal, NewLinkModal, SettingsView, WithdrawModal. Inputs ahora asociados correctamente a sus labels.
+- **`autoComplete` en LoginView:** `"email"` y `"current-password"` para autofill + password managers.
+- **`aria-hidden="true"` en íconos decorativos:** `Input` icon wrapper.
+- **Toast z-index:** subido de `z-[60]` a `z-[70]` para garantizar aparición sobre modales.
+- **`hoverOnlyWhenSupported: true`** en `tailwind.config.js`: envuelve clases `hover:` en `@media (hover: hover)`, evitando sticky hover en touch devices y correcto behavior en emulación mobile de DevTools.
+
+### Documentation
+- **`CLAUDE.md`:** nueva sección "Full-attention overlays — patrón estándar" con ejemplo de código, reglas (portal + `useChromeBlur`), y lista de componentes que ya cumplen el patrón.
+
 ## [0.11.1] — 2026-04-14
 
 ### Fixed

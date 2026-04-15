@@ -108,7 +108,7 @@ export default function WalletView() {
 
 
   return (
-    <motion.div variants={pageVariants} initial="hidden" animate="show">
+    <motion.div variants={pageVariants} initial="hidden" animate="show" exit="exit">
 
       <PageHeader title={t('wallet.title')} />
 

@@ -92,7 +92,7 @@ export default function LiquidacionesView() {
   })
 
   return (
-    <motion.div variants={pageVariants} initial="hidden" animate="show">
+    <motion.div variants={pageVariants} initial="hidden" animate="show" exit="exit">
 
       <PageHeader title={t('settlements.title')}>
         <Button variant="outline">

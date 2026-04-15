@@ -1,13 +1,21 @@
 import { useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { X, Printer, ArrowRightLeft, CheckCircle2, Download } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
+import useScrollLock from '@/shared/hooks/useScrollLock'
+import useChromeBlur from '@/shared/hooks/useChromeBlur'
+import { SPRING_SOFT } from '@/shared/utils/springs'
+import { BUSINESS_NAME } from '@/services/mocks/mockData'
 
 export default function ReceiptModal({ trx, onClose }) {
   const { isDarkMode } = useTheme()
   const { t } = useTranslation()
   const containerRef = useRef(null)
+
+  useScrollLock(true)
+  useChromeBlur()
 
   // ESC key handler
   useEffect(() => {
@@ -16,14 +24,6 @@ export default function ReceiptModal({ trx, onClose }) {
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [trx, onClose])
-
-  // Body scroll lock
-  useEffect(() => {
-    if (!trx) return
-    const original = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = original }
-  }, [trx])
 
   // Focus trap
   useEffect(() => {
@@ -50,8 +50,9 @@ export default function ReceiptModal({ trx, onClose }) {
   }, [trx])
 
   if (!trx) return null
+  if (typeof document === 'undefined') return null
 
-  return (
+  return createPortal(
     <motion.div
       ref={containerRef}
       role="dialog"
@@ -77,8 +78,8 @@ export default function ReceiptModal({ trx, onClose }) {
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{
             opacity: { duration: 0.15 },
-            y: { type: "spring", stiffness: 300, damping: 25 },
-            scale: { type: "spring", stiffness: 300, damping: 25 },
+            y: SPRING_SOFT,
+            scale: SPRING_SOFT,
           }}
           className="relative w-full max-w-[400px]"
         >
@@ -130,7 +131,7 @@ export default function ReceiptModal({ trx, onClose }) {
 
               <div className="text-center mb-8">
                 <h2 className={`text-xl font-bold mb-1 tracking-tight ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-                  ZWAP Hotel
+                  {BUSINESS_NAME}
                 </h2>
                 <p className={`text-xs font-medium uppercase tracking-widest ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
                   {t('transactions.paymentReceipt')}
@@ -140,9 +141,9 @@ export default function ReceiptModal({ trx, onClose }) {
               {/* Status Badge */}
               <div className="flex justify-center mb-8">
                 <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
-                  trx.status === 'Exitoso'
+                  trx.statusVariant === 'success'
                     ? isDarkMode ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                    : trx.status === 'Reembolsado'
+                    : trx.statusVariant === 'danger'
                       ? isDarkMode ? 'bg-rose-500/15 text-rose-400 border border-rose-500/20' : 'bg-rose-100 text-rose-700 border border-rose-200'
                       : isDarkMode ? 'bg-amber-500/15 text-amber-400 border border-amber-500/20' : 'bg-amber-100 text-amber-700 border border-amber-200'
                 }`}>
@@ -157,7 +158,7 @@ export default function ReceiptModal({ trx, onClose }) {
               <div className="text-center my-6">
                 <p className={`text-xs font-bold tracking-widest uppercase mb-1 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>{t('transactions.totalAmount')}</p>
                 <div className={`text-4xl font-mono font-bold tracking-tighter ${
-                  trx.status === 'Reembolsado'
+                  trx.statusVariant === 'danger'
                     ? 'text-rose-500 line-through opacity-70'
                     : isDarkMode ? 'text-white' : 'text-[#111113]'
                 }`}>
@@ -203,6 +204,7 @@ export default function ReceiptModal({ trx, onClose }) {
             </div>
           </div>
         </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body
   )
 }

@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useViewSearch } from '@/shared/context/ViewSearchContext'
 import { pageVariants } from '@/shared/utils/motionVariants'
+import { SPRING } from '@/shared/utils/springs'
 import {
   User, Shield, CreditCard, Bell, Save,
   Smartphone, KeyRound, MonitorSmartphone, Mail, Lock, Globe
@@ -50,6 +51,12 @@ export default function SettingsView() {
   const [alertEmails, setAlertEmails] = useState(true)
   const [pushNotifs, setPushNotifs]   = useState(false)
   const [twoFactor, setTwoFactor]     = useState(false)
+
+  const formatLastActive = (minutes) => {
+    if (!minutes) return ''
+    if (minutes < 60) return t('settings.activeAgoMinutes', { count: minutes })
+    return t('settings.activeAgoHours', { count: Math.floor(minutes / 60) })
+  }
 
   const TABS = [
     { id: 'perfil', label: t('settings.tabProfile'), icon: User },
@@ -138,7 +145,7 @@ export default function SettingsView() {
   const noResults = isSearching && visibleSections?.size === 0
 
   return (
-    <motion.div variants={pageVariants} initial="hidden" animate="show" className="max-w-4xl mx-auto">
+    <motion.div variants={pageVariants} initial="hidden" animate="show" exit="exit" className="max-w-4xl mx-auto">
 
       <PageHeader title={t('settings.title')} />
 
@@ -149,7 +156,7 @@ export default function SettingsView() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            transition={SPRING}
             className="overflow-hidden mb-6"
           >
             <div className={`flex gap-2 p-1 rounded-xl inline-flex ${
@@ -177,7 +184,7 @@ export default function SettingsView() {
                           ? 'bg-[#252429] border border-white/10 shadow-[0_2px_10px_rgba(0,0,0,0.5)]'
                           : 'bg-white border border-[#7C3AED]/20 shadow-sm'
                       }`}
-                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                      transition={SPRING}
                     />
                   )}
                   <span className="relative z-10 flex items-center gap-2">
@@ -218,22 +225,22 @@ export default function SettingsView() {
 
               <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className={`block text-xs font-bold tracking-widest mb-2 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                  <label htmlFor="settings-name" className={`block text-xs font-bold tracking-widest mb-2 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
                     {t('users.fullName')}
                   </label>
-                  <Input defaultValue={CURRENT_USER.name} />
+                  <Input id="settings-name" defaultValue={CURRENT_USER.name} />
                 </div>
                 <div>
-                  <label className={`block text-xs font-bold tracking-widest mb-2 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                  <label htmlFor="settings-role" className={`block text-xs font-bold tracking-widest mb-2 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
                     {t('users.role')}
                   </label>
-                  <Input defaultValue={t('users.roleAdmin')} disabled />
+                  <Input id="settings-role" defaultValue={t('users.roleAdmin')} disabled />
                 </div>
                 <div className="md:col-span-2">
-                  <label className={`block text-xs font-bold tracking-widest mb-2 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+                  <label htmlFor="settings-email" className={`block text-xs font-bold tracking-widest mb-2 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
                     {t('users.emailLabel')}
                   </label>
-                  <Input icon={Mail} defaultValue={CURRENT_USER.email} />
+                  <Input id="settings-email" icon={Mail} defaultValue={CURRENT_USER.email} />
                 </div>
               </div>
             </div>
@@ -352,7 +359,7 @@ export default function SettingsView() {
                   key={session.id}
                   icon={session.icon === 'desktop' ? MonitorSmartphone : Smartphone}
                   title={session.device}
-                  desc={`${session.location} • ${session.isCurrent ? t('settings.currentSession') : session.lastActive}`}
+                  desc={`${session.location} • ${session.isCurrent ? t('settings.currentSession') : formatLastActive(session.lastActive)}`}
                   control={session.isCurrent
                     ? <Badge variant="success">{t('settings.currentSession')}</Badge>
                     : <Button variant="danger" size="sm" className="!py-1.5 !px-3">{t('common.revoke')}</Button>

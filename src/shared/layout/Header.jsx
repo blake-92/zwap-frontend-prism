@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useId } from 'react'
-import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Moon, Sun, Bell, ChevronDown, Building2, Settings, SlidersHorizontal, X, Check } from 'lucide-react'
@@ -7,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { useHeaderSearch } from '@/shared/context/ViewSearchContext'
 import { ROUTES } from '@/router/routes'
-import { Button, Tooltip } from '@/shared/ui'
+import { Button, Tooltip, BottomSheet } from '@/shared/ui'
 import { BRANCHES } from '@/services/mocks/mockData'
 import ZwapIsotipo  from '@/shared/brand/ZwapIsotipo'
 import ZwapWordmark from '@/shared/brand/ZwapWordmark'
@@ -28,56 +27,8 @@ const panelVariants = {
   exit:    { opacity: 0, scale: 0.95, y: -4,  transition: { type: 'spring', stiffness: 500, damping: 30 } },
 }
 
-const sheetBackdropVariants = {
-  hidden:  { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.15 } },
-  exit:    { opacity: 0, transition: { duration: 0.15 } },
-}
-
-const sheetVariants = {
-  hidden:  { y: '100%' },
-  visible: { y: 0, transition: SPRING },
-  exit:    { y: '100%', transition: { type: 'spring', stiffness: 400, damping: 36 } },
-}
-
-export default function Header({ selectedBranch, onBranchChange, isDesktop, headerVisible = true }) {
-  const { t } = useTranslation()
-  const { isDarkMode, toggleTheme } = useTheme()
-  const { query, setQuery, placeholder, hasFilters, openFilters, activeFilterCount } = useHeaderSearch()
-  const navigate                    = useNavigate()
-  const [menuOpen, setMenuOpen]     = useState(false)
-  const [branchSheetOpen, setBranchSheetOpen] = useState(false)
-  const [searchExpanded, setSearchExpanded] = useState(false)
-  const menuRef                     = useRef(null)
-  const searchInputRef              = useRef(null)
-  const pillId                      = useId()
-
-  useEffect(() => {
-    const handler = e => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false)
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [])
-
-  // Lock scroll when branch sheet is open
-  useEffect(() => {
-    if (!branchSheetOpen) return
-    const original = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = original }
-  }, [branchSheetOpen])
-
-  // Auto-focus search input when expanded
-  useEffect(() => {
-    if (searchExpanded) {
-      const timer = setTimeout(() => searchInputRef.current?.focus(), 80)
-      return () => clearTimeout(timer)
-    }
-  }, [searchExpanded])
-
-  /* ── Desktop: branch dropdown ── */
-  const desktopBranchSelector = (
+function DesktopBranchDropdown({ selectedBranch, onBranchChange, isDarkMode, menuOpen, setMenuOpen, menuRef, pillId }) {
+  return (
     <div ref={menuRef} className="relative">
       <button
         onClick={() => setMenuOpen(v => !v)}
@@ -152,6 +103,35 @@ export default function Header({ selectedBranch, onBranchChange, isDesktop, head
       </AnimatePresence>
     </div>
   )
+}
+
+export default function Header({ selectedBranch, onBranchChange, isDesktop, headerVisible = true }) {
+  const { t } = useTranslation()
+  const { isDarkMode, toggleTheme } = useTheme()
+  const { query, setQuery, placeholder, hasFilters, openFilters, activeFilterCount } = useHeaderSearch()
+  const navigate                    = useNavigate()
+  const [menuOpen, setMenuOpen]     = useState(false)
+  const [branchSheetOpen, setBranchSheetOpen] = useState(false)
+  const [searchExpanded, setSearchExpanded] = useState(false)
+  const menuRef                     = useRef(null)
+  const searchInputRef              = useRef(null)
+  const pillId                      = useId()
+
+  useEffect(() => {
+    const handler = e => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  // Auto-focus search input when expanded
+  useEffect(() => {
+    if (searchExpanded) {
+      const timer = setTimeout(() => searchInputRef.current?.focus(), 80)
+      return () => clearTimeout(timer)
+    }
+  }, [searchExpanded])
 
   /* ── Mobile: branch pill (opens bottom sheet) ── */
   const mobileBranchPill = (
@@ -239,7 +219,15 @@ export default function Header({ selectedBranch, onBranchChange, isDesktop, head
               </Button>
             </Tooltip>
 
-            {desktopBranchSelector}
+            <DesktopBranchDropdown
+              selectedBranch={selectedBranch}
+              onBranchChange={onBranchChange}
+              isDarkMode={isDarkMode}
+              menuOpen={menuOpen}
+              setMenuOpen={setMenuOpen}
+              menuRef={menuRef}
+              pillId={pillId}
+            />
           </div>
         </>
       ) : (
@@ -334,86 +322,44 @@ export default function Header({ selectedBranch, onBranchChange, isDesktop, head
 
     </motion.header>
 
-    {/* ── Mobile: branch bottom sheet (portal to body to escape stacking contexts) ── */}
-    {createPortal(
-      <>
-        <AnimatePresence>
-          {branchSheetOpen && (
-            <motion.div
-              key="branch-backdrop"
-              variants={sheetBackdropVariants}
-              initial="hidden" animate="visible" exit="exit"
-              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
-              onClick={() => setBranchSheetOpen(false)}
-            />
-          )}
-        </AnimatePresence>
-        <AnimatePresence>
-          {branchSheetOpen && (
-            <motion.div
-              key="branch-sheet"
-              variants={sheetVariants}
-              initial="hidden" animate="visible" exit="exit"
-              drag="y"
-              dragConstraints={{ top: 0 }}
-              dragElastic={0.2}
-              onDragEnd={(e, info) => {
-                if (info.offset.y > 100 || info.velocity.y > 500) setBranchSheetOpen(false)
-              }}
-              className={`fixed bottom-0 inset-x-0 z-50 rounded-t-2xl border-t pb-[env(safe-area-inset-bottom)] ${
-                isDarkMode
-                  ? 'bg-[#1A1A1D] border-white/10'
-                  : 'bg-white border-black/5 shadow-[0_-8px_40px_rgba(0,0,0,0.1)]'
+    {/* ── Mobile: branch bottom sheet ── */}
+    <BottomSheet
+      isOpen={branchSheetOpen}
+      onClose={() => setBranchSheetOpen(false)}
+      title={t('nav.branches')}
+    >
+      <div className="px-4 pb-6 flex flex-col gap-1">
+        {BRANCHES.map(branch => {
+          const isSelected = selectedBranch === branch
+          return (
+            <button
+              key={branch}
+              onClick={() => { onBranchChange(branch); setBranchSheetOpen(false) }}
+              className={`relative w-full text-left px-4 py-3.5 rounded-xl text-[15px] font-medium flex items-center gap-3 transition-colors ${
+                isSelected
+                  ? isDarkMode ? 'text-white' : 'text-[#561BAF]'
+                  : isDarkMode ? 'text-[#888991] active:bg-white/5' : 'text-[#67656E] active:bg-black/5'
               }`}
             >
-              {/* Drag handle */}
-              <div className="flex justify-center py-3">
-                <div className={`w-10 h-1 rounded-full ${isDarkMode ? 'bg-white/20' : 'bg-black/10'}`} />
-              </div>
-
-              {/* Title */}
-              <h3 className={`px-5 pb-2 text-sm font-bold opacity-50 ${isDarkMode ? 'text-white' : 'text-black'}`}>
-                {t('nav.branches')}
-              </h3>
-
-              {/* Branch list */}
-              <div className="px-4 pb-6 flex flex-col gap-1">
-                {BRANCHES.map(branch => {
-                  const isSelected = selectedBranch === branch
-                  return (
-                    <button
-                      key={branch}
-                      onClick={() => { onBranchChange(branch); setBranchSheetOpen(false) }}
-                      className={`relative w-full text-left px-4 py-3.5 rounded-xl text-[15px] font-medium flex items-center gap-3 transition-colors ${
-                        isSelected
-                          ? isDarkMode ? 'text-white' : 'text-[#561BAF]'
-                          : isDarkMode ? 'text-[#888991] active:bg-white/5' : 'text-[#67656E] active:bg-black/5'
-                      }`}
-                    >
-                      {isSelected && (
-                        <motion.div
-                          layoutId="branch-sheet-pill"
-                          className={`absolute inset-0 rounded-xl ${
-                            isDarkMode ? 'bg-[#7C3AED]/15' : 'bg-[#DBD3FB]/40'
-                          }`}
-                          transition={SPRING}
-                        />
-                      )}
-                      <Building2 size={18} className={`relative z-10 ${isSelected ? 'text-[#7C3AED]' : 'opacity-50'}`} />
-                      <span className="relative z-10 flex-1">{branch}</span>
-                      {isSelected && (
-                        <Check size={18} className="relative z-10 text-[#7C3AED]" />
-                      )}
-                    </button>
-                  )
-                })}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </>,
-      document.body
-    )}
+              {isSelected && (
+                <motion.div
+                  layoutId="branch-sheet-pill"
+                  className={`absolute inset-0 rounded-xl ${
+                    isDarkMode ? 'bg-[#7C3AED]/15' : 'bg-[#DBD3FB]/40'
+                  }`}
+                  transition={SPRING}
+                />
+              )}
+              <Building2 size={18} className={`relative z-10 ${isSelected ? 'text-[#7C3AED]' : 'opacity-50'}`} />
+              <span className="relative z-10 flex-1">{branch}</span>
+              {isSelected && (
+                <Check size={18} className="relative z-10 text-[#7C3AED]" />
+              )}
+            </button>
+          )
+        })}
+      </div>
+    </BottomSheet>
   </>
   )
 }

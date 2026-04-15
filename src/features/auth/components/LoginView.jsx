@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Mail, Lock, Sun, Moon, ArrowLeft } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { Card, Button, Input } from '@/shared/ui'
 import ZwapLogo from '@/shared/brand/ZwapLogo'
 import { ROUTES } from '@/router/routes'
+import { pageVariants } from '@/shared/utils/motionVariants'
+import { SPRING } from '@/shared/utils/springs'
 
 /* ─── Google SVG Icon ──────────────────────────────────────── */
 function GoogleIcon() {
@@ -82,16 +85,18 @@ function EmailForm({ onBack, onSubmit }) {
 
   return (
     <form
-      className="space-y-4 animate-slide-up"
+      className="space-y-4"
       onSubmit={e => { e.preventDefault(); onSubmit({ email, password }) }}
     >
       <div>
-        <label className={`block text-xs font-bold tracking-wide mb-2 ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
+        <label htmlFor="login-email" className={`block text-xs font-bold tracking-wide mb-2 ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
           {t('auth.email')}
         </label>
         <Input
+          id="login-email"
           icon={Mail}
           type="email"
+          autoComplete="email"
           placeholder="admin@hotel.com"
           value={email}
           onChange={e => setEmail(e.target.value)}
@@ -100,7 +105,7 @@ function EmailForm({ onBack, onSubmit }) {
 
       <div>
         <div className="flex justify-between items-center mb-2">
-          <label className={`block text-xs font-bold tracking-wide ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
+          <label htmlFor="login-password" className={`block text-xs font-bold tracking-wide ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
             {t('auth.password')}
           </label>
           <button className={`text-xs font-semibold transition-colors hover:underline ${
@@ -110,8 +115,10 @@ function EmailForm({ onBack, onSubmit }) {
           </button>
         </div>
         <Input
+          id="login-password"
           icon={Lock}
           type="password"
+          autoComplete="current-password"
           placeholder="••••••••"
           value={password}
           onChange={e => setPassword(e.target.value)}
@@ -153,7 +160,7 @@ export default function LoginView() {
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col relative z-10 animate-fade-in items-center justify-center p-4">
+    <motion.div variants={pageVariants} initial="hidden" animate="show" className="min-h-screen w-full flex flex-col relative z-10 items-center justify-center p-4">
 
       {/* Theme toggle */}
       <div className="absolute top-6 right-6 md:top-10 md:right-10 z-50">
@@ -186,29 +193,46 @@ export default function LoginView() {
 
         {/* Auth methods */}
         <div className="w-full space-y-5">
-          {!showEmail ? (
-            <div className="space-y-6 animate-fade-in">
-              <GoogleButton onClick={handleLogin} />
-              <OrDivider />
-              <Button
-                variant="ghost"
-                className="w-full !py-3.5"
-                onClick={() => setShowEmail(true)}
+          <AnimatePresence mode="wait">
+            {!showEmail ? (
+              <motion.div
+                key="methods"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={SPRING}
+                className="space-y-6"
               >
-                <Mail size={18} className="mr-2" />
-                {t('auth.continueWithEmail')}
-              </Button>
-            </div>
-          ) : (
-            <EmailForm
-              onBack={() => setShowEmail(false)}
-              onSubmit={handleLogin}
-            />
-          )}
+                <GoogleButton onClick={handleLogin} />
+                <OrDivider />
+                <Button
+                  variant="ghost"
+                  className="w-full !py-3.5"
+                  onClick={() => setShowEmail(true)}
+                >
+                  <Mail size={18} className="mr-2" />
+                  {t('auth.continueWithEmail')}
+                </Button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="email-form"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={SPRING}
+              >
+                <EmailForm
+                  onBack={() => setShowEmail(false)}
+                  onSubmit={handleLogin}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </Card>
 
       <LegalFooter />
-    </div>
+    </motion.div>
   )
 }

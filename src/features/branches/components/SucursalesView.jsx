@@ -110,7 +110,7 @@ export default function SucursalesView() {
   }, [search])
 
   return (
-    <motion.div variants={pageVariants} initial="hidden" animate="show">
+    <motion.div variants={pageVariants} initial="hidden" animate="show" exit="exit">
 
       <PageHeader title={t('branches.title')}>
         <Button onClick={() => setNewBranchOpen(true)}>

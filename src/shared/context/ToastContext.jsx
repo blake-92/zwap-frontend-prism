@@ -10,7 +10,7 @@ export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([])
 
   const addToast = useCallback((message, type = 'success', duration = 3000) => {
-    const id = Date.now().toString()
+    const id = crypto.randomUUID()
     setToasts(prev => [...prev, { id, message, type }])
     
     if (duration) {
@@ -29,7 +29,7 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={{ addToast }}>
       {children}
-      <div className="fixed bottom-20 sm:bottom-6 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-6 z-50 flex flex-col items-center sm:items-end gap-3 pointer-events-none">
+      <div className="fixed bottom-20 sm:bottom-6 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-6 z-[70] flex flex-col items-center sm:items-end gap-3 pointer-events-none">
         <AnimatePresence>
           {toasts.map(toast => (
             <motion.div

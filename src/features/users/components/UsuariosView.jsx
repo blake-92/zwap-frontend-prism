@@ -72,7 +72,7 @@ export default function UsuariosView() {
 
 
   return (
-    <motion.div variants={pageVariants} initial="hidden" animate="show">
+    <motion.div variants={pageVariants} initial="hidden" animate="show" exit="exit">
 
       <PageHeader title={t('users.title')}>
         <Button onClick={() => setNewUserOpen(true)}>

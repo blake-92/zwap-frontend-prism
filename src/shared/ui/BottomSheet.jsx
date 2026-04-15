@@ -1,7 +1,9 @@
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useAnimation } from 'framer-motion'
 import { useTheme } from '@/shared/context/ThemeContext'
+import useScrollLock from '@/shared/hooks/useScrollLock'
+import useChromeBlur from '@/shared/hooks/useChromeBlur'
 import { SPRING } from '@/shared/utils/springs'
 
 /**
@@ -35,13 +37,15 @@ const backdropVariants = {
 
 export default function BottomSheet({ isOpen, onClose, title, children }) {
   const { isDarkMode } = useTheme()
+  const controls = useAnimation()
 
+  useScrollLock(isOpen)
+  useChromeBlur(isOpen)
+
+  // Trigger entry animation when sheet opens; snap back to visible if drag released early
   useEffect(() => {
-    if (!isOpen) return
-    const original = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = original }
-  }, [isOpen])
+    if (isOpen) controls.start('visible')
+  }, [isOpen, controls])
 
   if (typeof document === 'undefined') return null
 
@@ -63,13 +67,18 @@ export default function BottomSheet({ isOpen, onClose, title, children }) {
             key="sheet-panel"
             variants={sheetVariants}
             initial="hidden"
-            animate="visible"
+            animate={controls}
             exit="exit"
             drag="y"
-            dragConstraints={{ top: 0 }}
+            dragConstraints={{ top: 0, bottom: 500 }}
             dragElastic={0.2}
             onDragEnd={(e, info) => {
-              if (info.offset.y > 100 || info.velocity.y > 500) onClose()
+              if (info.offset.y > 100 || info.velocity.y > 500) {
+                document.activeElement?.blur()
+                onClose()
+              } else {
+                controls.start('visible')
+              }
             }}
             className={`fixed bottom-0 inset-x-0 z-[55] rounded-t-[24px] border-t pb-[env(safe-area-inset-bottom)] ${
               isDarkMode

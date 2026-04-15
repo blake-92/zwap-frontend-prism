@@ -25,4 +25,5 @@ export const cardItemVariants = {
 export const pageVariants = {
   hidden: { opacity: 0, y: 15 },
   show:   { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 260, damping: 26 } },
+  exit:   { opacity: 0, y: -15, transition: { duration: 0.15 } },
 }

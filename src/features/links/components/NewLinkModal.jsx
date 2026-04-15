@@ -8,6 +8,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/context/ThemeContext'
 import useMediaQuery from '@/shared/hooks/useMediaQuery'
+import { SPRING } from '@/shared/utils/springs'
 import { Button, Input, Modal, SegmentControl, DatePickerModal, SectionLabel } from '@/shared/ui'
 
 export default function NewLinkModal({ onClose, link = null }) {
@@ -93,7 +94,7 @@ export default function NewLinkModal({ onClose, link = null }) {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            transition={SPRING}
             className="overflow-hidden"
           >
             <div className={`rounded-xl p-3 ${isDarkMode ? 'bg-[#111113]/40 border border-white/5' : 'bg-gray-50/80 border border-black/5'}`}>
@@ -188,53 +189,6 @@ export default function NewLinkModal({ onClose, link = null }) {
 
   return (
     <>
-      {/* Confirmation sub-modal */}
-      <AnimatePresence>
-        {showConfirmClose && (
-          <motion.div
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-[60] flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.15 }}
-              className="absolute inset-0 backdrop-blur-md bg-black/60"
-              onClick={() => setShowConfirmClose(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              transition={{
-                opacity: { duration: 0.15 },
-                scale: { type: 'spring', stiffness: 400, damping: 26 },
-                y: { type: 'spring', stiffness: 400, damping: 26 },
-              }}
-              className={`relative p-6 rounded-2xl border shadow-2xl max-w-[360px] ${
-                isDarkMode ? 'bg-[#252429] border-white/20' : 'bg-white border-gray-200'
-              }`}
-            >
-              <h3 className={`text-lg font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>
-                {t('common.discardConfirmTitle')}
-              </h3>
-              <p className={`text-sm mb-6 ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
-                {t('common.discardConfirmBody')}
-              </p>
-              <div className="flex gap-3 justify-end">
-                <Button variant="ghost" onClick={() => setShowConfirmClose(false)}>
-                  {t('common.cancel')}
-                </Button>
-                <Button variant="danger" onClick={onClose}>
-                  {t('common.discardConfirmAction')}
-                </Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Date picker modal — z-[55] to stack above parent modal (z-50) */}
       {calendarOpen && (
         <div className="relative z-[55]">
@@ -284,16 +238,16 @@ export default function NewLinkModal({ onClose, link = null }) {
             </SectionLabel>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className={`block text-xs font-bold tracking-wide mb-2 ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
+                <label htmlFor="link-client-name" className={`block text-xs font-bold tracking-wide mb-2 ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
                   {t('links.clientName')}
                 </label>
-                <Input type="text" placeholder={t('links.clientNamePlaceholder')} />
+                <Input id="link-client-name" type="text" placeholder={t('links.clientNamePlaceholder')} />
               </div>
               <div>
-                <label className={`block text-xs font-bold tracking-wide mb-2 ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
+                <label htmlFor="link-client-email" className={`block text-xs font-bold tracking-wide mb-2 ${isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'}`}>
                   {t('links.clientEmail')}
                 </label>
-                <Input icon={Mail} type="email" placeholder={t('links.clientEmailPlaceholder')} />
+                <Input id="link-client-email" icon={Mail} type="email" placeholder={t('links.clientEmailPlaceholder')} />
               </div>
             </div>
           </div>
@@ -344,6 +298,31 @@ export default function NewLinkModal({ onClose, link = null }) {
           </div>
         </div>
       </Modal>
+
+      {/* Confirmation sub-modal — renders after parent in DOM so z-50 stacking is correct */}
+      <AnimatePresence>
+        {showConfirmClose && (
+          <Modal
+            onClose={() => setShowConfirmClose(false)}
+            title={t('common.discardConfirmTitle')}
+            maxWidth="360px"
+            footer={
+              <>
+                <Button variant="ghost" className="flex-1" onClick={() => setShowConfirmClose(false)}>
+                  {t('common.cancel')}
+                </Button>
+                <Button variant="danger" className="flex-1" onClick={onClose}>
+                  {t('common.discardConfirmAction')}
+                </Button>
+              </>
+            }
+          >
+            <p className={`px-5 sm:px-8 py-5 text-sm ${isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'}`}>
+              {t('common.discardConfirmBody')}
+            </p>
+          </Modal>
+        )}
+      </AnimatePresence>
     </>
   )
 }

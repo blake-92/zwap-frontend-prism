@@ -1,8 +1,11 @@
 import { useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, useAnimation } from 'framer-motion'
 import { useTheme } from '@/shared/context/ThemeContext'
 import useMediaQuery from '@/shared/hooks/useMediaQuery'
+import useScrollLock from '@/shared/hooks/useScrollLock'
+import useChromeBlur from '@/shared/hooks/useChromeBlur'
 import { getModalGlass } from '@/shared/utils/cardClasses'
 import Button from './Button'
 
@@ -36,6 +39,20 @@ export default function Modal({
   const { isDarkMode } = useTheme()
   const isMobile = !useMediaQuery('(min-width: 640px)')
   const containerRef = useRef(null)
+  const controls = useAnimation()
+
+  // Blur Sidebar/BottomNav while modal is open
+  useChromeBlur()
+
+  // Trigger entry animation on mount; controls used for mobile snap-back on partial drag
+  useEffect(() => {
+    controls.start(
+      isMobile
+        ? { y: 0, transition: { type: 'spring', stiffness: 380, damping: 36 } }
+        : { opacity: 1, scale: 1, y: 0, transition: { opacity: { duration: 0.15 }, scale: { type: 'spring', stiffness: 400, damping: 30 }, y: { type: 'spring', stiffness: 400, damping: 30 } } }
+    )
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Escape key handler
   useEffect(() => {
@@ -46,26 +63,14 @@ export default function Modal({
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
 
-  // Prevent body scroll while modal is open
-  useEffect(() => {
-    const original = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = original }
-  }, [])
+  // Prevent main scroll while modal is open (coordinated via useScrollLock counter)
+  useScrollLock(true)
 
-  // Signal to other components (e.g. BottomNav) that a modal is open.
-  // Uses a counter so stacked modals don't clear the flag prematurely.
+  // Restore focus to the trigger element when modal closes
   useEffect(() => {
-    const count = parseInt(document.body.dataset.modalCount || '0', 10)
-    document.body.dataset.modalCount = String(count + 1)
-    document.body.dataset.modalOpen = 'true'
+    const trigger = document.activeElement
     return () => {
-      const next = parseInt(document.body.dataset.modalCount || '1', 10) - 1
-      document.body.dataset.modalCount = String(next)
-      if (next <= 0) {
-        delete document.body.dataset.modalOpen
-        delete document.body.dataset.modalCount
-      }
+      if (trigger && document.contains(trigger)) trigger.focus()
     }
   }, [])
 
@@ -96,7 +101,9 @@ export default function Modal({
     return () => document.removeEventListener('keydown', handleTab)
   }, [])
 
-  return (
+  if (typeof document === 'undefined') return null
+
+  return createPortal(
     <motion.div
       exit={{ opacity: 0 }}
       transition={{ duration: 0.15 }}
@@ -118,31 +125,27 @@ export default function Modal({
         ref={containerRef}
         {...(isMobile && {
           drag: 'y',
-          dragConstraints: { top: 0 },
+          dragConstraints: { top: 0, bottom: 600 },
           dragElastic: 0.2,
           onDragEnd: (e, info) => {
-            if (info.offset.y > 100 || info.velocity.y > 500) onClose()
+            if (info.offset.y > 100 || info.velocity.y > 500) {
+              // Blur active element before close so iOS Safari clears any stuck
+              // hover/active state on the trigger button (tap-elsewhere quirk)
+              document.activeElement?.blur()
+              onClose()
+            } else {
+              controls.start({ y: 0, transition: { type: 'spring', stiffness: 380, damping: 36 } })
+            }
           },
         })}
         initial={isMobile
           ? { y: '100%' }
           : { opacity: 0, scale: 0.95, y: 10 }
         }
-        animate={isMobile
-          ? { y: 0 }
-          : { opacity: 1, scale: 1, y: 0 }
-        }
+        animate={controls}
         exit={isMobile
           ? { y: '100%' }
           : { opacity: 0, scale: 0.95, y: 10 }
-        }
-        transition={isMobile
-          ? { type: 'spring', stiffness: 380, damping: 36 }
-          : {
-              opacity: { duration: 0.15 },
-              scale: { type: 'spring', stiffness: 400, damping: 30 },
-              y: { type: 'spring', stiffness: 400, damping: 30 },
-            }
         }
         role="dialog"
         aria-modal="true"
@@ -193,6 +196,7 @@ export default function Modal({
           </div>
         )}
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body
   )
 }

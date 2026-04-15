@@ -27,7 +27,7 @@ export default function DashboardView() {
   const [activeTab, setActiveTab]     = useState('operations')
 
   return (
-    <motion.div variants={pageVariants} initial="hidden" animate="show">
+    <motion.div variants={pageVariants} initial="hidden" animate="show" exit="exit">
       {/* Header bar: title + segment + action */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 mb-6 sm:mb-8">
         <h1 className={`text-xl sm:text-2xl font-bold tracking-tight hidden sm:block ${isDarkMode ? 'text-white' : 'text-[#111113]'}`}>

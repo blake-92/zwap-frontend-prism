@@ -141,7 +141,10 @@
     "requiresAttention": "Requires Attention",
     "alertsDescription": "Today's operational alerts",
     "chartPaymentLinks": "Payment Links",
-    "chartTerminalPos": "POS Terminal"
+    "chartTerminalPos": "POS Terminal",
+    "minuteShort": "m",
+    "hourShort": "h",
+    "dayShort": "d"
   },
 
   "transactions": {
@@ -390,7 +393,11 @@
     "language": "Language",
     "languageDesc": "Choose the display language for the interface",
     "languageEs": "Español",
-    "languageEn": "English"
+    "languageEn": "English",
+    "activeAgoMinutes_one": "Active {{count}} minute ago",
+    "activeAgoMinutes_other": "Active {{count}} minutes ago",
+    "activeAgoHours_one": "Active {{count}} hour ago",
+    "activeAgoHours_other": "Active {{count}} hours ago"
   },
 
   "filters": {

@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, Suspense } from 'react'
-import { Outlet } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { Outlet, useLocation } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
 import { useTheme } from '@/shared/context/ThemeContext'
 import { ErrorBoundary, PageLoader } from '@/shared/ui'
 import { BRANCHES } from '@/services/mocks/mockData'
 import useMediaQuery from '@/shared/hooks/useMediaQuery'
+import useModalOpen from '@/shared/hooks/useModalOpen'
 import Sidebar   from './Sidebar'
 import Header    from './Header'
 import BottomNav from './BottomNav'
@@ -15,6 +16,9 @@ export default function AppShell() {
   const { isDarkMode }      = useTheme()
   const [branch, setBranch] = useState(BRANCHES[0])
   const isDesktop           = useMediaQuery('(min-width: 1024px)')
+  const location            = useLocation()
+
+  const modalOpen   = useModalOpen()
 
   const [isCollapsed, setIsCollapsed] = useState(
     () => localStorage.getItem('zwap-sidebar') === 'collapsed'
@@ -71,7 +75,9 @@ export default function AppShell() {
 
       {/* ── Sidebar + toggle button wrapper (desktop only) ── */}
       {isDesktop && (
-        <div className="relative flex-shrink-0 group/sidebar">
+        <div className={`relative flex-shrink-0 group/sidebar transition-[filter,opacity] duration-150 ${
+          modalOpen ? 'blur-sm saturate-50 pointer-events-none' : ''
+        }`}>
           <Sidebar isCollapsed={isCollapsed} />
 
           {/* Borde hover hint */}
@@ -126,11 +132,13 @@ export default function AppShell() {
           style={!isDesktop ? { paddingBottom: 'calc(5rem + env(safe-area-inset-bottom))' } : undefined}
         >
           <div className="max-w-[1400px] 2xl:max-w-[1600px] mx-auto">
-            <ErrorBoundary>
-              <Suspense fallback={<PageLoader />}>
-                <Outlet />
-              </Suspense>
-            </ErrorBoundary>
+            <AnimatePresence mode="wait">
+              <ErrorBoundary key={location.pathname}>
+                <Suspense fallback={<PageLoader />}>
+                  <Outlet />
+                </Suspense>
+              </ErrorBoundary>
+            </AnimatePresence>
           </div>
         </main>
       </div>

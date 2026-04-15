@@ -6,9 +6,9 @@ import { Button, Input, Modal, SectionLabel } from '@/shared/ui'
 import { BRANCH_LIST } from '@/services/mocks/mockData'
 
 const ROLE_SELECTED_STYLE = {
-  admin:         { dark: 'bg-[#7C3AED]/10 border-[#7C3AED]/50', light: 'bg-[#DBD3FB]/40 border-[#7C3AED]/40' },
-  accountant:    { dark: 'bg-amber-500/10 border-amber-500/50', light: 'bg-amber-50 border-amber-400' },
-  receptionist:  { dark: 'bg-emerald-500/10 border-emerald-500/50', light: 'bg-emerald-50 border-emerald-400' },
+  admin:         { onDark: 'bg-[#7C3AED]/10 border-[#7C3AED]/50', onLight: 'bg-[#DBD3FB]/40 border-[#7C3AED]/40' },
+  accountant:    { onDark: 'bg-amber-500/10 border-amber-500/50', onLight: 'bg-amber-50 border-amber-400' },
+  receptionist:  { onDark: 'bg-emerald-500/10 border-emerald-500/50', onLight: 'bg-emerald-50 border-emerald-400' },
 }
 
 const ROLE_ICON_STYLE = {
@@ -109,10 +109,11 @@ export default function NewUserModal({ onClose }) {
         {/* Name + Email */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className={`block text-xs font-bold tracking-widest mb-2 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
+            <label htmlFor="user-name" className={`block text-xs font-bold tracking-widest mb-2 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
               {t('users.name')}
             </label>
             <Input
+              id="user-name"
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder={t('users.fullNamePlaceholder')}
@@ -120,26 +121,19 @@ export default function NewUserModal({ onClose }) {
           </div>
 
           <div className="relative">
-            <label className={`block text-xs font-bold tracking-widest mb-2 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
+            <label htmlFor="user-email" className={`block text-xs font-bold tracking-widest mb-2 ${isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]'}`}>
               {t('users.emailLabel')}
             </label>
-            <input
+            <Input
+              id="user-email"
               type="email"
               value={email}
               onChange={handleEmailChange}
               placeholder={t('users.emailPlaceholder')}
-              className={`w-full px-4 py-2.5 rounded-xl border outline-none text-sm font-medium transition-all ${
-                emailError
-                  ? isDarkMode
-                    ? 'bg-rose-500/10 border-rose-500/50 text-white focus:border-rose-500/80 shadow-[0_0_15px_rgba(244,63,94,0.15)]'
-                    : 'bg-rose-50 border-rose-400 text-rose-900 focus:border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.15)]'
-                  : isDarkMode
-                    ? 'bg-[#111113]/50 border-white/10 text-white placeholder-[#45434A] focus:border-[#7C3AED]/50'
-                    : 'bg-white/60 border-white text-[#111113] placeholder-gray-300 focus:border-[#7C3AED]/40 shadow-sm'
-              }`}
+              error={!!emailError}
             />
             {emailError && (
-              <span className="absolute -bottom-5 left-1 text-[10px] font-bold text-rose-500 animate-fade-in">
+              <span className="absolute -bottom-5 left-1 text-[10px] font-bold text-rose-500">
                 {emailError}
               </span>
             )}
@@ -149,14 +143,18 @@ export default function NewUserModal({ onClose }) {
         {/* Role */}
         <div>
           <SectionLabel className="mb-4">{t('users.role')}</SectionLabel>
-          <div className="grid grid-cols-3 gap-3">
+          <div role="radiogroup" aria-label={t('users.role')} className="grid grid-cols-3 gap-3">
             {ROLES.map(({ id, icon: Icon, label, desc }) => (
               <div
                 key={id}
+                role="radio"
+                aria-checked={role === id}
+                tabIndex={0}
                 onClick={() => setRole(id)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setRole(id) } }}
                 className={`p-4 rounded-xl border cursor-pointer transition-all ${
                   role === id
-                    ? isDarkMode ? ROLE_SELECTED_STYLE[id].dark : ROLE_SELECTED_STYLE[id].light
+                    ? isDarkMode ? ROLE_SELECTED_STYLE[id].onDark : ROLE_SELECTED_STYLE[id].onLight
                     : isDarkMode ? 'bg-[#111113]/30 border-white/10 hover:bg-white/5' : 'bg-white/50 border-white hover:bg-white'
                 }`}
               >

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { X, Building2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
@@ -6,6 +7,8 @@ import { useTheme } from '@/shared/context/ThemeContext'
 import { Button, Input } from '@/shared/ui'
 import { SPRING } from '@/shared/utils/springs'
 import { getModalGlass } from '@/shared/utils/cardClasses'
+import useScrollLock from '@/shared/hooks/useScrollLock'
+import useChromeBlur from '@/shared/hooks/useChromeBlur'
 
 export default function NewBranchModal({ onClose }) {
   const { isDarkMode } = useTheme()
@@ -15,19 +18,15 @@ export default function NewBranchModal({ onClose }) {
   const [address, setAddress] = useState('')
   const [city, setCity]       = useState('')
 
+  useScrollLock(true)
+  useChromeBlur()
+
   // ESC key handler
   useEffect(() => {
     const handleKeyDown = (e) => { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
-
-  // Body scroll lock
-  useEffect(() => {
-    const original = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = original }
-  }, [])
 
   // Focus trap
   useEffect(() => {
@@ -58,7 +57,9 @@ export default function NewBranchModal({ onClose }) {
     { label: t('branches.cityRegion'), val: city,    set: setCity,    ph: t('branches.cityRegionPlaceholder'), full: false },
   ]
 
-  return (
+  if (typeof document === 'undefined') return null
+
+  return createPortal(
     <motion.div
       ref={containerRef}
       role="dialog"
@@ -146,6 +147,7 @@ export default function NewBranchModal({ onClose }) {
           </Button>
         </div>
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body
   )
 }

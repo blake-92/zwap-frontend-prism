@@ -601,6 +601,9 @@ export const PAYMENT_METHODS = [
   { label: 'Amex',       val: 10, color: '#F59E0B' },
 ]
 
+/* ── Business identity ── */
+export const BUSINESS_NAME = 'ZWAP Hotel'
+
 /* ── Current user & settings ── */
 export const CURRENT_USER = {
   initials: 'CS',
@@ -619,7 +622,7 @@ export const PLAN_INFO = {
 
 export const SESSIONS = [
   { id: 's1', device: 'MacBook Pro - Chrome', icon: 'desktop', location: 'Santa Cruz, BO', isCurrent: true, lastActive: null },
-  { id: 's2', device: 'iPhone 14 Pro - Safari', icon: 'phone', location: 'Santa Cruz, BO', isCurrent: false, lastActive: 'Activo hace 2 horas' },
+  { id: 's2', device: 'iPhone 14 Pro - Safari', icon: 'phone', location: 'Santa Cruz, BO', isCurrent: false, lastActive: 120 },
 ]
 
 export const PAYMENT_CARD = {
