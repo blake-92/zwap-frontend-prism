@@ -636,12 +636,12 @@ El componente `Modal` cambia de comportamiento según viewport:
 
 ### Convenciones responsive
 
-1. **Padding responsive en AppShell:** `p-4 sm:p-6 lg:p-8 xl:p-10 2xl:p-12`
-2. **Bottom padding para BottomNav:** `pb-28` en mobile (clearance para el bottom nav)
-3. **Header height:** `h-16 lg:h-20`
+1. **Padding responsive en AppShell:** desktop `px-4 pt-4 sm:px-6 sm:pt-6 lg:px-8 lg:pt-8 xl:px-10 xl:pt-10 2xl:px-12 2xl:pt-12 lg:pb-10 xl:pb-12 2xl:pb-16`; mobile `px-4 sm:px-6 pt-20` + `style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom))' }}`
+2. **Bottom padding para BottomNav:** mobile usa `calc(5rem + env(safe-area-inset-bottom))` via style prop (80px + safe area del dispositivo); el shorthand `p-*` de Tailwind sobreescribe `pb-*` base, por eso se usa style prop
+3. **Header height:** `h-16 lg:h-20`. En mobile el header es `position: fixed inset-x-0 top-0` con animación scroll-aware (se oculta al scrollear hacia abajo, reaparece al scrollear hacia arriba). En desktop es `position: relative` (flex child normal)
 4. **Safe areas:** usar `env(safe-area-inset-bottom)` en elementos fijos al fondo (BottomNav, Modal bottom-sheet)
 5. **Touch targets:** mínimo 40px (idealmente 44px) para botones interactivos en mobile
-6. **Scroll locking:** aplicar `document.body.style.overflow = 'hidden'` en modales y sheets abiertos
+6. **Scroll locking:** `document.body.style.overflow = 'hidden'` en modales y sheets abiertos. AppShell también bloquea `html` y `body` globalmente para garantizar que `main` sea siempre el scroll container (previene body scroll en iOS Safari / Chrome Android)
 
 ## Mock data
 

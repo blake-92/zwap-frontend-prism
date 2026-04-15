@@ -547,10 +547,12 @@ GlassBackground (fixed, z-0)
     ├── BottomNav (fixed bottom z-40) — solo < lg
     └── Main column (flex-1 flex flex-col h-screen overflow-hidden z-10)
         ├── Header (h-16 lg:h-20 z-50)
-        │   ├── Desktop: search bar inline + branch dropdown + acciones
-        │   └── Mobile: isotipo + wordmark/search + branch pill + search/filter icons
-        └── <main> (flex-1 overflow-auto p-4 sm:p-6 lg:p-8 xl:p-10 pb-28 lg:pb-16)
-            └── <div> max-w-[1400px] 2xl:max-w-[1600px] mx-auto
+        │   ├── Desktop: relative — search bar inline + branch dropdown + acciones
+        │   └── Mobile: fixed inset-x-0 top-0 — scroll-aware (y:-64 al bajar, y:0 al subir)
+        └── <main> (flex-1 overflow-auto overscroll-y-contain)
+        │       desktop: px/pt responsive + lg:pb-10 xl:pb-12 2xl:pb-16
+        │       mobile:  px-4 sm:px-6 pt-20 + paddingBottom calc(5rem+safe-area) via style
+            └── <div> max-w-[1400px] 2xl:max-w-[1600px] mx-auto  ← sin h-full
 ```
 
 **Header mobile:** muestra isotipo Zwap + wordmark animado (blur reveal con `AnimatePresence`). Al expandir búsqueda, el wordmark se reemplaza por la barra de búsqueda con spring. El selector de sucursales es un pill circular que abre un bottom sheet vía `createPortal`. Filtros e íconos de acción se ocultan cuando la búsqueda está expandida.
