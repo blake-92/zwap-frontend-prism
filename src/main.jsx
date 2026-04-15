@@ -11,6 +11,16 @@ window.addEventListener('vite:preloadError', () => {
   window.location.reload()
 })
 
+// iOS Safari BFCache (Back/Forward Cache) restoration: when Safari restores a frozen
+// page from BFCache, the vite:preloadError event won't fire for stale chunks because
+// the module graph is already "resolved" (frozen state). Force a hard reload so Safari
+// fetches fresh HTML and re-evaluates all chunks.
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted) {
+    window.location.reload()
+  }
+})
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />

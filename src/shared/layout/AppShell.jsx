@@ -28,11 +28,12 @@ export default function AppShell() {
   // Prevent document scroll — ensures main is always the scroll container.
   // Without this, iOS Safari and Chrome Android propagate scroll to the body,
   // causing the header to disappear and the browser chrome to auto-hide.
+  // NOTE: Only lock body, NOT documentElement (<html>). Setting overflow:hidden
+  // on <html> triggers a known iOS Safari bug that causes blank screens on
+  // BFCache restoration and some reload scenarios.
   useEffect(() => {
-    document.documentElement.style.overflow = 'hidden'
     document.body.style.overflow = 'hidden'
     return () => {
-      document.documentElement.style.overflow = ''
       document.body.style.overflow = ''
     }
   }, [])
