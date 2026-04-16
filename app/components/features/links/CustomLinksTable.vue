@@ -5,7 +5,7 @@ import { Download, ChevronDown, Edit2, Mail, Eye, Timer, ListTree, CalendarDays,
 import { useThemeStore } from '~/stores/theme'
 import { useToastStore } from '~/stores/toast'
 import { useMediaQuery } from '~/composables/useMediaQuery'
-import { listVariants, itemVariants, cardItemVariants } from '~/utils/motionVariants'
+import { useMotionVariants } from '~/composables/useMotionVariants'
 import { CUSTOM_LINKS } from '~/utils/mockData'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
@@ -15,6 +15,7 @@ import TableToolbar from '~/components/ui/TableToolbar.vue'
 import EmptySearchState from '~/components/ui/EmptySearchState.vue'
 import SwipeableCard from '~/components/ui/SwipeableCard.vue'
 
+const mv = useMotionVariants()
 const props = defineProps({
   search: { type: String, default: '' },
 })
@@ -76,7 +77,7 @@ const mobileActions = (link) => [
             <th class="px-8 py-4 text-right">{{ t('transactions.tableActions') }}</th>
           </tr>
         </thead>
-        <motion.tbody :variants="listVariants" initial="hidden" animate="show">
+        <motion.tbody :variants="mv.list.value" initial="hidden" animate="show">
           <template v-if="filtered.length === 0">
             <EmptySearchState :col-span="5" :term="search" @clear="emit('clearSearch')" />
           </template>
@@ -84,7 +85,7 @@ const mobileActions = (link) => [
             v-for="link in filtered"
             v-else
             :key="link.id"
-            :variants="itemVariants"
+            :variants="mv.item.value"
             :class="['group transition-colors duration-200', trClass]"
           >
             <td class="px-8 py-4">
@@ -152,8 +153,8 @@ const mobileActions = (link) => [
 
   <!-- Mobile cards with SwipeableCard -->
   <div class="lg:hidden">
-    <motion.div v-if="filtered.length > 0" :variants="listVariants" initial="hidden" animate="show" class="space-y-3">
-      <motion.div v-for="link in filtered" :key="link.id" :variants="cardItemVariants">
+    <motion.div v-if="filtered.length > 0" :variants="mv.list.value" initial="hidden" animate="show" class="space-y-3">
+      <motion.div v-for="link in filtered" :key="link.id" :variants="mv.cardItem.value">
         <SwipeableCard :actions="mobileActions(link)">
           <div class="p-4" @click="emit('detail', link)">
             <div class="flex items-center justify-between gap-2 mb-2.5">

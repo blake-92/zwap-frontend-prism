@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion-v'
 import { Download, UserPlus, Users, Pencil, Trash2, Filter } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
 import { useViewSearch } from '~/composables/useViewSearch'
-import { listVariants, itemVariants, pageVariants } from '~/utils/motionVariants'
+import { useMotionVariants } from '~/composables/useMotionVariants'
 import { USERS } from '~/utils/mockData'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
@@ -18,6 +18,7 @@ import PageHeader from '~/components/ui/PageHeader.vue'
 import TableToolbar from '~/components/ui/TableToolbar.vue'
 import NewUserModal from './NewUserModal.vue'
 
+const mv = useMotionVariants()
 const { t } = useI18n()
 const themeStore = useThemeStore()
 const viewSearch = useViewSearch(computed(() => t('users.searchPlaceholder')))
@@ -95,7 +96,7 @@ const branchOverflowClass = computed(() =>
 </script>
 
 <template>
-  <motion.div :variants="pageVariants" initial="hidden" animate="show" exit="exit">
+  <motion.div :variants="mv.page.value" initial="hidden" animate="show" exit="exit">
     <PageHeader :title="t('users.title')">
       <Button @click="newUserOpen = true">
         <UserPlus :size="18" /> {{ t('users.newUser') }}
@@ -146,7 +147,7 @@ const branchOverflowClass = computed(() =>
               <th class="px-8 py-4 text-right min-w-[120px]">{{ t('transactions.tableActions') }}</th>
             </tr>
           </thead>
-          <motion.tbody :variants="listVariants" initial="hidden" animate="show">
+          <motion.tbody :variants="mv.list.value" initial="hidden" animate="show">
             <template v-if="filtered.length === 0">
               <EmptySearchState :col-span="5" :term="viewSearch.query" @clear="viewSearch.setQuery('')" />
             </template>
@@ -154,7 +155,7 @@ const branchOverflowClass = computed(() =>
               v-for="user in filtered"
               v-else
               :key="user.id"
-              :variants="itemVariants"
+              :variants="mv.item.value"
               :class="['group transition-colors duration-200', trClass]"
             >
               <td class="px-8 py-4">
@@ -201,12 +202,12 @@ const branchOverflowClass = computed(() =>
     <div class="lg:hidden space-y-3">
       <motion.div
         v-if="filtered.length > 0"
-        :variants="listVariants"
+        :variants="mv.list.value"
         initial="hidden"
         animate="show"
         class="space-y-3"
       >
-        <motion.div v-for="user in filtered" :key="user.id" :variants="itemVariants">
+        <motion.div v-for="user in filtered" :key="user.id" :variants="mv.item.value">
           <Card class="p-4">
             <div class="flex items-start justify-between gap-3 mb-3">
               <AvatarInfo :initials="user.initials" :primary="user.name" :secondary="user.email" glow />

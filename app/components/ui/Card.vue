@@ -1,6 +1,7 @@
 <script setup>
 import { computed, useAttrs } from 'vue'
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceStore } from '~/stores/performance'
 import { getCardClasses } from '~/utils/cardClasses'
 
 const props = defineProps({
@@ -8,8 +9,9 @@ const props = defineProps({
 })
 
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
 const attrs = useAttrs()
-const cls = computed(() => getCardClasses(themeStore.isDarkMode, props.hoverEffect))
+const cls = computed(() => getCardClasses(themeStore.isDarkMode, props.hoverEffect, perfStore.useBlur))
 const clickable = computed(() => typeof attrs.onClick === 'function')
 
 const onKey = (e) => {
@@ -24,7 +26,7 @@ const onKey = (e) => {
 <template>
   <div
     :class="[
-      'rounded-[24px] border transition-all duration-300 transform-gpu overflow-hidden',
+      'rounded-[24px] border transition-[transform,box-shadow] duration-300 transform-gpu overflow-hidden',
       cls.base,
       cls.hover,
       clickable ? 'cursor-pointer' : '',

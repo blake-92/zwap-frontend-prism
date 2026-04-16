@@ -6,6 +6,7 @@ import { useThemeStore } from '~/stores/theme'
 import { useMediaQuery } from '~/composables/useMediaQuery'
 import { useScrollLock } from '~/composables/useScrollLock'
 import { useChromeBlur } from '~/composables/useChromeBlur'
+import { usePerformanceStore } from '~/stores/performance'
 import { getModalGlass } from '~/utils/cardClasses'
 import Button from './Button.vue'
 
@@ -84,7 +85,8 @@ const onDragEnd = (_e, info) => {
   }
 }
 
-const modalClass = computed(() => getModalGlass(themeStore.isDarkMode))
+const perfStore = usePerformanceStore()
+const modalClass = computed(() => getModalGlass(themeStore.isDarkMode, perfStore.useBlur))
 </script>
 
 <template>

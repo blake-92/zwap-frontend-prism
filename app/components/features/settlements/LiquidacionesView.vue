@@ -10,7 +10,7 @@ import { useThemeStore } from '~/stores/theme'
 import { useViewSearch } from '~/composables/useViewSearch'
 import { useMediaQuery } from '~/composables/useMediaQuery'
 import { useInfiniteScroll } from '~/composables/useInfiniteScroll'
-import { listVariants, itemVariants, pageVariants } from '~/utils/motionVariants'
+import { useMotionVariants } from '~/composables/useMotionVariants'
 import { PAYOUTS, WALLET_BALANCE, SETTLEMENT_SUMMARY } from '~/utils/mockData'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
@@ -23,6 +23,7 @@ import Tooltip from '~/components/ui/Tooltip.vue'
 import PageHeader from '~/components/ui/PageHeader.vue'
 import TableToolbar from '~/components/ui/TableToolbar.vue'
 
+const mv = useMotionVariants()
 const { t } = useI18n()
 const themeStore = useThemeStore()
 const isDesktop = useMediaQuery('(min-width: 1024px)')
@@ -115,7 +116,7 @@ const netClass = (isDebt) => {
 </script>
 
 <template>
-  <motion.div :variants="pageVariants" initial="hidden" animate="show" exit="exit">
+  <motion.div :variants="mv.page.value" initial="hidden" animate="show" exit="exit">
     <PageHeader :title="t('settlements.title')">
       <Button variant="outline"><Download :size="18" /> {{ t('settlements.downloadFiscal') }}</Button>
     </PageHeader>
@@ -177,7 +178,7 @@ const netClass = (isDebt) => {
               <th class="px-8 py-4 text-right">{{ t('transactions.tableActions') }}</th>
             </tr>
           </thead>
-          <motion.tbody :variants="listVariants" initial="hidden" animate="show">
+          <motion.tbody :variants="mv.list.value" initial="hidden" animate="show">
             <template v-if="paginatedData.length === 0">
               <EmptySearchState :col-span="5" :term="viewSearch.query" @clear="viewSearch.setQuery('')" />
             </template>
@@ -185,7 +186,7 @@ const netClass = (isDebt) => {
               v-for="(lote, idx) in paginatedData"
               v-else
               :key="`${lote.type}-${lote.closeDate}-${idx}`"
-              :variants="itemVariants"
+              :variants="mv.item.value"
               :class="['group transition-colors duration-200', trClass]"
             >
               <td class="px-8 py-4">
@@ -266,12 +267,12 @@ const netClass = (isDebt) => {
     <div class="lg:hidden space-y-3">
       <motion.div
         v-if="visibleData.length > 0"
-        :variants="listVariants"
+        :variants="mv.list.value"
         initial="hidden"
         animate="show"
         class="space-y-3"
       >
-        <motion.div v-for="(lote, idx) in visibleData" :key="`${lote.type}-${lote.closeDate}-${idx}`" :variants="itemVariants">
+        <motion.div v-for="(lote, idx) in visibleData" :key="`${lote.type}-${lote.closeDate}-${idx}`" :variants="mv.item.value">
           <Card class="p-4">
             <div class="flex items-start justify-between gap-3 mb-3">
               <div class="flex items-start gap-3 min-w-0">

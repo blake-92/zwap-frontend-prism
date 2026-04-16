@@ -52,7 +52,7 @@ const inputClass = computed(() => {
       v-bind="$attrs"
       :value="modelValue"
       :class="[
-        'w-full py-3 rounded-xl border outline-hidden transition-all font-medium',
+        'w-full py-3 rounded-xl border outline-hidden transition-colors font-medium',
         icon ? 'pl-11 pr-4' : prefix ? 'pl-8 pr-4' : 'px-4',
         inputClass,
       ]"

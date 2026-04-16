@@ -150,6 +150,43 @@ html.has-overlay main {
 .rdp-prism-dark .rdp-button_next:hover,
 .rdp-prism-dark .rdp-button_previous:hover { background: rgba(255, 255, 255, 0.1); border-radius: 8px; }
 
+/* ─── Performance tiers ──────────────────────────────────── */
+/* Controlled by usePerformanceStore via html.perf-* classes.
+   Tier lite: strip backdrop-blur (biggest GPU cost).
+   Tier minimal: disable all animations + transitions.
+   prefers-reduced-motion: OS-level animation opt-out (WCAG 2.1). */
+
+html.perf-lite *,
+html.perf-lite *::before,
+html.perf-lite *::after {
+  --tw-backdrop-blur: initial !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html.perf-minimal *,
+html.perf-minimal *::before,
+html.perf-minimal *::after {
+  --tw-backdrop-blur: initial !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* ─── Page & layout transitions ──────────────────────────── */
 .page-enter-active,
 .page-leave-active,

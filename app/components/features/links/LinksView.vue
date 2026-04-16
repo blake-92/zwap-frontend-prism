@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { motion, AnimatePresence } from 'motion-v'
 import { Plus } from 'lucide-vue-next'
 import { useViewSearch } from '~/composables/useViewSearch'
-import { pageVariants } from '~/utils/motionVariants'
+import { useMotionVariants } from '~/composables/useMotionVariants'
 import { PERMANENT_LINKS } from '~/utils/mockData'
 import Button from '~/components/ui/Button.vue'
 import SectionLabel from '~/components/ui/SectionLabel.vue'
@@ -14,6 +14,7 @@ import CustomLinksTable from './CustomLinksTable.vue'
 import NewLinkModal from './NewLinkModal.vue'
 import LinkDetailModal from './LinkDetailModal.vue'
 
+const mv = useMotionVariants()
 const { t } = useI18n()
 const links = ref(PERMANENT_LINKS.map(l => ({ ...l })))
 const newLinkOpen = ref(false)
@@ -33,7 +34,7 @@ const handleEdit = (link) => {
 </script>
 
 <template>
-  <motion.div :variants="pageVariants" initial="hidden" animate="show" exit="exit">
+  <motion.div :variants="mv.page.value" initial="hidden" animate="show" exit="exit">
     <PageHeader :title="t('links.title')">
       <div class="hidden lg:block">
         <Button @click="newLinkOpen = true">

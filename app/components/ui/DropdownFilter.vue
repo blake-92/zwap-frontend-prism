@@ -133,7 +133,7 @@ const sheetRowClass = computed(() =>
       :size="isDesktop ? 'sm' : 'icon'"
       aria-haspopup="listbox"
       :aria-expanded="isOpen"
-      :class="['transition-all', isDesktop ? '!px-3 flex items-center gap-1.5' : '!w-10 !h-10 !p-0 flex items-center justify-center', openedButtonClass]"
+      :class="['transition-colors', isDesktop ? '!px-3 flex items-center gap-1.5' : '!w-10 !h-10 !p-0 flex items-center justify-center', openedButtonClass]"
       @click="isOpen = !isOpen"
     >
       <component

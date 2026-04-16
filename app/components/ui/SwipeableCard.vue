@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { motion, useAnimationControls } from 'motion-v'
 import { ChevronLeft } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceStore } from '~/stores/performance'
 import { getCardClasses } from '~/utils/cardClasses'
 
 const props = defineProps({
@@ -10,6 +11,7 @@ const props = defineProps({
 })
 
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
 const controls = useAnimationControls()
 const isOpen = ref(false)
 const isDragging = ref(false)
@@ -18,7 +20,7 @@ const validActions = computed(() => props.actions.filter(a => !a.hidden))
 const actionWidth = 76
 const maxDrag = computed(() => validActions.value.length * actionWidth)
 
-const cardClasses = computed(() => getCardClasses(themeStore.isDarkMode))
+const cardClasses = computed(() => getCardClasses(themeStore.isDarkMode, false, perfStore.useBlur))
 
 const closeCard = () => {
   controls.start({ x: 0 })

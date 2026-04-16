@@ -10,7 +10,7 @@ import { useThemeStore } from '~/stores/theme'
 import { useViewSearch } from '~/composables/useViewSearch'
 import { useMediaQuery } from '~/composables/useMediaQuery'
 import { useInfiniteScroll } from '~/composables/useInfiniteScroll'
-import { listVariants, itemVariants, pageVariants } from '~/utils/motionVariants'
+import { useMotionVariants } from '~/composables/useMotionVariants'
 import { TRANSACTIONS } from '~/utils/mockData'
 import { ROUTES } from '~/utils/routes'
 import Card from '~/components/ui/Card.vue'
@@ -26,6 +26,7 @@ import SwipeableCard from '~/components/ui/SwipeableCard.vue'
 import ReceiptModal from './ReceiptModal.vue'
 import RefundModal from './RefundModal.vue'
 
+const mv = useMotionVariants()
 const { t } = useI18n()
 const themeStore = useThemeStore()
 const isDesktop = useMediaQuery('(min-width: 1024px)')
@@ -123,7 +124,7 @@ const goLinks = () => navigateTo(ROUTES.LINKS)
 </script>
 
 <template>
-  <motion.div :variants="pageVariants" initial="hidden" animate="show" exit="exit">
+  <motion.div :variants="mv.page.value" initial="hidden" animate="show" exit="exit">
     <PageHeader :title="t('transactions.title')">
       <Button class="hidden sm:flex" @click="goLinks">
         <LinkIcon :size="18" /> {{ t('transactions.viewLinks') }}
@@ -167,7 +168,7 @@ const goLinks = () => navigateTo(ROUTES.LINKS)
               <th class="px-8 py-4 text-right min-w-[160px]">{{ t('transactions.tableActions') }}</th>
             </tr>
           </thead>
-          <motion.tbody :variants="listVariants" initial="hidden" animate="show">
+          <motion.tbody :variants="mv.list.value" initial="hidden" animate="show">
             <template v-if="paginatedData.length === 0">
               <EmptySearchState :col-span="5" :term="viewSearch.query" @clear="viewSearch.setQuery('')" />
             </template>
@@ -175,7 +176,7 @@ const goLinks = () => navigateTo(ROUTES.LINKS)
               v-for="trx in paginatedData"
               v-else
               :key="trx.id"
-              :variants="itemVariants"
+              :variants="mv.item.value"
               :class="['group transition-colors duration-200', trClass]"
             >
               <td class="px-8 py-4">
@@ -252,8 +253,8 @@ const goLinks = () => navigateTo(ROUTES.LINKS)
 
     <!-- Mobile cards with SwipeableCard -->
     <div class="lg:hidden space-y-3">
-      <motion.div v-if="visibleData.length > 0" :variants="listVariants" initial="hidden" animate="show" class="space-y-3">
-        <motion.div v-for="trx in visibleData" :key="trx.id" :variants="itemVariants">
+      <motion.div v-if="visibleData.length > 0" :variants="mv.list.value" initial="hidden" animate="show" class="space-y-3">
+        <motion.div v-for="trx in visibleData" :key="trx.id" :variants="mv.item.value">
           <SwipeableCard :actions="mobileActions(trx)">
             <div class="p-4">
               <div class="flex items-start justify-between gap-3 mb-3">

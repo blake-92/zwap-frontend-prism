@@ -39,7 +39,7 @@ const subClass = (step) => {
       <div class="flex flex-col items-center flex-1 min-w-0">
         <div class="flex items-center w-full mb-3">
           <div v-if="i > 0" :class="['flex-1 h-0.5 transition-colors', connectorColor(i - 1)]" />
-          <div :class="['w-8 h-8 shrink-0 flex items-center justify-center rounded-full transition-all duration-300', circleClass(step)]">
+          <div :class="['w-8 h-8 shrink-0 flex items-center justify-center rounded-full transition-colors duration-300', circleClass(step)]">
             <component :is="step.icon" :size="14" :class="step.active ? 'animate-spin-slow' : ''" />
           </div>
           <div v-if="i !== steps.length - 1" :class="['flex-1 h-0.5 transition-colors', connectorColor(i)]" />

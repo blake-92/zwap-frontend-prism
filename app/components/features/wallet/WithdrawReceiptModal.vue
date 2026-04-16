@@ -75,13 +75,13 @@ const closeBtnClass = computed(() =>
           class="relative w-full max-w-[400px]"
         >
           <div class="absolute -top-12 right-0 flex gap-2">
-            <button :class="['p-2 rounded-full backdrop-blur-xl transition-all shadow-lg', actionBtnClass]" :title="t('common.print')">
+            <button :class="['p-2 rounded-full backdrop-blur-xl transition-colors shadow-lg', actionBtnClass]" :title="t('common.print')">
               <Printer :size="18" />
             </button>
-            <button :class="['p-2 rounded-full backdrop-blur-xl transition-all shadow-lg', actionBtnClass]" :title="t('common.downloadPdf')">
+            <button :class="['p-2 rounded-full backdrop-blur-xl transition-colors shadow-lg', actionBtnClass]" :title="t('common.downloadPdf')">
               <Download :size="18" />
             </button>
-            <button :class="['p-2 rounded-full backdrop-blur-xl transition-all shadow-lg', closeBtnClass]" :title="t('common.close')" @click="emit('close')">
+            <button :class="['p-2 rounded-full backdrop-blur-xl transition-colors shadow-lg', closeBtnClass]" :title="t('common.close')" @click="emit('close')">
               <X :size="18" />
             </button>
           </div>

@@ -65,7 +65,7 @@ const mm = computed(() => hhmm.value[1])
 const inputClass = computed(() => {
   const d = themeStore.isDarkMode
   return [
-    'w-full rounded-xl px-4 py-3 border text-sm font-medium outline-hidden transition-all',
+    'w-full rounded-xl px-4 py-3 border text-sm font-medium outline-hidden transition-colors',
     d ? 'bg-[#252429] border-white/10 text-white focus:border-[#7C3AED]/60'
       : 'bg-gray-50 border-gray-200 text-[#111113] focus:border-[#7C3AED]/40',
   ]
@@ -173,7 +173,7 @@ const dpDarkMode = computed(() => themeStore.isDarkMode ? 'dark' : 'light')
               v-for="h in HOURS"
               :key="h"
               type="button"
-              :class="['py-1.5 rounded-lg text-[11px] font-mono font-semibold transition-all', hourPresetClass(h)]"
+              :class="['py-1.5 rounded-lg text-[11px] font-mono font-semibold transition-colors', hourPresetClass(h)]"
               @click="emit('timeChange', `${h}:${mm}`)"
             >
               {{ h }}:00
@@ -207,7 +207,7 @@ const dpDarkMode = computed(() => themeStore.isDarkMode ? 'dark' : 'light')
                 v-for="m in MINUTES"
                 :key="m"
                 type="button"
-                :class="['px-2 py-1.5 rounded-lg text-[11px] font-mono font-semibold transition-all', minutePresetClass(m)]"
+                :class="['px-2 py-1.5 rounded-lg text-[11px] font-mono font-semibold transition-colors', minutePresetClass(m)]"
                 @click="emit('timeChange', `${hh}:${m}`)"
               >
                 :{{ m }}

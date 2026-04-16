@@ -80,7 +80,7 @@ const inputClass = computed(() =>
           <div
             v-for="opt in options"
             :key="opt.id"
-            :class="['p-4 rounded-xl border cursor-pointer transition-all', boxClass(opt.id)]"
+            :class="['p-4 rounded-xl border cursor-pointer transition-colors', boxClass(opt.id)]"
             @click="refundType = opt.id"
           >
             <div class="flex justify-between items-center mb-1">
@@ -109,7 +109,7 @@ const inputClass = computed(() =>
             min="0"
             :max="parseFloat(trx.amount.replace(/,/g, ''))"
             :value="partial"
-            :class="['w-full pl-8 pr-4 py-3 rounded-xl border outline-hidden font-mono font-bold text-lg transition-all', inputClass]"
+            :class="['w-full pl-8 pr-4 py-3 rounded-xl border outline-hidden font-mono font-bold text-lg transition-colors', inputClass]"
             @input="handlePartialInput"
           />
         </div>

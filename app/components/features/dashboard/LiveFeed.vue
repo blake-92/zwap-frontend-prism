@@ -4,13 +4,14 @@ import { motion, AnimatePresence } from 'motion-v'
 import { ArrowRight, CreditCard } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
 import { TRANSACTIONS } from '~/utils/mockData'
-import { listVariants, itemVariants } from '~/utils/motionVariants'
+import { useMotionVariants } from '~/composables/useMotionVariants'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
 import Badge from '~/components/ui/Badge.vue'
 import CardHeader from '~/components/ui/CardHeader.vue'
 import ReceiptModal from '~/components/features/transactions/ReceiptModal.vue'
 
+const mv = useMotionVariants()
 const emit = defineEmits(['viewAll'])
 const { t } = useI18n()
 const themeStore = useThemeStore()
@@ -69,11 +70,11 @@ const ringClass = (variant) => {
             <th class="px-6 py-3 text-right">{{ t('dashboard.tableAmount') }}</th>
           </tr>
         </thead>
-        <motion.tbody :variants="listVariants" initial="hidden" animate="show">
+        <motion.tbody :variants="mv.list.value" initial="hidden" animate="show">
           <motion.tr
             v-for="trx in recent"
             :key="trx.id"
-            :variants="itemVariants"
+            :variants="mv.item.value"
             :class="['group transition-colors duration-200', trClass]"
           >
             <td class="px-6 py-3">
@@ -115,11 +116,11 @@ const ringClass = (variant) => {
 
     <!-- Mobile ticker -->
     <div class="lg:hidden flex-1 px-4 pb-2 pt-1">
-      <motion.div :variants="listVariants" initial="hidden" animate="show" class="space-y-0.5">
+      <motion.div :variants="mv.list.value" initial="hidden" animate="show" class="space-y-0.5">
         <motion.div
           v-for="(trx, i) in recent"
           :key="trx.id"
-          :variants="itemVariants"
+          :variants="mv.item.value"
           :class="[
             'flex items-center gap-2.5 py-2 cursor-pointer active:opacity-70 transition-opacity',
             i < 3 ? (themeStore.isDarkMode ? 'border-b border-white/5' : 'border-b border-black/5') : ''

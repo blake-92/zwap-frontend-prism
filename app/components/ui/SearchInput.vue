@@ -28,7 +28,7 @@ const ariaLabel = computed(() => props.placeholder.replace('...', '').trim())
 </script>
 
 <template>
-  <div :class="['flex items-center px-4 py-2 rounded-xl transition-all', containerClass, wrapperClass]">
+  <div :class="['flex items-center px-4 py-2 rounded-xl transition-colors', containerClass, wrapperClass]">
     <Search :size="14" :class="['shrink-0', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']" />
     <input
       type="text"

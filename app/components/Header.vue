@@ -6,6 +6,7 @@ import {
   Settings, SlidersHorizontal, X, Check,
 } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceStore } from '~/stores/performance'
 import { useViewSearchStore } from '~/stores/viewSearch'
 import { ROUTES } from '~/utils/routes'
 import { BRANCHES } from '~/utils/mockData'
@@ -26,6 +27,7 @@ const emit = defineEmits(['branchChange'])
 
 const { t } = useI18n()
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
 const viewSearch = useViewSearchStore()
 const menuOpen = ref(false)
 const branchSheetOpen = ref(false)
@@ -131,7 +133,7 @@ const goSettings = () => navigateTo(ROUTES.SETTINGS)
   >
     <!-- Desktop -->
     <template v-if="isDesktop">
-      <div :class="['flex items-center px-4 py-2.5 rounded-xl border w-[240px] md:w-[300px] lg:w-[340px] xl:w-[400px] transition-all duration-300', desktopSearchClass]">
+      <div :class="['flex items-center px-4 py-2.5 rounded-xl border w-[240px] md:w-[300px] lg:w-[340px] xl:w-[400px] transition-[border-color,box-shadow] duration-300', desktopSearchClass]">
         <Search :size="16" :class="themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'" />
         <input
           type="text"
@@ -212,7 +214,7 @@ const goSettings = () => navigateTo(ROUTES.SETTINGS)
               animate="visible"
               exit="exit"
               :style="{ transformOrigin: 'top right' }"
-              :class="['absolute right-0 mt-4 w-56 rounded-2xl z-50 overflow-hidden', getDropdownGlass(themeStore.isDarkMode)]"
+              :class="['absolute right-0 mt-4 w-56 rounded-2xl z-50 overflow-hidden', getDropdownGlass(themeStore.isDarkMode, perfStore.useBlur)]"
             >
               <div class="p-2 flex flex-col gap-0.5">
                 <button
@@ -314,7 +316,7 @@ const goSettings = () => navigateTo(ROUTES.SETTINGS)
         </AnimatePresence>
         <button
           :aria-label="t('nav.branches')"
-          :class="['w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 transition-all', branchPillClass]"
+          :class="['w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 transition-colors', branchPillClass]"
           @click="branchSheetOpen = true"
         >
           {{ selectedBranch.charAt(0) }}

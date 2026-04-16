@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion-v'
 import { Mail, Lock, Sun, Moon, ArrowLeft } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
 import { ROUTES } from '~/utils/routes'
-import { pageVariants } from '~/utils/motionVariants'
+import { useMotionVariants } from '~/composables/useMotionVariants'
 import { SPRING } from '~/utils/springs'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
@@ -14,6 +14,7 @@ import GlassBackground from '~/components/GlassBackground.vue'
 
 definePageMeta({ layout: false })
 
+const mv = useMotionVariants()
 const { t } = useI18n()
 const themeStore = useThemeStore()
 const showEmail = ref(false)
@@ -36,7 +37,7 @@ const linkCls = 'hover:underline transition-colors hover:text-[#7C3AED] cursor-p
     <GlassBackground />
 
     <motion.div
-      :variants="pageVariants"
+      :variants="mv.page.value"
       initial="hidden"
       animate="show"
       class="min-h-screen w-full flex flex-col relative z-10 items-center justify-center p-4"
@@ -80,7 +81,7 @@ const linkCls = 'hover:underline transition-colors hover:text-[#7C3AED] cursor-p
               <!-- Google button -->
               <button
                 :class="[
-                  'flex items-center justify-center w-full gap-3 py-3.5 px-4 rounded-xl text-sm font-bold transition-all duration-200 shadow-md',
+                  'flex items-center justify-center w-full gap-3 py-3.5 px-4 rounded-xl text-sm font-bold transition-colors duration-200 shadow-md',
                   themeStore.isDarkMode ? 'bg-white hover:bg-gray-100 text-[#111113]' : 'bg-white border border-gray-200 hover:bg-gray-50 text-[#111113]'
                 ]"
                 @click="handleLogin"

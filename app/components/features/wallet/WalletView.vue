@@ -9,7 +9,7 @@ import { useThemeStore } from '~/stores/theme'
 import { useViewSearch } from '~/composables/useViewSearch'
 import { useMediaQuery } from '~/composables/useMediaQuery'
 import { useInfiniteScroll } from '~/composables/useInfiniteScroll'
-import { listVariants, itemVariants, pageVariants } from '~/utils/motionVariants'
+import { useMotionVariants } from '~/composables/useMotionVariants'
 import { WITHDRAWALS, WALLET_BALANCE, WALLET_STEPS, BANK_ACCOUNT } from '~/utils/mockData'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
@@ -24,6 +24,7 @@ import TableToolbar from '~/components/ui/TableToolbar.vue'
 import WithdrawModal from './WithdrawModal.vue'
 import WithdrawReceiptModal from './WithdrawReceiptModal.vue'
 
+const mv = useMotionVariants()
 const { t } = useI18n()
 const themeStore = useThemeStore()
 const isDesktop = useMediaQuery('(min-width: 1024px)')
@@ -121,7 +122,7 @@ const trClass = computed(() =>
 </script>
 
 <template>
-  <motion.div :variants="pageVariants" initial="hidden" animate="show" exit="exit">
+  <motion.div :variants="mv.page.value" initial="hidden" animate="show" exit="exit">
     <PageHeader :title="t('wallet.title')" />
 
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-6">
@@ -242,7 +243,7 @@ const trClass = computed(() =>
               <th class="px-8 py-3 text-right">{{ t('wallet.receiptHeader') }}</th>
             </tr>
           </thead>
-          <motion.tbody :variants="listVariants" initial="hidden" animate="show">
+          <motion.tbody :variants="mv.list.value" initial="hidden" animate="show">
             <template v-if="paginatedWithdrawals.length === 0">
               <EmptySearchState :col-span="6" :term="viewSearch.query" @clear="() => { viewSearch.setQuery(''); currentPage = 1 }" />
             </template>
@@ -250,7 +251,7 @@ const trClass = computed(() =>
               v-for="w in paginatedWithdrawals"
               v-else
               :key="w.id"
-              :variants="itemVariants"
+              :variants="mv.item.value"
               :class="['group transition-colors duration-200', trClass]"
             >
               <td class="px-8 py-3.5">
@@ -294,8 +295,8 @@ const trClass = computed(() =>
       <div class="py-2">
         <h3 :class="['font-bold text-sm', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']">{{ t('wallet.withdrawalHistory') }}</h3>
       </div>
-      <motion.div v-if="visibleData.length > 0" :variants="listVariants" initial="hidden" animate="show" class="space-y-3">
-        <motion.div v-for="w in visibleData" :key="w.id" :variants="itemVariants">
+      <motion.div v-if="visibleData.length > 0" :variants="mv.list.value" initial="hidden" animate="show" class="space-y-3">
+        <motion.div v-for="w in visibleData" :key="w.id" :variants="mv.item.value">
           <Card class="p-4">
             <div class="flex items-start justify-between gap-3 mb-2">
               <div class="min-w-0">

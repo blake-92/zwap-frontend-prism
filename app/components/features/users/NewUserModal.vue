@@ -127,7 +127,7 @@ const disabled = computed(() => !name.value.trim() || !email.value.trim() || bra
             role="radio"
             :aria-checked="role === r.id"
             tabindex="0"
-            :class="['p-4 rounded-xl border cursor-pointer transition-all', roleBoxClass(r.id)]"
+            :class="['p-4 rounded-xl border cursor-pointer transition-colors', roleBoxClass(r.id)]"
             @click="role = r.id"
             @keydown.enter.prevent="role = r.id"
             @keydown.space.prevent="role = r.id"
@@ -146,7 +146,7 @@ const disabled = computed(() => !name.value.trim() || !email.value.trim() || bra
           <label
             v-for="b in BRANCH_LIST"
             :key="b.id"
-            :class="['flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all', branchRowClass(b.id)]"
+            :class="['flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-colors', branchRowClass(b.id)]"
           >
             <span :class="['text-sm font-semibold', themeStore.isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]']">
               {{ b.name }}

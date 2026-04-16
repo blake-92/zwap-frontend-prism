@@ -380,7 +380,13 @@
     "languageEs": "Español",
     "languageEn": "English",
     "activeAgoMinutes": "Active {count} minute ago | Active {count} minutes ago",
-    "activeAgoHours": "Active {count} hour ago | Active {count} hours ago"
+    "activeAgoHours": "Active {count} hour ago | Active {count} hours ago",
+    "performance": "Performance",
+    "liteMode": "Lite Mode",
+    "liteModeDesc": "Disables transparency and blur effects to improve performance on low-end devices",
+    "perfAuto": "Auto",
+    "perfFull": "Full",
+    "perfLite": "Lite"
   },
   "filters": {
     "anyDate": "Any date",

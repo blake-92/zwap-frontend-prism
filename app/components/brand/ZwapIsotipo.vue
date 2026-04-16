@@ -19,7 +19,7 @@ const shadowClass = computed(() =>
     viewBox="140 490 285 225"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-    :class="['w-auto object-contain transition-all duration-300', shadowClass, wrapperClass]"
+    :class="['w-auto object-contain transition-[filter] duration-300', shadowClass, wrapperClass]"
   >
     <defs>
       <linearGradient id="isoGradMark" gradientUnits="userSpaceOnUse" x1="155" y1="708" x2="420" y2="496">

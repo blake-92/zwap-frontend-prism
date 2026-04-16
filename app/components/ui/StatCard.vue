@@ -46,7 +46,7 @@ const labelBalanceClass = computed(() =>
   <Card hover-effect class="p-6 cursor-pointer group">
     <template v-if="layout === 'balance'">
       <div class="flex justify-between items-start mb-4">
-        <div :class="['w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300', iconBubbleClass]">
+        <div :class="['w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-300', iconBubbleClass]">
           <component :is="icon" :size="20" />
         </div>
         <Badge v-if="badge" :variant="badgeVariant">{{ badge }}</Badge>
@@ -58,7 +58,7 @@ const labelBalanceClass = computed(() =>
     <template v-else>
       <div class="flex justify-between items-start mb-6">
         <span :class="['text-sm font-semibold transition-colors', labelKpiClass]">{{ label }}</span>
-        <div :class="['w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300', iconBubbleClass]">
+        <div :class="['w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-300', iconBubbleClass]">
           <component :is="icon" :size="20" />
         </div>
       </div>

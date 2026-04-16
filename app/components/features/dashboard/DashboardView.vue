@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion-v'
 import { Plus } from 'lucide-vue-next'
 import { useViewSearch } from '~/composables/useViewSearch'
 import { useThemeStore } from '~/stores/theme'
-import { pageVariants } from '~/utils/motionVariants'
+import { useMotionVariants } from '~/composables/useMotionVariants'
 import { KPIS } from '~/utils/mockData'
 import { ROUTES } from '~/utils/routes'
 import Button from '~/components/ui/Button.vue'
@@ -16,6 +16,7 @@ import LiveFeed from './LiveFeed.vue'
 import PendingCharges from './PendingCharges.vue'
 import NewLinkModal from '~/components/features/links/NewLinkModal.vue'
 
+const mv = useMotionVariants()
 const { t } = useI18n()
 const themeStore = useThemeStore()
 useViewSearch('')
@@ -32,7 +33,7 @@ const goTransactions = () => navigateTo(ROUTES.TRANSACTIONS)
 </script>
 
 <template>
-  <motion.div :variants="pageVariants" initial="hidden" animate="show" exit="exit">
+  <motion.div :variants="mv.page.value" initial="hidden" animate="show" exit="exit">
     <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 mb-6 sm:mb-8">
       <h1 :class="['text-xl sm:text-2xl font-bold tracking-tight hidden sm:block', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']">
         {{ t('nav.dashboard') }}

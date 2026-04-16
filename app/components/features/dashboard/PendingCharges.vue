@@ -5,7 +5,7 @@ import { Copy, QrCode, Mail, Timer, Eye, Clock, ListTree, CalendarDays } from 'l
 import { useThemeStore } from '~/stores/theme'
 import { useToastStore } from '~/stores/toast'
 import { useMediaQuery } from '~/composables/useMediaQuery'
-import { listVariants, itemVariants } from '~/utils/motionVariants'
+import { useMotionVariants } from '~/composables/useMotionVariants'
 import { CUSTOM_LINKS } from '~/utils/mockData'
 import { ROUTES } from '~/utils/routes'
 import Card from '~/components/ui/Card.vue'
@@ -15,6 +15,7 @@ import Tooltip from '~/components/ui/Tooltip.vue'
 import TriageDetailModal from './TriageDetailModal.vue'
 import { ACTIONS, formatTimeRemaining } from './triage.js'
 
+const mv = useMotionVariants()
 const MAX_ITEMS = 10
 const MAX_ITEMS_MOBILE = 5
 const LIFE_EARLY_THRESHOLD = 0.30
@@ -109,11 +110,11 @@ const rowBorder = (i, total) => {
         </Button>
       </div>
 
-      <motion.div :variants="listVariants" initial="hidden" animate="show">
+      <motion.div :variants="mv.list.value" initial="hidden" animate="show">
         <motion.button
           v-for="(link, i) in mobileLinks"
           :key="link.id"
-          :variants="itemVariants"
+          :variants="mv.item.value"
           :class="[
             'w-full flex items-stretch gap-3 px-4 py-2.5 text-left cursor-pointer active:opacity-70 transition-opacity',
             rowBorder(i, mobileLinks.length)
@@ -171,11 +172,11 @@ const rowBorder = (i, total) => {
             <th class="px-6 py-3 text-right">{{ t('transactions.tableActions') }}</th>
           </tr>
         </thead>
-        <motion.tbody :variants="listVariants" initial="hidden" animate="show">
+        <motion.tbody :variants="mv.list.value" initial="hidden" animate="show">
           <motion.tr
             v-for="link in links"
             :key="link.id"
-            :variants="itemVariants"
+            :variants="mv.item.value"
             :class="['group transition-colors duration-200', trClass]"
           >
             <td class="px-6 py-3.5">

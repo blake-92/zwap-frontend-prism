@@ -6,20 +6,25 @@ import {
   Smartphone, KeyRound, MonitorSmartphone, Mail, Lock, Globe,
 } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceStore } from '~/stores/performance'
 import { useToastStore } from '~/stores/toast'
 import { useViewSearch } from '~/composables/useViewSearch'
-import { pageVariants } from '~/utils/motionVariants'
+import { useMotionVariants } from '~/composables/useMotionVariants'
 import { SPRING } from '~/utils/springs'
 import { CURRENT_USER, PLAN_INFO, SESSIONS, PAYMENT_CARD } from '~/utils/mockData'
 import Card from '~/components/ui/Card.vue'
+import { Zap } from 'lucide-vue-next'
 import Button from '~/components/ui/Button.vue'
 import Input from '~/components/ui/Input.vue'
 import Toggle from '~/components/ui/Toggle.vue'
+import SegmentControl from '~/components/ui/SegmentControl.vue'
 import Badge from '~/components/ui/Badge.vue'
 import PageHeader from '~/components/ui/PageHeader.vue'
 
+const mv = useMotionVariants()
 const { t, locale, setLocale } = useI18n()
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
 const toastStore = useToastStore()
 const viewSearch = useViewSearch(computed(() => t('settings.searchPlaceholder')))
 
@@ -48,6 +53,7 @@ const sections = computed(() => [
   { id: 'personal-info', tab: 'perfil', keywords: [t('settings.personalInfo'), t('users.fullName'), t('users.role'), t('users.emailLabel'), CURRENT_USER.name, CURRENT_USER.email, t('users.roleAdmin')] },
   { id: 'notifications', tab: 'perfil', keywords: [t('settings.notificationPrefs'), t('settings.paymentAlerts'), t('settings.paymentAlertsDesc'), t('settings.pushNotifications'), t('settings.pushNotificationsDesc')] },
   { id: 'language', tab: 'perfil', keywords: [t('settings.language'), t('settings.languageDesc'), t('settings.languageEs'), t('settings.languageEn')] },
+  { id: 'performance', tab: 'perfil', keywords: [t('settings.performance'), t('settings.liteMode'), t('settings.liteModeDesc')] },
   { id: 'auth', tab: 'seguridad', keywords: [t('settings.authAccess'), t('settings.password'), t('settings.passwordUpdated'), t('settings.twoFactor'), t('settings.twoFactorDesc')] },
   { id: 'sessions', tab: 'seguridad', keywords: [t('settings.activeSessions'), ...SESSIONS.map(s => s.device), ...SESSIONS.map(s => s.location)] },
   { id: 'billing', tab: 'facturacion', keywords: [t('settings.paymentMethods'), t('settings.currentPlan'), t('settings.managePlan'), PLAN_INFO.name, PLAN_INFO.tier, PAYMENT_CARD.brand] },
@@ -76,6 +82,22 @@ const tabTextClass = (active) => {
 const sectionLabelClass = computed(() => themeStore.isDarkMode ? 'text-[#B0AFB4]' : 'text-[#67656E]')
 const borderSecondary = computed(() => themeStore.isDarkMode ? 'border-white/5' : 'border-black/5')
 
+const perfTier = computed({
+  get: () => perfStore.tier,
+  set: (v) => {
+    if (v === 'auto') {
+      localStorage.removeItem('zwap-perf')
+      perfStore.hydrate()
+    } else {
+      perfStore.setTier(v)
+    }
+  },
+})
+const perfOptions = computed(() => [
+  { value: 'full', label: t('settings.perfFull') },
+  { value: 'lite', label: t('settings.perfLite') },
+])
+
 const langBtnClass = (code) => {
   const active = locale.value === code
   const d = themeStore.isDarkMode
@@ -85,7 +107,7 @@ const langBtnClass = (code) => {
 </script>
 
 <template>
-  <motion.div :variants="pageVariants" initial="hidden" animate="show" exit="exit" class="max-w-4xl mx-auto">
+  <motion.div :variants="mv.page.value" initial="hidden" animate="show" exit="exit" class="max-w-4xl mx-auto">
     <PageHeader :title="t('settings.title')" />
 
     <AnimatePresence>
@@ -126,7 +148,7 @@ const langBtnClass = (code) => {
         <div class="flex flex-col sm:flex-row gap-8 items-start mb-8">
           <div class="relative group cursor-pointer">
             <div :class="[
-              'w-24 h-24 rounded-2xl flex items-center justify-center font-bold text-2xl transition-all',
+              'w-24 h-24 rounded-2xl flex items-center justify-center font-bold text-2xl transition-colors',
               themeStore.isDarkMode
                 ? 'bg-[#7C3AED]/20 text-[#7C3AED] border border-[#7C3AED]/40 group-hover:shadow-[0_0_20px_rgba(124,58,237,0.4)]'
                 : 'bg-[#DBD3FB]/60 border border-white text-[#561BAF] shadow-xs'
@@ -204,6 +226,25 @@ const langBtnClass = (code) => {
               <button :class="['px-4 py-2 text-sm font-bold transition-colors', langBtnClass('es')]" @click="setLocale('es')">{{ t('settings.languageEs') }}</button>
               <button :class="['px-4 py-2 text-sm font-bold transition-colors border-l', langBtnClass('en'), themeStore.isDarkMode ? 'border-white/10' : 'border-black/10']" @click="setLocale('en')">{{ t('settings.languageEn') }}</button>
             </div>
+          </div>
+        </div>
+      </Card>
+
+      <!-- PERFORMANCE -->
+      <Card v-if="showSection('performance', 'perfil')" class="p-6 md:p-8">
+        <h3 :class="['text-sm font-bold tracking-widest uppercase mb-2', sectionLabelClass]">{{ t('settings.performance') }}</h3>
+        <div :class="['py-5 flex items-start sm:items-center justify-between gap-4', borderSecondary]">
+          <div class="flex gap-4">
+            <div :class="['w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 sm:mt-0', themeStore.isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/50 text-[#561BAF]']">
+              <Zap :size="18" />
+            </div>
+            <div>
+              <h4 :class="['text-sm font-bold', themeStore.isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]']">{{ t('settings.liteMode') }}</h4>
+              <p :class="['text-xs mt-0.5 font-medium', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">{{ t('settings.liteModeDesc') }}</p>
+            </div>
+          </div>
+          <div class="shrink-0">
+            <SegmentControl v-model="perfTier" :options="perfOptions" layout-id="perfTierIndicator" />
           </div>
         </div>
       </Card>

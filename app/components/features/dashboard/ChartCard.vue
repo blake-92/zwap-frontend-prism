@@ -84,20 +84,29 @@ const yTicks = computed(() => {
 const gridStroke = computed(() => themeStore.isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)')
 const axisTick = computed(() => themeStore.isDarkMode ? '#888991' : '#A1A1AA')
 
+let rafId = null
 const onHover = (e) => {
-  const svg = e.currentTarget
-  const rect = svg.getBoundingClientRect()
-  const x = ((e.clientX - rect.left) / rect.width) * svgW
-  const n = CHART_DATA.length
-  let closest = 0, best = Infinity
-  for (let i = 0; i < n; i++) {
-    const cx = chartX(i, n)
-    const d = Math.abs(x - cx)
-    if (d < best) { best = d; closest = i }
-  }
-  hoverIdx.value = closest
+  if (rafId) return
+  rafId = requestAnimationFrame(() => {
+    rafId = null
+    const svg = e.currentTarget
+    if (!svg) return
+    const rect = svg.getBoundingClientRect()
+    const x = ((e.clientX - rect.left) / rect.width) * svgW
+    const n = CHART_DATA.length
+    let closest = 0, best = Infinity
+    for (let i = 0; i < n; i++) {
+      const cx = chartX(i, n)
+      const d = Math.abs(x - cx)
+      if (d < best) { best = d; closest = i }
+    }
+    hoverIdx.value = closest
+  })
 }
-const onLeave = () => { hoverIdx.value = -1 }
+const onLeave = () => {
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null }
+  hoverIdx.value = -1
+}
 
 const tooltipClass = computed(() =>
   themeStore.isDarkMode

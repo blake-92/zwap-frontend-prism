@@ -7,7 +7,7 @@ import {
 } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
 import { useViewSearch } from '~/composables/useViewSearch'
-import { listVariants, cardItemVariants, pageVariants } from '~/utils/motionVariants'
+import { useMotionVariants } from '~/composables/useMotionVariants'
 import { BRANCH_LIST } from '~/utils/mockData'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
@@ -16,6 +16,7 @@ import Tooltip from '~/components/ui/Tooltip.vue'
 import PageHeader from '~/components/ui/PageHeader.vue'
 import NewBranchModal from './NewBranchModal.vue'
 
+const mv = useMotionVariants()
 const { t } = useI18n()
 const themeStore = useThemeStore()
 const viewSearch = useViewSearch(computed(() => t('branches.searchPlaceholder')))
@@ -38,7 +39,7 @@ const descTextClass = computed(() => themeStore.isDarkMode ? 'text-[#888991]' : 
 </script>
 
 <template>
-  <motion.div :variants="pageVariants" initial="hidden" animate="show" exit="exit">
+  <motion.div :variants="mv.page.value" initial="hidden" animate="show" exit="exit">
     <PageHeader :title="t('branches.title')">
       <Button @click="newBranchOpen = true">
         <PlusCircle :size="18" /> {{ t('branches.newBranch') }}
@@ -53,15 +54,15 @@ const descTextClass = computed(() => themeStore.isDarkMode ? 'text-[#888991]' : 
 
     <motion.div
       v-if="filtered.length > 0"
-      :variants="listVariants"
+      :variants="mv.list.value"
       initial="hidden"
       animate="show"
       class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 2xl:gap-8"
     >
-      <motion.div v-for="b in filtered" :key="b.id" :variants="cardItemVariants">
+      <motion.div v-for="b in filtered" :key="b.id" :variants="mv.cardItem.value">
         <Card hover-effect class="p-6 cursor-pointer group relative overflow-hidden">
           <div class="flex justify-between items-start mb-5">
-            <div :class="['w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300', iconBubbleClass]">
+            <div :class="['w-12 h-12 rounded-2xl flex items-center justify-center transition-colors duration-300', iconBubbleClass]">
               <Building2 :size="22" />
             </div>
             <div class="flex items-center gap-2">
@@ -92,10 +93,10 @@ const descTextClass = computed(() => themeStore.isDarkMode ? 'text-[#888991]' : 
         </Card>
       </motion.div>
 
-      <motion.div v-if="!viewSearch.query" :variants="cardItemVariants">
+      <motion.div v-if="!viewSearch.query" :variants="mv.cardItem.value">
         <button
           :class="[
-            'rounded-[20px] border-2 border-dashed flex flex-col items-center justify-center gap-3 p-8 min-h-[200px] transition-all duration-300 group w-full',
+            'rounded-[20px] border-2 border-dashed flex flex-col items-center justify-center gap-3 p-8 min-h-[200px] transition-colors duration-300 group w-full',
             themeStore.isDarkMode
               ? 'border-white/10 text-[#888991] hover:border-[#7C3AED]/40 hover:text-[#A78BFA] hover:bg-[#7C3AED]/5'
               : 'border-gray-200 text-[#B0AFB4] hover:border-[#7C3AED]/40 hover:text-[#7C3AED] hover:bg-[#DBD3FB]/10'

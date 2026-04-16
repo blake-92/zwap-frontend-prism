@@ -344,6 +344,7 @@ En `app/stores/`:
 
 ```js
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceStore } from '~/stores/performance'
 import { useToastStore } from '~/stores/toast'
 import { useViewSearchStore } from '~/stores/viewSearch'
 ```
@@ -351,6 +352,7 @@ import { useViewSearchStore } from '~/stores/viewSearch'
 | Store | State | Actions | Persistencia |
 |---|---|---|---|
 | `theme` | `isDarkMode` | `toggleTheme()`, `hydrate()`, `apply()` | `localStorage['zwap-theme']` |
+| `performance` | `tier` (`full`/`lite`/`minimal`) | `hydrate()`, `setTier(tier)`, `apply()` | `localStorage['zwap-perf']` |
 | `toast` | `toasts[]` | `addToast(msg, type?, duration?)`, `removeToast(id)` | — |
 | `viewSearch` | `query`, `placeholder`, `hasFilters`, `activeFilterCount` | `setQuery()`, `registerView()`, `unregisterView()`, `setFilterOpener()`, `openFilters()` | — |
 
@@ -358,6 +360,24 @@ import { useViewSearchStore } from '~/stores/viewSearch'
 - `viewSearch.filterOpener` se mantiene como `shallowRef` fuera del state (evita reactividad innecesaria).
 - Tokens de auth: cookie `zwap_token` (`useCookie(...)`), no localStorage — SSR-safe aunque estemos en SPA mode.
 - Sidebar collapse: `localStorage['zwap-sidebar']` (`'collapsed'`/`'expanded'`).
+- Performance tier: `localStorage['zwap-perf']` — auto-detected or user override via Settings.
+
+### Performance Tiers
+
+El store `usePerformanceStore` detecta la capacidad del hardware y degrada la UI gracefully:
+
+| Tier | Detección | Backdrop-blur | Shadows | Animaciones |
+|---|---|---|---|---|
+| `full` | >= 4 cores, >= 4GB RAM | Glass real (blur 2xl/3xl) | Custom rgba | Spring completas |
+| `lite` | < 4 cores o < 4GB RAM | **Ninguno** (cards sólidas) | Simplificadas | Spring completas |
+| `minimal` | < 2 cores o `prefers-reduced-motion` | Ninguno | Simplificadas | **Instantáneas** |
+
+- `cardClasses.js`: las 3 funciones (`getCardClasses`, `getModalGlass`, `getDropdownGlass`) aceptan `useBlur` como tercer parámetro. Con `false` devuelven fondos sólidos con opacidad alta.
+- `motionVariants.js`: variantes `*Instant` con `duration: 0` para tier minimal.
+- `useMotionVariants()` composable: selecciona automáticamente entre variante spring o instant según `perfStore.useSpring`.
+- CSS global: `html.perf-lite` desactiva `backdrop-filter`, `html.perf-minimal` desactiva también animaciones/transiciones.
+- `@media (prefers-reduced-motion: reduce)` desactiva animaciones a nivel OS (WCAG 2.1).
+- Settings: toggle "Modo Ligero" en pestaña Mi Perfil permite override manual.
 
 ### Composable `useViewSearch(placeholder)`
 
@@ -415,6 +435,7 @@ En `app/composables/` (auto-import por Nuxt):
 | `useChromeBlur(active?)` | void | Setea `data-modal-open` con counter — blur al chrome |
 | `useInfiniteScroll(data, opts)` | `{ visibleData, hasMore, sentinelRef }` | IntersectionObserver sentinel |
 | `useViewSearch(placeholder)` | store | Registra búsqueda contextual |
+| `useMotionVariants()` | `{ list, item, cardItem, page }` (computed refs) | Selecciona variante spring o instant según performance tier |
 
 **Nota SSR:** todos usan guards `typeof document === 'undefined'` y/o `onMounted` para evitar crashes (aunque estamos en SPA mode, los guards se mantienen por si se migra a SSR/SSG).
 

@@ -206,7 +206,7 @@ const glowClass = (collapsed) => {
           </motion.div>
         </AnimatePresence>
 
-        <div :class="['absolute -bottom-4 -right-4 w-16 h-16 rounded-full blur-xl pointer-events-none transition-all duration-500', glowClass(isCollapsed)]" />
+        <div :class="['absolute -bottom-4 -right-4 w-16 h-16 rounded-full blur-xl pointer-events-none transition-[opacity] duration-500', glowClass(isCollapsed)]" />
       </motion.button>
 
       <!-- User row -->
@@ -234,7 +234,7 @@ const glowClass = (collapsed) => {
             <button
               :title="t('nav.logout')"
               :class="[
-                'p-1.5 rounded-lg shrink-0 transition-all duration-200',
+                'p-1.5 rounded-lg shrink-0 transition-colors duration-200',
                 themeStore.isDarkMode
                   ? 'text-[#888991] hover:text-rose-400 hover:bg-rose-500/10'
                   : 'text-[#67656E] hover:text-rose-600 hover:bg-rose-50'

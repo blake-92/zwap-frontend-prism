@@ -28,7 +28,7 @@ const variantClass = computed(() => {
 </script>
 
 <template>
-  <div :class="[sizeClass, 'rounded-full flex items-center justify-center font-bold shrink-0 transition-all', variantClass]">
+  <div :class="[sizeClass, 'rounded-full flex items-center justify-center font-bold shrink-0 transition-colors', variantClass]">
     {{ initials }}
   </div>
 </template>
