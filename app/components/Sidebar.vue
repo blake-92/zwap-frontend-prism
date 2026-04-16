@@ -6,6 +6,7 @@ import {
   Landmark, Users, Building2, LogOut, Wallet, ArrowRight,
 } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceMode } from '~/composables/usePerformanceMode'
 import { ROUTES } from '~/utils/routes'
 import { CURRENT_USER, WALLET_BALANCE } from '~/utils/mockData'
 import { SPRING_SIDEBAR as SPRING } from '~/utils/springs'
@@ -19,6 +20,7 @@ defineProps({
 
 const { t } = useI18n()
 const themeStore = useThemeStore()
+const performanceMode = usePerformanceMode()
 const route = useRoute()
 
 const NAV_ITEMS = [
@@ -30,17 +32,33 @@ const NAV_ITEMS = [
   { id: 'sucursales', labelKey: 'nav.branches', icon: Building2, route: ROUTES.BRANCHES },
 ]
 
-const LABEL_VARIANTS = {
-  hidden: { opacity: 0, filter: 'blur(4px)', x: -8 },
-  show: { opacity: 1, filter: 'blur(0px)', x: 0, transition: { type: 'spring', stiffness: 400, damping: 30, delay: 0.06 } },
-  exit: { opacity: 0, filter: 'blur(4px)', x: -8, transition: { type: 'spring', stiffness: 320, damping: 28 } },
-}
+const LABEL_VARIANTS = computed(() => (
+  performanceMode.value
+    ? {
+        hidden: { opacity: 0, x: -6 },
+        show: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 320, damping: 32 } },
+        exit: { opacity: 0, x: -6, transition: { type: 'spring', stiffness: 280, damping: 30 } },
+      }
+    : {
+        hidden: { opacity: 0, filter: 'blur(4px)', x: -8 },
+        show: { opacity: 1, filter: 'blur(0px)', x: 0, transition: { type: 'spring', stiffness: 400, damping: 30, delay: 0.06 } },
+        exit: { opacity: 0, filter: 'blur(4px)', x: -8, transition: { type: 'spring', stiffness: 320, damping: 28 } },
+      }
+))
 
-const CONTENT_VARIANTS = {
-  hidden: { opacity: 0, filter: 'blur(3px)' },
-  show: { opacity: 1, filter: 'blur(0px)', transition: { type: 'spring', stiffness: 380, damping: 30, delay: 0.1 } },
-  exit: { opacity: 0, filter: 'blur(3px)', transition: { type: 'spring', stiffness: 320, damping: 28 } },
-}
+const CONTENT_VARIANTS = computed(() => (
+  performanceMode.value
+    ? {
+        hidden: { opacity: 0, x: -4 },
+        show: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 320, damping: 32 } },
+        exit: { opacity: 0, x: -4, transition: { type: 'spring', stiffness: 280, damping: 30 } },
+      }
+    : {
+        hidden: { opacity: 0, filter: 'blur(3px)' },
+        show: { opacity: 1, filter: 'blur(0px)', transition: { type: 'spring', stiffness: 380, damping: 30, delay: 0.1 } },
+        exit: { opacity: 0, filter: 'blur(3px)', transition: { type: 'spring', stiffness: 320, damping: 28 } },
+      }
+))
 
 const isWalletActive = computed(() => route.path === ROUTES.WALLET)
 const walletHover = ref(false)
@@ -54,8 +72,8 @@ const logout = () => {
 
 const asideClass = computed(() =>
   themeStore.isDarkMode
-    ? 'bg-[#111113]/20 backdrop-blur-2xl border-r border-white/10'
-    : 'bg-white/40 backdrop-blur-2xl border-r border-white/80 shadow-[4px_0_30px_rgba(0,0,0,0.03)]',
+    ? performanceMode.value ? 'bg-[#111113]/94 border-r border-white/10' : 'bg-[#111113]/20 backdrop-blur-2xl border-r border-white/10'
+    : performanceMode.value ? 'bg-white/96 border-r border-black/5' : 'bg-white/40 backdrop-blur-2xl border-r border-white/80 shadow-[4px_0_30px_rgba(0,0,0,0.03)]',
 )
 
 const walletBtnClass = (collapsed) => {
@@ -77,8 +95,8 @@ const navItemClass = (active) => {
 
 const indicatorClass = computed(() =>
   themeStore.isDarkMode
-    ? 'bg-[#252429]/40 border border-white/10 border-t-white/20 shadow-xl shadow-black/30 backdrop-blur-md'
-    : 'bg-white/60 border border-white shadow-[0_8px_20px_rgba(0,0,0,0.04)] backdrop-blur-md',
+    ? performanceMode.value ? 'bg-[#252429]/90 border border-white/10' : 'bg-[#252429]/40 border border-white/10 border-t-white/20 shadow-xl shadow-black/30 backdrop-blur-md'
+    : performanceMode.value ? 'bg-white border border-gray-200' : 'bg-white/60 border border-white shadow-[0_8px_20px_rgba(0,0,0,0.04)] backdrop-blur-md',
 )
 
 const glowClass = (collapsed) => {

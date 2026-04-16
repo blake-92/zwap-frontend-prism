@@ -7,6 +7,7 @@ import {
 } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
 import { useViewSearchStore } from '~/stores/viewSearch'
+import { usePerformanceMode } from '~/composables/usePerformanceMode'
 import { ROUTES } from '~/utils/routes'
 import { BRANCHES } from '~/utils/mockData'
 import { SPRING, SPRING_SIDEBAR } from '~/utils/springs'
@@ -27,6 +28,7 @@ const emit = defineEmits(['branchChange'])
 const { t } = useI18n()
 const themeStore = useThemeStore()
 const viewSearch = useViewSearchStore()
+const performanceMode = usePerformanceMode()
 const menuOpen = ref(false)
 const branchSheetOpen = ref(false)
 const searchExpanded = ref(false)
@@ -34,11 +36,19 @@ const menuRef = ref(null)
 const searchInputRef = ref(null)
 const pillId = useId()
 
-const WORDMARK_VARIANTS = {
-  hidden: { opacity: 0, filter: 'blur(4px)', x: -8 },
-  show: { opacity: 1, filter: 'blur(0px)', x: 0, transition: { type: 'spring', stiffness: 400, damping: 30, delay: 0.06 } },
-  exit: { opacity: 0, filter: 'blur(4px)', x: -8, transition: { type: 'spring', stiffness: 320, damping: 28 } },
-}
+const WORDMARK_VARIANTS = computed(() => (
+  performanceMode.value
+    ? {
+        hidden: { opacity: 0, x: -6 },
+        show: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 320, damping: 32 } },
+        exit: { opacity: 0, x: -6, transition: { type: 'spring', stiffness: 280, damping: 30 } },
+      }
+    : {
+        hidden: { opacity: 0, filter: 'blur(4px)', x: -8 },
+        show: { opacity: 1, filter: 'blur(0px)', x: 0, transition: { type: 'spring', stiffness: 400, damping: 30, delay: 0.06 } },
+        exit: { opacity: 0, filter: 'blur(4px)', x: -8, transition: { type: 'spring', stiffness: 320, damping: 28 } },
+      }
+))
 const panelVariants = {
   hidden: { opacity: 0, scale: 0.95, y: -4 },
   visible: { opacity: 1, scale: 1, y: 0, transition: { ...SPRING, stiffness: 500 } },
@@ -74,14 +84,18 @@ const headerClass = computed(() => [
   'z-50 h-16 lg:h-20 flex items-center justify-between px-4 sm:px-6 lg:px-10 flex-shrink-0 transition-colors duration-500',
   props.isDesktop ? 'relative' : 'fixed inset-x-0 top-0',
   themeStore.isDarkMode
-    ? 'bg-[#111113]/20 backdrop-blur-2xl border-b border-white/10'
-    : 'bg-white/30 backdrop-blur-2xl border-b border-white/80',
+    ? performanceMode.value ? 'bg-[#111113]/88 border-b border-white/10' : 'bg-[#111113]/20 backdrop-blur-2xl border-b border-white/10'
+    : performanceMode.value ? 'bg-white/92 border-b border-black/5' : 'bg-white/30 backdrop-blur-2xl border-b border-white/80',
 ])
 
 const desktopSearchClass = computed(() =>
   themeStore.isDarkMode
-    ? 'bg-[#252429]/30 backdrop-blur-xl border-white/10 border-t-white/20 focus-within:border-[#7C3AED]/60 focus-within:shadow-[0_0_20px_rgba(124,58,237,0.2)] focus-within:bg-[#252429]/50'
-    : 'bg-white/50 backdrop-blur-xl border-white focus-within:border-[#7C3AED]/40 focus-within:shadow-[0_0_20px_rgba(124,58,237,0.15)] focus-within:bg-white/80 shadow-[0_4px_15px_rgb(0,0,0,0.02)]',
+    ? performanceMode.value
+      ? 'bg-[#252429]/90 border-white/10 focus-within:border-[#7C3AED]/50 focus-within:bg-[#252429]'
+      : 'bg-[#252429]/30 backdrop-blur-xl border-white/10 border-t-white/20 focus-within:border-[#7C3AED]/60 focus-within:shadow-[0_0_20px_rgba(124,58,237,0.2)] focus-within:bg-[#252429]/50'
+    : performanceMode.value
+      ? 'bg-white border-gray-200 focus-within:border-[#7C3AED]/30 focus-within:bg-white'
+      : 'bg-white/50 backdrop-blur-xl border-white focus-within:border-[#7C3AED]/40 focus-within:shadow-[0_0_20px_rgba(124,58,237,0.15)] focus-within:bg-white/80 shadow-[0_4px_15px_rgb(0,0,0,0.02)]',
 )
 
 const inputTextClass = computed(() =>
@@ -92,14 +106,22 @@ const inputTextClass = computed(() =>
 
 const branchPillClass = computed(() =>
   themeStore.isDarkMode
-    ? 'bg-[#7C3AED]/15 backdrop-blur-xl border border-[#7C3AED]/40 text-[#7C3AED] shadow-[0_0_15px_rgba(124,58,237,0.2)]'
-    : 'bg-white/90 border border-white shadow-md text-[#7C3AED] backdrop-blur-xl',
+    ? performanceMode.value
+      ? 'bg-[#7C3AED]/12 border border-[#7C3AED]/30 text-[#A78BFA]'
+      : 'bg-[#7C3AED]/15 backdrop-blur-xl border border-[#7C3AED]/40 text-[#7C3AED] shadow-[0_0_15px_rgba(124,58,237,0.2)]'
+    : performanceMode.value
+      ? 'bg-white border border-gray-200 text-[#7C3AED]'
+      : 'bg-white/90 border border-white shadow-md text-[#7C3AED] backdrop-blur-xl',
 )
 
 const mobileSearchBarClass = computed(() =>
   themeStore.isDarkMode
-    ? 'bg-[#252429]/50 backdrop-blur-xl border-[#7C3AED]/40 shadow-[0_0_15px_rgba(124,58,237,0.15)]'
-    : 'bg-white/70 backdrop-blur-xl border-[#7C3AED]/30 shadow-[0_0_15px_rgba(124,58,237,0.1)]',
+    ? performanceMode.value
+      ? 'bg-[#252429]/95 border-[#7C3AED]/35'
+      : 'bg-[#252429]/50 backdrop-blur-xl border-[#7C3AED]/40 shadow-[0_0_15px_rgba(124,58,237,0.15)]'
+    : performanceMode.value
+      ? 'bg-white border-[#7C3AED]/25'
+      : 'bg-white/70 backdrop-blur-xl border-[#7C3AED]/30 shadow-[0_0_15px_rgba(124,58,237,0.1)]',
 )
 
 const optionClass = (selected) => {
@@ -245,9 +267,9 @@ const goSettings = () => navigateTo(ROUTES.SETTINGS)
           <motion.div
             v-if="searchExpanded"
             key="search-bar"
-            :initial="{ opacity: 0, filter: 'blur(4px)', x: -8 }"
-            :animate="{ opacity: 1, filter: 'blur(0px)', x: 0 }"
-            :exit="{ opacity: 0, filter: 'blur(4px)', x: -8 }"
+            :initial="performanceMode ? { opacity: 0, x: -8 } : { opacity: 0, filter: 'blur(4px)', x: -8 }"
+            :animate="performanceMode ? { opacity: 1, x: 0 } : { opacity: 1, filter: 'blur(0px)', x: 0 }"
+            :exit="performanceMode ? { opacity: 0, x: -8 } : { opacity: 0, filter: 'blur(4px)', x: -8 }"
             :transition="SPRING"
             :class="['flex-1 min-w-0 flex items-center gap-2 ml-2 px-3 py-2 rounded-xl border overflow-hidden', mobileSearchBarClass]"
           >

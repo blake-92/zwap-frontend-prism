@@ -16,7 +16,8 @@ const emit = defineEmits(['select', 'timeChange', 'confirm', 'close'])
 
 const { t, locale } = useI18n()
 const themeStore = useThemeStore()
-const isMobile = computed(() => !useMediaQuery('(min-width: 640px)').value)
+const isDesktop = useMediaQuery('(min-width: 640px)')
+const isMobile = computed(() => !isDesktop.value)
 
 const monthsShort = computed(() => t('calendar.monthsShort', [], { returnObjects: true }))
 

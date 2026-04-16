@@ -5,6 +5,7 @@ import { ChevronRight } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
 import { useMediaQuery } from '~/composables/useMediaQuery'
 import { useModalOpen } from '~/composables/useModalOpen'
+import { usePerformanceMode } from '~/composables/usePerformanceMode'
 import { BRANCHES } from '~/utils/mockData'
 import { SPRING } from '~/utils/springs'
 import Sidebar from '~/components/Sidebar.vue'
@@ -16,6 +17,7 @@ import ToastContainer from '~/components/ToastContainer.vue'
 const themeStore = useThemeStore()
 const isDesktop = useMediaQuery('(min-width: 1024px)')
 const modalOpen = useModalOpen()
+const performanceMode = usePerformanceMode()
 const branch = ref(BRANCHES[0])
 
 const isCollapsed = ref(false)
@@ -35,7 +37,13 @@ onUnmounted(() => {
   if (typeof document === 'undefined') return
   document.documentElement.style.overflow = ''
   document.body.style.overflow = ''
+  delete document.documentElement.dataset.performanceMode
 })
+
+watch(performanceMode, (enabled) => {
+  if (typeof document === 'undefined') return
+  document.documentElement.dataset.performanceMode = enabled ? 'lite' : 'full'
+}, { immediate: true })
 
 // Scroll-aware mobile header
 const onScroll = () => {
@@ -88,7 +96,9 @@ const mainClass = computed(() => [
 
 const sidebarWrapperClass = computed(() => [
   'relative flex-shrink-0 group/sidebar transition-[filter,opacity] duration-150',
-  modalOpen.value ? 'blur-sm saturate-50 pointer-events-none' : '',
+  modalOpen.value
+    ? performanceMode.value ? 'opacity-80 pointer-events-none' : 'blur-sm saturate-50 pointer-events-none'
+    : '',
 ])
 
 const toggleBtnClass = computed(() =>

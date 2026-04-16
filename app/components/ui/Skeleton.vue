@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { motion } from 'motion-v'
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceMode } from '~/composables/usePerformanceMode'
 
 const props = defineProps({
   width: { type: [String, Number], default: '100%' },
@@ -10,6 +11,7 @@ const props = defineProps({
 })
 
 const themeStore = useThemeStore()
+const performanceMode = usePerformanceMode()
 
 const wrapperStyle = computed(() => ({
   width: typeof props.width === 'number' ? `${props.width}px` : props.width,
@@ -27,7 +29,7 @@ const shimmerStyle = computed(() => ({
   <motion.div
     :initial="{ opacity: 0.5 }"
     :animate="{ opacity: 1 }"
-    :transition="{ repeat: Infinity, duration: 1.5, repeatType: 'reverse', ease: 'easeInOut' }"
+    :transition="performanceMode ? { duration: 0.4 } : { repeat: Infinity, duration: 1.5, repeatType: 'reverse', ease: 'easeInOut' }"
     :style="wrapperStyle"
     :class="[
       'relative overflow-hidden',
@@ -36,8 +38,8 @@ const shimmerStyle = computed(() => ({
     ]"
   >
     <motion.div
-      :animate="{ x: ['-100%', '200%'] }"
-      :transition="{ repeat: Infinity, duration: 1.5, ease: 'linear' }"
+      :animate="performanceMode ? { opacity: 0.35 } : { x: ['-100%', '200%'] }"
+      :transition="performanceMode ? { duration: 0.4 } : { repeat: Infinity, duration: 1.5, ease: 'linear' }"
       class="absolute inset-0 z-10"
       :style="shimmerStyle"
     />
