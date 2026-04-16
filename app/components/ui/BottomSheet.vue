@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'motion-v'
 import { useThemeStore } from '~/stores/theme'
 import { useScrollLock } from '~/composables/useScrollLock'
 import { useChromeBlur } from '~/composables/useChromeBlur'
-import { usePerformanceMode } from '~/composables/usePerformanceMode'
 import { SPRING } from '~/utils/springs'
 
 const props = defineProps({
@@ -14,7 +13,6 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 const themeStore = useThemeStore()
-const performanceMode = usePerformanceMode()
 
 useScrollLock(() => props.isOpen)
 useChromeBlur(() => props.isOpen)
@@ -56,7 +54,7 @@ const panelClass = computed(() =>
             initial="hidden"
             animate="visible"
             exit="exit"
-            :class="performanceMode ? 'fixed inset-0 z-50 bg-black/55' : 'fixed inset-0 z-50 bg-black/50 backdrop-blur-sm'"
+            class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
             @click="emit('close')"
           />
           <motion.div

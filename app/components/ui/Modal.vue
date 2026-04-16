@@ -6,7 +6,6 @@ import { useThemeStore } from '~/stores/theme'
 import { useMediaQuery } from '~/composables/useMediaQuery'
 import { useScrollLock } from '~/composables/useScrollLock'
 import { useChromeBlur } from '~/composables/useChromeBlur'
-import { usePerformanceMode } from '~/composables/usePerformanceMode'
 import { getModalGlass } from '~/utils/cardClasses'
 import Button from './Button.vue'
 
@@ -20,9 +19,7 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 const themeStore = useThemeStore()
-const isDesktop = useMediaQuery('(min-width: 640px)')
-const isMobile = computed(() => !isDesktop.value)
-const performanceMode = usePerformanceMode()
+const isMobile = computed(() => !useMediaQuery('(min-width: 640px)').value)
 const containerRef = ref(null)
 let trigger = null
 
@@ -102,12 +99,7 @@ const modalClass = computed(() => getModalGlass(themeStore.isDarkMode))
           :initial="{ opacity: 0 }"
           :animate="{ opacity: 1 }"
           :transition="{ duration: 0.15 }"
-          :class="[
-            'absolute inset-0',
-            performanceMode
-              ? themeStore.isDarkMode ? 'bg-black/78' : 'bg-[#111113]/50'
-              : themeStore.isDarkMode ? 'bg-black/70 backdrop-blur-md backdrop-saturate-200' : 'bg-[#111113]/40 backdrop-blur-md backdrop-saturate-200'
-          ]"
+          :class="['absolute inset-0 backdrop-blur-md backdrop-saturate-200', themeStore.isDarkMode ? 'bg-black/70' : 'bg-[#111113]/40']"
           @click="emit('close')"
         />
         <motion.div

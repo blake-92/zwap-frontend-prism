@@ -9,7 +9,6 @@ import {
 import { useThemeStore } from '~/stores/theme'
 import { useModalOpen } from '~/composables/useModalOpen'
 import { useScrollLock } from '~/composables/useScrollLock'
-import { usePerformanceMode } from '~/composables/usePerformanceMode'
 import { ROUTES } from '~/utils/routes'
 import { SPRING } from '~/utils/springs'
 
@@ -17,7 +16,6 @@ const { t } = useI18n()
 const themeStore = useThemeStore()
 const route = useRoute()
 const modalOpen = useModalOpen()
-const performanceMode = usePerformanceMode()
 const sheetOpen = ref(false)
 
 useScrollLock(sheetOpen)
@@ -59,13 +57,11 @@ const handleDragEnd = (_e, info) => {
 }
 
 const navClass = computed(() => [
-  performanceMode.value
-    ? 'fixed bottom-0 inset-x-0 z-40 flex items-stretch justify-around border-t pb-[env(safe-area-inset-bottom)]'
-    : 'fixed bottom-0 inset-x-0 z-40 flex items-stretch justify-around border-t backdrop-blur-2xl backdrop-saturate-150 pb-[env(safe-area-inset-bottom)] transition-[filter] duration-150',
-  modalOpen.value ? performanceMode.value ? 'opacity-80 pointer-events-none' : 'blur-sm saturate-50 pointer-events-none' : '',
+  'fixed bottom-0 inset-x-0 z-40 flex items-stretch justify-around border-t backdrop-blur-2xl backdrop-saturate-150 pb-[env(safe-area-inset-bottom)] transition-[filter] duration-150',
+  modalOpen.value ? 'blur-sm saturate-50 pointer-events-none' : '',
   themeStore.isDarkMode
-    ? performanceMode.value ? 'bg-[#111113]/94 border-white/10 border-t-white/15' : 'bg-[#111113]/45 border-white/10 border-t-white/15'
-    : performanceMode.value ? 'bg-white/96 border-black/5' : 'bg-white/50 border-black/5 border-t-white/60 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]',
+    ? 'bg-[#111113]/45 border-white/10 border-t-white/15'
+    : 'bg-white/50 border-black/5 border-t-white/60 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]',
 ])
 
 const pillClass = computed(() =>
@@ -152,7 +148,7 @@ const moreIconBubbleClass = (active) => {
           initial="hidden"
           animate="visible"
           exit="exit"
-          :class="performanceMode ? 'fixed inset-0 z-30 bg-black/55' : 'fixed inset-0 z-30 bg-black/50 backdrop-blur-sm'"
+          class="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm"
           @click="sheetOpen = false"
         />
       </AnimatePresence>
