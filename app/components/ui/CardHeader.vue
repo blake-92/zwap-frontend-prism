@@ -20,7 +20,7 @@ const themeStore = useThemeStore()
         {{ description }}
       </p>
     </div>
-    <div v-if="$slots.default" class="flex-shrink-0">
+    <div v-if="$slots.default" class="shrink-0">
       <slot />
     </div>
   </div>

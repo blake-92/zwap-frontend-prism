@@ -101,7 +101,7 @@ const rowBorder = (i, total) => {
     <Card class="p-0 overflow-hidden">
       <div :class="['px-4 pt-3.5 pb-3 flex items-center justify-between border-b', themeStore.isDarkMode ? 'border-white/10' : 'border-black/5']">
         <div class="flex items-center gap-2 min-w-0">
-          <Clock :size="14" class="text-amber-500 flex-shrink-0" />
+          <Clock :size="14" class="text-amber-500 shrink-0" />
           <p :class="['text-xs font-bold truncate', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']">{{ t('dashboard.pendingLinks') }}</p>
         </div>
         <Button variant="ghost" size="sm" class="!text-[#7C3AED] !h-7 !px-2 !text-[11px]" @click="goLinks">
@@ -123,7 +123,7 @@ const rowBorder = (i, total) => {
           <div class="flex-1 min-w-0 flex flex-col justify-center gap-1.5">
             <div class="flex items-center justify-between gap-2">
               <p :class="['text-[13px] font-bold truncate', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']">{{ link.client }}</p>
-              <span :class="['font-mono font-bold text-[15px] tracking-tight flex-shrink-0', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']">${{ link.amount }}</span>
+              <span :class="['font-mono font-bold text-[15px] tracking-tight shrink-0', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']">${{ link.amount }}</span>
             </div>
             <div class="flex items-center gap-1.5">
               <span :class="['inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[11px] font-bold', ACTIONS[link.action].chip, ACTIONS[link.action].text]">

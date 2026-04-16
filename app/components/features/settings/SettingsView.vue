@@ -68,7 +68,7 @@ const showSection = (id, tab) => {
 const noResults = computed(() => isSearching.value && visibleSections.value?.size === 0)
 
 const tabsWrapperClass = computed(() => themeStore.isDarkMode ? 'bg-[#111113]/50 border border-white/5' : 'bg-gray-200/50 border border-black/5')
-const tabActiveClass = computed(() => themeStore.isDarkMode ? 'bg-[#252429] border border-white/10 shadow-[0_2px_10px_rgba(0,0,0,0.5)]' : 'bg-white border border-[#7C3AED]/20 shadow-sm')
+const tabActiveClass = computed(() => themeStore.isDarkMode ? 'bg-[#252429] border border-white/10 shadow-[0_2px_10px_rgba(0,0,0,0.5)]' : 'bg-white border border-[#7C3AED]/20 shadow-xs')
 const tabTextClass = (active) => {
   if (active) return themeStore.isDarkMode ? 'text-white' : 'text-[#7C3AED]'
   return themeStore.isDarkMode ? 'text-[#888991] hover:text-white' : 'text-[#67656E] hover:text-[#111113]'
@@ -129,9 +129,9 @@ const langBtnClass = (code) => {
               'w-24 h-24 rounded-2xl flex items-center justify-center font-bold text-2xl transition-all',
               themeStore.isDarkMode
                 ? 'bg-[#7C3AED]/20 text-[#7C3AED] border border-[#7C3AED]/40 group-hover:shadow-[0_0_20px_rgba(124,58,237,0.4)]'
-                : 'bg-[#DBD3FB]/60 border border-white text-[#561BAF] shadow-sm'
+                : 'bg-[#DBD3FB]/60 border border-white text-[#561BAF] shadow-xs'
             ]">{{ CURRENT_USER.initials }}</div>
-            <div class="absolute inset-0 bg-black/60 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-xs font-bold backdrop-blur-sm">
+            <div class="absolute inset-0 bg-black/60 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-xs font-bold backdrop-blur-xs">
               {{ t('common.change') }}
             </div>
           </div>
@@ -161,7 +161,7 @@ const langBtnClass = (code) => {
         <div class="flex flex-col">
           <div :class="['py-5 flex items-start sm:items-center justify-between gap-4 border-b last:border-0', borderSecondary]">
             <div class="flex gap-4">
-              <div :class="['w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 sm:mt-0', themeStore.isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/50 text-[#561BAF]']">
+              <div :class="['w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 sm:mt-0', themeStore.isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/50 text-[#561BAF]']">
                 <Bell :size="18" />
               </div>
               <div>
@@ -169,11 +169,11 @@ const langBtnClass = (code) => {
                 <p :class="['text-xs mt-0.5 font-medium', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">{{ t('settings.paymentAlertsDesc') }}</p>
               </div>
             </div>
-            <div class="flex-shrink-0"><Toggle :active="alertEmails" @toggle="alertEmails = !alertEmails" /></div>
+            <div class="shrink-0"><Toggle :active="alertEmails" @toggle="alertEmails = !alertEmails" /></div>
           </div>
           <div :class="['py-5 flex items-start sm:items-center justify-between gap-4 border-b last:border-0', borderSecondary]">
             <div class="flex gap-4">
-              <div :class="['w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 sm:mt-0', themeStore.isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/50 text-[#561BAF]']">
+              <div :class="['w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 sm:mt-0', themeStore.isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/50 text-[#561BAF]']">
                 <Smartphone :size="18" />
               </div>
               <div>
@@ -181,7 +181,7 @@ const langBtnClass = (code) => {
                 <p :class="['text-xs mt-0.5 font-medium', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">{{ t('settings.pushNotificationsDesc') }}</p>
               </div>
             </div>
-            <div class="flex-shrink-0"><Toggle :active="pushNotifs" @toggle="pushNotifs = !pushNotifs" /></div>
+            <div class="shrink-0"><Toggle :active="pushNotifs" @toggle="pushNotifs = !pushNotifs" /></div>
           </div>
         </div>
       </Card>
@@ -191,7 +191,7 @@ const langBtnClass = (code) => {
         <h3 :class="['text-sm font-bold tracking-widest uppercase mb-2', sectionLabelClass]">{{ t('settings.language') }}</h3>
         <div :class="['py-5 flex items-start sm:items-center justify-between gap-4 border-b last:border-0', borderSecondary]">
           <div class="flex gap-4">
-            <div :class="['w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 sm:mt-0', themeStore.isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/50 text-[#561BAF]']">
+            <div :class="['w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 sm:mt-0', themeStore.isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/50 text-[#561BAF]']">
               <Globe :size="18" />
             </div>
             <div>
@@ -199,7 +199,7 @@ const langBtnClass = (code) => {
               <p :class="['text-xs mt-0.5 font-medium', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">{{ t('settings.languageDesc') }}</p>
             </div>
           </div>
-          <div class="flex-shrink-0">
+          <div class="shrink-0">
             <div :class="['flex rounded-xl overflow-hidden border', themeStore.isDarkMode ? 'border-white/10' : 'border-black/10']">
               <button :class="['px-4 py-2 text-sm font-bold transition-colors', langBtnClass('es')]" @click="setLocale('es')">{{ t('settings.languageEs') }}</button>
               <button :class="['px-4 py-2 text-sm font-bold transition-colors border-l', langBtnClass('en'), themeStore.isDarkMode ? 'border-white/10' : 'border-black/10']" @click="setLocale('en')">{{ t('settings.languageEn') }}</button>
@@ -214,7 +214,7 @@ const langBtnClass = (code) => {
         <div class="flex flex-col">
           <div :class="['py-5 flex items-start sm:items-center justify-between gap-4 border-b last:border-0', borderSecondary]">
             <div class="flex gap-4">
-              <div :class="['w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 sm:mt-0', themeStore.isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/50 text-[#561BAF]']">
+              <div :class="['w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 sm:mt-0', themeStore.isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/50 text-[#561BAF]']">
                 <KeyRound :size="18" />
               </div>
               <div>
@@ -222,11 +222,11 @@ const langBtnClass = (code) => {
                 <p :class="['text-xs mt-0.5 font-medium', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">{{ t('settings.passwordUpdated') }}</p>
               </div>
             </div>
-            <div class="flex-shrink-0"><Button variant="outline" size="sm">{{ t('common.change') }}</Button></div>
+            <div class="shrink-0"><Button variant="outline" size="sm">{{ t('common.change') }}</Button></div>
           </div>
           <div :class="['py-5 flex items-start sm:items-center justify-between gap-4 border-b last:border-0', borderSecondary]">
             <div class="flex gap-4">
-              <div :class="['w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 sm:mt-0', themeStore.isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/50 text-[#561BAF]']">
+              <div :class="['w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 sm:mt-0', themeStore.isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/50 text-[#561BAF]']">
                 <Lock :size="18" />
               </div>
               <div>
@@ -234,7 +234,7 @@ const langBtnClass = (code) => {
                 <p :class="['text-xs mt-0.5 font-medium', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">{{ t('settings.twoFactorDesc') }}</p>
               </div>
             </div>
-            <div class="flex-shrink-0"><Toggle :active="twoFactor" @toggle="twoFactor = !twoFactor" /></div>
+            <div class="shrink-0"><Toggle :active="twoFactor" @toggle="twoFactor = !twoFactor" /></div>
           </div>
         </div>
       </Card>
@@ -249,7 +249,7 @@ const langBtnClass = (code) => {
             :class="['py-5 flex items-start sm:items-center justify-between gap-4 border-b last:border-0', borderSecondary]"
           >
             <div class="flex gap-4">
-              <div :class="['w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 sm:mt-0', themeStore.isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/50 text-[#561BAF]']">
+              <div :class="['w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 sm:mt-0', themeStore.isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/50 text-[#561BAF]']">
                 <component :is="session.icon === 'desktop' ? MonitorSmartphone : Smartphone" :size="18" />
               </div>
               <div>
@@ -259,7 +259,7 @@ const langBtnClass = (code) => {
                 </p>
               </div>
             </div>
-            <div class="flex-shrink-0">
+            <div class="shrink-0">
               <Badge v-if="session.isCurrent" variant="success">{{ t('settings.currentSession') }}</Badge>
               <Button v-else variant="danger" size="sm" class="!py-1.5 !px-3">{{ t('common.revoke') }}</Button>
             </div>
@@ -283,7 +283,7 @@ const langBtnClass = (code) => {
         <div class="flex flex-col">
           <div :class="['py-5 flex items-start sm:items-center justify-between gap-4 border-b last:border-0', borderSecondary]">
             <div class="flex gap-4">
-              <div :class="['w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 sm:mt-0', themeStore.isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/50 text-[#561BAF]']">
+              <div :class="['w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 sm:mt-0', themeStore.isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/50 text-[#561BAF]']">
                 <CreditCard :size="18" />
               </div>
               <div>
@@ -293,7 +293,7 @@ const langBtnClass = (code) => {
                 </p>
               </div>
             </div>
-            <div class="flex-shrink-0"><Button variant="outline" size="sm">{{ t('common.update') }}</Button></div>
+            <div class="shrink-0"><Button variant="outline" size="sm">{{ t('common.update') }}</Button></div>
           </div>
         </div>
       </Card>

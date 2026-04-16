@@ -21,7 +21,7 @@ const bannerClass = computed(() => (themeStore.isDarkMode ? v.value.onDark : v.v
 
 <template>
   <div :class="['p-4 rounded-xl border flex items-start gap-3', bannerClass]">
-    <component :is="v.icon" :size="16" class="mt-0.5 flex-shrink-0" />
+    <component :is="v.icon" :size="16" class="mt-0.5 shrink-0" />
     <p class="text-xs font-medium leading-relaxed"><slot /></p>
   </div>
 </template>

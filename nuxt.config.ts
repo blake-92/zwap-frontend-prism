@@ -1,3 +1,5 @@
+import tailwindcss from '@tailwindcss/vite'
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
@@ -5,7 +7,6 @@ export default defineNuxtConfig({
   ssr: false,
 
   modules: [
-    '@nuxtjs/tailwindcss',
     '@nuxtjs/i18n',
     '@pinia/nuxt',
     '@nuxt/fonts',
@@ -30,13 +31,8 @@ export default defineNuxtConfig({
       cookieKey: 'zwap-language',
       redirectOn: 'root',
     },
-    bundle: {
-      optimizeTranslationDirective: false,
-      dropMessageCompiler: false,
-    },
     compilation: {
       strictMessage: false,
-      jit: true,
     },
   },
 
@@ -77,6 +73,7 @@ export default defineNuxtConfig({
   },
 
   vite: {
+    plugins: [tailwindcss()],
     optimizeDeps: {
       include: ['@vuepic/vue-datepicker'],
     },

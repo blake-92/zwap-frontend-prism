@@ -32,7 +32,7 @@ const filtered = computed(() => {
 const iconBubbleClass = computed(() =>
   themeStore.isDarkMode
     ? 'bg-[#7C3AED]/15 text-[#7C3AED] group-hover:shadow-[0_0_20px_rgba(124,58,237,0.4)]'
-    : 'bg-[#DBD3FB]/60 text-[#561BAF] shadow-sm',
+    : 'bg-[#DBD3FB]/60 text-[#561BAF] shadow-xs',
 )
 const descTextClass = computed(() => themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]')
 </script>
@@ -80,7 +80,7 @@ const descTextClass = computed(() => themeStore.isDarkMode ? 'text-[#888991]' : 
             </Badge>
           </div>
           <p :class="['text-xs font-medium flex items-center gap-1.5 mb-5', descTextClass]">
-            <MapPin :size="12" class="opacity-70 flex-shrink-0" />
+            <MapPin :size="12" class="opacity-70 shrink-0" />
             {{ b.address }}
           </p>
           <div :class="['pt-4 border-t flex items-center gap-2', themeStore.isDarkMode ? 'border-white/10' : 'border-black/5']">

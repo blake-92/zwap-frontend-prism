@@ -158,7 +158,7 @@ const mobileActions = (link) => [
           <div class="p-4" @click="emit('detail', link)">
             <div class="flex items-center justify-between gap-2 mb-2.5">
               <p :class="['text-sm font-bold truncate min-w-0', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']">{{ link.client }}</p>
-              <span :class="['font-mono font-bold text-lg tracking-tight flex-shrink-0', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']">${{ link.amount }}</span>
+              <span :class="['font-mono font-bold text-lg tracking-tight shrink-0', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']">${{ link.amount }}</span>
             </div>
             <div class="flex items-center justify-between gap-2 mb-3">
               <div class="flex items-center gap-2.5">

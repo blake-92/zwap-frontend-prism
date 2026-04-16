@@ -97,7 +97,7 @@ const urlTextClass = computed(() => {
           {{ desktopSelected?.url }}
         </p>
         <div class="grid grid-cols-2 gap-3 w-full">
-          <Button variant="outline" class="w-full !py-2.5 shadow-sm" @click="handleCopy">
+          <Button variant="outline" class="w-full !py-2.5 shadow-xs" @click="handleCopy">
             <Copy :size="16" /> {{ t('dashboard.copy') }}
           </Button>
           <Button class="w-full !py-2.5 shadow-lg" @click="openUrl">
@@ -111,7 +111,7 @@ const urlTextClass = computed(() => {
   <!-- Mobile card -->
   <Card v-else class="p-0 overflow-hidden bg-gradient-to-b from-[#7C3AED]/5 to-transparent">
     <div :class="['px-4 pt-3.5 pb-0 flex items-center gap-2 border-b', themeStore.isDarkMode ? 'border-white/10' : 'border-black/5']">
-      <MousePointerClick :size="14" class="text-[#7C3AED] flex-shrink-0" />
+      <MousePointerClick :size="14" class="text-[#7C3AED] shrink-0" />
       <p :class="['text-xs font-bold pb-3.5', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']">{{ t('dashboard.quickCharge') }}</p>
     </div>
 
@@ -126,7 +126,7 @@ const urlTextClass = computed(() => {
       <motion.div
         layout-id="qr-code"
         :class="[
-          'relative flex-shrink-0 bg-white p-3 rounded-2xl shadow-lg border border-gray-100 group',
+          'relative shrink-0 bg-white p-3 rounded-2xl shadow-lg border border-gray-100 group',
           mobileSelected.active ? 'cursor-pointer' : 'cursor-default'
         ]"
         @click="mobileSelected.active && (isQrMaximized = true)"

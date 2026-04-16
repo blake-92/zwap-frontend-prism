@@ -92,11 +92,11 @@ const glowClass = (collapsed) => {
   <motion.aside
     :animate="{ width: isCollapsed ? 72 : 256 }"
     :transition="SPRING"
-    :class="['relative flex-shrink-0 flex flex-col h-screen z-20 overflow-hidden transition-colors duration-500', asideClass]"
+    :class="['relative shrink-0 flex flex-col h-screen z-20 overflow-hidden transition-colors duration-500', asideClass]"
   >
     <!-- Logo -->
-    <div class="h-20 flex items-center flex-shrink-0 overflow-hidden pl-[19px]">
-      <ZwapIsotipo wrapper-class="h-7 w-auto flex-shrink-0" />
+    <div class="h-20 flex items-center shrink-0 overflow-hidden pl-[19px]">
+      <ZwapIsotipo wrapper-class="h-7 w-auto shrink-0" />
       <AnimatePresence :initial="false">
         <motion.div
           v-if="!isCollapsed"
@@ -131,7 +131,7 @@ const glowClass = (collapsed) => {
           <component
             :is="item.icon"
             :size="18"
-            :class="['relative z-10 flex-shrink-0', route.path === item.route ? 'text-[#7C3AED]' : 'opacity-70']"
+            :class="['relative z-10 shrink-0', route.path === item.route ? 'text-[#7C3AED]' : 'opacity-70']"
           />
           <AnimatePresence :initial="false">
             <motion.span
@@ -151,7 +151,7 @@ const glowClass = (collapsed) => {
     </nav>
 
     <!-- Footer -->
-    <div class="px-2 pb-5 space-y-3 flex-shrink-0">
+    <div class="px-2 pb-5 space-y-3 shrink-0">
       <!-- Wallet -->
       <motion.button
         :animate="{ y: !isWalletActive && walletHover && !isCollapsed ? -3 : 0 }"
@@ -164,7 +164,7 @@ const glowClass = (collapsed) => {
       >
         <Wallet
           :size="18"
-          :class="['relative z-10 flex-shrink-0', isWalletActive ? 'text-[#7C3AED]' : themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#B0AFB4]']"
+          :class="['relative z-10 shrink-0', isWalletActive ? 'text-[#7C3AED]' : themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#B0AFB4]']"
         />
 
         <AnimatePresence :initial="false">
@@ -193,7 +193,7 @@ const glowClass = (collapsed) => {
               :animate="(isWalletActive || walletHover) ? { x: 0, opacity: 1 } : { x: -8, opacity: 0 }"
               :transition="SPRING"
               :class="[
-                'flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center',
+                'shrink-0 w-6 h-6 rounded-full flex items-center justify-center',
                 isWalletActive
                   ? themeStore.isDarkMode
                     ? 'bg-[#7C3AED] text-white shadow-[0_0_12px_rgba(124,58,237,0.5)]'
@@ -234,7 +234,7 @@ const glowClass = (collapsed) => {
             <button
               :title="t('nav.logout')"
               :class="[
-                'p-1.5 rounded-lg flex-shrink-0 transition-all duration-200',
+                'p-1.5 rounded-lg shrink-0 transition-all duration-200',
                 themeStore.isDarkMode
                   ? 'text-[#888991] hover:text-rose-400 hover:bg-rose-500/10'
                   : 'text-[#67656E] hover:text-rose-600 hover:bg-rose-50'

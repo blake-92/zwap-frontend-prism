@@ -34,7 +34,7 @@ const timeClass = computed(() => {
       <div :class="['p-4 rounded-xl border', cfg.tint]">
         <SectionLabel class="mb-2">{{ t('dashboard.recommendation') }}</SectionLabel>
         <div class="flex items-start gap-3">
-          <component :is="cfg.Icon" :size="22" :class="[cfg.text, 'flex-shrink-0 mt-0.5']" :stroke-width="2.25" />
+          <component :is="cfg.Icon" :size="22" :class="[cfg.text, 'shrink-0 mt-0.5']" :stroke-width="2.25" />
           <div class="flex-1 min-w-0">
             <p :class="['text-xl font-bold capitalize leading-none', cfg.text]">{{ t(cfg.labelKey) }}</p>
             <p :class="['text-xs font-medium mt-1.5', themeStore.isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]']">

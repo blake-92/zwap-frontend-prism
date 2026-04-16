@@ -190,7 +190,7 @@ const goLinks = () => navigateTo(ROUTES.LINKS)
                     {{ trx.client || t('common.anonymousClient') }}
                   </p>
                   <div :class="['flex items-center gap-1.5 text-[11px] font-medium truncate', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">
-                    <span class="flex items-center gap-1 flex-shrink-0">
+                    <span class="flex items-center gap-1 shrink-0">
                       <CreditCard :size="12" class="opacity-70" />
                       <span class="font-mono tracking-widest opacity-70">••</span>
                       <span class="font-mono">{{ trx.last4 }}</span>
@@ -262,14 +262,14 @@ const goLinks = () => navigateTo(ROUTES.LINKS)
                     {{ trx.client || t('common.anonymousClient') }}
                   </p>
                   <div :class="['flex items-center gap-1.5 text-[11px] font-medium truncate', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">
-                    <span class="flex items-center gap-1 flex-shrink-0">
+                    <span class="flex items-center gap-1 shrink-0">
                       <CreditCard :size="12" class="opacity-70" />
                       <span class="font-mono tracking-widest opacity-70">••</span>
                       <span class="font-mono">{{ trx.last4 }}</span>
                     </span>
                   </div>
                 </div>
-                <span :class="['font-mono font-bold text-lg tracking-tight mt-0.5 flex-shrink-0', amountClass(trx)]">${{ trx.amount }}</span>
+                <span :class="['font-mono font-bold text-lg tracking-tight mt-0.5 shrink-0', amountClass(trx)]">${{ trx.amount }}</span>
               </div>
               <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2 flex-wrap">

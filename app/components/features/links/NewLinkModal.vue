@@ -123,7 +123,7 @@ const sliderStyle = computed(() => ({
           ]"
           @click="calendarOpen = true"
         >
-          <CalendarDays :size="16" :class="['mr-2 flex-shrink-0', selectedDate ? 'text-[#7C3AED]' : 'opacity-50']" />
+          <CalendarDays :size="16" :class="['mr-2 shrink-0', selectedDate ? 'text-[#7C3AED]' : 'opacity-50']" />
           <span class="truncate">
             {{ selectedDate ? `${selectedDate} – ${timeValue}` : t('links.selectDateTime') }}
           </span>
@@ -171,7 +171,7 @@ const sliderStyle = computed(() => ({
                 @update:model-value="updateItem(idx, 'desc', $event)"
               />
             </div>
-            <div class="w-28 sm:w-32 flex-shrink-0">
+            <div class="w-28 sm:w-32 shrink-0">
               <Input
                 type="number"
                 min="0"
@@ -180,10 +180,10 @@ const sliderStyle = computed(() => ({
                 @update:model-value="updateItem(idx, 'amount', $event)"
               />
             </div>
-            <Button v-if="items.length > 1" variant="danger" size="icon" class="flex-shrink-0 mt-1" @click="removeItem(idx)">
+            <Button v-if="items.length > 1" variant="danger" size="icon" class="shrink-0 mt-1" @click="removeItem(idx)">
               <Trash2 :size="16" />
             </Button>
-            <Button v-else variant="ghost" size="icon" disabled class="flex-shrink-0 mt-1 opacity-20 cursor-not-allowed">
+            <Button v-else variant="ghost" size="icon" disabled class="shrink-0 mt-1 opacity-20 cursor-not-allowed">
               <Trash2 :size="16" />
             </Button>
           </div>

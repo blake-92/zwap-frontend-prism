@@ -31,7 +31,7 @@ const pageBtnClass = (p) => {
   if (active) {
     return d
       ? 'bg-[#7C3AED]/20 text-[#A78BFA] border border-[#7C3AED]/30 shadow-[0_0_12px_rgba(124,58,237,0.3)]'
-      : 'bg-[#DBD3FB]/60 text-[#561BAF] border border-[#7C3AED]/20 shadow-sm'
+      : 'bg-[#DBD3FB]/60 text-[#561BAF] border border-[#7C3AED]/20 shadow-xs'
   }
   return d
     ? 'text-[#888991] hover:bg-white/5 hover:text-white'

@@ -20,7 +20,7 @@ const themeStore = useThemeStore()
     <div
       v-else
       :class="[
-        'w-10 h-10 rounded-full flex items-center justify-center border-2 border-dashed flex-shrink-0',
+        'w-10 h-10 rounded-full flex items-center justify-center border-2 border-dashed shrink-0',
         themeStore.isDarkMode ? 'bg-[#111113]/50 border-white/20 text-[#888991]' : 'bg-gray-50 border-gray-300 text-gray-400',
       ]"
     >

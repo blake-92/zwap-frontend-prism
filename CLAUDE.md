@@ -5,13 +5,13 @@ Instrucciones para Claude Code al trabajar en este repositorio.
 ## Stack
 
 - **Nuxt 4** + **Vue 3** (Composition API, `<script setup>` siempre)
-- **Tailwind CSS 3** — utilidades inline, sin CSS modules
+- **Tailwind CSS 4** — utilidades inline, sin CSS modules; integrado via `@tailwindcss/vite`
 - **Render mode:** SPA (`ssr: false` en `nuxt.config.ts`)
 - **Pinia** — estado global (theme/toast/viewSearch)
 - **motion-v** — port de Framer Motion para Vue (spring como paradigma principal)
 - **lucide-vue-next** — íconos
 - **@vuepic/vue-datepicker** — calendario en `DatePickerModal`
-- **@nuxtjs/i18n v9** — i18n (vue-i18n v9, sintaxis pipe + `{var}`)
+- **@nuxtjs/i18n v10** — i18n (vue-i18n v11, sintaxis pipe + `{var}`)
 - **@nuxt/fonts** — Inter + JetBrains Mono self-hosted
 - **SVG nativo** — gráficas en `ChartCard` (antes Recharts, sin port Vue)
 
@@ -420,7 +420,7 @@ En `app/composables/` (auto-import por Nuxt):
 
 ## Internacionalización (i18n)
 
-`@nuxtjs/i18n` v9 con vue-i18n v9. Configurado en `nuxt.config.ts`:
+`@nuxtjs/i18n` v10 con vue-i18n v11. Configurado en `nuxt.config.ts`:
 
 ```ts
 i18n: {
@@ -435,7 +435,7 @@ i18n: {
     cookieKey: 'zwap-language',
     redirectOn: 'root',
   },
-  compilation: { strictMessage: false, jit: true },
+  compilation: { strictMessage: false },
 }
 ```
 
@@ -540,7 +540,7 @@ Vistas con este patrón: TransaccionesView, CustomLinksTable, LiquidacionesView,
 **Reglas para cards mobile:**
 1. `min-w-0` en flex children con texto (evita overflow)
 2. `truncate` en textos largos (emails, IDs, nombres)
-3. `flex-shrink-0` en elementos de ancho fijo (amounts, badges)
+3. `shrink-0` en elementos de ancho fijo (amounts, badges)
 4. `flex-wrap` en filas con múltiples badges
 
 ### Modal responsive
@@ -619,7 +619,7 @@ Cualquier elemento que requiera atención total del usuario (modales, recibos, l
 
 1. **Teleport a `body`** — `<ClientOnly><Teleport to="body">...</Teleport></ClientOnly>` para escapar stacking contexts del layout (evita que BottomNav `z-40` tape el overlay).
 
-2. **Señalizar con `useChromeBlur(activeRef)`** — setea `data-modal-open` en body con counter. Sidebar/BottomNav aplican `blur-sm saturate-50 pointer-events-none` cuando observan el flag (via `useModalOpen`).
+2. **Señalizar con `useChromeBlur(activeRef)`** — setea `data-modal-open` en body con counter. Sidebar/BottomNav aplican `blur-xs saturate-50 pointer-events-none` cuando observan el flag (via `useModalOpen`).
 
 Componentes que ya cumplen el patrón: `Modal`, `BottomSheet`, `QrLightbox`, `ReceiptModal`, `WithdrawReceiptModal`. Cualquier modal nuevo que use `<Modal>` lo hereda gratis.
 

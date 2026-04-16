@@ -121,11 +121,11 @@ const modalClass = computed(() => getModalGlass(themeStore.isDarkMode))
           ]"
           @drag-end="onDragEnd"
         >
-          <div class="sm:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
+          <div class="sm:hidden flex justify-center pt-3 pb-1 shrink-0">
             <div :class="['w-10 h-1 rounded-full', themeStore.isDarkMode ? 'bg-white/20' : 'bg-black/10']" />
           </div>
 
-          <div :class="['px-5 sm:px-8 py-4 sm:py-6 border-b flex justify-between items-start flex-shrink-0', themeStore.isDarkMode ? 'border-white/10' : 'border-black/5']">
+          <div :class="['px-5 sm:px-8 py-4 sm:py-6 border-b flex justify-between items-start shrink-0', themeStore.isDarkMode ? 'border-white/10' : 'border-black/5']">
             <div>
               <h2 id="modal-title" :class="['text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']">
                 <span v-if="icon" class="text-[#7C3AED]"><component :is="icon" :size="24" /></span>
@@ -146,7 +146,7 @@ const modalClass = computed(() => getModalGlass(themeStore.isDarkMode))
 
           <div
             v-if="$slots.footer"
-            :class="['px-5 sm:px-8 py-5 sm:py-6 flex gap-3 sm:gap-4 border-t flex-shrink-0', themeStore.isDarkMode ? 'bg-[#111113]/40 border-white/10' : 'bg-gray-50/50 border-black/5']"
+            :class="['px-5 sm:px-8 py-5 sm:py-6 flex gap-3 sm:gap-4 border-t shrink-0', themeStore.isDarkMode ? 'bg-[#111113]/40 border-white/10' : 'bg-gray-50/50 border-black/5']"
           >
             <slot name="footer" />
           </div>

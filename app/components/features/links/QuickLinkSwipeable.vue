@@ -72,7 +72,7 @@ const urlTextClass = computed(() => {
         <motion.div
           layout-id="ql-qr-mini"
           :class="[
-            'relative flex-shrink-0 bg-white p-3 rounded-2xl shadow-lg border border-gray-100 group',
+            'relative shrink-0 bg-white p-3 rounded-2xl shadow-lg border border-gray-100 group',
             selected.active ? 'cursor-pointer' : 'cursor-default'
           ]"
           @click="selected.active && (isQrOpen = true)"
@@ -130,9 +130,9 @@ const urlTextClass = computed(() => {
         </div>
       </motion.div>
 
-      <div :class="['w-px my-3 flex-shrink-0', themeStore.isDarkMode ? 'bg-white/8' : 'bg-black/5']" />
+      <div :class="['w-px my-3 shrink-0', themeStore.isDarkMode ? 'bg-white/8' : 'bg-black/5']" />
 
-      <div class="flex flex-col items-center justify-center gap-2.5 px-3 py-4 flex-shrink-0">
+      <div class="flex flex-col items-center justify-center gap-2.5 px-3 py-4 shrink-0">
         <button
           :disabled="!selected.active"
           :class="['p-2 rounded-xl transition-colors', actionBtnClass(selected.active)]"

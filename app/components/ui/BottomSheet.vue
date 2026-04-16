@@ -54,7 +54,7 @@ const panelClass = computed(() =>
             initial="hidden"
             animate="visible"
             exit="exit"
-            class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+            class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs"
             @click="emit('close')"
           />
           <motion.div

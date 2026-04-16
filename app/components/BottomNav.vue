@@ -58,7 +58,7 @@ const handleDragEnd = (_e, info) => {
 
 const navClass = computed(() => [
   'fixed bottom-0 inset-x-0 z-40 flex items-stretch justify-around border-t backdrop-blur-2xl backdrop-saturate-150 pb-[env(safe-area-inset-bottom)] transition-[filter] duration-150',
-  modalOpen.value ? 'blur-sm saturate-50 pointer-events-none' : '',
+  modalOpen.value ? 'blur-xs saturate-50 pointer-events-none' : '',
   themeStore.isDarkMode
     ? 'bg-[#111113]/45 border-white/10 border-t-white/15'
     : 'bg-white/50 border-black/5 border-t-white/60 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]',
@@ -148,7 +148,7 @@ const moreIconBubbleClass = (active) => {
           initial="hidden"
           animate="visible"
           exit="exit"
-          class="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm"
+          class="fixed inset-0 z-30 bg-black/50 backdrop-blur-xs"
           @click="sheetOpen = false"
         />
       </AnimatePresence>

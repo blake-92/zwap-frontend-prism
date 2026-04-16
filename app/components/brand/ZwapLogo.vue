@@ -10,7 +10,7 @@ const themeStore = useThemeStore()
 const shadowClass = computed(() =>
   themeStore.isDarkMode
     ? 'drop-shadow-[0_0_12px_rgba(255,255,255,0.15)]'
-    : 'drop-shadow-sm',
+    : 'drop-shadow-xs',
 )
 const textFill = computed(() => (themeStore.isDarkMode ? '#FFFFFF' : '#170339'))
 </script>

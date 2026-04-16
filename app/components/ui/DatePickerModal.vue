@@ -65,20 +65,20 @@ const mm = computed(() => hhmm.value[1])
 const inputClass = computed(() => {
   const d = themeStore.isDarkMode
   return [
-    'w-full rounded-xl px-4 py-3 border text-sm font-medium outline-none transition-all',
+    'w-full rounded-xl px-4 py-3 border text-sm font-medium outline-hidden transition-all',
     d ? 'bg-[#252429] border-white/10 text-white focus:border-[#7C3AED]/60'
       : 'bg-gray-50 border-gray-200 text-[#111113] focus:border-[#7C3AED]/40',
   ]
 })
 
 const hourPresetClass = (h) => {
-  if (hh.value === h) return 'bg-[#7C3AED] text-white shadow-sm'
+  if (hh.value === h) return 'bg-[#7C3AED] text-white shadow-xs'
   return themeStore.isDarkMode
     ? 'text-[#888991] hover:text-white hover:bg-white/10'
     : 'text-[#67656E] hover:text-[#111113] hover:bg-gray-100'
 }
 const minutePresetClass = (m) => {
-  if (mm.value === m) return 'bg-[#7C3AED] text-white shadow-sm'
+  if (mm.value === m) return 'bg-[#7C3AED] text-white shadow-xs'
   return themeStore.isDarkMode
     ? 'text-[#888991] hover:text-white hover:bg-white/10'
     : 'text-[#67656E] hover:text-[#111113] hover:bg-gray-100'
@@ -187,7 +187,7 @@ const dpDarkMode = computed(() => themeStore.isDarkMode ? 'dark' : 'light')
                 inputmode="numeric"
                 maxlength="2"
                 :value="hh"
-                :class="['w-6 text-center text-xs font-mono font-semibold outline-none bg-transparent', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']"
+                :class="['w-6 text-center text-xs font-mono font-semibold outline-hidden bg-transparent', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']"
                 @input="handleHourInput"
                 @blur="handleHourBlur"
               />
@@ -197,7 +197,7 @@ const dpDarkMode = computed(() => themeStore.isDarkMode ? 'dark' : 'light')
                 inputmode="numeric"
                 maxlength="2"
                 :value="mm"
-                :class="['w-6 text-center text-xs font-mono font-semibold outline-none bg-transparent', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']"
+                :class="['w-6 text-center text-xs font-mono font-semibold outline-hidden bg-transparent', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']"
                 @input="handleMinuteInput"
                 @blur="handleMinuteBlur"
               />

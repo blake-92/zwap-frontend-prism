@@ -190,7 +190,7 @@ const netClass = (isDebt) => {
             >
               <td class="px-8 py-4">
                 <div class="flex items-start gap-4">
-                  <div :class="['w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0', typeIconClass(lote.net < 0)]">
+                  <div :class="['w-10 h-10 rounded-full flex items-center justify-center shrink-0', typeIconClass(lote.net < 0)]">
                     <component :is="lote.typeIcon" :size="18" />
                   </div>
                   <div>
@@ -275,7 +275,7 @@ const netClass = (isDebt) => {
           <Card class="p-4">
             <div class="flex items-start justify-between gap-3 mb-3">
               <div class="flex items-start gap-3 min-w-0">
-                <div :class="['w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0', typeIconClass(lote.net < 0)]">
+                <div :class="['w-10 h-10 rounded-full flex items-center justify-center shrink-0', typeIconClass(lote.net < 0)]">
                   <component :is="lote.typeIcon" :size="18" />
                 </div>
                 <div class="min-w-0">
@@ -285,7 +285,7 @@ const netClass = (isDebt) => {
                   </p>
                 </div>
               </div>
-              <span :class="['font-mono font-bold text-lg tracking-tight flex-shrink-0', netClass(lote.net < 0)]">
+              <span :class="['font-mono font-bold text-lg tracking-tight shrink-0', netClass(lote.net < 0)]">
                 {{ lote.net < 0 ? '-' : '' }}${{ Math.abs(lote.net).toFixed(2) }}
               </span>
             </div>

@@ -33,14 +33,14 @@ const handle = () => { if (!props.disabled) emit('toggle') }
     :aria-checked="active"
     :disabled="disabled"
     :class="[
-      'w-10 h-5 rounded-full p-0.5 flex items-center outline-none transition-colors duration-300',
+      'w-10 h-5 rounded-full p-0.5 flex items-center outline-hidden transition-colors duration-300',
       disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
       btnClass,
     ]"
     @click="handle"
   >
     <motion.div
-      class="w-4 h-4 rounded-full bg-white shadow-sm"
+      class="w-4 h-4 rounded-full bg-white shadow-xs"
       :animate="{ x: active ? 20 : 0 }"
       :transition="{ type: 'spring', stiffness: 500, damping: 30 }"
     />

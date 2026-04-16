@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /* ============================================================
    ZWAP PRISM UI — Global Styles
@@ -14,6 +12,12 @@
 
 * {
   box-sizing: border-box;
+}
+
+/* Tailwind v4 changed button cursor default to 'default'.
+   Restore pointer for all interactive elements (native-app feel). */
+button, [role="button"], a, summary, select {
+  cursor: pointer;
 }
 
 body {

@@ -180,7 +180,7 @@ const trClass = computed(() =>
         <Card class="p-5">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div :class="['w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0', themeStore.isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/60 text-[#561BAF] shadow-sm']">
+              <div :class="['w-9 h-9 rounded-xl flex items-center justify-center shrink-0', themeStore.isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/60 text-[#561BAF] shadow-xs']">
                 <Landmark :size="16" />
               </div>
               <div>
@@ -264,7 +264,7 @@ const trClass = computed(() =>
               </td>
               <td class="px-6 py-3.5">
                 <span :class="['text-xs font-medium flex items-center gap-1.5', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">
-                  <Landmark :size="11" class="opacity-60 flex-shrink-0" />
+                  <Landmark :size="11" class="opacity-60 shrink-0" />
                   {{ w.bank }}
                 </span>
               </td>
@@ -302,12 +302,12 @@ const trClass = computed(() =>
                 <span :class="['font-mono font-bold text-sm truncate block', themeStore.isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]']">{{ w.id }}</span>
                 <p :class="['text-xs font-medium mt-0.5', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">{{ w.date }}</p>
               </div>
-              <span :class="['font-mono font-bold text-lg tracking-tight flex-shrink-0', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']">${{ w.amount }}</span>
+              <span :class="['font-mono font-bold text-lg tracking-tight shrink-0', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']">${{ w.amount }}</span>
             </div>
             <div class="flex items-center justify-between gap-2 mb-3">
               <Badge :variant="w.statusVariant" :icon="w.StatusIcon">{{ w.status }}</Badge>
               <span :class="['text-xs font-medium flex items-center gap-1 min-w-0 truncate', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">
-                <Landmark :size="11" class="opacity-60 flex-shrink-0" />
+                <Landmark :size="11" class="opacity-60 shrink-0" />
                 <span class="truncate">{{ w.bank }}</span>
               </span>
             </div>

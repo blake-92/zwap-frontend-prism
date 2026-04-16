@@ -81,7 +81,7 @@ const ringClass = (variant) => {
             </td>
             <td class="px-4 py-3">
               <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-full bg-gray-500/60 flex items-center justify-center flex-shrink-0">
+                <div class="w-7 h-7 rounded-full bg-gray-500/60 flex items-center justify-center shrink-0">
                   <CreditCard :size="12" class="text-white/80" />
                 </div>
                 <div>
@@ -126,9 +126,9 @@ const ringClass = (variant) => {
           ]"
           @click="receiptTrx = trx"
         >
-          <div :class="['relative flex-shrink-0 rounded-full p-[2px]', ringClass(trx.statusVariant)]">
+          <div :class="['relative shrink-0 rounded-full p-[2px]', ringClass(trx.statusVariant)]">
             <div :class="['rounded-full p-[1.5px]', themeStore.isDarkMode ? 'bg-[#252429]' : 'bg-white']">
-              <div class="w-7 h-7 rounded-full bg-gray-500/60 flex items-center justify-center flex-shrink-0">
+              <div class="w-7 h-7 rounded-full bg-gray-500/60 flex items-center justify-center shrink-0">
                 <CreditCard :size="12" class="text-white/80" />
               </div>
             </div>
@@ -138,11 +138,11 @@ const ringClass = (variant) => {
               {{ trx.client ? trx.client.split(' ')[0] : t('dashboard.counter') }}
             </span>
             <span :class="['opacity-30', themeStore.isDarkMode ? 'text-white' : 'text-black']">·</span>
-            <span :class="['text-[10px] flex-shrink-0', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">{{ trx.time }}</span>
+            <span :class="['text-[10px] shrink-0', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">{{ trx.time }}</span>
             <span :class="['opacity-30', themeStore.isDarkMode ? 'text-white' : 'text-black']">·</span>
-            <component :is="trx.ChannelIcon" :size="10" :class="['flex-shrink-0', themeStore.isDarkMode ? 'text-[#7C3AED] opacity-70' : 'text-[#561BAF] opacity-60']" />
+            <component :is="trx.ChannelIcon" :size="10" :class="['shrink-0', themeStore.isDarkMode ? 'text-[#7C3AED] opacity-70' : 'text-[#561BAF] opacity-60']" />
           </div>
-          <span :class="['font-mono font-bold text-[13px] tracking-tight flex-shrink-0', amountClass(trx)]">${{ trx.amount }}</span>
+          <span :class="['font-mono font-bold text-[13px] tracking-tight shrink-0', amountClass(trx)]">${{ trx.amount }}</span>
         </motion.div>
       </motion.div>
     </div>

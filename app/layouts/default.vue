@@ -87,8 +87,8 @@ const mainClass = computed(() => [
 ])
 
 const sidebarWrapperClass = computed(() => [
-  'relative flex-shrink-0 group/sidebar transition-[filter,opacity] duration-150',
-  modalOpen.value ? 'blur-sm saturate-50 pointer-events-none' : '',
+  'relative shrink-0 group/sidebar transition-[filter,opacity] duration-150',
+  modalOpen.value ? 'blur-xs saturate-50 pointer-events-none' : '',
 ])
 
 const toggleBtnClass = computed(() =>

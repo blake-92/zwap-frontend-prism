@@ -22,7 +22,7 @@ const variantClass = computed(() => {
 </script>
 
 <template>
-  <span :class="['px-2.5 py-1 rounded-md text-[11px] font-bold inline-flex items-center gap-1.5 border backdrop-blur-md shadow-sm', variantClass]">
+  <span :class="['px-2.5 py-1 rounded-md text-[11px] font-bold inline-flex items-center gap-1.5 border backdrop-blur-md shadow-xs', variantClass]">
     <component :is="icon" v-if="icon" :size="12" :stroke-width="3" />
     <slot />
   </span>

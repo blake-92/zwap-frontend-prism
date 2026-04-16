@@ -30,7 +30,7 @@ const variantClass = computed(() => {
       : 'bg-[#7C3AED] hover:bg-[#561BAF] active:bg-[#4C1599] text-white shadow-[0_8px_25px_rgba(124,58,237,0.3)] border border-[#7C3AED]/30 border-t-white/50',
     outline: d
       ? 'bg-transparent border border-white/10 text-[#D8D7D9] hover:bg-white/5 active:bg-white/10'
-      : 'bg-white/60 border border-white text-[#45434A] hover:bg-white active:bg-gray-100 shadow-sm',
+      : 'bg-white/60 border border-white text-[#45434A] hover:bg-white active:bg-gray-100 shadow-xs',
     ghost: d
       ? 'bg-transparent hover:bg-white/10 active:bg-white/15 text-[#888991] hover:text-white border border-transparent'
       : 'bg-transparent hover:bg-black/5 active:bg-black/10 text-[#67656E] hover:text-[#111113] border border-transparent',
@@ -42,7 +42,7 @@ const variantClass = computed(() => {
       : 'text-[#67656E] bg-white border border-gray-200 hover:bg-rose-50 active:bg-rose-100 hover:text-rose-600 hover:border-rose-200',
     successExport: d
       ? 'bg-transparent border border-white/10 text-[#D8D7D9] hover:bg-emerald-500/15 active:bg-emerald-500/25 hover:text-emerald-400 hover:border-emerald-500/30'
-      : 'bg-white/60 border border-white text-[#45434A] hover:bg-emerald-50 active:bg-emerald-100 hover:text-emerald-600 hover:border-emerald-200 shadow-sm',
+      : 'bg-white/60 border border-white text-[#45434A] hover:bg-emerald-50 active:bg-emerald-100 hover:text-emerald-600 hover:border-emerald-200 shadow-xs',
   }
   return v[props.variant]
 })
@@ -58,7 +58,7 @@ const whileTap = computed(() => (props.disabled ? undefined : { scale: 0.94 }))
     :while-tap="whileTap"
     :transition="{ type: 'spring', stiffness: 500, damping: 30 }"
     :class="[
-      'inline-flex items-center justify-center gap-2 font-semibold transition-colors duration-200 outline-none rounded-xl disabled:opacity-50 disabled:cursor-not-allowed',
+      'inline-flex items-center justify-center gap-2 font-semibold transition-colors duration-200 outline-hidden rounded-xl cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
       SIZES[size],
       variantClass,
     ]"

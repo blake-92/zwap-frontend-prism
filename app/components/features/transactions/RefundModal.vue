@@ -56,7 +56,7 @@ const handlePartialInput = (e) => {
 const inputClass = computed(() =>
   themeStore.isDarkMode
     ? 'bg-[#111113]/50 border-white/10 text-white focus:border-[#7C3AED]/50 placeholder-[#45434A]'
-    : 'bg-white/60 border-white text-[#111113] focus:border-[#7C3AED]/40 shadow-sm placeholder-gray-300',
+    : 'bg-white/60 border-white text-[#111113] focus:border-[#7C3AED]/40 shadow-xs placeholder-gray-300',
 )
 </script>
 
@@ -109,7 +109,7 @@ const inputClass = computed(() =>
             min="0"
             :max="parseFloat(trx.amount.replace(/,/g, ''))"
             :value="partial"
-            :class="['w-full pl-8 pr-4 py-3 rounded-xl border outline-none font-mono font-bold text-lg transition-all', inputClass]"
+            :class="['w-full pl-8 pr-4 py-3 rounded-xl border outline-hidden font-mono font-bold text-lg transition-all', inputClass]"
             @input="handlePartialInput"
           />
         </div>

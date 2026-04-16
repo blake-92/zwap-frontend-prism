@@ -45,7 +45,7 @@ onUnmounted(() => viewSearch.setFilterOpener(null))
 const glassClass = computed(() =>
   themeStore.isDarkMode
     ? 'bg-[#252429]/20 backdrop-blur-xl border-white/10'
-    : 'bg-white/40 backdrop-blur-xl border-white shadow-sm',
+    : 'bg-white/40 backdrop-blur-xl border-white shadow-xs',
 )
 
 const resetBtnClass = computed(() =>
@@ -83,7 +83,7 @@ const handleReset = () => {
         {{ t('filters.clearFilters') }}
       </button>
     </div>
-    <div v-if="$slots.actions" class="flex items-center gap-2 flex-shrink-0">
+    <div v-if="$slots.actions" class="flex items-center gap-2 shrink-0">
       <slot name="actions" />
     </div>
   </div>

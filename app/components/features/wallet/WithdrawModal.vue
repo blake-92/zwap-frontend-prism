@@ -58,7 +58,7 @@ const surfaceClass = computed(() => themeStore.isDarkMode ? 'bg-[#111113]/30 bor
       </div>
 
       <div :class="['flex items-center gap-4 p-4 rounded-xl border', surfaceClass]">
-        <div :class="['w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0', themeStore.isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/60 text-[#561BAF]']">
+        <div :class="['w-10 h-10 rounded-xl flex items-center justify-center shrink-0', themeStore.isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/60 text-[#561BAF]']">
           <Landmark :size="18" />
         </div>
         <div>

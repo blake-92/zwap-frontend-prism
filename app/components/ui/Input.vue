@@ -27,7 +27,7 @@ const inputClass = computed(() => {
   }
   return d
     ? 'bg-[#111113]/50 border-white/10 text-white focus:border-[#7C3AED]/50 focus:shadow-[0_0_15px_rgba(124,58,237,0.15)] placeholder-[#888991]'
-    : 'bg-white/60 border-white text-[#111113] focus:border-[#7C3AED]/40 shadow-sm placeholder-[#B0AFB4]'
+    : 'bg-white/60 border-white text-[#111113] focus:border-[#7C3AED]/40 shadow-xs placeholder-[#B0AFB4]'
 })
 </script>
 
@@ -52,7 +52,7 @@ const inputClass = computed(() => {
       v-bind="$attrs"
       :value="modelValue"
       :class="[
-        'w-full py-3 rounded-xl border outline-none transition-all font-medium',
+        'w-full py-3 rounded-xl border outline-hidden transition-all font-medium',
         icon ? 'pl-11 pr-4' : prefix ? 'pl-8 pr-4' : 'px-4',
         inputClass,
       ]"

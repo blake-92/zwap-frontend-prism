@@ -29,13 +29,13 @@ const ariaLabel = computed(() => props.placeholder.replace('...', '').trim())
 
 <template>
   <div :class="['flex items-center px-4 py-2 rounded-xl transition-all', containerClass, wrapperClass]">
-    <Search :size="14" :class="['flex-shrink-0', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']" />
+    <Search :size="14" :class="['shrink-0', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']" />
     <input
       type="text"
       :placeholder="placeholder"
       :value="modelValue"
       :aria-label="ariaLabel"
-      :class="['bg-transparent border-none outline-none text-xs ml-2 w-full font-medium', inputClass]"
+      :class="['bg-transparent border-none outline-hidden text-xs ml-2 w-full font-medium', inputClass]"
       @input="emit('update:modelValue', $event.target.value)"
     />
   </div>

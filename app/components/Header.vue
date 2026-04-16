@@ -71,7 +71,7 @@ const pickBranch = (b) => {
 }
 
 const headerClass = computed(() => [
-  'z-50 h-16 lg:h-20 flex items-center justify-between px-4 sm:px-6 lg:px-10 flex-shrink-0 transition-colors duration-500',
+  'z-50 h-16 lg:h-20 flex items-center justify-between px-4 sm:px-6 lg:px-10 shrink-0 transition-colors duration-500',
   props.isDesktop ? 'relative' : 'fixed inset-x-0 top-0',
   themeStore.isDarkMode
     ? 'bg-[#111113]/20 backdrop-blur-2xl border-b border-white/10'
@@ -137,7 +137,7 @@ const goSettings = () => navigateTo(ROUTES.SETTINGS)
           type="text"
           :placeholder="viewSearch.placeholder || t('header.searchPlaceholder')"
           :value="viewSearch.query"
-          :class="['bg-transparent border-none outline-none text-sm ml-3 w-full font-medium placeholder:opacity-60', inputTextClass]"
+          :class="['bg-transparent border-none outline-hidden text-sm ml-3 w-full font-medium placeholder:opacity-60', inputTextClass]"
           @input="viewSearch.setQuery($event.target.value)"
         />
         <button
@@ -240,7 +240,7 @@ const goSettings = () => navigateTo(ROUTES.SETTINGS)
     <!-- Mobile -->
     <template v-else>
       <div class="flex items-center flex-1 min-w-0 mr-3">
-        <ZwapIsotipo wrapper-class="h-7 flex-shrink-0" />
+        <ZwapIsotipo wrapper-class="h-7 shrink-0" />
         <AnimatePresence :initial="false" mode="wait">
           <motion.div
             v-if="searchExpanded"
@@ -251,19 +251,19 @@ const goSettings = () => navigateTo(ROUTES.SETTINGS)
             :transition="SPRING"
             :class="['flex-1 min-w-0 flex items-center gap-2 ml-2 px-3 py-2 rounded-xl border overflow-hidden', mobileSearchBarClass]"
           >
-            <Search :size="16" class="text-[#7C3AED] flex-shrink-0" />
+            <Search :size="16" class="text-[#7C3AED] shrink-0" />
             <input
               ref="searchInputRef"
               type="text"
               :value="viewSearch.query"
               :placeholder="viewSearch.placeholder || t('header.searchPlaceholder')"
-              :class="['bg-transparent border-none outline-none text-sm w-full font-medium placeholder:opacity-50', inputTextClass]"
+              :class="['bg-transparent border-none outline-hidden text-sm w-full font-medium placeholder:opacity-50', inputTextClass]"
               @input="viewSearch.setQuery($event.target.value)"
             />
             <motion.button
               :while-tap="{ scale: 0.85 }"
               :transition="SPRING"
-              :class="['p-1 rounded-lg flex-shrink-0 transition-colors', themeStore.isDarkMode ? 'text-[#888991] hover:text-white' : 'text-[#67656E] hover:text-[#111113]']"
+              :class="['p-1 rounded-lg shrink-0 transition-colors', themeStore.isDarkMode ? 'text-[#888991] hover:text-white' : 'text-[#67656E] hover:text-[#111113]']"
               @click="viewSearch.query ? viewSearch.setQuery('') : (searchExpanded = false)"
             >
               <X :size="16" />
@@ -283,7 +283,7 @@ const goSettings = () => navigateTo(ROUTES.SETTINGS)
         </AnimatePresence>
       </div>
 
-      <div class="flex items-center gap-1 flex-shrink-0">
+      <div class="flex items-center gap-1 shrink-0">
         <AnimatePresence>
           <motion.div
             v-if="!searchExpanded"
@@ -314,7 +314,7 @@ const goSettings = () => navigateTo(ROUTES.SETTINGS)
         </AnimatePresence>
         <button
           :aria-label="t('nav.branches')"
-          :class="['w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0 transition-all', branchPillClass]"
+          :class="['w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 transition-all', branchPillClass]"
           @click="branchSheetOpen = true"
         >
           {{ selectedBranch.charAt(0) }}
