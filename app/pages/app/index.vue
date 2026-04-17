@@ -1,6 +1,7 @@
 <script setup>
-definePageMeta({ middleware: 'auth' })
-await navigateTo('/app/dashboard', { replace: true })
+definePageMeta({
+  middleware: ['auth', () => navigateTo('/app/dashboard', { replace: true })],
+})
 </script>
 
 <template>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onBeforeUnmount } from 'vue'
 import { motion, AnimatePresence } from 'motion-v'
 import { CreditCard } from 'lucide-vue-next'
 import Card from '~/components/ui/Card.vue'
@@ -107,6 +107,10 @@ const onLeave = () => {
   if (rafId) { cancelAnimationFrame(rafId); rafId = null }
   hoverIdx.value = -1
 }
+
+onBeforeUnmount(() => {
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null }
+})
 
 const tooltipClass = computed(() =>
   themeStore.isDarkMode

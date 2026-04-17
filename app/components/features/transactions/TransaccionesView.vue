@@ -13,6 +13,7 @@ import { useInfiniteScroll } from '~/composables/useInfiniteScroll'
 import { useMotionVariants } from '~/composables/useMotionVariants'
 import { TRANSACTIONS } from '~/utils/mockData'
 import { ROUTES } from '~/utils/routes'
+import { formatDate, parseIsoDate } from '~/utils/formatDate'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
 import Badge from '~/components/ui/Badge.vue'
@@ -27,7 +28,7 @@ import ReceiptModal from './ReceiptModal.vue'
 import RefundModal from './RefundModal.vue'
 
 const mv = useMotionVariants()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const themeStore = useThemeStore()
 const isDesktop = useMediaQuery('(min-width: 1024px)')
 const viewSearch = useViewSearch(computed(() => t('transactions.searchPlaceholder')))
@@ -69,18 +70,26 @@ const filtered = computed(() => {
       (trx.client?.toLowerCase().includes(q)) ||
       (trx.email?.toLowerCase().includes(q)) ||
       trx.id.toLowerCase().includes(q)
-    const matchStatus = statusFilter.value === defaultStatus.value || trx.status === statusFilter.value
+    const matchStatus = statusFilter.value === defaultStatus.value
+      || t(`status.${trx.status}`) === statusFilter.value
     let matchDate = true
     if (dateFilter.value !== defaultDate.value) {
-      const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
       const today = new Date()
+      const trxDate = parseIsoDate(trx.date)
+
       if (dateFilter.value === tToday) {
-        const monthStr = months[today.getMonth()]
-        matchDate = trx.date.includes(`${today.getDate()} ${monthStr}`) && trx.date.includes(`${today.getFullYear()}`)
+        matchDate = !!trxDate
+          && trxDate.getFullYear() === today.getFullYear()
+          && trxDate.getMonth() === today.getMonth()
+          && trxDate.getDate() === today.getDate()
       } else if (dateFilter.value === tLast7) {
-        matchDate = trx.date.includes('29 Mar') || trx.date.includes('28 Mar') || trx.date.includes('27 Mar')
+        const weekAgo = new Date(today)
+        weekAgo.setDate(today.getDate() - 7)
+        matchDate = !!trxDate && trxDate >= weekAgo && trxDate <= today
       } else if (dateFilter.value === tThisMonth) {
-        matchDate = trx.date.includes(months[today.getMonth()])
+        matchDate = !!trxDate
+          && trxDate.getFullYear() === today.getFullYear()
+          && trxDate.getMonth() === today.getMonth()
       }
     }
     return matchSearch && matchStatus && matchDate
@@ -98,9 +107,11 @@ const { visibleData, hasMore, sentinelRef } = useInfiniteScroll(filtered, {
 })
 
 const amountClass = (trx) => {
-  if (trx.status === 'Reembolsado') return 'text-rose-500 line-through opacity-70'
+  if (trx.status === 'refunded') return 'text-rose-500 line-through opacity-70'
   return themeStore.isDarkMode ? 'text-white' : 'text-[#111113]'
 }
+
+const formatTrxDate = (iso) => formatDate(iso, locale.value)
 
 const theadClass = computed(() =>
   themeStore.isDarkMode
@@ -115,9 +126,9 @@ const trClass = computed(() =>
 
 const mobileActions = (trx) => [
   { label: t('transactions.viewReceipt'), icon: FileText, onClick: () => { receiptTrx.value = trx } },
-  trx.status === 'Reembolsado'
+  trx.status === 'refunded'
     ? { label: t('transactions.refundReceipt'), icon: FileText, onClick: () => { refundTrx.value = trx } }
-    : { label: t('transactions.refund'), icon: RotateCcw, variant: 'danger', disabled: trx.status === 'Pendiente', onClick: () => { refundTrx.value = trx } },
+    : { label: t('transactions.refund'), icon: RotateCcw, variant: 'danger', disabled: trx.status === 'pending', onClick: () => { refundTrx.value = trx } },
 ]
 
 const goLinks = () => navigateTo(ROUTES.LINKS)
@@ -180,7 +191,7 @@ const goLinks = () => navigateTo(ROUTES.LINKS)
               :class="['group transition-colors duration-200', trClass]"
             >
               <td class="px-8 py-4">
-                <p :class="['font-bold text-sm', themeStore.isDarkMode ? 'text-[#D8D7D9] group-hover:text-white' : 'text-[#111113]']">{{ trx.date }}</p>
+                <p :class="['font-bold text-sm', themeStore.isDarkMode ? 'text-[#D8D7D9] group-hover:text-white' : 'text-[#111113]']">{{ formatTrxDate(trx.date) }}</p>
                 <p :class="['text-xs font-medium mt-1 flex items-center gap-1.5', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">
                   <Clock :size="12" class="opacity-70" /> {{ trx.time }}
                 </p>
@@ -201,12 +212,12 @@ const goLinks = () => navigateTo(ROUTES.LINKS)
               </td>
               <td class="px-6 py-4">
                 <div class="flex flex-col items-start gap-2">
-                  <Badge :variant="trx.statusVariant" :icon="trx.StatusIcon">{{ trx.status }}</Badge>
+                  <Badge :variant="trx.statusVariant" :icon="trx.StatusIcon">{{ t(`status.${trx.status}`) }}</Badge>
                   <div :class="['flex items-center gap-2 text-[11px] font-medium flex-wrap', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">
                     <span class="flex items-center gap-1.5">
                       <component :is="trx.ChannelIcon" :size="12" class="opacity-70" />
-                      <span class="hidden xl:inline">{{ trx.channel }}</span>
-                      <span class="inline xl:hidden">{{ trx.channel.includes('POS') ? 'POS' : 'Link' }}</span>
+                      <span class="hidden xl:inline">{{ t(`channel.${trx.channel}`) }}</span>
+                      <span class="inline xl:hidden">{{ t(`channel.${trx.channel}Short`) }}</span>
                     </span>
                     <span class="opacity-40">•</span>
                     <span class="flex items-center gap-1.5" :title="trx.country">
@@ -228,14 +239,14 @@ const goLinks = () => navigateTo(ROUTES.LINKS)
                       <span class="hidden xl:inline ml-1">{{ t('transactions.receiptShort') }}</span>
                     </Button>
                   </Tooltip>
-                  <Tooltip v-if="trx.status === 'Reembolsado'" :content="t('transactions.refundReceipt')" position="top">
+                  <Tooltip v-if="trx.status === 'refunded'" :content="t('transactions.refundReceipt')" position="top">
                     <Button variant="outline" size="sm" class="!px-3 !py-2" @click="refundTrx = trx">
                       <FileText :size="15" />
                       <span class="hidden xl:inline ml-1">{{ t('transactions.refundReceipt') }}</span>
                     </Button>
                   </Tooltip>
                   <Tooltip v-else :content="t('transactions.refund')" position="top">
-                    <Button variant="danger" size="sm" class="!px-3 !py-2" :disabled="trx.status === 'Pendiente'" @click="refundTrx = trx">
+                    <Button variant="danger" size="sm" class="!px-3 !py-2" :disabled="trx.status === 'pending'" @click="refundTrx = trx">
                       <RotateCcw :size="15" />
                       <span class="hidden xl:inline ml-1">{{ t('transactions.refund') }}</span>
                     </Button>
@@ -274,13 +285,13 @@ const goLinks = () => navigateTo(ROUTES.LINKS)
               </div>
               <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2 flex-wrap">
-                  <Badge :variant="trx.statusVariant" :icon="trx.StatusIcon" :title="trx.status" />
-                  <span :class="['text-[11px] font-medium flex items-center gap-1 opacity-70', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']" :title="trx.channel">
+                  <Badge :variant="trx.statusVariant" :icon="trx.StatusIcon" :title="t(`status.${trx.status}`)" />
+                  <span :class="['text-[11px] font-medium flex items-center gap-1 opacity-70', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']" :title="t(`channel.${trx.channel}`)">
                     <component :is="trx.ChannelIcon" :size="14" />
                   </span>
                 </div>
                 <span :class="['text-[11px] font-medium flex items-center gap-1.5 opacity-80', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">
-                  <Clock :size="12" /> {{ trx.date }} {{ trx.time }}
+                  <Clock :size="12" /> {{ formatTrxDate(trx.date) }} {{ trx.time }}
                 </span>
               </div>
             </div>

@@ -7,6 +7,8 @@ import { useToastStore } from '~/stores/toast'
 import { useMediaQuery } from '~/composables/useMediaQuery'
 import { useMotionVariants } from '~/composables/useMotionVariants'
 import { CUSTOM_LINKS } from '~/utils/mockData'
+import { copyToClipboard } from '~/utils/clipboard'
+import { formatDate } from '~/utils/formatDate'
 import { ROUTES } from '~/utils/routes'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
@@ -37,16 +39,17 @@ function classifyAction(views, lifeElapsedPct) {
   return late ? 'ayudar' : 'interes'
 }
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const themeStore = useThemeStore()
 const toastStore = useToastStore()
 const isDesktop = useMediaQuery('(min-width: 1024px)')
+const fmtCreated = (createdAt) => formatDate((createdAt || '').split('T')[0], locale.value)
 const isMobile = useMediaQuery('(max-width: 639px)')
 const detail = ref(null)
 
 const links = computed(() => (
   CUSTOM_LINKS
-    .filter((l) => l.status === 'Pendiente')
+    .filter((l) => l.status === 'pending')
     .map((l) => {
       const total = (l.createdMinutesAgo ?? 0) + (l.expiresInMinutes ?? 0)
       const lifeElapsedPct = total > 0 ? (l.createdMinutesAgo ?? 0) / total : 0
@@ -64,10 +67,14 @@ const links = computed(() => (
 
 const mobileLinks = computed(() => links.value.slice(0, MAX_ITEMS_MOBILE))
 
-const handleCopy = (link) => {
-  if (typeof navigator !== 'undefined') navigator.clipboard?.writeText(`https://zwap.me/pay/${link.id}`)
-  const key = isMobile.value ? 'links.linkCopiedShort' : 'links.linkCopied'
-  toastStore.addToast(t(key, { name: link.client }), 'success')
+const handleCopy = async (link) => {
+  const ok = await copyToClipboard(`https://zwap.me/pay/${link.id}`)
+  if (ok) {
+    const key = isMobile.value ? 'links.linkCopiedShort' : 'links.linkCopied'
+    toastStore.addToast(t(key, { name: link.client }), 'success')
+  } else {
+    toastStore.addToast(t('common.copyFailed'), 'error')
+  }
 }
 
 const goLinks = () => navigateTo(ROUTES.LINKS)
@@ -200,7 +207,7 @@ const rowBorder = (i, total) => {
                 {{ t('links.expires', { date: link.expires }) }}
               </p>
               <p :class="['text-[10px] font-medium flex items-center gap-1.5 mt-1', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">
-                <CalendarDays :size="12" class="opacity-70" /> {{ t('links.created', { date: link.createdAt }) }}
+                <CalendarDays :size="12" class="opacity-70" /> {{ t('links.created', { date: fmtCreated(link.createdAt) }) }}
               </p>
             </td>
             <td class="px-4 py-3.5">

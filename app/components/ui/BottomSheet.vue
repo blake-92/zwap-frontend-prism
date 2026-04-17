@@ -66,6 +66,7 @@ const panelClass = computed(() =>
             drag="y"
             :drag-constraints="{ top: 0, bottom: 500 }"
             :drag-elastic="0.2"
+            :drag-snap-to-origin="true"
             :class="[
               'fixed bottom-0 inset-x-0 z-[55] rounded-t-[24px] border-t pb-[env(safe-area-inset-bottom)]',
               panelClass,

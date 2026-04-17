@@ -7,6 +7,8 @@ import { useToastStore } from '~/stores/toast'
 import { useMediaQuery } from '~/composables/useMediaQuery'
 import { useMotionVariants } from '~/composables/useMotionVariants'
 import { CUSTOM_LINKS } from '~/utils/mockData'
+import { copyToClipboard } from '~/utils/clipboard'
+import { formatDate } from '~/utils/formatDate'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
 import Badge from '~/components/ui/Badge.vue'
@@ -21,7 +23,8 @@ const props = defineProps({
 })
 const emit = defineEmits(['detail', 'edit', 'clearSearch'])
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const fmtCreated = (createdAt) => formatDate((createdAt || '').split('T')[0], locale.value)
 const themeStore = useThemeStore()
 const toastStore = useToastStore()
 const isMobile = useMediaQuery('(max-width: 639px)')
@@ -32,10 +35,14 @@ const filtered = computed(() => {
   return CUSTOM_LINKS.filter(l => l.client.toLowerCase().includes(q))
 })
 
-const handleCopy = (link) => {
-  if (typeof navigator !== 'undefined') navigator.clipboard?.writeText(`https://zwap.me/pay/${link.id}`)
-  const key = isMobile.value ? 'links.linkCopiedShort' : 'links.linkCopied'
-  toastStore.addToast(t(key, { name: link.client }), 'success')
+const handleCopy = async (link) => {
+  const ok = await copyToClipboard(`https://zwap.me/pay/${link.id}`)
+  if (ok) {
+    const key = isMobile.value ? 'links.linkCopiedShort' : 'links.linkCopied'
+    toastStore.addToast(t(key, { name: link.client }), 'success')
+  } else {
+    toastStore.addToast(t('common.copyFailed'), 'error')
+  }
 }
 
 const theadClass = computed(() =>
@@ -50,7 +57,7 @@ const trClass = computed(() =>
 )
 
 const mobileActions = (link) => [
-  { label: t('common.edit'), icon: Edit2, disabled: link.status === 'Pagado', onClick: () => emit('edit', link) },
+  { label: t('common.edit'), icon: Edit2, disabled: link.status === 'paid', onClick: () => emit('edit', link) },
 ]
 </script>
 
@@ -103,18 +110,18 @@ const mobileActions = (link) => [
             <td class="px-6 py-4">
               <p :class="[
                 'text-xs font-bold flex items-center gap-1.5',
-                link.status === 'Expirado' ? 'text-rose-500' : themeStore.isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'
+                link.status === 'expired' ? 'text-rose-500' : themeStore.isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]'
               ]">
                 <Timer :size="14" class="opacity-70" />
-                {{ link.expires !== '-' ? t('links.expires', { date: link.expires }) : t('links.noExpiration') }}
+                {{ link.expires ? t('links.expires', { date: link.expires }) : t('links.noExpiration') }}
               </p>
               <p :class="['text-[10px] font-medium flex items-center gap-1.5 mt-1', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">
-                <CalendarDays :size="12" class="opacity-70" /> {{ t('links.created', { date: link.createdAt }) }}
+                <CalendarDays :size="12" class="opacity-70" /> {{ t('links.created', { date: fmtCreated(link.createdAt) }) }}
               </p>
             </td>
             <td class="px-6 py-4 text-center">
               <div class="flex flex-col items-center gap-1.5">
-                <Badge :variant="link.statusVariant" :icon="link.StatusIcon">{{ link.status }}</Badge>
+                <Badge :variant="link.statusVariant" :icon="link.StatusIcon">{{ t(`status.${link.status}`) }}</Badge>
                 <p :class="['text-[10px] font-medium flex items-center gap-1', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">
                   <Eye :size="10" /> {{ link.views }} {{ t('links.views') }}
                 </p>
@@ -123,22 +130,22 @@ const mobileActions = (link) => [
             <td class="px-8 py-4 text-right">
               <div class="flex items-center justify-end gap-1">
                 <Tooltip :content="t('common.edit')" position="top">
-                  <Button variant="ghost" size="sm" class="!px-2" :disabled="link.status === 'Pagado'" @click="emit('edit', link)">
+                  <Button variant="ghost" size="sm" class="!px-2" :disabled="link.status === 'paid'" @click="emit('edit', link)">
                     <Edit2 :size="15" />
                   </Button>
                 </Tooltip>
                 <Tooltip :content="t('links.copyLink')" position="top">
-                  <Button variant="ghost" size="sm" class="!px-2" :disabled="link.status === 'Expirado'" @click="handleCopy(link)">
+                  <Button variant="ghost" size="sm" class="!px-2" :disabled="link.status === 'expired'" @click="handleCopy(link)">
                     <Copy :size="15" />
                   </Button>
                 </Tooltip>
                 <Tooltip :content="t('links.generateQr')" position="top">
-                  <Button variant="ghost" size="sm" class="!px-2" :disabled="link.status === 'Expirado'">
+                  <Button variant="ghost" size="sm" class="!px-2" :disabled="link.status === 'expired'">
                     <QrCode :size="15" />
                   </Button>
                 </Tooltip>
                 <Tooltip :content="t('users.sendByEmail')" position="top">
-                  <Button variant="action" size="sm" class="!px-3 ml-1" :disabled="link.status === 'Expirado' || link.status === 'Pagado'">
+                  <Button variant="action" size="sm" class="!px-3 ml-1" :disabled="link.status === 'expired' || link.status === 'paid'">
                     <Mail :size="15" />
                     <span class="hidden xl:inline text-xs ml-1">{{ t('links.send') }}</span>
                   </Button>
@@ -169,21 +176,21 @@ const mobileActions = (link) => [
               </div>
               <span :class="[
                 'text-[11px] font-bold flex items-center gap-1',
-                link.status === 'Expirado' ? 'text-rose-500' : themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'
+                link.status === 'expired' ? 'text-rose-500' : themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'
               ]">
                 <Timer :size="11" />
-                {{ link.expires !== '-' ? link.expires : t('links.noExpiration') }}
+                {{ link.expires ? link.expires : t('links.noExpiration') }}
               </span>
             </div>
           </div>
           <div :class="['flex items-center gap-1.5 px-4 pb-4', themeStore.isDarkMode ? 'border-white/5' : 'border-black/5']">
-            <Button variant="ghost" size="sm" class="!p-2.5 flex-1 justify-center" :disabled="link.status === 'Expirado' || link.status === 'Pagado'" @click.stop>
+            <Button variant="ghost" size="sm" class="!p-2.5 flex-1 justify-center" :disabled="link.status === 'expired' || link.status === 'paid'" @click.stop>
               <Mail :size="16" />
             </Button>
-            <Button variant="ghost" size="sm" class="!p-2.5 flex-1 justify-center" :disabled="link.status === 'Expirado'" @click.stop="handleCopy(link)">
+            <Button variant="ghost" size="sm" class="!p-2.5 flex-1 justify-center" :disabled="link.status === 'expired'" @click.stop="handleCopy(link)">
               <Copy :size="16" />
             </Button>
-            <Button variant="ghost" size="sm" class="!p-2.5 flex-1 justify-center" :disabled="link.status === 'Expirado'" @click.stop>
+            <Button variant="ghost" size="sm" class="!p-2.5 flex-1 justify-center" :disabled="link.status === 'expired'" @click.stop>
               <QrCode :size="16" />
             </Button>
           </div>

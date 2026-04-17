@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { motion } from 'motion-v'
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceStore } from '~/stores/performance'
 
 const props = defineProps({
   variant: { type: String, default: 'default' },
@@ -14,6 +15,7 @@ const props = defineProps({
 defineOptions({ inheritAttrs: true })
 
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
 
 const SIZES = {
   default: 'px-5 py-2.5 text-sm',
@@ -24,10 +26,17 @@ const SIZES = {
 
 const variantClass = computed(() => {
   const d = themeStore.isDarkMode
+  const neon = perfStore.useNeon
+  // Shadow del botón default (morado): neon en full, shadow-lg neutro en normal/lite/minimal
+  const defaultShadow = neon
+    ? (d ? 'shadow-[0_8px_30px_rgba(124,58,237,0.4)]' : 'shadow-[0_8px_25px_rgba(124,58,237,0.3)]')
+    : 'shadow-lg'
+  // Shimmer sweep sutil que cruza el botón cada 8s — solo Prism (useGlassElevation === tier === 'full')
+  const shimmer = perfStore.useGlassElevation ? ' prism-button-shimmer' : ''
   const v = {
     default: d
-      ? 'bg-[#7C3AED] hover:bg-[#561BAF] active:bg-[#4C1599] text-white shadow-[0_8px_30px_rgba(124,58,237,0.4)] border border-[#7C3AED]/60 border-t-[#B9A4F8]/50'
-      : 'bg-[#7C3AED] hover:bg-[#561BAF] active:bg-[#4C1599] text-white shadow-[0_8px_25px_rgba(124,58,237,0.3)] border border-[#7C3AED]/30 border-t-white/50',
+      ? `bg-[#7C3AED] hover:bg-[#561BAF] active:bg-[#4C1599] text-white ${defaultShadow} border border-[#7C3AED]/60 border-t-[#B9A4F8]/50${shimmer}`
+      : `bg-[#7C3AED] hover:bg-[#561BAF] active:bg-[#4C1599] text-white ${defaultShadow} border border-[#7C3AED]/30 border-t-white/50${shimmer}`,
     outline: d
       ? 'bg-transparent border border-white/10 text-[#D8D7D9] hover:bg-white/5 active:bg-white/10'
       : 'bg-white/60 border border-white text-[#45434A] hover:bg-white active:bg-gray-100 shadow-xs',

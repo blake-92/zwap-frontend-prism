@@ -15,9 +15,14 @@ export function useInfiniteScroll(data, { batchSize = 10, enabled = true } = {})
   const getData = () => toValue(data) || []
   const getEnabled = () => !!toValue(enabled)
 
+  // Solo resetear cuando el dataset se reduce (filtro aplicado).
+  // Growth (append/paginación) debe preservar la posición del usuario.
   watch(
     () => getData().length,
-    () => { visibleCount.value = batchSize },
+    (newLen, oldLen) => {
+      if (oldLen === undefined) return
+      if (newLen < oldLen) visibleCount.value = batchSize
+    },
   )
 
   const setupObserver = () => {

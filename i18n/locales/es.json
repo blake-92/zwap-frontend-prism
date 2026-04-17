@@ -24,7 +24,33 @@
     "anonymousClient": "Cliente Anónimo",
     "free": "Gratis",
     "usd": "USD",
-    "receipt": "Recibo"
+    "receipt": "Recibo",
+    "copyFailed": "No se pudo copiar"
+  },
+  "status": {
+    "success": "Exitoso",
+    "pending": "Pendiente",
+    "refunded": "Reembolsado",
+    "paid": "Pagado",
+    "expired": "Expirado",
+    "completed": "Completado",
+    "failed": "Fallido",
+    "processing": "Procesando",
+    "inTransit": "En Tránsito",
+    "held": "Retenido",
+    "compensated": "Compensado",
+    "deposited": "Depositado"
+  },
+  "channel": {
+    "pos": "Terminal POS",
+    "link": "Link de Pago",
+    "posShort": "POS",
+    "linkShort": "Link"
+  },
+  "type": {
+    "settlement": "Liquidación",
+    "dispute": "Disputa",
+    "partialRefund": "Devolución Parcial"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -385,8 +411,12 @@
     "liteMode": "Modo Ligero",
     "liteModeDesc": "Desactiva efectos de transparencia y blur para mejorar el rendimiento en dispositivos con recursos limitados",
     "perfAuto": "Auto",
-    "perfFull": "Completo",
-    "perfLite": "Ligero"
+    "perfFull": "Prism",
+    "perfNormal": "Normal",
+    "perfLite": "Lite",
+    "perfFullDesc": "Identidad completa · glass + neón + morphs (desktop, flagships)",
+    "perfNormalDesc": "Blur reducido, sin glow neón · preserva identidad (mid-range)",
+    "perfLiteDesc": "Plano sin blur · glow de fondo sutil · ahorra batería (low-end)"
   },
   "filters": {
     "anyDate": "Cualquier fecha",

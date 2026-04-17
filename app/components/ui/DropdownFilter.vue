@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onUnmounted, useId } from 'vue'
 import { motion, AnimatePresence } from 'motion-v'
 import { ChevronDown, Check, Filter } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceStore } from '~/stores/performance'
 import { useMediaQuery } from '~/composables/useMediaQuery'
 import { SPRING } from '~/utils/springs'
 import Button from './Button.vue'
@@ -20,10 +21,12 @@ const emit = defineEmits(['update:modelValue'])
 
 const { t } = useI18n()
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
 const isDesktop = useMediaQuery('(min-width: 1024px)')
 const isOpen = ref(false)
 const dropdownRef = ref(null)
 const pillId = useId()
+const pillLayoutId = computed(() => perfStore.useNavMorphs ? `dropdown-pill-${pillId}` : undefined)
 
 const DisplayIcon = computed(() => props.icon || Filter)
 const isFiltered = computed(() => {
@@ -106,16 +109,18 @@ const sheetRowClass = computed(() =>
       </span>
     </button>
     <BottomSheet :is-open="isOpen" :title="t('filters.filterBy', { label: label.toLowerCase() })" @close="closeSheet">
-      <div class="px-4 pb-6 flex flex-col gap-2">
+      <div role="listbox" :aria-label="label" class="px-4 pb-6 flex flex-col gap-2">
         <button
           v-for="opt in options"
           :key="opt"
+          role="option"
+          :aria-selected="modelValue === opt"
           :class="['relative flex items-center justify-between w-full px-5 py-4 rounded-2xl text-base font-medium transition-colors duration-150', optionTextClass(modelValue === opt)]"
           @click="pick(opt)"
         >
           <motion.div
             v-if="modelValue === opt"
-            :layout-id="`dropdown-pill-${pillId}`"
+            :layout-id="pillLayoutId"
             :class="['absolute inset-0 rounded-2xl', pillBg]"
             :transition="SPRING"
           />
@@ -159,6 +164,8 @@ const sheetRowClass = computed(() =>
     <AnimatePresence v-if="isDesktop">
       <motion.div
         v-if="isOpen"
+        role="listbox"
+        :aria-label="label"
         :variants="panelVariants"
         initial="hidden"
         animate="visible"
@@ -170,12 +177,14 @@ const sheetRowClass = computed(() =>
           <button
             v-for="opt in options"
             :key="opt"
+            role="option"
+            :aria-selected="modelValue === opt"
             :class="['relative flex items-center justify-between w-full px-3 py-2 rounded-xl text-sm font-medium transition-colors duration-150', optionTextClass(modelValue === opt)]"
             @click="pick(opt)"
           >
             <motion.div
               v-if="modelValue === opt"
-              :layout-id="`dropdown-pill-${pillId}`"
+              :layout-id="pillLayoutId"
               :class="['absolute inset-0 rounded-xl', pillBg]"
               :transition="SPRING"
             />
@@ -193,16 +202,18 @@ const sheetRowClass = computed(() =>
       :title="t('filters.filterBy', { label: label.toLowerCase() })"
       @close="closeSheet"
     >
-      <div class="px-4 pb-6 flex flex-col gap-2">
+      <div role="listbox" :aria-label="label" class="px-4 pb-6 flex flex-col gap-2">
         <button
           v-for="opt in options"
           :key="opt"
+          role="option"
+          :aria-selected="modelValue === opt"
           :class="['relative flex items-center justify-between w-full px-5 py-4 rounded-2xl text-base font-medium transition-colors duration-150', optionTextClass(modelValue === opt)]"
           @click="pick(opt)"
         >
           <motion.div
             v-if="modelValue === opt"
-            :layout-id="`dropdown-pill-${pillId}`"
+            :layout-id="pillLayoutId"
             :class="['absolute inset-0 rounded-2xl', pillBg]"
             :transition="SPRING"
           />

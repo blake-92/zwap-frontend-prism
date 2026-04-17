@@ -7,13 +7,17 @@ import { useScrollLock } from '~/composables/useScrollLock'
 import { useChromeBlur } from '~/composables/useChromeBlur'
 import { SPRING_SOFT } from '~/utils/springs'
 import { BUSINESS_NAME } from '~/utils/mockData'
+import { formatDate } from '~/utils/formatDate'
 
 const props = defineProps({
   trx: { type: Object, required: true },
 })
 const emit = defineEmits(['close'])
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const themeStore = useThemeStore()
+
+const statusLabel = computed(() => t(`status.${props.trx.status}`).toUpperCase())
+const formattedDate = computed(() => formatDate(props.trx.date, locale.value))
 
 useScrollLock(true)
 useChromeBlur(true)
@@ -111,7 +115,7 @@ const amountClass = computed(() => {
               <div class="flex justify-center mb-8">
                 <div :class="['inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold', statusBadgeClass]">
                   <CheckCircle2 :size="14" />
-                  {{ trx.status.toUpperCase() }}
+                  {{ statusLabel }}
                 </div>
               </div>
 
@@ -129,7 +133,7 @@ const amountClass = computed(() => {
               <div class="space-y-4">
                 <div class="flex justify-between items-center">
                   <span :class="['text-xs font-medium', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">{{ t('transactions.dateTime') }}</span>
-                  <span :class="['text-sm font-bold', themeStore.isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]']">{{ trx.date }}, {{ trx.time }}</span>
+                  <span :class="['text-sm font-bold', themeStore.isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]']">{{ formattedDate }}, {{ trx.time }}</span>
                 </div>
                 <div class="flex justify-between items-center">
                   <span :class="['text-xs font-medium', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">{{ t('transactions.transactionId') }}</span>

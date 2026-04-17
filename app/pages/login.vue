@@ -17,14 +17,21 @@ definePageMeta({ layout: false })
 const mv = useMotionVariants()
 const { t } = useI18n()
 const themeStore = useThemeStore()
+const route = useRoute()
 const showEmail = ref(false)
 const email = ref('')
 const password = ref('')
+const token = useCookie('zwap_token', {
+  maxAge: 60 * 60 * 24 * 7,
+  sameSite: 'lax',
+  secure: !import.meta.dev,
+  path: '/',
+})
 
 const handleLogin = () => {
-  const token = useCookie('zwap_token', { maxAge: 60 * 60 * 24 * 7 })
   token.value = 'mock-token'
-  navigateTo(ROUTES.DASHBOARD)
+  const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : ROUTES.DASHBOARD
+  navigateTo(redirect)
 }
 
 const goLegal = (doc) => navigateTo(`/legal/${doc}`)

@@ -7,6 +7,7 @@ import { useToastStore } from '~/stores/toast'
 import { useMediaQuery } from '~/composables/useMediaQuery'
 import { SPRING_DOTS } from '~/utils/springs'
 import { PERMANENT_LINKS } from '~/utils/mockData'
+import { copyToClipboard } from '~/utils/clipboard'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
 import SegmentControl from '~/components/ui/SegmentControl.vue'
@@ -18,9 +19,9 @@ const toastStore = useToastStore()
 const isDesktop = useMediaQuery('(min-width: 1024px)')
 const isMobile = useMediaQuery('(max-width: 639px)')
 
-const activeLinks = PERMANENT_LINKS.filter(l => l.active)
-const active = ref(activeLinks[0]?.id ?? null)
-const desktopSelected = computed(() => PERMANENT_LINKS.find(l => l.id === active.value) ?? activeLinks[0])
+const activeLinks = computed(() => PERMANENT_LINKS.filter(l => l.active))
+const active = ref(activeLinks.value[0]?.id ?? null)
+const desktopSelected = computed(() => PERMANENT_LINKS.find(l => l.id === active.value) ?? activeLinks.value[0])
 
 const mobileIndex = ref(0)
 const mobileSelected = computed(() => PERMANENT_LINKS[mobileIndex.value] ?? PERMANENT_LINKS[0])
@@ -29,11 +30,15 @@ const isQrMaximized = ref(false)
 
 const lightboxLink = computed(() => isDesktop.value ? desktopSelected.value : mobileSelected.value)
 
-const handleCopy = () => {
+const handleCopy = async () => {
   if (!desktopSelected.value?.url) return
-  if (typeof navigator !== 'undefined') navigator.clipboard?.writeText(desktopSelected.value.url)
-  const key = isMobile.value ? 'links.linkCopiedShort' : 'links.linkCopied'
-  toastStore.addToast(t(key, { name: desktopSelected.value.name }), 'success')
+  const ok = await copyToClipboard(desktopSelected.value.url)
+  if (ok) {
+    const key = isMobile.value ? 'links.linkCopiedShort' : 'links.linkCopied'
+    toastStore.addToast(t(key, { name: desktopSelected.value.name }), 'success')
+  } else {
+    toastStore.addToast(t('common.copyFailed'), 'error')
+  }
 }
 
 const goNext = () => { mobileIndex.value = (mobileIndex.value + 1) % PERMANENT_LINKS.length }
@@ -48,7 +53,7 @@ const openUrl = () => {
   if (typeof window !== 'undefined') window.open(desktopSelected.value?.url, '_blank')
 }
 
-const segmentOptions = computed(() => activeLinks.map(l => ({ value: l.id, label: l.name })))
+const segmentOptions = computed(() => activeLinks.value.map(l => ({ value: l.id, label: l.name })))
 
 const dotAnimate = (i) => ({
   width: i === mobileIndex.value ? 16 : 6,
@@ -190,6 +195,7 @@ const urlTextClass = computed(() => {
     layout-id="qr-code"
     :name="lightboxLink?.name"
     :url="lightboxLink?.url"
+    :qr-size="isDesktop ? 340 : 280"
     @close="isQrMaximized = false"
   />
 </template>

@@ -1,18 +1,20 @@
 <script setup>
 import { computed } from 'vue'
-import { Copy, QrCode, Mail, Timer, ListTree, CalendarDays, Clock } from 'lucide-vue-next'
+import { Copy, QrCode, Mail, Timer, ListTree, CalendarDays, Clock, Eye } from 'lucide-vue-next'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import SectionLabel from '~/components/ui/SectionLabel.vue'
 import { useThemeStore } from '~/stores/theme'
 import { ACTIONS, formatTimeRemaining } from './triage.js'
+import { formatDate } from '~/utils/formatDate'
 
 const props = defineProps({ link: { type: Object, required: true } })
 const emit = defineEmits(['close', 'copy'])
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const themeStore = useThemeStore()
 const cfg = computed(() => ACTIONS[props.link.action])
+const formattedCreatedAt = computed(() => formatDate((props.link.createdAt || '').split('T')[0], locale.value))
 
 const timeClass = computed(() => {
   const m = props.link.expiresInMinutes ?? Infinity
@@ -69,7 +71,7 @@ const timeClass = computed(() => {
       </div>
 
       <div :class="['flex items-center gap-1.5 text-xs font-medium', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">
-        <CalendarDays :size="13" /> {{ t('links.created', { date: link.createdAt }) }}
+        <CalendarDays :size="13" /> {{ t('links.created', { date: formattedCreatedAt }) }}
       </div>
 
       <div class="flex gap-2">

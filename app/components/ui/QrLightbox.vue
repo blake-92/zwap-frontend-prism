@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion-v'
 import { QrCode } from 'lucide-vue-next'
 import { useScrollLock } from '~/composables/useScrollLock'
 import { useChromeBlur } from '~/composables/useChromeBlur'
+import { usePerformanceStore } from '~/stores/performance'
 
 const props = defineProps({
   isOpen: { type: Boolean, default: false },
@@ -13,6 +14,8 @@ const props = defineProps({
   qrSize: { type: Number, default: 280 },
 })
 const emit = defineEmits(['close'])
+
+const perfStore = usePerformanceStore()
 
 useScrollLock(() => props.isOpen)
 useChromeBlur(() => props.isOpen)
@@ -45,12 +48,21 @@ onUnmounted(() => {
           />
           <motion.div
             :layout-id="layoutId"
-            class="relative bg-white p-8 sm:p-12 rounded-[32px] shadow-2xl flex flex-col items-center"
+            class="relative bg-white p-8 sm:p-12 rounded-[32px] shadow-2xl flex flex-col items-center overflow-hidden"
             @click.stop
           >
             <QrCode :size="qrSize" class="text-black mb-6" :stroke-width="1.5" />
             <p class="text-[#111113] font-bold text-xl mb-1 text-center">{{ name }}</p>
             <p class="text-[#67656E] font-mono text-sm text-center">{{ url }}</p>
+
+            <!-- Landing shimmer — solo Prism, se dispara después del morph y sweep one-shot -->
+            <div
+              v-if="perfStore.useGlassElevation"
+              class="absolute inset-0 pointer-events-none overflow-hidden"
+              aria-hidden="true"
+            >
+              <div class="prism-qr-shimmer absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+            </div>
           </motion.div>
         </div>
       </AnimatePresence>

@@ -6,6 +6,7 @@ import { useThemeStore } from '~/stores/theme'
 import { useToastStore } from '~/stores/toast'
 import { useMediaQuery } from '~/composables/useMediaQuery'
 import { SPRING_DOTS } from '~/utils/springs'
+import { copyToClipboard } from '~/utils/clipboard'
 import Card from '~/components/ui/Card.vue'
 import Toggle from '~/components/ui/Toggle.vue'
 import QrLightbox from '~/components/ui/QrLightbox.vue'
@@ -31,11 +32,15 @@ const onDragEnd = (_e, info) => {
   else if (info.velocity.x > 200 || info.offset.x > 50) goPrev()
 }
 
-const handleCopy = () => {
+const handleCopy = async () => {
   if (!selected.value.active) return
-  if (typeof navigator !== 'undefined') navigator.clipboard?.writeText(`https://${selected.value.url}`)
-  const key = isMobile.value ? 'links.linkCopiedShort' : 'links.linkCopied'
-  toastStore.addToast(t(key, { name: selected.value.name }), 'success')
+  const ok = await copyToClipboard(`https://${selected.value.url}`)
+  if (ok) {
+    const key = isMobile.value ? 'links.linkCopiedShort' : 'links.linkCopied'
+    toastStore.addToast(t(key, { name: selected.value.name }), 'success')
+  } else {
+    toastStore.addToast(t('common.copyFailed'), 'error')
+  }
 }
 
 const handleOpen = () => {

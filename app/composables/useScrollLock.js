@@ -19,9 +19,9 @@ export function useScrollLock(active) {
   const release = () => {
     if (!locked || typeof document === 'undefined') return
     const el = document.documentElement
-    const next = parseInt(el.dataset.overlayCount || '1', 10) - 1
+    const next = Math.max(0, parseInt(el.dataset.overlayCount || '1', 10) - 1)
     el.dataset.overlayCount = String(next)
-    if (next <= 0) {
+    if (next === 0) {
       el.classList.remove('has-overlay')
       delete el.dataset.overlayCount
     }

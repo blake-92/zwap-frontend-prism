@@ -7,6 +7,7 @@ import {
   Sun, Moon, Bell,
 } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceStore } from '~/stores/performance'
 import { useModalOpen } from '~/composables/useModalOpen'
 import { useScrollLock } from '~/composables/useScrollLock'
 import { ROUTES } from '~/utils/routes'
@@ -14,6 +15,7 @@ import { SPRING } from '~/utils/springs'
 
 const { t } = useI18n()
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
 const route = useRoute()
 const modalOpen = useModalOpen()
 const sheetOpen = ref(false)
@@ -56,13 +58,20 @@ const handleDragEnd = (_e, info) => {
   if (info.offset.y > 100 || info.velocity.y > 500) sheetOpen.value = false
 }
 
-const navClass = computed(() => [
-  'fixed bottom-0 inset-x-0 z-40 flex items-stretch justify-around border-t backdrop-blur-2xl backdrop-saturate-150 pb-[env(safe-area-inset-bottom)] transition-[filter] duration-150',
-  modalOpen.value ? 'blur-xs saturate-50 pointer-events-none' : '',
-  themeStore.isDarkMode
-    ? 'bg-[#111113]/45 border-white/10 border-t-white/15'
-    : 'bg-white/50 border-black/5 border-t-white/60 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]',
-])
+const navClass = computed(() => {
+  const useBlur = perfStore.useBlur
+  const saturate = perfStore.chromeSaturate ? 'backdrop-saturate-150' : ''
+  const bgDark = useBlur ? 'bg-[#111113]/45' : 'bg-[#1A1A1D]'
+  const bgLight = useBlur ? 'bg-white/50' : 'bg-white'
+  return [
+    `fixed bottom-0 inset-x-0 z-40 flex items-stretch justify-around border-t backdrop-blur-2xl ${saturate} pb-[env(safe-area-inset-bottom)] transition-[filter] duration-150`,
+    // Sin blur-xs propio — el backdrop del modal hace el work. Solo desaturamos.
+    modalOpen.value ? 'saturate-50 pointer-events-none' : '',
+    themeStore.isDarkMode
+      ? `${bgDark} border-white/10 border-t-white/15`
+      : `${bgLight} border-black/5 border-t-white/60 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]`,
+  ]
+})
 
 const pillClass = computed(() =>
   themeStore.isDarkMode
@@ -107,9 +116,17 @@ const moreIconBubbleClass = (active) => {
         :class="['flex-1 flex flex-col items-center justify-center gap-1 py-2.5 pt-3 relative', tabTextClass(route.path === tab.route)]"
         @click="handleNav(tab.route)"
       >
+        <!-- Ambient halo (solo Prism) -->
+        <motion.div
+          v-if="route.path === tab.route && perfStore.useActiveHalo"
+          :layout-id="perfStore.useNavMorphs ? 'bottomnav-pill-halo' : undefined"
+          class="absolute inset-x-2 inset-y-1.5 rounded-2xl bg-[#7C3AED]/25 blur-xl pointer-events-none"
+          :transition="SPRING"
+          aria-hidden="true"
+        />
         <motion.div
           v-if="route.path === tab.route"
-          layout-id="bottomnav-pill"
+          :layout-id="perfStore.useNavMorphs ? 'bottomnav-pill' : undefined"
           :class="['absolute inset-x-2 inset-y-1.5 rounded-2xl', pillClass]"
           :transition="SPRING"
         />
@@ -125,8 +142,15 @@ const moreIconBubbleClass = (active) => {
         @click="sheetOpen = !sheetOpen"
       >
         <motion.div
+          v-if="isMoreActive && !sheetOpen && perfStore.useActiveHalo"
+          :layout-id="perfStore.useNavMorphs ? 'bottomnav-pill-halo' : undefined"
+          class="absolute inset-x-2 inset-y-1.5 rounded-2xl bg-[#7C3AED]/25 blur-xl pointer-events-none"
+          :transition="SPRING"
+          aria-hidden="true"
+        />
+        <motion.div
           v-if="isMoreActive && !sheetOpen"
-          layout-id="bottomnav-pill"
+          :layout-id="perfStore.useNavMorphs ? 'bottomnav-pill' : undefined"
           :class="['absolute inset-x-2 inset-y-1.5 rounded-2xl', pillClass]"
           :transition="SPRING"
         />
@@ -164,6 +188,7 @@ const moreIconBubbleClass = (active) => {
           drag="y"
           :drag-constraints="{ top: 0 }"
           :drag-elastic="0.2"
+          :drag-snap-to-origin="true"
           :class="['fixed bottom-0 inset-x-0 z-[35] rounded-t-2xl border-t pb-[calc(68px+env(safe-area-inset-bottom))]', sheetClass]"
           @drag-end="handleDragEnd"
         >

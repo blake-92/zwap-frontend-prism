@@ -7,6 +7,123 @@ Versionamiento según [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
+## [0.14.0] — 2026-04-17
+
+### Auditoría profunda + sistema de performance tiers refinado
+
+Pass exhaustivo de QA/frontend/UX sobre toda la app. Fixes críticos de bugs, refactor de datos hacia códigos canónicos, rediseño del sistema de performance tiers a 3 niveles, y elevación de identidad para Prism (tier high-end).
+
+### Critical bug fixes
+
+- **Blank screen en primera carga** (`pages/index.vue`, `[...slug].vue`, `app/index.vue`) — top-level `await navigateTo()` causaba race con `pageTransition: out-in`. Migrado a `definePageMeta({ middleware: () => navigateTo(...) })`.
+- **Modal drag suspended** (`Modal.vue`, `BottomSheet.vue`, `BottomNav.vue` sheet) — agregado `:drag-snap-to-origin="true"` para retornar a origen cuando drag no supera threshold.
+- **Dashboard mobile: botón duplicado** — envuelto botón desktop en `<div class="hidden sm:block">` por conflicto entre `inline-flex` interno de `Button.vue` y `hidden` pasado desde padre.
+- **`useMediaQuery` memory leak** (`Modal.vue`) — se llamaba dentro de `computed` creando nuevos listeners por evaluación. Movido a setup top-level.
+- **Cookie flags** (`login.vue`, `middleware/auth.js`, `Sidebar.vue`, `api.js`) — agregado `sameSite: 'lax'`, `secure: !import.meta.dev`, `path: '/'`. Logout migrado a `useCookie` (no más `document.cookie` directo inconsistente).
+- **Filtro last-7-days** (`TransaccionesView.vue`) — hardcodeaba `'29 Mar', '28 Mar', '27 Mar'`, roto fuera de marzo. Reemplazado con parseo ISO + rango dinámico.
+- **Clipboard sin error handling** — creado `utils/clipboard.js` helper `copyToClipboard()` que retorna boolean. Aplicado en 6 puntos (QuickLinkCard, PendingCharges, PermanentCard, LinkDetailModal, QuickLinkSwipeable, CustomLinksTable). Toast de error si falla.
+
+### Perf + UX fixes
+
+- **FOUC desktop** (`composables/useMediaQuery.js`) — `matches` ahora se inicializa sincrónicamente con `window.matchMedia` para evitar flash mobile→desktop en primera pintura.
+- **Sidebar flicker** (`layouts/default.vue`) — `isCollapsed` hidratado desde `localStorage` en el `ref` directamente, no en `onMounted`.
+- **`app.vue` dark: classes** — reemplazadas por binding JS con `themeStore.isDarkMode` (Tailwind v4 requiere `@custom-variant dark` que no estaba configurado).
+- **`layoutTransition` deshabilitado** — evita cascada de 360ms+ entre login y app.
+- **`setTimeout` sin cleanup** (Header search focus) — guardado en `focusTid` con clear en `onUnmounted`.
+- **Perf detection Firefox/Safari** — agregado fallback `pointer:coarse + hover:none` y `userAgentData.mobile` para navegadores sin `deviceMemory`.
+- **`useInfiniteScroll` reset no destructivo** — solo resetea cuando dataset se reduce (filtro), no al crecer (paginación).
+- **Auth middleware con redirect query** — preserva ruta solicitada al login, restaura tras autenticar.
+- **`api.js` robusto** — `AbortController` con timeout 15s default, manejo automático de 401 → limpia cookie + redirect, soporte 204.
+- **Toast timer cancellation** — `Map` de timers fuera del state, `removeToast` cancela `setTimeout` pendiente.
+- **`useScrollLock`/`useChromeBlur` counter defensivo** — `Math.max(0, ...)` para evitar contadores negativos si composable se desmonta en mal orden.
+- **Modal focus initial** — prefiere primer `input/textarea/select` sobre botón cerrar.
+- **`ChartCard` rAF cleanup** — `cancelAnimationFrame` en `onBeforeUnmount`.
+- **ARIA roles en dropdowns** (`DropdownFilter.vue`, `Header.vue`) — `role="listbox"`/`"option"` + `aria-selected`.
+- **`Tooltip` IDs con `useId()`** en vez de `Math.random()`.
+
+### i18n + data refactor
+
+- **Status/channel/type codes** — `mockData.js` migrado a códigos canónicos (`'success'`, `'refunded'`, `'pending'`, `'pos'`, `'link'`, `'settlement'`, etc.). Display usa `t(\`status.${code}\`)` en templates. Filtros comparan códigos, no strings visibles.
+- **Dates ISO** — todas las fechas en mockData son `YYYY-MM-DD`. Display via `Intl.DateTimeFormat` con locale awareness (`utils/formatDate.js`).
+- **i18n namespaces nuevos**: `status.*`, `channel.*`, `type.*` (agregados a es.json + en.json).
+- **Filtros de fecha locale-aware** — `TransaccionesView`, `WalletView`, `LiquidacionesView` ahora parsean ISO en lugar de strings en español.
+
+### Performance tier system (rediseñado a 3 niveles)
+
+Ver `docs/performance-tiers.md` para matriz completa.
+
+- Tiers: **`full` (Prism)**, **`normal`**, **`lite`** (colapsado `minimal` en `lite`).
+- `prefers-reduced-motion` detecta a `lite` + CSS media query anula animaciones globalmente.
+- Detección refinada: bias mobile hacia `normal` aun con 8 cores (`pointer:coarse + !deviceMemory`).
+- Settings UI: SegmentControl con 3 opciones + descripción dinámica (`settings.perfFullDesc|perfNormalDesc|perfLiteDesc`).
+
+**Getters granulares** en `perfStore`:
+- GPU: `useBlur`, `useReducedBlur`, `useNeon`, `useInnerHighlight`, `useWalletGlowBubble`, `useGlassElevation`, `useActiveHalo`, `chromeSaturate`
+- Shadows: `modalShadow` (3-way: `'deep'|'medium'|'compact'`), `modalBackdropFilter` (Tailwind class string)
+- Motion: `useSpring`, `useLayoutMorphs`, `useNavMorphs`, `useContinuousAnim`
+- Interaction: `useHoverLift`, `useDecorGradients`
+
+**Diferenciación Prism vs Normal vs Lite:**
+- Prism: liquid glass (opacidad /20-30 + saturate), neon glows, ambient halos, button sheen, parallax blobs, typography features, cinematic shadows
+- Normal: glass base semi-opaco, morphs, hover-lift, continuous anims — SIN neon/elevation/chrome saturate
+- Lite: surfaces sólidas, nav morphs OFF (instant), continuous anims OFF, hover-lift OFF, typography default
+
+### Prism premium elevations (Paquete A/B/C)
+
+**A — Glass liquid (validado UX):**
+- `getCardClasses/getModalGlass/getDropdownGlass` aceptan `useGlassElevation`
+- En Prism: opacidad reducida + `backdrop-saturate-150` + rim (`border-t-white/25 + border-l-white/10`) + inset 1px top highlight + dual-source drop shadow
+- **NO** specular white overlay (rechazado como "glass milky")
+- Ambient halo púrpura detrás de pills activos (Sidebar/BottomNav/SegmentControl) con `layout-id` propio
+
+**B — Kinetic premium:**
+- Button variant=default: sheen lavanda (`#B9A4F8` 14% alpha) cada 8s vía `.prism-button-shimmer::before`
+- GlassBackground blobs: parallax drift sinusoidal 22s/18s asimétrico
+- QR lightbox: landing shimmer one-shot 900ms con 400ms delay tras morph
+
+**C — Typography details:**
+- Inter: `cv11` (single-storey a) + `cv05` (straight l) + `ss01` (open digits)
+- JetBrains Mono: `calt` (ligatures) + `zero` (slashed zero para IDs/amounts)
+- Aplicado vía CSS `html.perf-full body`
+
+### Chrome fixes (UX)
+
+- **Sidebar/Header/BottomNav sólidos en Lite** — cuando se desactiva backdrop-blur, los bg con `/X%` opacity se volvían transparentes. Promocionados a `bg-[#1A1A1D]` sólido cuando `useBlur === false`.
+- **Double-blur en chrome al abrir modal** — removido `blur-xs saturate-50` del Sidebar/BottomNav. El `backdrop-blur-md` del modal backdrop ya cubre esos elementos en z-stack. Solo queda `saturate-50 pointer-events-none`.
+- **Modal backdrop filter tiered** — `modalBackdropFilter` getter retorna Tailwind string: `blur-md saturate-200` (Prism) / `blur-sm saturate-150` (Normal) / `''` (Lite via CSS strip).
+- **Blobs dark mode balanceados** — `#300C67/40` (off-brand navy) reemplazado por `#561BAF/30` (primary-darker), TL alpha boosted 15→22 para no desaturarse con 140px blur.
+
+### Dashboard/Links features
+
+- **QR expand en Links desktop** — `PermanentCard.vue` cableado con `QrLightbox` + `layout-id` propio por link. Antes el botón QR no hacía nada.
+- **QR morph más dramático en desktop Dashboard** — `qr-size=340` en desktop vs 280 default.
+
+### Archivos nuevos
+
+- `app/utils/clipboard.js`
+- `app/utils/formatDate.js`
+- `docs/performance-tiers.md`
+
+### A11y
+
+- ARIA roles en dropdowns completos
+- Touch target Header branch pill `w-9 h-9 → w-11 h-11` (44px, cumple regla CLAUDE.md)
+- Modal focus prioriza inputs sobre botón cerrar
+- `prefers-reduced-motion` mapea a tier Lite + CSS global
+
+### Archivos modificados clave
+
+- `app/stores/performance.js` — 3 tiers + 15+ getters granulares
+- `app/utils/cardClasses.js` — 3 helpers con glass elevation
+- `app/utils/mockData.js` — migración a códigos canónicos
+- `app/assets/css/globals.css` — overrides por tier + keyframes Prism
+- `app/components/GlassBackground.vue` — blobs tier-aware + parallax
+- `app/components/features/settings/SettingsView.vue` — UI 3 tiers con descripciones
+- `app/middleware/auth.js` — redirect query preservado
+- `app/utils/api.js` — timeout/abort/401 handling
+
+---
+
 ## [0.13.0] — 2026-04-15
 
 ### Migration: React+Vite → Nuxt 4 + Vue 3

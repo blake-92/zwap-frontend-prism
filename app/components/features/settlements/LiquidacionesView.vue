@@ -12,6 +12,7 @@ import { useMediaQuery } from '~/composables/useMediaQuery'
 import { useInfiniteScroll } from '~/composables/useInfiniteScroll'
 import { useMotionVariants } from '~/composables/useMotionVariants'
 import { PAYOUTS, WALLET_BALANCE, SETTLEMENT_SUMMARY } from '~/utils/mockData'
+import { formatDate, parseIsoDate } from '~/utils/formatDate'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
 import Badge from '~/components/ui/Badge.vue'
@@ -24,7 +25,8 @@ import PageHeader from '~/components/ui/PageHeader.vue'
 import TableToolbar from '~/components/ui/TableToolbar.vue'
 
 const mv = useMotionVariants()
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const fmtDate = (iso) => formatDate(iso, locale.value)
 const themeStore = useThemeStore()
 const isDesktop = useMediaQuery('(min-width: 1024px)')
 const viewSearch = useViewSearch(computed(() => t('settlements.searchPlaceholder')))
@@ -57,27 +59,23 @@ const filtered = computed(() => {
   const tThisWeek = t('filters.thisWeek')
   const tThisMonth = t('filters.thisMonth')
   return PAYOUTS.filter(p => {
-    const matchSearch = !q || p.type.toLowerCase().includes(q) || p.closeDate.toLowerCase().includes(q)
-    const matchStatus = statusFilter.value === defaultStatus.value || p.status === statusFilter.value
+    const typeLabel = t(`type.${p.type}`).toLowerCase()
+    const matchSearch = !q || typeLabel.includes(q) || fmtDate(p.closeDate).toLowerCase().includes(q)
+    const matchStatus = statusFilter.value === defaultStatus.value
+      || t(`status.${p.status}`) === statusFilter.value
     let matchDate = true
     if (dateFilter.value !== defaultDate.value) {
-      const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
       const today = new Date()
-      if (dateFilter.value === tThisWeek) {
+      const closeDate = parseIsoDate(p.closeDate)
+      if (!closeDate) {
+        matchDate = false
+      } else if (dateFilter.value === tThisWeek) {
         const weekAgo = new Date(today)
         weekAgo.setDate(today.getDate() - 7)
-        const parts = p.closeDate.split(' ')
-        if (parts.length === 3) {
-          const day = parseInt(parts[0])
-          const mi = months.indexOf(parts[1])
-          const y = parseInt(parts[2])
-          if (mi !== -1) {
-            const d = new Date(y, mi, day)
-            matchDate = d >= weekAgo && d <= today
-          }
-        }
+        matchDate = closeDate >= weekAgo && closeDate <= today
       } else if (dateFilter.value === tThisMonth) {
-        matchDate = p.closeDate.includes(months[today.getMonth()])
+        matchDate = closeDate.getFullYear() === today.getFullYear()
+          && closeDate.getMonth() === today.getMonth()
       }
     }
     return matchSearch && matchStatus && matchDate
@@ -152,7 +150,7 @@ const netClass = (isDebt) => {
       <DropdownFilter
         :label="t('filters.status')"
         :icon="Filter"
-        :options="[defaultStatus, t('filters.deposited'), t('filters.pendingAch')]"
+        :options="[defaultStatus, t('status.deposited'), t('status.processing'), t('status.inTransit'), t('status.held'), t('status.compensated')]"
         :default-value="defaultStatus"
         :model-value="statusFilter"
         @update:model-value="(v) => { statusFilter = v; currentPage = 1 }"
@@ -195,9 +193,9 @@ const netClass = (isDebt) => {
                     <component :is="lote.typeIcon" :size="18" />
                   </div>
                   <div>
-                    <p :class="['font-bold text-sm', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']">{{ lote.type }}</p>
+                    <p :class="['font-bold text-sm', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']">{{ t(`type.${lote.type}`) }}</p>
                     <p :class="['text-xs font-medium flex items-center gap-1.5 mt-1', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">
-                      <CalendarDays :size="12" class="opacity-70" /> {{ lote.closeDate }}
+                      <CalendarDays :size="12" class="opacity-70" /> {{ fmtDate(lote.closeDate) }}
                     </p>
                     <p :class="['text-[10px] font-bold flex items-center gap-1 mt-0.5', themeStore.isDarkMode ? 'text-[#7C3AED]' : 'text-[#561BAF]']">
                       <Clock :size="10" /> Cierre UTC: {{ lote.closeTime }} hrs
@@ -240,9 +238,9 @@ const netClass = (isDebt) => {
               </td>
               <td class="px-6 py-4 text-center">
                 <div class="flex flex-col items-center gap-1.5">
-                  <Badge :variant="lote.statusVariant" :icon="lote.StatusIcon">{{ lote.status }}</Badge>
-                  <p v-if="lote.net >= 0 && lote.depositDate !== '-'" :class="['text-[10px] font-medium flex items-center gap-1', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">
-                    <ArrowDownToLine :size="10" /> {{ t('settlements.arrives') }}: {{ lote.depositDate }}
+                  <Badge :variant="lote.statusVariant" :icon="lote.StatusIcon">{{ t(`status.${lote.status}`) }}</Badge>
+                  <p v-if="lote.net >= 0 && lote.depositDate" :class="['text-[10px] font-medium flex items-center gap-1', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">
+                    <ArrowDownToLine :size="10" /> {{ t('settlements.arrives') }}: {{ fmtDate(lote.depositDate) }}
                   </p>
                 </div>
               </td>
@@ -280,9 +278,9 @@ const netClass = (isDebt) => {
                   <component :is="lote.typeIcon" :size="18" />
                 </div>
                 <div class="min-w-0">
-                  <p :class="['font-bold text-sm', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']">{{ lote.type }}</p>
+                  <p :class="['font-bold text-sm', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']">{{ t(`type.${lote.type}`) }}</p>
                   <p :class="['text-xs font-medium flex items-center gap-1 mt-0.5', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">
-                    <CalendarDays :size="12" /> {{ lote.closeDate }}
+                    <CalendarDays :size="12" /> {{ fmtDate(lote.closeDate) }}
                   </p>
                 </div>
               </div>
@@ -292,9 +290,9 @@ const netClass = (isDebt) => {
             </div>
             <div class="flex items-center justify-between gap-2 mb-3">
               <div class="flex items-center gap-2 flex-wrap">
-                <Badge :variant="lote.statusVariant" :icon="lote.StatusIcon">{{ lote.status }}</Badge>
-                <span v-if="lote.net >= 0 && lote.depositDate !== '-'" :class="['text-[10px] font-medium flex items-center gap-1', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">
-                  <ArrowDownToLine :size="10" /> {{ lote.depositDate }}
+                <Badge :variant="lote.statusVariant" :icon="lote.StatusIcon">{{ t(`status.${lote.status}`) }}</Badge>
+                <span v-if="lote.net >= 0 && lote.depositDate" :class="['text-[10px] font-medium flex items-center gap-1', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">
+                  <ArrowDownToLine :size="10" /> {{ fmtDate(lote.depositDate) }}
                 </span>
               </div>
               <span :class="['text-[10px] font-bold flex items-center gap-1', themeStore.isDarkMode ? 'text-[#7C3AED]' : 'text-[#561BAF]']">

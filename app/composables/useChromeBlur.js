@@ -18,9 +18,9 @@ export function useChromeBlur(active) {
 
   const release = () => {
     if (!engaged || typeof document === 'undefined') return
-    const next = parseInt(document.body.dataset.modalCount || '1', 10) - 1
+    const next = Math.max(0, parseInt(document.body.dataset.modalCount || '1', 10) - 1)
     document.body.dataset.modalCount = String(next)
-    if (next <= 0) {
+    if (next === 0) {
       delete document.body.dataset.modalOpen
       delete document.body.dataset.modalCount
     }

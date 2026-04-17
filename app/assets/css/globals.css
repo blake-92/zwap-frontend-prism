@@ -152,10 +152,28 @@ html.has-overlay main {
 
 /* ─── Performance tiers ──────────────────────────────────── */
 /* Controlled by usePerformanceStore via html.perf-* classes.
-   Tier lite: strip backdrop-blur (biggest GPU cost).
-   Tier minimal: disable all animations + transitions.
-   prefers-reduced-motion: OS-level animation opt-out (WCAG 2.1). */
+   Tiers (3):
+     full   → "Prism" — todos los efectos (flagships, desktop)
+     normal → blur reducido, sin neón, resto intacto (mid-range)
+     lite   → flat: sin blur/filter/hover-lift (low-end, a11y)
+   Branching JS adicional para neon, deep shadows, continuous anims.
+   @media prefers-reduced-motion: OS-level (WCAG 2.1) anula animaciones. */
 
+/* Normal — backdrop-blur a ~50% (Tailwind: blur-2xl=40px, blur-3xl=64px) */
+html.perf-normal .backdrop-blur-3xl {
+  -webkit-backdrop-filter: blur(24px) !important;
+  backdrop-filter: blur(24px) !important;
+}
+html.perf-normal .backdrop-blur-2xl {
+  -webkit-backdrop-filter: blur(16px) !important;
+  backdrop-filter: blur(16px) !important;
+}
+html.perf-normal .backdrop-blur-xl {
+  -webkit-backdrop-filter: blur(10px) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+/* Lite — sin backdrop-filter (mayor costo GPU) */
 html.perf-lite *,
 html.perf-lite *::before,
 html.perf-lite *::after {
@@ -164,18 +182,90 @@ html.perf-lite *::after {
   -webkit-backdrop-filter: none !important;
 }
 
-html.perf-minimal *,
-html.perf-minimal *::before,
-html.perf-minimal *::after {
-  --tw-backdrop-blur: initial !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  animation-duration: 0.01ms !important;
-  animation-iteration-count: 1 !important;
-  transition-duration: 0.01ms !important;
-  scroll-behavior: auto !important;
+/* Lite — sin filter:blur decorativo (glows pequeños; las bolas del fondo
+   usan :style inline para bypass-earlo y seguir con radio reducido). */
+html.perf-lite .blur-xs,
+html.perf-lite .blur-sm,
+html.perf-lite .blur,
+html.perf-lite .blur-md,
+html.perf-lite .blur-lg,
+html.perf-lite .blur-xl,
+html.perf-lite .blur-2xl,
+html.perf-lite .blur-3xl {
+  filter: none !important;
 }
 
+/* Lite — sin hover-lift (evita composite layer por card) */
+html.perf-lite .hover\:-translate-y-1:hover {
+  transform: none !important;
+}
+
+/* ─── Prism typography micro-details — solo html.perf-full ─── */
+/*
+ * Inter OpenType features (zero runtime cost — font shaping time):
+ *   cv11 → single-storey 'a' (modernizes letterforms)
+ *   cv05 → straight 'l' (disambigua contra I/1)
+ *   ss01 → open digits (1, 4, 6, 9 más limpios, precisos para fintech)
+ *
+ * JetBrains Mono:
+ *   calt → contextual ligatures (si aparecen operadores en textos técnicos)
+ *   zero → slashed zero (disambigua 0 de O en IDs, amounts)
+ */
+html.perf-full body {
+  font-feature-settings: 'cv11' 1, 'cv05' 1, 'ss01' 1;
+}
+html.perf-full .font-mono,
+html.perf-full pre,
+html.perf-full code {
+  font-feature-settings: 'calt' 1, 'zero' 1;
+}
+
+/* ─── Prism kinetic premium — solo html.perf-full ──────────── */
+
+/* Button primary: sheen lavanda (#B9A4F8) en vez de blanco, alpha 0.14.
+   El blanco lavaba el morado. Lavanda cohesiona con brand y se siente como
+   "luz púrpura pasando" no "wash blanco". */
+@keyframes prism-button-sheen {
+  0%, 100% { transform: translateX(-120%) skewX(-15deg); }
+  50%      { transform: translateX(120%)  skewX(-15deg); }
+}
+html.perf-full .prism-button-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+html.perf-full .prism-button-shimmer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 30%, rgba(185, 164, 248, 0.14) 50%, transparent 70%);
+  animation: prism-button-sheen 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* GlassBackground blobs: parallax drift asimétrico para atmósfera viva */
+@keyframes prism-blob-drift-a {
+  0%, 100% { translate: 0 0; }
+  50%      { translate: 3% -2%; }
+}
+@keyframes prism-blob-drift-b {
+  0%, 100% { translate: 0 0; }
+  50%      { translate: -3% 2%; }
+}
+html.perf-full .prism-blob-a { animation: prism-blob-drift-a 22s ease-in-out infinite; }
+html.perf-full .prism-blob-b { animation: prism-blob-drift-b 18s ease-in-out infinite; }
+
+/* QR lightbox landing shimmer: sweep one-shot 400ms después del morph */
+@keyframes prism-qr-shimmer {
+  0%   { transform: translateX(-100%) skewX(-20deg); opacity: 0; }
+  30%  { opacity: 1; }
+  100% { transform: translateX(300%)  skewX(-20deg); opacity: 0; }
+}
+html.perf-full .prism-qr-shimmer {
+  animation: prism-qr-shimmer 900ms 400ms cubic-bezier(0.22, 1, 0.36, 1) 1;
+}
+
+/* A11y OS-level — aunque el usuario pick Prism, si tiene reduced-motion,
+   ninguna animación/transition CSS corre. Motion-v queda fuera (CPU-cheap). */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

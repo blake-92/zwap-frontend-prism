@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceStore } from '~/stores/performance'
 import Button from './Button.vue'
 
 const props = defineProps({
@@ -11,6 +12,7 @@ const props = defineProps({
 const emit = defineEmits(['pageChange'])
 
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
 const { t } = useI18n()
 
 const pages = computed(() => {
@@ -28,10 +30,10 @@ const pages = computed(() => {
 const pageBtnClass = (p) => {
   const active = props.currentPage === p
   const d = themeStore.isDarkMode
+  const neon = perfStore.useNeon
   if (active) {
-    return d
-      ? 'bg-[#7C3AED]/20 text-[#A78BFA] border border-[#7C3AED]/30 shadow-[0_0_12px_rgba(124,58,237,0.3)]'
-      : 'bg-[#DBD3FB]/60 text-[#561BAF] border border-[#7C3AED]/20 shadow-xs'
+    if (d) return `bg-[#7C3AED]/20 text-[#A78BFA] border border-[#7C3AED]/30${neon ? ' shadow-[0_0_12px_rgba(124,58,237,0.3)]' : ''}`
+    return 'bg-[#DBD3FB]/60 text-[#561BAF] border border-[#7C3AED]/20 shadow-xs'
   }
   return d
     ? 'text-[#888991] hover:bg-white/5 hover:text-white'

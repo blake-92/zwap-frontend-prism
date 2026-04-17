@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onUnmounted, watch, nextTick } from 'vue'
+import { ref, onUnmounted, watch, nextTick, useId } from 'vue'
 import { motion, AnimatePresence } from 'motion-v'
 import { useThemeStore } from '~/stores/theme'
 
@@ -14,7 +14,7 @@ const coords = ref({ top: -9999, left: -9999 })
 const triggerRef = ref(null)
 const tooltipRef = ref(null)
 let timeoutId = null
-const tooltipId = `tooltip-${Math.random().toString(36).slice(2, 9)}`
+const tooltipId = `tooltip-${useId()}`
 
 const getEl = (r) => r?.$el ?? r
 const updatePosition = async () => {

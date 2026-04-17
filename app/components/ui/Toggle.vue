@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { motion } from 'motion-v'
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceStore } from '~/stores/performance'
 
 const props = defineProps({
   active: { type: Boolean, default: false },
@@ -10,13 +11,14 @@ const props = defineProps({
 const emit = defineEmits(['toggle'])
 
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
 
 const btnClass = computed(() => {
   const d = themeStore.isDarkMode
+  const neon = perfStore.useNeon
   if (props.active) {
-    return d
-      ? 'bg-[#7C3AED] border border-[#7C3AED]/50 shadow-[0_0_12px_rgba(124,58,237,0.4)]'
-      : 'bg-[#7C3AED] border border-[#7C3AED]/30'
+    if (d) return `bg-[#7C3AED] border border-[#7C3AED]/50${neon ? ' shadow-[0_0_12px_rgba(124,58,237,0.4)]' : ''}`
+    return 'bg-[#7C3AED] border border-[#7C3AED]/30'
   }
   return d
     ? 'bg-[#252429] border border-white/10'

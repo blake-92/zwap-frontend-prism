@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { motion, AnimatePresence } from 'motion-v'
 import { ArrowRight, CreditCard } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceStore } from '~/stores/performance'
 import { TRANSACTIONS } from '~/utils/mockData'
 import { useMotionVariants } from '~/composables/useMotionVariants'
 import Card from '~/components/ui/Card.vue'
@@ -15,9 +16,10 @@ const mv = useMotionVariants()
 const emit = defineEmits(['viewAll'])
 const { t } = useI18n()
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
 const receiptTrx = ref(null)
 
-const recent = TRANSACTIONS.slice(0, 4)
+const recent = computed(() => TRANSACTIONS.slice(0, 4))
 
 const trClass = computed(() =>
   themeStore.isDarkMode
@@ -31,7 +33,7 @@ const theadClass = computed(() =>
 )
 
 const amountClass = (trx) => {
-  if (trx.status === 'Reembolsado') return 'text-rose-500 line-through opacity-70'
+  if (trx.status === 'refunded') return 'text-rose-500 line-through opacity-70'
   return themeStore.isDarkMode ? 'text-white' : 'text-[#111113]'
 }
 const ringClass = (variant) => {
@@ -46,11 +48,13 @@ const ringClass = (variant) => {
     <CardHeader :description="t('dashboard.liveFeedDesc')" wrapper-class="p-6 pb-5">
       <template #title>
         <motion.span
+          v-if="perfStore.useContinuousAnim"
           :initial="{ opacity: 0.2 }"
           :animate="{ opacity: [1, 0.2, 1, 0.2, 1] }"
           :transition="{ duration: 2, times: [0, 0.2, 0.4, 0.6, 1], repeat: Infinity, repeatDelay: 1 }"
-          class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] inline-block"
+          :class="['w-2 h-2 rounded-full bg-emerald-500 inline-block', perfStore.useNeon ? 'shadow-[0_0_8px_rgba(16,185,129,0.8)]' : '']"
         />
+        <span v-else class="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
         {{ t('dashboard.liveFeed') }}
       </template>
       <Button variant="ghost" size="sm" class="!text-[#7C3AED] !h-8 !px-2" @click="emit('viewAll')">
@@ -100,11 +104,11 @@ const ringClass = (variant) => {
             <td class="px-4 py-3">
               <span :class="['text-[11px] font-semibold flex items-center gap-1.5', themeStore.isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]']">
                 <component :is="trx.ChannelIcon" :size="12" :class="themeStore.isDarkMode ? 'text-[#7C3AED]' : 'text-[#561BAF]'" />
-                {{ trx.channel.includes('POS') ? 'POS' : 'Link' }}
+                {{ t(`channel.${trx.channel}Short`) }}
               </span>
             </td>
             <td class="px-4 py-3 text-center">
-              <Badge :variant="trx.statusVariant" :icon="trx.StatusIcon" class="!py-0.5 !px-2 !text-[9px]">{{ trx.status }}</Badge>
+              <Badge :variant="trx.statusVariant" :icon="trx.StatusIcon" class="!py-0.5 !px-2 !text-[9px]">{{ t(`status.${trx.status}`) }}</Badge>
             </td>
             <td class="px-6 py-3 text-right">
               <span :class="['font-mono font-bold text-sm tracking-tight', amountClass(trx)]">${{ trx.amount }}</span>

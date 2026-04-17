@@ -11,6 +11,7 @@ import { useMediaQuery } from '~/composables/useMediaQuery'
 import { useInfiniteScroll } from '~/composables/useInfiniteScroll'
 import { useMotionVariants } from '~/composables/useMotionVariants'
 import { WITHDRAWALS, WALLET_BALANCE, WALLET_STEPS, BANK_ACCOUNT } from '~/utils/mockData'
+import { formatDate, parseIsoDate } from '~/utils/formatDate'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
 import Badge from '~/components/ui/Badge.vue'
@@ -25,7 +26,8 @@ import WithdrawModal from './WithdrawModal.vue'
 import WithdrawReceiptModal from './WithdrawReceiptModal.vue'
 
 const mv = useMotionVariants()
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const fmtDate = (iso) => formatDate(iso, locale.value)
 const themeStore = useThemeStore()
 const isDesktop = useMediaQuery('(min-width: 1024px)')
 const viewSearch = useViewSearch(computed(() => t('wallet.searchPlaceholder')))
@@ -68,31 +70,23 @@ const filtered = computed(() => {
       if (!matchSearch) return false
     }
     if (statusFilter.value !== defaultStatus.value) {
-      if (w.status !== statusFilter.value) return false
+      if (t(`status.${w.status}`) !== statusFilter.value) return false
     }
     if (dateFilter.value !== defaultDate.value) {
-      const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
       const today = new Date()
+      const wDate = parseIsoDate(w.date)
+      if (!wDate) return false
       if (dateFilter.value === tToday) {
-        const monthStr = months[today.getMonth()]
-        if (!w.date.includes(`${today.getDate()} ${monthStr}`)) return false
-      }
-      if (dateFilter.value === tLast7) {
+        if (wDate.getFullYear() !== today.getFullYear() ||
+            wDate.getMonth() !== today.getMonth() ||
+            wDate.getDate() !== today.getDate()) return false
+      } else if (dateFilter.value === tLast7) {
         const weekAgo = new Date(today)
         weekAgo.setDate(today.getDate() - 7)
-        const parts = w.date.replace(',', '').split(' ')
-        if (parts.length >= 3) {
-          const day = parseInt(parts[0])
-          const mi = months.indexOf(parts[1])
-          const y = parseInt(parts[2])
-          if (mi !== -1) {
-            const wDate = new Date(y, mi, day)
-            if (wDate < weekAgo || wDate > today) return false
-          }
-        }
-      }
-      if (dateFilter.value === tThisMonth) {
-        if (!w.date.includes(months[today.getMonth()])) return false
+        if (wDate < weekAgo || wDate > today) return false
+      } else if (dateFilter.value === tThisMonth) {
+        if (wDate.getFullYear() !== today.getFullYear() ||
+            wDate.getMonth() !== today.getMonth()) return false
       }
     }
     return true
@@ -172,7 +166,7 @@ const trClass = computed(() =>
             </div>
             <div class="flex items-center gap-3">
               <span :class="['text-xs font-mono font-bold', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">${{ WITHDRAWALS[0].amount }}</span>
-              <span :class="['text-[10px] font-medium', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">{{ WITHDRAWALS[0].date }}</span>
+              <span :class="['text-[10px] font-medium', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">{{ fmtDate(WITHDRAWALS[0].date) }}</span>
             </div>
           </div>
           <Stepper :steps="WALLET_STEPS" />
@@ -214,7 +208,7 @@ const trClass = computed(() =>
       <DropdownFilter
         :label="t('filters.status')"
         :icon="Filter"
-        :options="[defaultStatus, t('wallet.processing'), t('wallet.completed'), t('wallet.failed')]"
+        :options="[defaultStatus, t('status.processing'), t('status.completed'), t('status.failed')]"
         :default-value="defaultStatus"
         :model-value="statusFilter"
         @update:model-value="(v) => { statusFilter = v; currentPage = 1 }"
@@ -258,7 +252,7 @@ const trClass = computed(() =>
                 <span :class="['font-mono font-bold text-sm', themeStore.isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]']">{{ w.id }}</span>
               </td>
               <td class="px-6 py-3.5">
-                <span :class="['text-xs font-medium', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">{{ w.date }}</span>
+                <span :class="['text-xs font-medium', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">{{ fmtDate(w.date) }}</span>
               </td>
               <td class="px-6 py-3.5 text-right">
                 <span :class="['font-mono font-bold', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']">${{ w.amount }}</span>
@@ -270,12 +264,12 @@ const trClass = computed(() =>
                 </span>
               </td>
               <td class="px-6 py-3.5 text-center">
-                <Badge :variant="w.statusVariant" :icon="w.StatusIcon">{{ w.status }}</Badge>
+                <Badge :variant="w.statusVariant" :icon="w.StatusIcon">{{ t(`status.${w.status}`) }}</Badge>
               </td>
               <td class="px-8 py-3.5 text-right">
                 <div class="flex justify-end">
                   <Tooltip :content="t('wallet.viewReceipt')" position="top">
-                    <Button variant="action" size="sm" class="!px-2.5 !py-1.5" :disabled="w.status !== 'Completado'" @click="receiptTrx = w">
+                    <Button variant="action" size="sm" class="!px-2.5 !py-1.5" :disabled="w.status !== 'completed'" @click="receiptTrx = w">
                       <FileText :size="13" />
                     </Button>
                   </Tooltip>
@@ -301,18 +295,18 @@ const trClass = computed(() =>
             <div class="flex items-start justify-between gap-3 mb-2">
               <div class="min-w-0">
                 <span :class="['font-mono font-bold text-sm truncate block', themeStore.isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]']">{{ w.id }}</span>
-                <p :class="['text-xs font-medium mt-0.5', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">{{ w.date }}</p>
+                <p :class="['text-xs font-medium mt-0.5', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">{{ fmtDate(w.date) }}</p>
               </div>
               <span :class="['font-mono font-bold text-lg tracking-tight shrink-0', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']">${{ w.amount }}</span>
             </div>
             <div class="flex items-center justify-between gap-2 mb-3">
-              <Badge :variant="w.statusVariant" :icon="w.StatusIcon">{{ w.status }}</Badge>
+              <Badge :variant="w.statusVariant" :icon="w.StatusIcon">{{ t(`status.${w.status}`) }}</Badge>
               <span :class="['text-xs font-medium flex items-center gap-1 min-w-0 truncate', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">
                 <Landmark :size="11" class="opacity-60 shrink-0" />
                 <span class="truncate">{{ w.bank }}</span>
               </span>
             </div>
-            <div v-if="w.status === 'Completado'" :class="['pt-3 border-t', themeStore.isDarkMode ? 'border-white/5' : 'border-black/5']">
+            <div v-if="w.status === 'completed'" :class="['pt-3 border-t', themeStore.isDarkMode ? 'border-white/5' : 'border-black/5']">
               <Button variant="action" size="sm" class="!px-3 !py-1.5 w-full justify-center" @click="receiptTrx = w">
                 <FileText :size="14" /> {{ t('wallet.viewReceipt') }}
               </Button>

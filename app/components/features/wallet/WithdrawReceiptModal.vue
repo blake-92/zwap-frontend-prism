@@ -6,12 +6,14 @@ import { useThemeStore } from '~/stores/theme'
 import { useScrollLock } from '~/composables/useScrollLock'
 import { useChromeBlur } from '~/composables/useChromeBlur'
 import { SPRING_SOFT } from '~/utils/springs'
+import { formatDate } from '~/utils/formatDate'
 
 const props = defineProps({
   trx: { type: Object, required: true },
 })
 const emit = defineEmits(['close'])
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const formattedDate = computed(() => formatDate(props.trx.date, locale.value))
 const themeStore = useThemeStore()
 
 useScrollLock(true)
@@ -125,7 +127,7 @@ const closeBtnClass = computed(() =>
               <div class="space-y-4">
                 <div class="flex justify-between items-center">
                   <span :class="['text-xs font-medium', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">{{ t('wallet.executionDate') }}</span>
-                  <span :class="['text-sm font-bold', themeStore.isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]']">{{ trx.date }}</span>
+                  <span :class="['text-sm font-bold', themeStore.isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]']">{{ formattedDate }}</span>
                 </div>
                 <div class="flex justify-between items-center">
                   <span :class="['text-xs font-medium', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">{{ t('wallet.transferId') }}</span>

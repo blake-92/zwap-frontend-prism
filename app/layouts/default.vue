@@ -18,14 +18,16 @@ const isDesktop = useMediaQuery('(min-width: 1024px)')
 const modalOpen = useModalOpen()
 const branch = ref(BRANCHES[0])
 
-const isCollapsed = ref(false)
+// Hidratar sincrónicamente para evitar flicker 256px → 72px.
+const isCollapsed = ref(
+  typeof localStorage !== 'undefined' && localStorage.getItem('zwap-sidebar') === 'collapsed',
+)
 const mainRef = ref(null)
 let lastScrollY = 0
 const headerVisible = ref(true)
 
 onMounted(() => {
   if (typeof document === 'undefined') return
-  isCollapsed.value = localStorage.getItem('zwap-sidebar') === 'collapsed'
   // Prevent document scroll — main is scroll container
   document.documentElement.style.overflow = 'hidden'
   document.body.style.overflow = 'hidden'
@@ -86,9 +88,12 @@ const mainClass = computed(() => [
     : 'px-4 sm:px-6 pt-20',
 ])
 
+// El blur del chrome cuando hay modal abierto lo hace el `backdrop-blur-md`
+// del backdrop del modal (cubre z-40/z-20 desde z-50). Aquí solo desaturamos
+// + bloqueamos clicks para feel "receded" sin doble blur.
 const sidebarWrapperClass = computed(() => [
   'relative shrink-0 group/sidebar transition-[filter,opacity] duration-150',
-  modalOpen.value ? 'blur-xs saturate-50 pointer-events-none' : '',
+  modalOpen.value ? 'saturate-50 pointer-events-none' : '',
 ])
 
 const toggleBtnClass = computed(() =>

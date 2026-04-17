@@ -20,7 +20,7 @@ const validActions = computed(() => props.actions.filter(a => !a.hidden))
 const actionWidth = 76
 const maxDrag = computed(() => validActions.value.length * actionWidth)
 
-const cardClasses = computed(() => getCardClasses(themeStore.isDarkMode, false, perfStore.useBlur))
+const cardClasses = computed(() => getCardClasses(themeStore.isDarkMode, false, perfStore.useBlur, perfStore.useNeon, perfStore.useGlassElevation))
 
 const closeCard = () => {
   controls.start({ x: 0 })

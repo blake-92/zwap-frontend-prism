@@ -51,19 +51,23 @@ const handler = (e) => {
   if (menuRef.value && !menuRef.value.contains(e.target)) menuOpen.value = false
 }
 
+let focusTid = null
+
 onMounted(() => {
   if (typeof document !== 'undefined') document.addEventListener('mousedown', handler)
 })
 onUnmounted(() => {
   if (typeof document !== 'undefined') document.removeEventListener('mousedown', handler)
+  if (focusTid) { clearTimeout(focusTid); focusTid = null }
 })
 
 watch(searchExpanded, (v) => {
-  if (v) {
-    setTimeout(() => {
-      nextTick().then(() => searchInputRef.value?.focus?.())
-    }, 80)
-  }
+  if (focusTid) { clearTimeout(focusTid); focusTid = null }
+  if (!v) return
+  focusTid = setTimeout(() => {
+    focusTid = null
+    nextTick().then(() => searchInputRef.value?.focus?.())
+  }, 80)
 })
 
 const pickBranch = (b) => {
@@ -72,19 +76,28 @@ const pickBranch = (b) => {
   branchSheetOpen.value = false
 }
 
-const headerClass = computed(() => [
-  'z-50 h-16 lg:h-20 flex items-center justify-between px-4 sm:px-6 lg:px-10 shrink-0 transition-colors duration-500',
-  props.isDesktop ? 'relative' : 'fixed inset-x-0 top-0',
-  themeStore.isDarkMode
-    ? 'bg-[#111113]/20 backdrop-blur-2xl border-b border-white/10'
-    : 'bg-white/30 backdrop-blur-2xl border-b border-white/80',
-])
+const headerClass = computed(() => {
+  const useBlur = perfStore.useBlur
+  // En lite, el header fijo mobile sin blur sería transparente sobre contenido
+  // que hace scroll detrás — hay que dar surface sólida.
+  const bgDark = useBlur ? 'bg-[#111113]/20' : 'bg-[#1A1A1D]'
+  const bgLight = useBlur ? 'bg-white/30' : 'bg-white'
+  return [
+    'z-50 h-16 lg:h-20 flex items-center justify-between px-4 sm:px-6 lg:px-10 shrink-0 transition-colors duration-500',
+    props.isDesktop ? 'relative' : 'fixed inset-x-0 top-0',
+    themeStore.isDarkMode
+      ? `${bgDark} backdrop-blur-2xl border-b border-white/10`
+      : `${bgLight} backdrop-blur-2xl border-b border-white/80`,
+  ]
+})
 
-const desktopSearchClass = computed(() =>
-  themeStore.isDarkMode
-    ? 'bg-[#252429]/30 backdrop-blur-xl border-white/10 border-t-white/20 focus-within:border-[#7C3AED]/60 focus-within:shadow-[0_0_20px_rgba(124,58,237,0.2)] focus-within:bg-[#252429]/50'
-    : 'bg-white/50 backdrop-blur-xl border-white focus-within:border-[#7C3AED]/40 focus-within:shadow-[0_0_20px_rgba(124,58,237,0.15)] focus-within:bg-white/80 shadow-[0_4px_15px_rgb(0,0,0,0.02)]',
-)
+const desktopSearchClass = computed(() => {
+  const neon = perfStore.useNeon
+  if (themeStore.isDarkMode) {
+    return `bg-[#252429]/30 backdrop-blur-xl border-white/10 border-t-white/20 focus-within:border-[#7C3AED]/60 focus-within:bg-[#252429]/50${neon ? ' focus-within:shadow-[0_0_20px_rgba(124,58,237,0.2)]' : ''}`
+  }
+  return `bg-white/50 backdrop-blur-xl border-white focus-within:border-[#7C3AED]/40 focus-within:bg-white/80 shadow-[0_4px_15px_rgb(0,0,0,0.02)]${neon ? ' focus-within:shadow-[0_0_20px_rgba(124,58,237,0.15)]' : ''}`
+})
 
 const inputTextClass = computed(() =>
   themeStore.isDarkMode
@@ -92,17 +105,21 @@ const inputTextClass = computed(() =>
     : 'text-[#111113] placeholder:text-[#B0AFB4]',
 )
 
-const branchPillClass = computed(() =>
-  themeStore.isDarkMode
-    ? 'bg-[#7C3AED]/15 backdrop-blur-xl border border-[#7C3AED]/40 text-[#7C3AED] shadow-[0_0_15px_rgba(124,58,237,0.2)]'
-    : 'bg-white/90 border border-white shadow-md text-[#7C3AED] backdrop-blur-xl',
-)
+const branchPillClass = computed(() => {
+  const neon = perfStore.useNeon
+  if (themeStore.isDarkMode) {
+    return `bg-[#7C3AED]/15 backdrop-blur-xl border border-[#7C3AED]/40 text-[#7C3AED]${neon ? ' shadow-[0_0_15px_rgba(124,58,237,0.2)]' : ''}`
+  }
+  return 'bg-white/90 border border-white shadow-md text-[#7C3AED] backdrop-blur-xl'
+})
 
-const mobileSearchBarClass = computed(() =>
-  themeStore.isDarkMode
-    ? 'bg-[#252429]/50 backdrop-blur-xl border-[#7C3AED]/40 shadow-[0_0_15px_rgba(124,58,237,0.15)]'
-    : 'bg-white/70 backdrop-blur-xl border-[#7C3AED]/30 shadow-[0_0_15px_rgba(124,58,237,0.1)]',
-)
+const mobileSearchBarClass = computed(() => {
+  const neon = perfStore.useNeon
+  if (themeStore.isDarkMode) {
+    return `bg-[#252429]/50 backdrop-blur-xl border-[#7C3AED]/40${neon ? ' shadow-[0_0_15px_rgba(124,58,237,0.15)]' : ''}`
+  }
+  return `bg-white/70 backdrop-blur-xl border-[#7C3AED]/30${neon ? ' shadow-[0_0_15px_rgba(124,58,237,0.1)]' : ''}`
+})
 
 const optionClass = (selected) => {
   if (selected) return themeStore.isDarkMode ? 'text-white' : 'text-[#561BAF]'
@@ -167,7 +184,7 @@ const goSettings = () => navigateTo(ROUTES.SETTINGS)
         <Tooltip :content="t('header.notifications')" position="bottom">
           <Button variant="ghost" size="icon" class="relative">
             <motion.span
-              :while-hover="{ rotate: [0, -18, 14, -10, 6, 0] }"
+              :while-hover="perfStore.useContinuousAnim ? { rotate: [0, -18, 14, -10, 6, 0] } : undefined"
               :transition="{ duration: 0.6, ease: 'easeInOut' }"
               class="flex items-center justify-center"
             >
@@ -209,23 +226,27 @@ const goSettings = () => navigateTo(ROUTES.SETTINGS)
           <AnimatePresence>
             <motion.div
               v-if="menuOpen"
+              role="listbox"
+              :aria-label="t('nav.branches')"
               :variants="panelVariants"
               initial="hidden"
               animate="visible"
               exit="exit"
               :style="{ transformOrigin: 'top right' }"
-              :class="['absolute right-0 mt-4 w-56 rounded-2xl z-50 overflow-hidden', getDropdownGlass(themeStore.isDarkMode, perfStore.useBlur)]"
+              :class="['absolute right-0 mt-4 w-56 rounded-2xl z-50 overflow-hidden', getDropdownGlass(themeStore.isDarkMode, perfStore.useBlur, perfStore.modalShadow, perfStore.useGlassElevation)]"
             >
               <div class="p-2 flex flex-col gap-0.5">
                 <button
                   v-for="branch in BRANCHES"
                   :key="branch"
+                  role="option"
+                  :aria-selected="selectedBranch === branch"
                   :class="['relative w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-3 transition-colors duration-150', optionClass(selectedBranch === branch)]"
                   @click="pickBranch(branch)"
                 >
                   <motion.div
                     v-if="selectedBranch === branch"
-                    :layout-id="`branch-pill-${pillId}`"
+                    :layout-id="perfStore.useNavMorphs ? `branch-pill-${pillId}` : undefined"
                     :class="['absolute inset-0 rounded-xl', pillBg]"
                     :transition="SPRING"
                   />
@@ -316,7 +337,7 @@ const goSettings = () => navigateTo(ROUTES.SETTINGS)
         </AnimatePresence>
         <button
           :aria-label="t('nav.branches')"
-          :class="['w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 transition-colors', branchPillClass]"
+          :class="['w-11 h-11 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 transition-colors', branchPillClass]"
           @click="branchSheetOpen = true"
         >
           {{ selectedBranch.charAt(0) }}
@@ -336,7 +357,7 @@ const goSettings = () => navigateTo(ROUTES.SETTINGS)
       >
         <motion.div
           v-if="selectedBranch === branch"
-          layout-id="branch-sheet-pill"
+          :layout-id="perfStore.useNavMorphs ? 'branch-sheet-pill' : undefined"
           :class="['absolute inset-0 rounded-xl', sheetPillBg]"
           :transition="SPRING"
         />

@@ -43,9 +43,11 @@ const goTransactions = () => navigateTo(ROUTES.TRANSACTIONS)
         <SegmentControl v-model="activeTab" :options="segmentOptions" layout-id="dashboardTab" />
       </div>
 
-      <Button class="hidden sm:flex sm:ml-auto" @click="newLinkOpen = true">
-        <Plus :size="18" /> {{ t('dashboard.newReservationLink') }}
-      </Button>
+      <div class="hidden sm:block sm:ml-auto">
+        <Button @click="newLinkOpen = true">
+          <Plus :size="18" /> {{ t('dashboard.newReservationLink') }}
+        </Button>
+      </div>
     </div>
 
     <div class="sm:hidden mb-6">

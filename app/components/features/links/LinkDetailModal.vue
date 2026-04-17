@@ -8,21 +8,31 @@ import SectionLabel from '~/components/ui/SectionLabel.vue'
 import { useThemeStore } from '~/stores/theme'
 import { useToastStore } from '~/stores/toast'
 import { useMediaQuery } from '~/composables/useMediaQuery'
+import { copyToClipboard } from '~/utils/clipboard'
+import { formatDate } from '~/utils/formatDate'
 
 const props = defineProps({ link: { type: Object, required: true } })
 const emit = defineEmits(['close', 'edit'])
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const formattedCreatedAt = computed(() => {
+  const iso = (props.link.createdAt || '').split('T')[0]
+  return formatDate(iso, locale.value)
+})
 const themeStore = useThemeStore()
 const toastStore = useToastStore()
 const isMobile = useMediaQuery('(max-width: 639px)')
 
 const url = computed(() => `https://zwap.me/pay/${props.link.id}`)
 
-const handleCopy = () => {
-  if (typeof navigator !== 'undefined') navigator.clipboard?.writeText(url.value)
-  const key = isMobile.value ? 'links.linkCopiedShort' : 'links.linkCopied'
-  toastStore.addToast(t(key, { name: props.link.client }), 'success')
+const handleCopy = async () => {
+  const ok = await copyToClipboard(url.value)
+  if (ok) {
+    const key = isMobile.value ? 'links.linkCopiedShort' : 'links.linkCopied'
+    toastStore.addToast(t(key, { name: props.link.client }), 'success')
+  } else {
+    toastStore.addToast(t('common.copyFailed'), 'error')
+  }
 }
 
 const handleEdit = () => {
@@ -42,15 +52,15 @@ const handleEdit = () => {
     <div class="p-5 sm:p-8 space-y-6">
       <div class="flex items-center justify-between">
         <span :class="['font-mono font-bold text-3xl tracking-tighter', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']">${{ link.amount }}</span>
-        <Badge :variant="link.statusVariant" :icon="link.StatusIcon">{{ link.status }}</Badge>
+        <Badge :variant="link.statusVariant" :icon="link.StatusIcon">{{ t(`status.${link.status}`) }}</Badge>
       </div>
 
       <div :class="['flex items-center gap-4 flex-wrap text-xs font-medium', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">
         <span class="flex items-center gap-1.5"><Eye :size="13" /> {{ link.views }} {{ t('links.views') }}</span>
         <span class="flex items-center gap-1.5"><ListTree :size="13" /> {{ link.items }} {{ t('dashboard.items') }}</span>
-        <span :class="['flex items-center gap-1.5', link.status === 'Expirado' ? 'text-rose-500' : '']">
+        <span :class="['flex items-center gap-1.5', link.status === 'expired' ? 'text-rose-500' : '']">
           <Timer :size="13" />
-          {{ link.expires !== '-' ? t('links.expires', { date: link.expires }) : t('links.noExpiration') }}
+          {{ link.expires ? t('links.expires', { date: link.expires }) : t('links.noExpiration') }}
         </span>
       </div>
 
@@ -72,17 +82,17 @@ const handleEdit = () => {
 
       <div :class="['flex items-center gap-3 text-xs font-medium', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">
         <CalendarDays :size="13" />
-        <span>{{ t('links.created', { date: link.createdAt }) }}</span>
+        <span>{{ t('links.created', { date: formattedCreatedAt }) }}</span>
       </div>
 
       <div class="flex gap-2">
-        <Button variant="outline" size="sm" class="flex-1 !py-2.5 justify-center" :disabled="link.status === 'Expirado'" @click="handleCopy">
+        <Button variant="outline" size="sm" class="flex-1 !py-2.5 justify-center" :disabled="link.status === 'expired'" @click="handleCopy">
           <Copy :size="15" /> {{ t('links.copyLink') }}
         </Button>
-        <Button variant="outline" size="sm" class="flex-1 !py-2.5 justify-center" :disabled="link.status === 'Expirado'">
+        <Button variant="outline" size="sm" class="flex-1 !py-2.5 justify-center" :disabled="link.status === 'expired'">
           <QrCode :size="15" /> {{ t('links.generateQr') }}
         </Button>
-        <Button variant="outline" size="sm" class="flex-1 !py-2.5 justify-center" :disabled="link.status === 'Pagado'" @click="handleEdit">
+        <Button variant="outline" size="sm" class="flex-1 !py-2.5 justify-center" :disabled="link.status === 'paid'" @click="handleEdit">
           {{ t('common.edit') }}
         </Button>
       </div>
@@ -90,7 +100,7 @@ const handleEdit = () => {
 
     <template #footer>
       <Button variant="outline" class="flex-1 !py-3.5" @click="emit('close')">{{ t('common.close') }}</Button>
-      <Button class="flex-1 !py-3.5" :disabled="link.status === 'Expirado' || link.status === 'Pagado'">
+      <Button class="flex-1 !py-3.5" :disabled="link.status === 'expired' || link.status === 'paid'">
         <Mail :size="16" /> {{ t('links.send') }}
       </Button>
     </template>

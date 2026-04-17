@@ -352,7 +352,7 @@ import { useViewSearchStore } from '~/stores/viewSearch'
 | Store | State | Actions | Persistencia |
 |---|---|---|---|
 | `theme` | `isDarkMode` | `toggleTheme()`, `hydrate()`, `apply()` | `localStorage['zwap-theme']` |
-| `performance` | `tier` (`full`/`lite`/`minimal`) | `hydrate()`, `setTier(tier)`, `apply()` | `localStorage['zwap-perf']` |
+| `performance` | `tier` (`full`/`normal`/`lite`) | `hydrate()`, `setTier(tier)`, `apply()` | `localStorage['zwap-perf']` |
 | `toast` | `toasts[]` | `addToast(msg, type?, duration?)`, `removeToast(id)` | — |
 | `viewSearch` | `query`, `placeholder`, `hasFilters`, `activeFilterCount` | `setQuery()`, `registerView()`, `unregisterView()`, `setFilterOpener()`, `openFilters()` | — |
 
@@ -362,22 +362,59 @@ import { useViewSearchStore } from '~/stores/viewSearch'
 - Sidebar collapse: `localStorage['zwap-sidebar']` (`'collapsed'`/`'expanded'`).
 - Performance tier: `localStorage['zwap-perf']` — auto-detected or user override via Settings.
 
-### Performance Tiers
+### Performance Tiers (3 niveles)
 
-El store `usePerformanceStore` detecta la capacidad del hardware y degrada la UI gracefully:
+Ver doc dedicado: **[docs/performance-tiers.md](docs/performance-tiers.md)**.
 
-| Tier | Detección | Backdrop-blur | Shadows | Animaciones |
-|---|---|---|---|---|
-| `full` | >= 4 cores, >= 4GB RAM | Glass real (blur 2xl/3xl) | Custom rgba | Spring completas |
-| `lite` | < 4 cores o < 4GB RAM | **Ninguno** (cards sólidas) | Simplificadas | Spring completas |
-| `minimal` | < 2 cores o `prefers-reduced-motion` | Ninguno | Simplificadas | **Instantáneas** |
+El store `usePerformanceStore` expone 3 tiers con detección automática + override manual en Settings:
 
-- `cardClasses.js`: las 3 funciones (`getCardClasses`, `getModalGlass`, `getDropdownGlass`) aceptan `useBlur` como tercer parámetro. Con `false` devuelven fondos sólidos con opacidad alta.
-- `motionVariants.js`: variantes `*Instant` con `duration: 0` para tier minimal.
-- `useMotionVariants()` composable: selecciona automáticamente entre variante spring o instant según `perfStore.useSpring`.
-- CSS global: `html.perf-lite` desactiva `backdrop-filter`, `html.perf-minimal` desactiva también animaciones/transiciones.
-- `@media (prefers-reduced-motion: reduce)` desactiva animaciones a nivel OS (WCAG 2.1).
-- Settings: toggle "Modo Ligero" en pestaña Mi Perfil permite override manual.
+| Tier | Target device | Identidad | Efectos removidos |
+|---|---|---|---|
+| **`full` (Prism)** | Desktop, flagships (MacBook, iPhone 13+, S23+) | Liquid glass, neon, morphs, continuous anims | — |
+| **`normal`** | Mid-range (iPhone XR-14, Galaxy A5x, Pixel 5-6) | Glass base, morphs, hover-lift, continuous anims | Neon glows, glass elevation, chrome saturate, button shimmer, blob parallax |
+| **`lite`** | Low-end (Samsung A15, 4GB RAM) + `prefers-reduced-motion` | Surfaces sólidas, morphs OFF | backdrop-filter, filter:blur, hover-lift, nav morphs, continuous anims |
+
+**Detección** (`detectTier()`):
+```
+prefers-reduced-motion              → lite
+cores < 4 || memory < 4GB           → lite
+cores < 8 || memory < 6GB           → normal
+isMobile UA || (touch && !memory)   → normal
+else                                → full
+```
+
+**Getters granulares** (consumir `perfStore.X` en componentes):
+- GPU: `useBlur`, `useReducedBlur`, `useNeon`, `useInnerHighlight`, `useWalletGlowBubble`, `useGlassElevation`, `useActiveHalo`, `chromeSaturate`
+- Animación: `useSpring`, `useLayoutMorphs`, `useNavMorphs`, `useContinuousAnim`
+- Interacción: `useHoverLift`, `useDecorGradients`
+- Composite: `modalShadow` (string `'deep'|'medium'|'compact'`), `modalBackdropFilter` (string de Tailwind classes)
+
+**Nuevos helpers clave**:
+- `cardClasses.js`: `getCardClasses(isDarkMode, hoverEffect, useBlur, useNeon, useGlassElevation)` — 5to param activa liquid glass.
+- `getModalGlass(isDarkMode, useBlur, shadowLevel, useGlassElevation)` — `shadowLevel` es 3-way (`deep`/`medium`/`compact`).
+- `getDropdownGlass(...)` — mismo patrón.
+
+**Liquid glass Prism — fórmula validada:**
+- Opacidad baja en bg (`/20-30` cards, `/65-85` modales según densidad texto)
+- `backdrop-blur-2xl` (cards) / `3xl` (modales) + `backdrop-saturate-150`
+- Rim borders (`border-t-white/25` + `border-l-white/10`)
+- Inset 1px highlight top (catch de luz en edge, NO overlay)
+- Dual-source drop shadow
+- ❌ NO specular white gradient (`from-white/[X] to-transparent`) — ensucia el vidrio
+
+**CSS global**:
+- `html.perf-normal .backdrop-blur-*` → radios reducidos a ~50%
+- `html.perf-lite *` → `backdrop-filter: none`, `filter: none` en `.blur-*`, sin hover-lift
+- `@media (prefers-reduced-motion: reduce)` → overrides globales WCAG 2.1
+
+**Navigation morphs vs Action morphs**:
+- `useNavMorphs` (pill Sidebar/BottomNav/SegmentControl/dropdown) — OFF en Lite (instant toggle)
+- `useLayoutMorphs` (QR expand, etc.) — siempre ON (moment de identidad one-shot)
+
+**Settings UI** (`SettingsView.vue` → pestaña Mi Perfil → sección Performance):
+- SegmentControl con 3 opciones: `Prism` / `Normal` / `Lite`
+- Descripción dinámica por tier seleccionado
+- Override manual persiste en `localStorage['zwap-perf']`
 
 ### Composable `useViewSearch(placeholder)`
 

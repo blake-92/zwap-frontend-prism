@@ -1,13 +1,16 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import { motion } from 'motion-v'
 import { QrCode, Copy, ExternalLink } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
 import { useToastStore } from '~/stores/toast'
 import { useMediaQuery } from '~/composables/useMediaQuery'
+import { copyToClipboard } from '~/utils/clipboard'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
 import Toggle from '~/components/ui/Toggle.vue'
 import Tooltip from '~/components/ui/Tooltip.vue'
+import QrLightbox from '~/components/ui/QrLightbox.vue'
 
 const props = defineProps({ link: { type: Object, required: true } })
 const emit = defineEmits(['toggle'])
@@ -16,12 +19,22 @@ const { t } = useI18n()
 const themeStore = useThemeStore()
 const toastStore = useToastStore()
 const isMobile = useMediaQuery('(max-width: 639px)')
+const isQrOpen = ref(false)
 
-const handleCopy = () => {
-  if (typeof navigator !== 'undefined') navigator.clipboard?.writeText(`https://zwap.me/pay/${props.link.id}`)
-  const key = isMobile.value ? 'links.linkCopiedShort' : 'links.linkCopied'
-  toastStore.addToast(t(key, { name: props.link.name }), 'success')
+const qrLayoutId = computed(() => `qr-permanent-${props.link.id}`)
+const qrUrl = computed(() => `zwap.me/pay/${props.link.id}`)
+
+const handleCopy = async () => {
+  const ok = await copyToClipboard(`https://zwap.me/pay/${props.link.id}`)
+  if (ok) {
+    const key = isMobile.value ? 'links.linkCopiedShort' : 'links.linkCopied'
+    toastStore.addToast(t(key, { name: props.link.name }), 'success')
+  } else {
+    toastStore.addToast(t('common.copyFailed'), 'error')
+  }
 }
+
+const openQr = () => { if (props.link.active) isQrOpen.value = true }
 
 const iconClass = computed(() => {
   if (props.link.active) {
@@ -38,9 +51,22 @@ const titleClass = computed(() => {
 <template>
   <Card class="p-6 relative group">
     <div class="flex justify-between items-start mb-4">
-      <div :class="['w-12 h-12 rounded-xl flex items-center justify-center transition-colors duration-300', iconClass]">
+      <motion.div
+        :layout-id="qrLayoutId"
+        :class="[
+          'w-12 h-12 rounded-xl flex items-center justify-center transition-colors duration-300',
+          link.active ? 'cursor-pointer' : 'cursor-default',
+          iconClass,
+        ]"
+        :aria-label="t('links.viewQr')"
+        role="button"
+        :tabindex="link.active ? 0 : -1"
+        @click="openQr"
+        @keydown.enter="openQr"
+        @keydown.space.prevent="openQr"
+      >
         <QrCode :size="22" />
-      </div>
+      </motion.div>
       <Toggle :active="link.active" @toggle="emit('toggle')" />
     </div>
 
@@ -50,7 +76,7 @@ const titleClass = computed(() => {
     <div :class="['pt-4 border-t flex justify-between items-center', themeStore.isDarkMode ? 'border-white/10' : 'border-black/5']">
       <div class="flex gap-2">
         <Tooltip :content="t('links.viewQr')" position="top">
-          <Button variant="ghost" size="icon" class="!p-1.5" :disabled="!link.active">
+          <Button variant="ghost" size="icon" class="!p-1.5" :disabled="!link.active" @click="openQr">
             <QrCode :size="16" />
           </Button>
         </Tooltip>
@@ -64,5 +90,13 @@ const titleClass = computed(() => {
         {{ t('common.open') }} <ExternalLink :size="12" />
       </Button>
     </div>
+
+    <QrLightbox
+      :is-open="isQrOpen"
+      :layout-id="qrLayoutId"
+      :name="link.name"
+      :url="qrUrl"
+      @close="isQrOpen = false"
+    />
   </Card>
 </template>

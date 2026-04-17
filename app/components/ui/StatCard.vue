@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceStore } from '~/stores/performance'
 import Card from './Card.vue'
 import Badge from './Badge.vue'
 
@@ -17,14 +18,17 @@ const props = defineProps({
 })
 
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
 
 const iconBubbleClass = computed(() => {
   const d = themeStore.isDarkMode
+  const neon = perfStore.useNeon
+  const glow = (color) => (d && neon ? ` group-hover:shadow-[0_0_15px_rgba(${color},0.3)]` : ' group-hover:shadow-md')
   const map = {
-    default: d ? 'bg-[#7C3AED]/15 text-[#7C3AED] group-hover:shadow-[0_0_15px_rgba(124,58,237,0.3)]' : 'bg-[#DBD3FB]/60 text-[#561BAF] group-hover:shadow-md',
-    success: d ? 'bg-emerald-500/15 text-emerald-500 group-hover:shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-emerald-100 text-emerald-600 group-hover:shadow-md',
-    warning: d ? 'bg-amber-500/15 text-amber-500 group-hover:shadow-[0_0_15px_rgba(245,158,11,0.3)]' : 'bg-amber-100 text-amber-600 group-hover:shadow-md',
-    danger: d ? 'bg-rose-500/15 text-rose-500 group-hover:shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'bg-rose-100 text-rose-600 group-hover:shadow-md',
+    default: d ? `bg-[#7C3AED]/15 text-[#7C3AED]${glow('124,58,237')}` : 'bg-[#DBD3FB]/60 text-[#561BAF] group-hover:shadow-md',
+    success: d ? `bg-emerald-500/15 text-emerald-500${glow('16,185,129')}` : 'bg-emerald-100 text-emerald-600 group-hover:shadow-md',
+    warning: d ? `bg-amber-500/15 text-amber-500${glow('245,158,11')}` : 'bg-amber-100 text-amber-600 group-hover:shadow-md',
+    danger: d ? `bg-rose-500/15 text-rose-500${glow('244,63,94')}` : 'bg-rose-100 text-rose-600 group-hover:shadow-md',
   }
   return map[props.iconVariant]
 })

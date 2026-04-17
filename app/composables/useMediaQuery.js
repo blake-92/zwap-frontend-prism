@@ -1,7 +1,14 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 
 export function useMediaQuery(query) {
-  const matches = ref(false)
+  const resolve = (q) => (typeof q === 'function' ? q() : q)
+
+  // Evaluar sincrónicamente para evitar FOUC en SPA mode.
+  const initialMatches = typeof window !== 'undefined'
+    ? window.matchMedia(resolve(query)).matches
+    : false
+
+  const matches = ref(initialMatches)
   let mql = null
   let handler = null
 
@@ -14,9 +21,9 @@ export function useMediaQuery(query) {
     mql.addEventListener('change', handler)
   }
 
-  onMounted(() => setup(typeof query === 'function' ? query() : query))
+  onMounted(() => setup(resolve(query)))
 
-  watch(() => (typeof query === 'function' ? query() : query), (q) => setup(q))
+  watch(() => resolve(query), (q) => setup(q))
 
   onUnmounted(() => {
     if (mql && handler) mql.removeEventListener('change', handler)

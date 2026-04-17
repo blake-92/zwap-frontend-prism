@@ -6,6 +6,7 @@ import {
   Landmark, Users, Building2, LogOut, Wallet, ArrowRight,
 } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceStore } from '~/stores/performance'
 import { ROUTES } from '~/utils/routes'
 import { CURRENT_USER, WALLET_BALANCE } from '~/utils/mockData'
 import { SPRING_SIDEBAR as SPRING } from '~/utils/springs'
@@ -19,7 +20,13 @@ defineProps({
 
 const { t } = useI18n()
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
 const route = useRoute()
+const token = useCookie('zwap_token', {
+  sameSite: 'lax',
+  secure: !import.meta.dev,
+  path: '/',
+})
 
 const NAV_ITEMS = [
   { id: 'dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard, route: ROUTES.DASHBOARD },
@@ -48,22 +55,28 @@ const walletHover = ref(false)
 const goTo = (r) => navigateTo(r)
 
 const logout = () => {
-  if (typeof document !== 'undefined') document.cookie = 'zwap_token=; Max-Age=0; path=/'
+  token.value = null
   navigateTo(ROUTES.LOGIN)
 }
 
-const asideClass = computed(() =>
-  themeStore.isDarkMode
-    ? 'bg-[#111113]/20 backdrop-blur-2xl border-r border-white/10'
-    : 'bg-white/40 backdrop-blur-2xl border-r border-white/80 shadow-[4px_0_30px_rgba(0,0,0,0.03)]',
-)
+const asideClass = computed(() => {
+  const useBlur = perfStore.useBlur
+  const bgDark = useBlur ? 'bg-[#111113]/20' : 'bg-[#1A1A1D]'
+  const bgLight = useBlur ? 'bg-white/40' : 'bg-white'
+  if (themeStore.isDarkMode) {
+    return `${bgDark} backdrop-blur-2xl border-r border-white/10`
+  }
+  return `${bgLight} backdrop-blur-2xl border-r border-white/80 shadow-[4px_0_30px_rgba(0,0,0,0.03)]`
+})
 
 const walletBtnClass = (collapsed) => {
   if (collapsed) return 'border-transparent bg-transparent shadow-none'
+  const neon = perfStore.useNeon
   if (isWalletActive.value) {
-    return themeStore.isDarkMode
-      ? 'bg-[#252429]/60 border-[#7C3AED]/50 shadow-[0_0_16px_rgba(124,58,237,0.2)]'
-      : 'bg-white/80 border-[#7C3AED]/40 shadow-[0_0_12px_rgba(124,58,237,0.15)]'
+    if (themeStore.isDarkMode) {
+      return `bg-[#252429]/60 border-[#7C3AED]/50${neon ? ' shadow-[0_0_16px_rgba(124,58,237,0.2)]' : ''}`
+    }
+    return `bg-white/80 border-[#7C3AED]/40${neon ? ' shadow-[0_0_12px_rgba(124,58,237,0.15)]' : ''}`
   }
   return themeStore.isDarkMode
     ? 'bg-[#252429]/20 border-white/10 hover:bg-[#252429]/40 hover:border-[#7C3AED]/30'
@@ -122,9 +135,17 @@ const glowClass = (collapsed) => {
           :class="['relative w-full h-11 flex items-center gap-3 py-3 pl-[19px] rounded-xl text-sm font-medium transition-colors duration-200', navItemClass(route.path === item.route)]"
           @click="goTo(item.route)"
         >
+          <!-- Ambient halo (solo Prism) — blob púrpura blurreado DETRÁS del pill -->
+          <motion.div
+            v-if="route.path === item.route && perfStore.useActiveHalo"
+            :layout-id="perfStore.useNavMorphs ? 'sidebar-indicator-halo' : undefined"
+            class="absolute inset-0 rounded-xl bg-[#7C3AED]/25 blur-xl pointer-events-none"
+            :transition="SPRING"
+            aria-hidden="true"
+          />
           <motion.div
             v-if="route.path === item.route"
-            layout-id="sidebar-indicator"
+            :layout-id="perfStore.useNavMorphs ? 'sidebar-indicator' : undefined"
             :class="['absolute inset-0 rounded-xl', indicatorClass]"
             :transition="SPRING"
           />
@@ -196,7 +217,7 @@ const glowClass = (collapsed) => {
                 'shrink-0 w-6 h-6 rounded-full flex items-center justify-center',
                 isWalletActive
                   ? themeStore.isDarkMode
-                    ? 'bg-[#7C3AED] text-white shadow-[0_0_12px_rgba(124,58,237,0.5)]'
+                    ? `bg-[#7C3AED] text-white${perfStore.useNeon ? ' shadow-[0_0_12px_rgba(124,58,237,0.5)]' : ' shadow-md'}`
                     : 'bg-[#7C3AED] text-white shadow-md'
                   : 'bg-transparent text-[#888991]'
               ]"

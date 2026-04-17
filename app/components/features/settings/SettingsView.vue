@@ -86,7 +86,7 @@ const perfTier = computed({
   get: () => perfStore.tier,
   set: (v) => {
     if (v === 'auto') {
-      localStorage.removeItem('zwap-perf')
+      try { localStorage.removeItem('zwap-perf') } catch { /* Safari private mode / storage denied */ }
       perfStore.hydrate()
     } else {
       perfStore.setTier(v)
@@ -95,8 +95,16 @@ const perfTier = computed({
 })
 const perfOptions = computed(() => [
   { value: 'full', label: t('settings.perfFull') },
+  { value: 'normal', label: t('settings.perfNormal') },
   { value: 'lite', label: t('settings.perfLite') },
 ])
+
+const perfDesc = computed(() => {
+  if (perfStore.tier === 'full') return t('settings.perfFullDesc')
+  if (perfStore.tier === 'normal') return t('settings.perfNormalDesc')
+  if (perfStore.tier === 'lite') return t('settings.perfLiteDesc')
+  return ''
+})
 
 const langBtnClass = (code) => {
   const active = locale.value === code
@@ -233,18 +241,20 @@ const langBtnClass = (code) => {
       <!-- PERFORMANCE -->
       <Card v-if="showSection('performance', 'perfil')" class="p-6 md:p-8">
         <h3 :class="['text-sm font-bold tracking-widest uppercase mb-2', sectionLabelClass]">{{ t('settings.performance') }}</h3>
-        <div :class="['py-5 flex items-start sm:items-center justify-between gap-4', borderSecondary]">
-          <div class="flex gap-4">
-            <div :class="['w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 sm:mt-0', themeStore.isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/50 text-[#561BAF]']">
-              <Zap :size="18" />
+        <div class="py-5 flex flex-col gap-4">
+          <div class="flex items-start justify-between gap-4 flex-col sm:flex-row sm:items-center">
+            <div class="flex gap-4">
+              <div :class="['w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 sm:mt-0', themeStore.isDarkMode ? 'bg-[#7C3AED]/15 text-[#7C3AED]' : 'bg-[#DBD3FB]/50 text-[#561BAF]']">
+                <Zap :size="18" />
+              </div>
+              <div>
+                <h4 :class="['text-sm font-bold', themeStore.isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]']">{{ t('settings.liteMode') }}</h4>
+                <p :class="['text-xs mt-0.5 font-medium', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">{{ perfDesc }}</p>
+              </div>
             </div>
-            <div>
-              <h4 :class="['text-sm font-bold', themeStore.isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]']">{{ t('settings.liteMode') }}</h4>
-              <p :class="['text-xs mt-0.5 font-medium', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">{{ t('settings.liteModeDesc') }}</p>
+            <div class="shrink-0 w-full sm:w-auto">
+              <SegmentControl v-model="perfTier" :options="perfOptions" layout-id="perfTierIndicator" />
             </div>
-          </div>
-          <div class="shrink-0">
-            <SegmentControl v-model="perfTier" :options="perfOptions" layout-id="perfTierIndicator" />
           </div>
         </div>
       </Card>

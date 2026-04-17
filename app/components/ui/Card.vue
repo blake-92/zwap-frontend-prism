@@ -11,7 +11,7 @@ const props = defineProps({
 const themeStore = useThemeStore()
 const perfStore = usePerformanceStore()
 const attrs = useAttrs()
-const cls = computed(() => getCardClasses(themeStore.isDarkMode, props.hoverEffect, perfStore.useBlur))
+const cls = computed(() => getCardClasses(themeStore.isDarkMode, props.hoverEffect, perfStore.useBlur, perfStore.useNeon, perfStore.useGlassElevation))
 const clickable = computed(() => typeof attrs.onClick === 'function')
 
 const onKey = (e) => {

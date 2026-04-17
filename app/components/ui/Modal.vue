@@ -20,7 +20,8 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 const themeStore = useThemeStore()
-const isMobile = computed(() => !useMediaQuery('(min-width: 640px)').value)
+const isDesktopSm = useMediaQuery('(min-width: 640px)')
+const isMobile = computed(() => !isDesktopSm.value)
 const containerRef = ref(null)
 let trigger = null
 
@@ -68,7 +69,12 @@ onMounted(() => {
   const focusable = el?.querySelectorAll?.(
     'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
   )
-  if (focusable && focusable.length > 0) focusable[0].focus()
+  if (!focusable || focusable.length === 0) return
+  // Preferir el primer input/textarea/select (contenido real) sobre el botón cerrar.
+  const preferred = el.querySelector(
+    'input:not([type="hidden"]), textarea, select, [tabindex]:not([tabindex="-1"])',
+  )
+  ;(preferred ?? focusable[0]).focus()
 })
 
 onUnmounted(() => {
@@ -86,7 +92,8 @@ const onDragEnd = (_e, info) => {
 }
 
 const perfStore = usePerformanceStore()
-const modalClass = computed(() => getModalGlass(themeStore.isDarkMode, perfStore.useBlur))
+const modalClass = computed(() => getModalGlass(themeStore.isDarkMode, perfStore.useBlur, perfStore.modalShadow, perfStore.useGlassElevation))
+const backdropFilterClass = computed(() => perfStore.modalBackdropFilter)
 </script>
 
 <template>
@@ -101,7 +108,7 @@ const modalClass = computed(() => getModalGlass(themeStore.isDarkMode, perfStore
           :initial="{ opacity: 0 }"
           :animate="{ opacity: 1 }"
           :transition="{ duration: 0.15 }"
-          :class="['absolute inset-0 backdrop-blur-md backdrop-saturate-200', themeStore.isDarkMode ? 'bg-black/70' : 'bg-[#111113]/40']"
+          :class="['absolute inset-0', backdropFilterClass, themeStore.isDarkMode ? 'bg-black/70' : 'bg-[#111113]/40']"
           @click="emit('close')"
         />
         <motion.div
@@ -112,6 +119,7 @@ const modalClass = computed(() => getModalGlass(themeStore.isDarkMode, perfStore
           :drag="isMobile ? 'y' : false"
           :drag-constraints="{ top: 0, bottom: 600 }"
           :drag-elastic="0.2"
+          :drag-snap-to-origin="true"
           role="dialog"
           aria-modal="true"
           aria-labelledby="modal-title"
