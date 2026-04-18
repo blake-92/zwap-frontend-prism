@@ -53,6 +53,7 @@ const titleClass = computed(() => {
     <div class="flex justify-between items-start mb-4">
       <motion.div
         :layout-id="qrLayoutId"
+        layout
         :class="[
           'w-12 h-12 rounded-xl flex items-center justify-center transition-colors duration-300',
           link.active ? 'cursor-pointer' : 'cursor-default',

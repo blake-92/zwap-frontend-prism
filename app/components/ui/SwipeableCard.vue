@@ -112,8 +112,9 @@ const chevronBg = computed(() =>
     >
       <slot />
 
+      <!-- Hint animation solo con continuous anims (Prism/Normal). Lite: chevron estático. -->
       <motion.div
-        v-if="maxDrag > 0 && !isOpen"
+        v-if="maxDrag > 0 && !isOpen && perfStore.useContinuousAnim"
         :initial="{ x: 5 }"
         :animate="{ x: 0 }"
         :transition="{
@@ -127,6 +128,12 @@ const chevronBg = computed(() =>
       >
         <ChevronLeft :size="16" :stroke-width="3" class="ml-2" />
       </motion.div>
+      <div
+        v-else-if="maxDrag > 0 && !isOpen"
+        :class="['absolute right-0 top-0 bottom-0 flex flex-col items-center justify-center w-10 pointer-events-none rounded-r-[24px]', chevronBg]"
+      >
+        <ChevronLeft :size="16" :stroke-width="3" class="ml-2" />
+      </div>
     </motion.div>
   </div>
 </template>

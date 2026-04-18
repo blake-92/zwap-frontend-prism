@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { motion, AnimatePresence } from 'motion-v'
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceStore } from '~/stores/performance'
 import { useScrollLock } from '~/composables/useScrollLock'
 import { useChromeBlur } from '~/composables/useChromeBlur'
 import { SPRING } from '~/utils/springs'
@@ -13,6 +14,7 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
 
 useScrollLock(() => props.isOpen)
 useChromeBlur(() => props.isOpen)
@@ -54,7 +56,7 @@ const panelClass = computed(() =>
             initial="hidden"
             animate="visible"
             exit="exit"
-            class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs"
+            :class="['fixed inset-0 z-50', perfStore.isLite ? 'bg-black/70' : 'bg-black/50 backdrop-blur-xs']"
             @click="emit('close')"
           />
           <motion.div

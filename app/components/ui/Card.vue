@@ -26,7 +26,8 @@ const onKey = (e) => {
 <template>
   <div
     :class="[
-      'rounded-[24px] border transition-[transform,box-shadow] duration-300 transform-gpu overflow-hidden',
+      'rounded-[24px] border overflow-hidden',
+      perfStore.useHoverLift ? 'transform-gpu transition-[transform,box-shadow] duration-300' : '',
       cls.base,
       cls.hover,
       clickable ? 'cursor-pointer' : '',

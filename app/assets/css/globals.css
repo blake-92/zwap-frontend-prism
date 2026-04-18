@@ -159,7 +159,7 @@ html.has-overlay main {
    Branching JS adicional para neon, deep shadows, continuous anims.
    @media prefers-reduced-motion: OS-level (WCAG 2.1) anula animaciones. */
 
-/* Normal — backdrop-blur a ~50% (Tailwind: blur-2xl=40px, blur-3xl=64px) */
+/* Normal — backdrop-blur a ~50% (Tailwind: blur-md=12px, blur-lg=16px, blur-xl=24px, blur-2xl=40px, blur-3xl=64px) */
 html.perf-normal .backdrop-blur-3xl {
   -webkit-backdrop-filter: blur(24px) !important;
   backdrop-filter: blur(24px) !important;
@@ -171,6 +171,18 @@ html.perf-normal .backdrop-blur-2xl {
 html.perf-normal .backdrop-blur-xl {
   -webkit-backdrop-filter: blur(10px) !important;
   backdrop-filter: blur(10px) !important;
+}
+html.perf-normal .backdrop-blur-lg {
+  -webkit-backdrop-filter: blur(8px) !important;
+  backdrop-filter: blur(8px) !important;
+}
+html.perf-normal .backdrop-blur-md {
+  -webkit-backdrop-filter: blur(6px) !important;
+  backdrop-filter: blur(6px) !important;
+}
+html.perf-normal .backdrop-blur-sm {
+  -webkit-backdrop-filter: blur(3px) !important;
+  backdrop-filter: blur(3px) !important;
 }
 
 /* Lite — sin backdrop-filter (mayor costo GPU) */
@@ -200,7 +212,7 @@ html.perf-lite .hover\:-translate-y-1:hover {
   transform: none !important;
 }
 
-/* ─── Prism typography micro-details — solo html.perf-full ─── */
+/* ─── Typography micro-details — Global (Democratized for all tiers) ─── */
 /*
  * Inter OpenType features (zero runtime cost — font shaping time):
  *   cv11 → single-storey 'a' (modernizes letterforms)
@@ -211,12 +223,12 @@ html.perf-lite .hover\:-translate-y-1:hover {
  *   calt → contextual ligatures (si aparecen operadores en textos técnicos)
  *   zero → slashed zero (disambigua 0 de O en IDs, amounts)
  */
-html.perf-full body {
+body {
   font-feature-settings: 'cv11' 1, 'cv05' 1, 'ss01' 1;
 }
-html.perf-full .font-mono,
-html.perf-full pre,
-html.perf-full code {
+.font-mono,
+pre,
+code {
   font-feature-settings: 'calt' 1, 'zero' 1;
 }
 

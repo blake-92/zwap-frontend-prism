@@ -8,11 +8,14 @@ import {
 } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
 import { useViewSearch } from '~/composables/useViewSearch'
+import { useDebouncedSearch } from '~/composables/useDebouncedSearch'
 import { useMediaQuery } from '~/composables/useMediaQuery'
 import { useInfiniteScroll } from '~/composables/useInfiniteScroll'
 import { useMotionVariants } from '~/composables/useMotionVariants'
 import { PAYOUTS, WALLET_BALANCE, SETTLEMENT_SUMMARY } from '~/utils/mockData'
 import { formatDate, parseIsoDate } from '~/utils/formatDate'
+import { getTheadClass } from '~/utils/cardClasses'
+import { usePerformanceStore } from '~/stores/performance'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
 import Badge from '~/components/ui/Badge.vue'
@@ -28,6 +31,7 @@ const mv = useMotionVariants()
 const { t, locale } = useI18n()
 const fmtDate = (iso) => formatDate(iso, locale.value)
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
 const isDesktop = useMediaQuery('(min-width: 1024px)')
 const viewSearch = useViewSearch(computed(() => t('settlements.searchPlaceholder')))
 
@@ -40,7 +44,12 @@ const ITEMS_PER_PAGE = 7
 
 watch(defaultStatus, (v) => { if (!statusFilter.value) statusFilter.value = v }, { immediate: true })
 watch(defaultDate, (v) => { if (!dateFilter.value) dateFilter.value = v }, { immediate: true })
-watch(() => viewSearch.query, () => { currentPage.value = 1 })
+
+// Debounce solo en Lite + reset page inmediato
+const debouncedQuery = useDebouncedSearch(
+  () => viewSearch.query,
+  { onInput: () => { currentPage.value = 1 } },
+)
 
 const filtersActive = computed(() =>
   (statusFilter.value !== defaultStatus.value ? 1 : 0) +
@@ -55,7 +64,7 @@ const resetFilters = () => {
 }
 
 const filtered = computed(() => {
-  const q = viewSearch.query?.toLowerCase() || ''
+  const q = debouncedQuery.value?.toLowerCase() || ''
   const tThisWeek = t('filters.thisWeek')
   const tThisMonth = t('filters.thisMonth')
   return PAYOUTS.filter(p => {
@@ -92,11 +101,7 @@ const { visibleData, hasMore, sentinelRef } = useInfiniteScroll(filtered, {
   enabled: computed(() => !isDesktop.value),
 })
 
-const theadClass = computed(() =>
-  themeStore.isDarkMode
-    ? 'text-[#888991] border-b border-white/10 bg-[#111113]/40'
-    : 'text-[#67656E] border-b border-black/5 bg-white/50',
-)
+const theadClass = computed(() => getTheadClass(themeStore.isDarkMode, perfStore.isLite))
 const trClass = computed(() =>
   themeStore.isDarkMode
     ? 'border-b border-white/5 hover:bg-[#7C3AED]/5 last:border-0'

@@ -17,7 +17,14 @@ const connectorColor = (i) => {
 const circleClass = (step) => {
   const neon = perfStore.useNeon
   if (step.done) return `bg-emerald-500 text-white${neon ? ' shadow-[0_0_12px_rgba(16,185,129,0.5)]' : ' shadow-md'}`
-  if (step.active) return `bg-[#7C3AED] text-white outline outline-4 outline-[#7C3AED]/20${neon ? ' shadow-[0_0_20px_rgba(124,58,237,0.7)]' : ' shadow-md'}`
+  if (step.active) {
+    // Outline + neon halo son un pair visual: en Prism el glow suaviza el outline.
+    // Sin glow (Normal/Lite) el outline púrpura/20 queda flotando sobre fondo oscuro
+    // y se percibe como aro grisáceo. Solo aplicamos outline cuando hay neon.
+    return neon
+      ? 'bg-[#7C3AED] text-white outline outline-4 outline-[#7C3AED]/20 shadow-[0_0_20px_rgba(124,58,237,0.7)]'
+      : 'bg-[#7C3AED] text-white shadow-md'
+  }
   return themeStore.isDarkMode
     ? 'bg-[#252429] border border-white/10 text-[#45434A]'
     : 'bg-gray-100 border border-gray-200 text-gray-400'

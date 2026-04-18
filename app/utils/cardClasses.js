@@ -13,12 +13,30 @@
  * En Normal/Lite se queda con glass base (más opaco, sin saturate) para ahorrar GPU.
  */
 
+/**
+ * Clase para table thead — compartida entre 6 vistas con tablas.
+ * En Lite light el `bg-white/50` desaparece sobre cards blancas — usamos tinte lavanda.
+ */
+export function getTheadClass(isDarkMode, isLite = false) {
+  if (isDarkMode) {
+    if (isLite) return 'text-[#888991] border-b border-white/10 bg-[#1A1A1D]'
+    return 'text-[#888991] border-b border-white/10 bg-[#111113]/40'
+  }
+  if (isLite) return 'text-[#67656E] border-b border-[#DBD3FB] bg-[#F8F7FB]'
+  return 'text-[#67656E] border-b border-black/5 bg-white/50'
+}
+
 export function getCardClasses(isDarkMode, hoverEffect = false, useBlur = true, useNeon = true, useGlassElevation = false) {
   const d = isDarkMode
   let base
 
   if (!useBlur) {
-    base = d ? 'bg-[#252429] border-white/10 shadow-xl' : 'bg-white border-gray-200 shadow-md'
+    // Lite tier — surfaces sin glass. Para no perder identidad ni jerarquía:
+    //   Dark:  tinte layered (#1A1A1D sobre #111113) + rim inset + shadow tight
+    //   Light: bg blanco + border lavanda de marca + shadow dual branded púrpura
+    base = d
+      ? 'bg-[#1A1A1D] border border-white/15 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_4px_12px_rgba(0,0,0,0.5)]'
+      : 'bg-white border border-[#DBD3FB] shadow-[0_1px_2px_rgba(124,58,237,0.05),0_4px_12px_rgba(124,58,237,0.06)]'
   } else if (useGlassElevation) {
     // Prism — liquid glass: opacidad baja + backdrop-saturate + rim + bevel
     const shadow = d
@@ -52,10 +70,10 @@ export function getCardClasses(isDarkMode, hoverEffect = false, useBlur = true, 
     ? d
       ? useBlur
         ? `hover:-translate-y-1 ${hoverBgDark} ${hoverShadowDark} active:translate-y-0 ${activeBgDark}`
-        : 'hover:-translate-y-1 hover:bg-[#2a2930] hover:shadow-lg active:translate-y-0 active:bg-[#252429]'
+        : 'active:scale-[0.98] active:bg-[#7C3AED]/20 transition-all duration-100'
       : useBlur
         ? `hover:-translate-y-1 ${hoverBgLight} ${hoverShadowLight} active:translate-y-0 ${activeBgLight}`
-        : 'hover:-translate-y-1 hover:bg-gray-50 hover:shadow-lg active:translate-y-0 active:bg-white'
+        : 'active:scale-[0.98] active:bg-[#7C3AED]/10 transition-all duration-100'
     : ''
 
   return { base, hover }
@@ -64,7 +82,10 @@ export function getCardClasses(isDarkMode, hoverEffect = false, useBlur = true, 
 export const getModalGlass = (isDarkMode, useBlur = true, shadowLevel = 'deep', useGlassElevation = false) => {
   const d = isDarkMode
   if (!useBlur) {
-    return d ? 'bg-[#252429] border border-white/15 shadow-2xl' : 'bg-white border border-gray-200 shadow-2xl'
+    // Lite modal — branded depth sin glass. Modal shadow stronger que Card (hierarchy).
+    return d
+      ? 'bg-[#1A1A1D] border border-white/15 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_24px_rgba(0,0,0,0.6)]'
+      : 'bg-white border border-[#DBD3FB] shadow-[0_4px_12px_rgba(124,58,237,0.08),0_16px_40px_rgba(124,58,237,0.08)]'
   }
 
   if (useGlassElevation) {
@@ -93,7 +114,10 @@ export const getModalGlass = (isDarkMode, useBlur = true, shadowLevel = 'deep', 
 export const getDropdownGlass = (isDarkMode, useBlur = true, shadowLevel = 'deep', useGlassElevation = false) => {
   const d = isDarkMode
   if (!useBlur) {
-    return d ? 'bg-[#252429] border border-white/15 shadow-xl' : 'bg-white border border-gray-200 shadow-xl'
+    // Lite dropdown — branded depth. Entre Card y Modal en peso.
+    return d
+      ? 'bg-[#1A1A1D] border border-white/15 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_4px_16px_rgba(0,0,0,0.6)]'
+      : 'bg-white border border-[#DBD3FB] shadow-[0_2px_8px_rgba(124,58,237,0.08),0_10px_30px_rgba(124,58,237,0.08)]'
   }
 
   if (useGlassElevation) {

@@ -3,9 +3,11 @@ import { ref, computed, watch } from 'vue'
 import { motion, AnimatePresence } from 'motion-v'
 import { Download, UserPlus, Users, Pencil, Trash2, Filter } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceStore } from '~/stores/performance'
 import { useViewSearch } from '~/composables/useViewSearch'
 import { useMotionVariants } from '~/composables/useMotionVariants'
 import { USERS } from '~/utils/mockData'
+import { getTheadClass } from '~/utils/cardClasses'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
 import Badge from '~/components/ui/Badge.vue'
@@ -21,6 +23,7 @@ import NewUserModal from './NewUserModal.vue'
 const mv = useMotionVariants()
 const { t } = useI18n()
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
 const viewSearch = useViewSearch(computed(() => t('users.searchPlaceholder')))
 const users = ref(USERS.map(u => ({ ...u })))
 const newUserOpen = ref(false)
@@ -73,11 +76,7 @@ const toggleUser = (id) => {
   if (u) u.active = !u.active
 }
 
-const theadClass = computed(() =>
-  themeStore.isDarkMode
-    ? 'text-[#888991] border-b border-white/10 bg-[#111113]/40'
-    : 'text-[#67656E] border-b border-black/5 bg-white/50',
-)
+const theadClass = computed(() => getTheadClass(themeStore.isDarkMode, perfStore.isLite))
 const trClass = computed(() =>
   themeStore.isDarkMode
     ? 'border-b border-white/5 hover:bg-[#7C3AED]/5 last:border-0'

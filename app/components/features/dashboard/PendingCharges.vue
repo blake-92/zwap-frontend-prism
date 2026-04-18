@@ -9,6 +9,8 @@ import { useMotionVariants } from '~/composables/useMotionVariants'
 import { CUSTOM_LINKS } from '~/utils/mockData'
 import { copyToClipboard } from '~/utils/clipboard'
 import { formatDate } from '~/utils/formatDate'
+import { getTheadClass } from '~/utils/cardClasses'
+import { usePerformanceStore } from '~/stores/performance'
 import { ROUTES } from '~/utils/routes'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
@@ -41,6 +43,7 @@ function classifyAction(views, lifeElapsedPct) {
 
 const { t, locale } = useI18n()
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
 const toastStore = useToastStore()
 const isDesktop = useMediaQuery('(min-width: 1024px)')
 const fmtCreated = (createdAt) => formatDate((createdAt || '').split('T')[0], locale.value)
@@ -79,11 +82,7 @@ const handleCopy = async (link) => {
 
 const goLinks = () => navigateTo(ROUTES.LINKS)
 
-const theadClass = computed(() =>
-  themeStore.isDarkMode
-    ? 'text-[#888991] border-b border-white/10 bg-[#111113]/40'
-    : 'text-[#67656E] border-b border-black/5 bg-white/50',
-)
+const theadClass = computed(() => getTheadClass(themeStore.isDarkMode, perfStore.isLite))
 const trClass = computed(() =>
   themeStore.isDarkMode
     ? 'border-b border-white/5 hover:bg-[#7C3AED]/5 last:border-0'

@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { motion } from 'motion-v'
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceStore } from '~/stores/performance'
 
 const props = defineProps({
   width: { type: [String, Number], default: '100%' },
@@ -10,6 +11,7 @@ const props = defineProps({
 })
 
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
 
 const wrapperStyle = computed(() => ({
   width: typeof props.width === 'number' ? `${props.width}px` : props.width,
@@ -24,7 +26,17 @@ const shimmerStyle = computed(() => ({
 </script>
 
 <template>
+  <div
+    v-if="perfStore.isLite"
+    :style="wrapperStyle"
+    :class="[
+      'animate-pulse overflow-hidden',
+      rounded,
+      themeStore.isDarkMode ? 'bg-[#252429] border border-white/5' : 'bg-gray-200 border border-black/5',
+    ]"
+  />
   <motion.div
+    v-else
     :initial="{ opacity: 0.5 }"
     :animate="{ opacity: 1 }"
     :transition="{ repeat: Infinity, duration: 1.5, repeatType: 'reverse', ease: 'easeInOut' }"

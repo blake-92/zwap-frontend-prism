@@ -104,7 +104,7 @@ const toggleBtnClass = computed(() =>
 </script>
 
 <template>
-  <div :class="['min-h-screen flex font-sans transition-colors duration-500 relative overflow-hidden', themeStore.isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]']">
+  <div :class="['min-h-screen flex font-sans transition-colors duration-300 relative overflow-hidden', themeStore.isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]']">
     <GlassBackground />
 
     <!-- Desktop sidebar + toggle -->

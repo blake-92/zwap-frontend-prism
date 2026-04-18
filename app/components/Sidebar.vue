@@ -72,15 +72,22 @@ const asideClass = computed(() => {
 const walletBtnClass = (collapsed) => {
   if (collapsed) return 'border-transparent bg-transparent shadow-none'
   const neon = perfStore.useNeon
+  const isLite = perfStore.isLite
   if (isWalletActive.value) {
     if (themeStore.isDarkMode) {
+      if (isLite) return 'bg-[#252429] border-[#7C3AED]/50'
       return `bg-[#252429]/60 border-[#7C3AED]/50${neon ? ' shadow-[0_0_16px_rgba(124,58,237,0.2)]' : ''}`
     }
+    if (isLite) return 'bg-[#F8F7FB] border-[#7C3AED]/40'
     return `bg-white/80 border-[#7C3AED]/40${neon ? ' shadow-[0_0_12px_rgba(124,58,237,0.15)]' : ''}`
   }
-  return themeStore.isDarkMode
-    ? 'bg-[#252429]/20 border-white/10 hover:bg-[#252429]/40 hover:border-[#7C3AED]/30'
-    : 'bg-white/40 border-white hover:bg-white/60 hover:border-[#7C3AED]/20'
+  // Inactive
+  if (themeStore.isDarkMode) {
+    if (isLite) return 'bg-[#1A1A1D] border-white/15 hover:border-[#7C3AED]/30'
+    return 'bg-[#252429]/20 border-white/10 hover:bg-[#252429]/40 hover:border-[#7C3AED]/30'
+  }
+  if (isLite) return 'bg-[#F8F7FB] border-[#DBD3FB] hover:border-[#7C3AED]/30'
+  return 'bg-white/40 border-white hover:bg-white/60 hover:border-[#7C3AED]/20'
 }
 
 const navItemClass = (active) => {
@@ -105,7 +112,7 @@ const glowClass = (collapsed) => {
   <motion.aside
     :animate="{ width: isCollapsed ? 72 : 256 }"
     :transition="SPRING"
-    :class="['relative shrink-0 flex flex-col h-screen z-20 overflow-hidden transition-colors duration-500', asideClass]"
+    :class="['relative shrink-0 flex flex-col h-screen z-20 overflow-hidden transition-colors duration-300', asideClass]"
   >
     <!-- Logo -->
     <div class="h-20 flex items-center shrink-0 overflow-hidden pl-[19px]">
@@ -227,7 +234,12 @@ const glowClass = (collapsed) => {
           </motion.div>
         </AnimatePresence>
 
-        <div :class="['absolute -bottom-4 -right-4 w-16 h-16 rounded-full blur-xl pointer-events-none transition-[opacity] duration-500', glowClass(isCollapsed)]" />
+        <!-- Glow bubble solo en Prism/Normal — filter:blur en Lite ya se strippea vía CSS,
+             pero el DOM y el compositing layer persisten. v-if lo elimina completamente. -->
+        <div
+          v-if="perfStore.useWalletGlowBubble"
+          :class="['absolute -bottom-4 -right-4 w-16 h-16 rounded-full blur-xl pointer-events-none transition-[opacity] duration-500', glowClass(isCollapsed)]"
+        />
       </motion.button>
 
       <!-- User row -->

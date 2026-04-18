@@ -37,17 +37,24 @@ onUnmounted(() => {
   <ClientOnly>
     <Teleport to="body">
       <AnimatePresence>
-        <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center">
-          <motion.div
-            :initial="{ opacity: 0 }"
-            :animate="{ opacity: 1 }"
-            :exit="{ opacity: 0 }"
-            :transition="{ duration: 0.2 }"
-            class="absolute inset-0 bg-black/60 backdrop-blur-md"
-            @click="emit('close')"
+        <!-- Direct child de AnimatePresence debe ser motion component para que layoutId matching sea confiable. -->
+        <motion.div
+          v-if="isOpen"
+          :initial="{ opacity: 0 }"
+          :animate="{ opacity: 1 }"
+          :exit="{ opacity: 0 }"
+          :transition="{ duration: 0.22 }"
+          class="fixed inset-0 z-50 flex items-center justify-center"
+          @click="emit('close')"
+        >
+          <div
+            class="absolute inset-0 bg-black/60 backdrop-blur-md pointer-events-none"
+            aria-hidden="true"
           />
           <motion.div
             :layout-id="layoutId"
+            layout
+            :transition="{ layout: { type: 'spring', stiffness: 260, damping: 30 } }"
             class="relative bg-white p-8 sm:p-12 rounded-[32px] shadow-2xl flex flex-col items-center overflow-hidden"
             @click.stop
           >
@@ -64,7 +71,7 @@ onUnmounted(() => {
               <div class="prism-qr-shimmer absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent" />
             </div>
           </motion.div>
-        </div>
+        </motion.div>
       </AnimatePresence>
     </Teleport>
   </ClientOnly>

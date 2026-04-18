@@ -8,12 +8,15 @@ import {
 } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
 import { useViewSearch } from '~/composables/useViewSearch'
+import { useDebouncedSearch } from '~/composables/useDebouncedSearch'
 import { useMediaQuery } from '~/composables/useMediaQuery'
 import { useInfiniteScroll } from '~/composables/useInfiniteScroll'
 import { useMotionVariants } from '~/composables/useMotionVariants'
 import { TRANSACTIONS } from '~/utils/mockData'
 import { ROUTES } from '~/utils/routes'
 import { formatDate, parseIsoDate } from '~/utils/formatDate'
+import { getTheadClass } from '~/utils/cardClasses'
+import { usePerformanceStore } from '~/stores/performance'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
 import Badge from '~/components/ui/Badge.vue'
@@ -30,6 +33,7 @@ import RefundModal from './RefundModal.vue'
 const mv = useMotionVariants()
 const { t, locale } = useI18n()
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
 const isDesktop = useMediaQuery('(min-width: 1024px)')
 const viewSearch = useViewSearch(computed(() => t('transactions.searchPlaceholder')))
 
@@ -46,7 +50,12 @@ watch(defaultDate, (v) => { if (!dateFilter.value) dateFilter.value = v }, { imm
 const currentPage = ref(1)
 const ITEMS_PER_PAGE = 7
 
-watch(() => viewSearch.query, () => { currentPage.value = 1 })
+// Debounce solo en Lite — evita recalcular filter + date parse por keystroke en A15-class.
+// currentPage resetea instantáneamente (user espera página 1 al buscar, no tras 250ms).
+const debouncedQuery = useDebouncedSearch(
+  () => viewSearch.query,
+  { onInput: () => { currentPage.value = 1 } },
+)
 
 const filtersActive = computed(() =>
   (statusFilter.value !== defaultStatus.value ? 1 : 0) +
@@ -61,7 +70,7 @@ const resetFilters = () => {
 }
 
 const filtered = computed(() => {
-  const q = viewSearch.query?.toLowerCase() || ''
+  const q = debouncedQuery.value?.toLowerCase() || ''
   const tToday = t('filters.today')
   const tLast7 = t('filters.last7days')
   const tThisMonth = t('filters.thisMonth')
@@ -113,11 +122,7 @@ const amountClass = (trx) => {
 
 const formatTrxDate = (iso) => formatDate(iso, locale.value)
 
-const theadClass = computed(() =>
-  themeStore.isDarkMode
-    ? 'text-[#888991] border-b border-white/10 bg-[#111113]/40'
-    : 'text-[#67656E] border-b border-black/5 bg-white/50',
-)
+const theadClass = computed(() => getTheadClass(themeStore.isDarkMode, perfStore.isLite))
 const trClass = computed(() =>
   themeStore.isDarkMode
     ? 'border-b border-white/5 hover:bg-[#7C3AED]/5 last:border-0'
@@ -222,7 +227,14 @@ const goLinks = () => navigateTo(ROUTES.LINKS)
                     <span class="opacity-40">•</span>
                     <span class="flex items-center gap-1.5" :title="trx.country">
                       <Globe2 v-if="trx.countryCode === 'xx'" :size="12" class="opacity-70" />
-                      <img v-else :src="`https://flagcdn.com/w20/${trx.countryCode}.png`" :alt="trx.country" class="w-3.5 h-3.5 rounded-full object-cover" />
+                      <img
+                        v-else
+                        :src="`https://flagcdn.com/w20/${trx.countryCode}.png`"
+                        :alt="trx.country"
+                        loading="lazy"
+                        decoding="async"
+                        class="w-3.5 h-3.5 rounded-full object-cover"
+                      />
                       <span class="hidden xl:inline">{{ trx.country }}</span>
                     </span>
                   </div>

@@ -27,19 +27,27 @@ const SIZES = {
 const variantClass = computed(() => {
   const d = themeStore.isDarkMode
   const neon = perfStore.useNeon
+  const isLite = perfStore.isLite
   // Shadow del botón default (morado): neon en full, shadow-lg neutro en normal/lite/minimal
   const defaultShadow = neon
     ? (d ? 'shadow-[0_8px_30px_rgba(124,58,237,0.4)]' : 'shadow-[0_8px_25px_rgba(124,58,237,0.3)]')
     : 'shadow-lg'
   // Shimmer sweep sutil que cruza el botón cada 8s — solo Prism (useGlassElevation === tier === 'full')
   const shimmer = perfStore.useGlassElevation ? ' prism-button-shimmer' : ''
+  // Outline/successExport en Lite light: fondo tintado + borde lavanda (sin depender de blur)
+  const outlineLight = isLite
+    ? 'bg-[#F8F7FB] border border-[#DBD3FB] text-[#45434A] hover:bg-white active:bg-[#EEECF2] shadow-xs'
+    : 'bg-white/60 border border-white text-[#45434A] hover:bg-white active:bg-gray-100 shadow-xs'
+  const successExportLight = isLite
+    ? 'bg-[#F8F7FB] border border-[#DBD3FB] text-[#45434A] hover:bg-emerald-50 active:bg-emerald-100 hover:text-emerald-600 hover:border-emerald-200 shadow-xs'
+    : 'bg-white/60 border border-white text-[#45434A] hover:bg-emerald-50 active:bg-emerald-100 hover:text-emerald-600 hover:border-emerald-200 shadow-xs'
   const v = {
     default: d
       ? `bg-[#7C3AED] hover:bg-[#561BAF] active:bg-[#4C1599] text-white ${defaultShadow} border border-[#7C3AED]/60 border-t-[#B9A4F8]/50${shimmer}`
       : `bg-[#7C3AED] hover:bg-[#561BAF] active:bg-[#4C1599] text-white ${defaultShadow} border border-[#7C3AED]/30 border-t-white/50${shimmer}`,
     outline: d
       ? 'bg-transparent border border-white/10 text-[#D8D7D9] hover:bg-white/5 active:bg-white/10'
-      : 'bg-white/60 border border-white text-[#45434A] hover:bg-white active:bg-gray-100 shadow-xs',
+      : outlineLight,
     ghost: d
       ? 'bg-transparent hover:bg-white/10 active:bg-white/15 text-[#888991] hover:text-white border border-transparent'
       : 'bg-transparent hover:bg-black/5 active:bg-black/10 text-[#67656E] hover:text-[#111113] border border-transparent',
@@ -51,7 +59,7 @@ const variantClass = computed(() => {
       : 'text-[#67656E] bg-white border border-gray-200 hover:bg-rose-50 active:bg-rose-100 hover:text-rose-600 hover:border-rose-200',
     successExport: d
       ? 'bg-transparent border border-white/10 text-[#D8D7D9] hover:bg-emerald-500/15 active:bg-emerald-500/25 hover:text-emerald-400 hover:border-emerald-500/30'
-      : 'bg-white/60 border border-white text-[#45434A] hover:bg-emerald-50 active:bg-emerald-100 hover:text-emerald-600 hover:border-emerald-200 shadow-xs',
+      : successExportLight,
   }
   return v[props.variant]
 })

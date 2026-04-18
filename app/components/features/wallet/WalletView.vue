@@ -6,12 +6,15 @@ import {
   FileText, Loader2, Calendar, Filter, Download,
 } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceStore } from '~/stores/performance'
 import { useViewSearch } from '~/composables/useViewSearch'
+import { useDebouncedSearch } from '~/composables/useDebouncedSearch'
 import { useMediaQuery } from '~/composables/useMediaQuery'
 import { useInfiniteScroll } from '~/composables/useInfiniteScroll'
 import { useMotionVariants } from '~/composables/useMotionVariants'
 import { WITHDRAWALS, WALLET_BALANCE, WALLET_STEPS, BANK_ACCOUNT } from '~/utils/mockData'
 import { formatDate, parseIsoDate } from '~/utils/formatDate'
+import { getTheadClass } from '~/utils/cardClasses'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
 import Badge from '~/components/ui/Badge.vue'
@@ -29,6 +32,7 @@ const mv = useMotionVariants()
 const { t, locale } = useI18n()
 const fmtDate = (iso) => formatDate(iso, locale.value)
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
 const isDesktop = useMediaQuery('(min-width: 1024px)')
 const viewSearch = useViewSearch(computed(() => t('wallet.searchPlaceholder')))
 
@@ -48,7 +52,12 @@ const filtersActive = computed(() =>
   (dateFilter.value !== defaultDate.value ? 1 : 0),
 )
 watch(filtersActive, (v) => viewSearch.setActiveFilterCount(v), { immediate: true })
-watch(() => viewSearch.query, () => { currentPage.value = 1 })
+
+// Debounce solo en Lite + reset page inmediato
+const debouncedQuery = useDebouncedSearch(
+  () => viewSearch.query,
+  { onInput: () => { currentPage.value = 1 } },
+)
 
 const resetFilters = () => {
   statusFilter.value = defaultStatus.value
@@ -59,7 +68,7 @@ const resetFilters = () => {
 const ITEMS_PER_PAGE = 5
 
 const filtered = computed(() => {
-  const q = viewSearch.query?.toLowerCase() || ''
+  const q = debouncedQuery.value?.toLowerCase() || ''
   const tToday = t('filters.today')
   const tLast7 = t('filters.last7days')
   const tThisMonth = t('filters.thisMonth')
@@ -103,11 +112,7 @@ const { visibleData, hasMore, sentinelRef } = useInfiniteScroll(filtered, {
   enabled: computed(() => !isDesktop.value),
 })
 
-const theadClass = computed(() =>
-  themeStore.isDarkMode
-    ? 'text-[#888991] border-b border-white/10 bg-[#111113]/40'
-    : 'text-[#67656E] border-b border-black/5 bg-white/50',
-)
+const theadClass = computed(() => getTheadClass(themeStore.isDarkMode, perfStore.isLite))
 const trClass = computed(() =>
   themeStore.isDarkMode
     ? 'border-b border-white/5 hover:bg-[#7C3AED]/5 last:border-0'
@@ -122,7 +127,12 @@ const trClass = computed(() =>
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-6">
       <!-- Saldo Disponible -->
       <Card class="lg:col-span-2 relative overflow-hidden flex flex-col">
-        <div :class="['absolute -top-10 -right-10 w-40 h-40 rounded-full blur-3xl pointer-events-none', themeStore.isDarkMode ? 'bg-[#7C3AED]/20' : 'bg-[#DBD3FB]/60']" />
+        <!-- Decorative glow solo cuando hay blur real (Prism/Normal).
+             En Lite el CSS strippea filter:blur y este div queda como círculo púrpura sólido. -->
+        <div
+          v-if="perfStore.useBlur"
+          :class="['absolute -top-10 -right-10 w-40 h-40 rounded-full blur-3xl pointer-events-none', themeStore.isDarkMode ? 'bg-[#7C3AED]/20' : 'bg-[#DBD3FB]/60']"
+        />
 
         <div class="relative px-6 pt-6 pb-5">
           <div class="flex items-start justify-between mb-4">

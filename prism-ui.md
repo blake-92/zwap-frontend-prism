@@ -68,6 +68,35 @@ Usados en badges, fondos de alerta e iconos de estado. La opacidad varía por mo
 | Mastercard en gráfico | `#10B981` | – |
 | Amex en gráfico | `#F59E0B` | – |
 
+### 1.6 Tokens específicos del tier Lite
+
+En tier Lite (sin `backdrop-blur` ni `filter:blur`) las superficies usan **tintes sólidos** en vez de transparencias. Estos tokens extienden la paleta brand sin perder identidad.
+
+| Token | Valor | Uso Lite |
+|---|---|---|
+| `lite-light-surface` | `#F8F7FB` | Bg tintado de inputs, search bars, Toolbar, Button outline/successExport, branch pill, thead |
+| `lite-light-hover` | `#EEECF2` | Active state de cards clickeables en Lite light (reemplaza hover-lift) |
+| `lite-light-border` | `#DBD3FB` | Borde de cards, modales, inputs, dropdowns, badges outline — usa el mismo `brand-light` |
+| `lite-dark-chrome` | `#1A1A1D` | Bg sólido de Sidebar/Header/BottomNav, cards, modales, dropdowns, badge outline |
+| `lite-dark-input` | `#0F0F11` | Bg de inputs y search bars en dark (capa más profunda que chrome) |
+
+**Shadow branded para Lite light** (sustituye neon/glass depth):
+```css
+shadow-[0_1px_2px_rgba(124,58,237,0.05),0_4px_12px_rgba(124,58,237,0.06)]  /* Card */
+shadow-[0_2px_8px_rgba(124,58,237,0.08),0_10px_30px_rgba(124,58,237,0.08)]  /* Dropdown */
+shadow-[0_4px_12px_rgba(124,58,237,0.08),0_16px_40px_rgba(124,58,237,0.08)] /* Modal */
+```
+
+El tinte púrpura al 5-8% alpha da "aliento de marca" sin costo de compositing.
+
+**Radial-gradient background Lite** (reemplazo de blobs blur):
+```css
+bg-[radial-gradient(ellipse_at_top_left,rgba(124,58,237,0.22)_0%,transparent_55%),
+    radial-gradient(ellipse_at_bottom_right,rgba(86,27,175,0.14)_0%,transparent_55%)]
+```
+
+Zero GPU cost vs. `filter: blur(60px)` — mantiene atmósfera púrpura para que cards blancas no se pierdan.
+
 ---
 
 ## 2. Tipografía

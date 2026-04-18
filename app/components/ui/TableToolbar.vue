@@ -2,6 +2,7 @@
 import { ref, computed, watch, onUnmounted } from 'vue'
 import { RotateCcw } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceStore } from '~/stores/performance'
 import { useMediaQuery } from '~/composables/useMediaQuery'
 import { useViewSearchStore } from '~/stores/viewSearch'
 import BottomSheet from './BottomSheet.vue'
@@ -13,6 +14,7 @@ const emit = defineEmits(['reset'])
 
 const { t } = useI18n()
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
 const isDesktop = useMediaQuery('(min-width: 1024px)')
 const viewSearch = useViewSearchStore()
 const sheetOpen = ref(false)
@@ -42,11 +44,15 @@ watch(
 
 onUnmounted(() => viewSearch.setFilterOpener(null))
 
-const glassClass = computed(() =>
-  themeStore.isDarkMode
-    ? 'bg-[#252429]/20 backdrop-blur-xl border-white/10'
-    : 'bg-white/40 backdrop-blur-xl border-white shadow-xs',
-)
+const glassClass = computed(() => {
+  const isLite = perfStore.isLite
+  if (themeStore.isDarkMode) {
+    if (isLite) return 'bg-[#1A1A1D] border-white/15'
+    return 'bg-[#252429]/20 backdrop-blur-xl border-white/10'
+  }
+  if (isLite) return 'bg-[#F8F7FB] border-[#DBD3FB] shadow-xs'
+  return 'bg-white/40 backdrop-blur-xl border-white shadow-xs'
+})
 
 const resetBtnClass = computed(() =>
   themeStore.isDarkMode

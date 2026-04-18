@@ -83,7 +83,7 @@ const headerClass = computed(() => {
   const bgDark = useBlur ? 'bg-[#111113]/20' : 'bg-[#1A1A1D]'
   const bgLight = useBlur ? 'bg-white/30' : 'bg-white'
   return [
-    'z-50 h-16 lg:h-20 flex items-center justify-between px-4 sm:px-6 lg:px-10 shrink-0 transition-colors duration-500',
+    'z-50 h-16 lg:h-20 flex items-center justify-between px-4 sm:px-6 lg:px-10 shrink-0 transition-colors duration-300',
     props.isDesktop ? 'relative' : 'fixed inset-x-0 top-0',
     themeStore.isDarkMode
       ? `${bgDark} backdrop-blur-2xl border-b border-white/10`
@@ -93,9 +93,12 @@ const headerClass = computed(() => {
 
 const desktopSearchClass = computed(() => {
   const neon = perfStore.useNeon
+  const isLite = perfStore.isLite
   if (themeStore.isDarkMode) {
+    if (isLite) return 'bg-[#0F0F11] border-white/15 focus-within:border-[#7C3AED]/60 focus-within:ring-2 focus-within:ring-[#7C3AED]/20'
     return `bg-[#252429]/30 backdrop-blur-xl border-white/10 border-t-white/20 focus-within:border-[#7C3AED]/60 focus-within:bg-[#252429]/50${neon ? ' focus-within:shadow-[0_0_20px_rgba(124,58,237,0.2)]' : ''}`
   }
+  if (isLite) return 'bg-[#F8F7FB] border-[#DBD3FB] focus-within:border-[#7C3AED] focus-within:ring-2 focus-within:ring-[#7C3AED]/15'
   return `bg-white/50 backdrop-blur-xl border-white focus-within:border-[#7C3AED]/40 focus-within:bg-white/80 shadow-[0_4px_15px_rgb(0,0,0,0.02)]${neon ? ' focus-within:shadow-[0_0_20px_rgba(124,58,237,0.15)]' : ''}`
 })
 
@@ -107,17 +110,23 @@ const inputTextClass = computed(() =>
 
 const branchPillClass = computed(() => {
   const neon = perfStore.useNeon
+  const isLite = perfStore.isLite
   if (themeStore.isDarkMode) {
+    if (isLite) return 'bg-[#1A1A1D] border border-[#7C3AED]/40 text-[#7C3AED]'
     return `bg-[#7C3AED]/15 backdrop-blur-xl border border-[#7C3AED]/40 text-[#7C3AED]${neon ? ' shadow-[0_0_15px_rgba(124,58,237,0.2)]' : ''}`
   }
+  if (isLite) return 'bg-[#F8F7FB] border border-[#DBD3FB] shadow-sm text-[#7C3AED]'
   return 'bg-white/90 border border-white shadow-md text-[#7C3AED] backdrop-blur-xl'
 })
 
 const mobileSearchBarClass = computed(() => {
   const neon = perfStore.useNeon
+  const isLite = perfStore.isLite
   if (themeStore.isDarkMode) {
+    if (isLite) return 'bg-[#0F0F11] border-[#7C3AED]/40'
     return `bg-[#252429]/50 backdrop-blur-xl border-[#7C3AED]/40${neon ? ' shadow-[0_0_15px_rgba(124,58,237,0.15)]' : ''}`
   }
+  if (isLite) return 'bg-[#F8F7FB] border-[#DBD3FB]'
   return `bg-white/70 backdrop-blur-xl border-[#7C3AED]/30${neon ? ' shadow-[0_0_15px_rgba(124,58,237,0.1)]' : ''}`
 })
 

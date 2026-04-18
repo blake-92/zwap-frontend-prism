@@ -3,6 +3,7 @@ import { computed, onMounted, onUnmounted } from 'vue'
 import { motion } from 'motion-v'
 import { X, Printer, Download, Landmark, CheckCircle2 } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceStore } from '~/stores/performance'
 import { useScrollLock } from '~/composables/useScrollLock'
 import { useChromeBlur } from '~/composables/useChromeBlur'
 import { SPRING_SOFT } from '~/utils/springs'
@@ -15,6 +16,12 @@ const emit = defineEmits(['close'])
 const { t, locale } = useI18n()
 const formattedDate = computed(() => formatDate(props.trx.date, locale.value))
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
+
+// Blur condicional — misma lógica que ReceiptModal
+const actionBlur = computed(() => perfStore.isFull ? 'backdrop-blur-xl' : '')
+const cardBlur = computed(() => perfStore.useBlur ? 'backdrop-blur-2xl' : '')
+const backdropBlur = computed(() => perfStore.useBlur ? 'backdrop-blur-md' : '')
 
 useScrollLock(true)
 useChromeBlur(true)
@@ -65,7 +72,7 @@ const closeBtnClass = computed(() =>
           :initial="{ opacity: 0 }"
           :animate="{ opacity: 1 }"
           :transition="{ duration: 0.15 }"
-          :class="['absolute inset-0 backdrop-blur-md', themeStore.isDarkMode ? 'bg-[#111113]/80' : 'bg-white/60']"
+          :class="['absolute inset-0', backdropBlur, themeStore.isDarkMode ? 'bg-[#111113]/80' : 'bg-white/60']"
           @click="emit('close')"
         />
 
@@ -77,18 +84,18 @@ const closeBtnClass = computed(() =>
           class="relative w-full max-w-[400px]"
         >
           <div class="absolute -top-12 right-0 flex gap-2">
-            <button :class="['p-2 rounded-full backdrop-blur-xl transition-colors shadow-lg', actionBtnClass]" :title="t('common.print')">
+            <button :class="['p-2 rounded-full transition-colors shadow-lg', actionBlur, actionBtnClass]" :title="t('common.print')">
               <Printer :size="18" />
             </button>
-            <button :class="['p-2 rounded-full backdrop-blur-xl transition-colors shadow-lg', actionBtnClass]" :title="t('common.downloadPdf')">
+            <button :class="['p-2 rounded-full transition-colors shadow-lg', actionBlur, actionBtnClass]" :title="t('common.downloadPdf')">
               <Download :size="18" />
             </button>
-            <button :class="['p-2 rounded-full backdrop-blur-xl transition-colors shadow-lg', closeBtnClass]" :title="t('common.close')" @click="emit('close')">
+            <button :class="['p-2 rounded-full transition-colors shadow-lg', actionBlur, closeBtnClass]" :title="t('common.close')" @click="emit('close')">
               <X :size="18" />
             </button>
           </div>
 
-          <div :class="['overflow-hidden rounded-3xl border shadow-2xl backdrop-blur-2xl', cardClass]">
+          <div :class="['overflow-hidden rounded-3xl border shadow-2xl', cardBlur, cardClass]">
             <div class="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-emerald-500/20 to-transparent pointer-events-none" />
 
             <div class="px-8 pt-10 pb-8 relative z-10">

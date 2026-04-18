@@ -26,11 +26,15 @@ const trClass = computed(() =>
     ? 'border-b border-white/5 hover:bg-[#7C3AED]/5 last:border-0'
     : 'border-b border-black/5 hover:bg-[#DBD3FB]/20 last:border-0',
 )
-const theadClass = computed(() =>
-  themeStore.isDarkMode
-    ? 'text-[#888991] bg-[#111113]/20'
-    : 'text-[#67656E] bg-white/20',
-)
+const theadClass = computed(() => {
+  const isLite = perfStore.isLite
+  if (themeStore.isDarkMode) {
+    if (isLite) return 'text-[#888991] bg-[#1A1A1D]'
+    return 'text-[#888991] bg-[#111113]/20'
+  }
+  if (isLite) return 'text-[#67656E] bg-[#F8F7FB]'
+  return 'text-[#67656E] bg-white/20'
+})
 
 const amountClass = (trx) => {
   if (trx.status === 'refunded') return 'text-rose-500 line-through opacity-70'

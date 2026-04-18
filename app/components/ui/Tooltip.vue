@@ -1,7 +1,8 @@
 <script setup>
-import { ref, onUnmounted, watch, nextTick, useId } from 'vue'
+import { ref, computed, onUnmounted, watch, nextTick, useId } from 'vue'
 import { motion, AnimatePresence } from 'motion-v'
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceStore } from '~/stores/performance'
 
 const props = defineProps({
   content: { type: String, required: true },
@@ -9,7 +10,13 @@ const props = defineProps({
 })
 
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
 const isVisible = ref(false)
+
+// En Lite, aparición instantánea — sin spring. Ahorra motion-v framework overhead per-hover.
+const tooltipInitial = computed(() => perfStore.isLite ? false : { opacity: 0, scale: 0.95 })
+const tooltipExit = computed(() => perfStore.isLite ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, scale: 0.95 })
+const tooltipTransition = computed(() => perfStore.isLite ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 30 })
 const coords = ref({ top: -9999, left: -9999 })
 const triggerRef = ref(null)
 const tooltipRef = ref(null)
@@ -92,10 +99,10 @@ onUnmounted(() => clearTimeout(timeoutId))
           ref="tooltipRef"
           :id="tooltipId"
           role="tooltip"
-          :initial="{ opacity: 0, scale: 0.95 }"
+          :initial="tooltipInitial"
           :animate="{ opacity: 1, scale: 1 }"
-          :exit="{ opacity: 0, scale: 0.95 }"
-          :transition="{ type: 'spring', stiffness: 500, damping: 30 }"
+          :exit="tooltipExit"
+          :transition="tooltipTransition"
           :style="{
             position: 'fixed',
             top: coords.top + 'px',

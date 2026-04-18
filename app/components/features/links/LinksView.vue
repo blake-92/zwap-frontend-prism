@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { motion, AnimatePresence } from 'motion-v'
 import { Plus } from 'lucide-vue-next'
 import { useViewSearch } from '~/composables/useViewSearch'
+import { useDebouncedSearch } from '~/composables/useDebouncedSearch'
 import { useMotionVariants } from '~/composables/useMotionVariants'
 import { PERMANENT_LINKS } from '~/utils/mockData'
 import Button from '~/components/ui/Button.vue'
@@ -21,6 +22,8 @@ const newLinkOpen = ref(false)
 const detailLink = ref(null)
 const editLink = ref(null)
 const viewSearch = useViewSearch(computed(() => t('links.searchPlaceholder')))
+// Debounce solo en Lite — CustomLinksTable recibe el valor debounced vía prop
+const debouncedQuery = useDebouncedSearch(() => viewSearch.query)
 
 const toggleLink = (id) => {
   const l = links.value.find(x => x.id === id)
@@ -72,7 +75,7 @@ const handleEdit = (link) => {
     <!-- Custom -->
     <SectionLabel class="uppercase mb-4">{{ t('links.customSection') }}</SectionLabel>
     <CustomLinksTable
-      :search="viewSearch.query"
+      :search="debouncedQuery"
       @detail="detailLink = $event"
       @edit="handleEdit"
       @clear-search="viewSearch.setQuery('')"

@@ -56,11 +56,15 @@ const panelVariants = {
   exit: { opacity: 0, scale: 0.95, y: -4, transition: { type: 'spring', stiffness: 500, damping: 30 } },
 }
 
-const panelClass = computed(() =>
-  themeStore.isDarkMode
-    ? 'bg-[#252429]/95 backdrop-blur-xl border-white/10'
-    : 'bg-white/95 backdrop-blur-xl border-gray-200',
-)
+const panelClass = computed(() => {
+  const isLite = perfStore.isLite
+  if (themeStore.isDarkMode) {
+    if (isLite) return 'bg-[#1A1A1D] border-white/15'
+    return 'bg-[#252429]/95 backdrop-blur-xl border-white/10'
+  }
+  if (isLite) return 'bg-white border-[#DBD3FB]'
+  return 'bg-white/95 backdrop-blur-xl border-gray-200'
+})
 
 const optionTextClass = (active) => {
   const d = themeStore.isDarkMode

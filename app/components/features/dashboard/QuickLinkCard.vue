@@ -86,6 +86,7 @@ const urlTextClass = computed(() => {
 
       <motion.div
         layout-id="qr-code"
+        layout
         class="bg-white p-4 rounded-2xl shadow-xl border border-gray-100 mb-6 relative group cursor-pointer"
         @click="isQrMaximized = true"
       >
@@ -130,6 +131,7 @@ const urlTextClass = computed(() => {
     >
       <motion.div
         layout-id="qr-code"
+        layout
         :class="[
           'relative shrink-0 bg-white p-3 rounded-2xl shadow-lg border border-gray-100 group',
           mobileSelected.active ? 'cursor-pointer' : 'cursor-default'

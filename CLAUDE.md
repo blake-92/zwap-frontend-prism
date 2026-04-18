@@ -393,6 +393,8 @@ else                                → full
 - `cardClasses.js`: `getCardClasses(isDarkMode, hoverEffect, useBlur, useNeon, useGlassElevation)` — 5to param activa liquid glass.
 - `getModalGlass(isDarkMode, useBlur, shadowLevel, useGlassElevation)` — `shadowLevel` es 3-way (`deep`/`medium`/`compact`).
 - `getDropdownGlass(...)` — mismo patrón.
+- `getTheadClass(isDarkMode, isLite)` — table thead Lite-aware (ver sección 1.6 de prism-ui.md).
+- `useDebouncedSearch(getter, { liteDelay, onInput })` — debounce de búsquedas activado solo en Lite.
 
 **Liquid glass Prism — fórmula validada:**
 - Opacidad baja en bg (`/20-30` cards, `/65-85` modales según densidad texto)
@@ -401,6 +403,14 @@ else                                → full
 - Inset 1px highlight top (catch de luz en edge, NO overlay)
 - Dual-source drop shadow
 - ❌ NO specular white gradient (`from-white/[X] to-transparent`) — ensucia el vidrio
+
+**Lite wireframe aesthetic — para surfaces en light mode:**
+- Bg `#F8F7FB` (off-white tintado lavanda) para inputs, Toolbar, search bars, Button outline/successExport, thead
+- Bg `bg-white` para Cards (paper feel) con borde `border-[#DBD3FB]` (brand-light)
+- Dark mode Lite: layering `#111113` (app) → `#1A1A1D` (chrome/cards) → `#0F0F11` (inputs)
+- Shadows branded: `shadow-[0_1px_2px_rgba(124,58,237,0.05),0_4px_12px_rgba(124,58,237,0.06)]`
+- Active state (reemplaza hover-lift): `active:scale-[0.98] active:bg-[#7C3AED]/20` dark / `/10` light
+- Radial-gradient bg (sustituye blobs blur): `ellipse_at_top_left, rgba(124,58,237,0.22) 0%, transparent 55%`
 
 **CSS global**:
 - `html.perf-normal .backdrop-blur-*` → radios reducidos a ~50%

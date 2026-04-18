@@ -76,6 +76,7 @@ const urlTextClass = computed(() => {
       >
         <motion.div
           layout-id="ql-qr-mini"
+          layout
           :class="[
             'relative shrink-0 bg-white p-3 rounded-2xl shadow-lg border border-gray-100 group',
             selected.active ? 'cursor-pointer' : 'cursor-default'
