@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { motion } from 'motion-v'
 import { ChevronRight } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceStore } from '~/stores/performance'
 import { useMediaQuery } from '~/composables/useMediaQuery'
 import { useModalOpen } from '~/composables/useModalOpen'
 import { BRANCHES } from '~/utils/mockData'
@@ -14,30 +15,20 @@ import GlassBackground from '~/components/GlassBackground.vue'
 import ToastContainer from '~/components/ToastContainer.vue'
 
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
 const isDesktop = useMediaQuery('(min-width: 1024px)')
 const modalOpen = useModalOpen()
 const branch = ref(BRANCHES[0])
 
-// Hidratar sincrónicamente para evitar flicker 256px → 72px.
-const isCollapsed = ref(
-  typeof localStorage !== 'undefined' && localStorage.getItem('zwap-sidebar') === 'collapsed',
-)
+// Hidratar sincrónicamente para evitar flicker 256px → 72px en mount.
+const readSidebarCollapsed = () => {
+  if (typeof localStorage === 'undefined') return false
+  try { return localStorage.getItem('zwap-sidebar') === 'collapsed' } catch { return false }
+}
+const isCollapsed = ref(readSidebarCollapsed())
 const mainRef = ref(null)
 let lastScrollY = 0
 const headerVisible = ref(true)
-
-onMounted(() => {
-  if (typeof document === 'undefined') return
-  // Prevent document scroll — main is scroll container
-  document.documentElement.style.overflow = 'hidden'
-  document.body.style.overflow = 'hidden'
-})
-
-onUnmounted(() => {
-  if (typeof document === 'undefined') return
-  document.documentElement.style.overflow = ''
-  document.body.style.overflow = ''
-})
 
 // Scroll-aware mobile header
 const onScroll = () => {
@@ -50,31 +41,43 @@ const onScroll = () => {
   lastScrollY = Math.max(0, y)
 }
 
+let scrollListenerAttached = false
+const attachScroll = () => {
+  if (scrollListenerAttached || !mainRef.value) return
+  mainRef.value.addEventListener('scroll', onScroll, { passive: true })
+  scrollListenerAttached = true
+}
+const detachScroll = () => {
+  if (!scrollListenerAttached || !mainRef.value) return
+  mainRef.value.removeEventListener('scroll', onScroll)
+  scrollListenerAttached = false
+}
+
 watch(isDesktop, (d) => {
-  if (!mainRef.value) return
-  if (d) {
-    headerVisible.value = true
-    mainRef.value.removeEventListener('scroll', onScroll)
-  } else {
-    mainRef.value.addEventListener('scroll', onScroll, { passive: true })
-  }
-}, { immediate: false })
+  if (d) { headerVisible.value = true; detachScroll() }
+  else attachScroll()
+})
 
 onMounted(() => {
-  if (!isDesktop.value && mainRef.value) {
-    mainRef.value.addEventListener('scroll', onScroll, { passive: true })
-  }
+  if (typeof document === 'undefined') return
+  // Main es el contenedor de scroll — bloquear document/body scroll.
+  document.documentElement.style.overflow = 'hidden'
+  document.body.style.overflow = 'hidden'
+  if (!isDesktop.value) attachScroll()
 })
 
 onUnmounted(() => {
-  if (mainRef.value) mainRef.value.removeEventListener('scroll', onScroll)
+  if (typeof document !== 'undefined') {
+    document.documentElement.style.overflow = ''
+    document.body.style.overflow = ''
+  }
+  detachScroll()
 })
 
 const toggle = () => {
   isCollapsed.value = !isCollapsed.value
-  if (typeof localStorage !== 'undefined') {
-    localStorage.setItem('zwap-sidebar', isCollapsed.value ? 'collapsed' : 'expanded')
-  }
+  if (typeof localStorage === 'undefined') return
+  try { localStorage.setItem('zwap-sidebar', isCollapsed.value ? 'collapsed' : 'expanded') } catch {}
 }
 
 const mainPaddingStyle = computed(() =>
@@ -88,9 +91,7 @@ const mainClass = computed(() => [
     : 'px-4 sm:px-6 pt-20',
 ])
 
-// El blur del chrome cuando hay modal abierto lo hace el `backdrop-blur-md`
-// del backdrop del modal (cubre z-40/z-20 desde z-50). Aquí solo desaturamos
-// + bloqueamos clicks para feel "receded" sin doble blur.
+// Modal backdrop aplica el blur — aquí solo desaturate + pointer-events-none para "receded" sin doble blur.
 const sidebarWrapperClass = computed(() => [
   'relative shrink-0 group/sidebar transition-[filter,opacity] duration-150',
   modalOpen.value ? 'saturate-50 pointer-events-none' : '',
@@ -111,7 +112,18 @@ const toggleBtnClass = computed(() =>
     <div v-if="isDesktop" :class="sidebarWrapperClass">
       <Sidebar :is-collapsed="isCollapsed" />
 
-      <div :class="['absolute inset-y-0 right-0 w-px transition-colors duration-300 group-hover/sidebar:bg-[#7C3AED]/40', themeStore.isDarkMode ? 'bg-white/10' : 'bg-black/5']" />
+      <!-- Lite: rim brand-tinted con gradient top→decay. Hover no aplica aquí (inline bg domina utility). -->
+      <div
+        v-if="perfStore.isLite"
+        aria-hidden="true"
+        class="absolute inset-y-0 right-0 w-px"
+        :style="{
+          background: themeStore.isDarkMode
+            ? 'linear-gradient(180deg, transparent 0%, rgba(124,58,237,0.5) 10%, rgba(124,58,237,0.2) 55%, rgba(255,255,255,0.08) 100%)'
+            : 'linear-gradient(180deg, transparent 0%, rgba(124,58,237,0.35) 10%, rgba(124,58,237,0.12) 55%, rgba(0,0,0,0.05) 100%)',
+        }"
+      />
+      <div v-else :class="['absolute inset-y-0 right-0 w-px transition-colors duration-300 group-hover/sidebar:bg-[#7C3AED]/40', themeStore.isDarkMode ? 'bg-white/10' : 'bg-black/5']" />
 
       <motion.div
         class="absolute z-30"

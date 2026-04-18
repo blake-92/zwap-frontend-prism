@@ -298,3 +298,13 @@ html.perf-full .prism-qr-shimmer {
 .layout-enter-from { opacity: 0; transform: translateY(8px); }
 .page-leave-to,
 .layout-leave-to { opacity: 0; transform: translateY(-8px); }
+
+/* Lite: entrada instantánea de vistas — sin fade/slide. Ahorra work por navegación. */
+html.perf-lite .page-enter-active,
+html.perf-lite .page-leave-active,
+html.perf-lite .layout-enter-active,
+html.perf-lite .layout-leave-active { transition: none; }
+html.perf-lite .page-enter-from,
+html.perf-lite .page-leave-to,
+html.perf-lite .layout-enter-from,
+html.perf-lite .layout-leave-to { opacity: 1; transform: none; }

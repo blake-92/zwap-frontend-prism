@@ -1,3 +1,5 @@
+import { isSafeInternalPath } from '~/utils/routes'
+
 export default defineNuxtRouteMiddleware((to) => {
   const token = useCookie('zwap_token', {
     sameSite: 'lax',
@@ -5,7 +7,8 @@ export default defineNuxtRouteMiddleware((to) => {
     path: '/',
   })
   if (!token.value) {
-    const redirect = to.fullPath && to.fullPath !== '/' ? to.fullPath : undefined
+    const candidate = to.fullPath
+    const redirect = candidate && candidate !== '/' && isSafeInternalPath(candidate) ? candidate : undefined
     return navigateTo({
       path: '/login',
       query: redirect ? { redirect } : undefined,

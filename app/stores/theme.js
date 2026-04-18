@@ -8,7 +8,8 @@ export const useThemeStore = defineStore('theme', {
   actions: {
     hydrate() {
       if (this._hydrated || typeof window === 'undefined') return
-      const stored = localStorage.getItem('zwap-theme')
+      let stored = null
+      try { stored = localStorage.getItem('zwap-theme') } catch {}
       if (stored) {
         this.isDarkMode = stored === 'dark'
       } else {
@@ -20,7 +21,7 @@ export const useThemeStore = defineStore('theme', {
     apply() {
       if (typeof document === 'undefined') return
       document.documentElement.classList.toggle('dark', this.isDarkMode)
-      localStorage.setItem('zwap-theme', this.isDarkMode ? 'dark' : 'light')
+      try { localStorage.setItem('zwap-theme', this.isDarkMode ? 'dark' : 'light') } catch {}
     },
     toggleTheme() {
       this.isDarkMode = !this.isDarkMode

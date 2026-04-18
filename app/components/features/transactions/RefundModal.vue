@@ -19,7 +19,16 @@ const refundType = ref('total')
 const feeBearer = ref('hotel')
 const partial = ref('')
 
-const refundAmount = computed(() => refundType.value === 'parcial' ? (partial.value || '0.00') : props.trx.amount)
+// Parse "1,500.00" | number | undefined → finite number (0 fallback). Evita NaN en cálculos + guards.
+const parseAmount = (v) => {
+  if (typeof v === 'number') return Number.isFinite(v) ? v : 0
+  if (typeof v !== 'string') return 0
+  const n = parseFloat(v.replace(/,/g, ''))
+  return Number.isFinite(n) ? n : 0
+}
+
+const maxAmount = computed(() => parseAmount(props.trx?.amount))
+const refundAmount = computed(() => refundType.value === 'parcial' ? (partial.value || '0.00') : (props.trx?.amount ?? '0.00'))
 
 const warningText = computed(() =>
   feeBearer.value === 'hotel'
@@ -49,8 +58,9 @@ const boxClass = (id) => {
 
 const handlePartialInput = (e) => {
   const val = e.target.value
-  const maxAmount = parseFloat(props.trx.amount.replace(/,/g, ''))
-  if (val === '' || parseFloat(val) <= maxAmount) partial.value = val
+  if (val === '') { partial.value = ''; return }
+  const n = parseFloat(val)
+  if (Number.isFinite(n) && n <= maxAmount.value) partial.value = val
 }
 
 const inputClass = computed(() =>
@@ -107,7 +117,7 @@ const inputClass = computed(() =>
             type="number"
             placeholder="0.00"
             min="0"
-            :max="parseFloat(trx.amount.replace(/,/g, ''))"
+            :max="maxAmount"
             :value="partial"
             :class="['w-full pl-8 pr-4 py-3 rounded-xl border outline-hidden font-mono font-bold text-lg transition-colors', inputClass]"
             @input="handlePartialInput"

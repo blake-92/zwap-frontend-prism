@@ -8,6 +8,7 @@ import { useScrollLock } from '~/composables/useScrollLock'
 import { useChromeBlur } from '~/composables/useChromeBlur'
 import { usePerformanceStore } from '~/stores/performance'
 import { getModalGlass } from '~/utils/cardClasses'
+import { pushModal, popModal, isTopModal } from '~/utils/modalStack'
 import Button from './Button.vue'
 
 const props = defineProps({
@@ -16,8 +17,13 @@ const props = defineProps({
   icon: { type: [Object, Function, null], default: null },
   maxWidth: { type: String, default: '480px' },
   wrapperClass: { type: String, default: '' },
+  // z-index — por default 50. Sub-modales (ej. DatePickerModal dentro de NewLinkModal) usan 60+.
+  z: { type: Number, default: 50 },
 })
 const emit = defineEmits(['close'])
+
+// ID único por instancia — coordina stack global para focus trap / Escape.
+const modalId = Symbol('modal')
 
 const themeStore = useThemeStore()
 const isDesktopSm = useMediaQuery('(min-width: 640px)')
@@ -48,6 +54,8 @@ const desktopExit = { opacity: 0, scale: 0.95, y: 10 }
 const getContainerEl = () => containerRef.value?.$el ?? containerRef.value
 
 const onKey = (e) => {
+  // Solo el modal top responde — evita que modal padre intercepte Escape/Tab cuando hay hijo.
+  if (!isTopModal(modalId)) return
   if (e.key === 'Escape') emit('close')
   const el = getContainerEl()
   if (e.key !== 'Tab' || !el?.querySelectorAll) return
@@ -64,6 +72,7 @@ const onKey = (e) => {
 onMounted(() => {
   if (typeof document === 'undefined') return
   trigger = document.activeElement
+  pushModal(modalId)
   document.addEventListener('keydown', onKey)
   const el = getContainerEl()
   const focusable = el?.querySelectorAll?.(
@@ -79,6 +88,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (typeof document === 'undefined') return
+  popModal(modalId)
   document.removeEventListener('keydown', onKey)
   if (trigger && document.contains(trigger)) trigger.focus()
 })
@@ -102,7 +112,8 @@ const backdropFilterClass = computed(() => perfStore.modalBackdropFilter)
       <motion.div
         :exit="{ opacity: 0 }"
         :transition="{ duration: 0.15 }"
-        class="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
+        :style="{ zIndex: z }"
+        class="fixed inset-0 flex items-end sm:items-center justify-center sm:p-4"
       >
         <motion.div
           :initial="{ opacity: 0 }"

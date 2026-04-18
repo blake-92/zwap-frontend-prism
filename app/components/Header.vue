@@ -78,17 +78,28 @@ const pickBranch = (b) => {
 
 const headerClass = computed(() => {
   const useBlur = perfStore.useBlur
-  // En lite, el header fijo mobile sin blur sería transparente sobre contenido
-  // que hace scroll detrás — hay que dar surface sólida.
+  const isLite = perfStore.isLite
+  // Lite mobile sin blur: el header fixed mostraría contenido scrolleando detrás — surface sólida.
   const bgDark = useBlur ? 'bg-[#111113]/20' : 'bg-[#1A1A1D]'
   const bgLight = useBlur ? 'bg-white/30' : 'bg-white'
+  const blur = useBlur ? ' backdrop-blur-2xl' : ''
+  const borderDark = isLite ? 'border-[#7C3AED]/20' : 'border-white/10'
+  const borderLight = isLite ? 'border-[#DBD3FB]' : 'border-white/80'
   return [
     'z-50 h-16 lg:h-20 flex items-center justify-between px-4 sm:px-6 lg:px-10 shrink-0 transition-colors duration-300',
     props.isDesktop ? 'relative' : 'fixed inset-x-0 top-0',
     themeStore.isDarkMode
-      ? `${bgDark} backdrop-blur-2xl border-b border-white/10`
-      : `${bgLight} backdrop-blur-2xl border-b border-white/80`,
+      ? `${bgDark}${blur} border-b ${borderDark}`
+      : `${bgLight}${blur} border-b ${borderLight}`,
   ]
+})
+
+// Lite — halo sutil top-right del header (eco del halo en sidebar, balancea composición).
+const liteHeaderHaloStyle = computed(() => {
+  if (!perfStore.isLite) return null
+  return themeStore.isDarkMode
+    ? { background: 'radial-gradient(ellipse 60% 180% at 95% 50%, rgba(124,58,237,0.10), transparent 60%)' }
+    : { background: 'radial-gradient(ellipse 60% 180% at 95% 50%, rgba(124,58,237,0.06), transparent 60%)' }
 })
 
 const desktopSearchClass = computed(() => {
@@ -157,6 +168,14 @@ const goSettings = () => navigateTo(ROUTES.SETTINGS)
     :transition="SPRING_SIDEBAR"
     :class="headerClass"
   >
+    <!-- Lite: halo sutil top-right — eco del halo en sidebar, da "atmósfera" brand sin blur. -->
+    <div
+      v-if="perfStore.isLite"
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-0 z-[-1]"
+      :style="liteHeaderHaloStyle"
+    />
+
     <!-- Desktop -->
     <template v-if="isDesktop">
       <div :class="['flex items-center px-4 py-2.5 rounded-xl border w-[240px] md:w-[300px] lg:w-[340px] xl:w-[400px] transition-[border-color,box-shadow] duration-300', desktopSearchClass]">

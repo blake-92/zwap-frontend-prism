@@ -97,12 +97,12 @@ export const usePerformanceStore = defineStore('performance', {
   actions: {
     hydrate() {
       if (this._hydrated || typeof window === 'undefined') return
-      const stored = localStorage.getItem(STORAGE_KEY)
+      let stored = null
+      try { stored = localStorage.getItem(STORAGE_KEY) } catch {}
       if (stored && TIERS.includes(stored)) {
         this.tier = stored
       } else {
-        // Valor inválido heredado (ej: 'minimal' previo) — re-detect y limpia
-        if (stored) localStorage.removeItem(STORAGE_KEY)
+        if (stored) { try { localStorage.removeItem(STORAGE_KEY) } catch {} }
         this.tier = detectTier()
       }
       this._hydrated = true
@@ -111,7 +111,7 @@ export const usePerformanceStore = defineStore('performance', {
     setTier(tier) {
       if (!TIERS.includes(tier)) return
       this.tier = tier
-      localStorage.setItem(STORAGE_KEY, tier)
+      try { localStorage.setItem(STORAGE_KEY, tier) } catch {}
       this.apply()
     },
     apply() {

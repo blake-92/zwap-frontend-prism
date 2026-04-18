@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import { motion, AnimatePresence } from 'motion-v'
 import {
   Plus, Trash2, Mail, User, ListTree,
@@ -62,10 +62,18 @@ const addItem = () => {
 const removeItem = (i) => { items.value.splice(i, 1) }
 const updateItem = (i, field, val) => { items.value[i][field] = val }
 
+let generateTimer = null
 const handleGenerate = () => {
   isGenerating.value = true
-  setTimeout(() => { isGenerating.value = false; emit('close') }, 1500)
+  generateTimer = setTimeout(() => {
+    generateTimer = null
+    isGenerating.value = false
+    emit('close')
+  }, 1500)
 }
+onUnmounted(() => {
+  if (generateTimer) clearTimeout(generateTimer)
+})
 
 const FEE_RATE = 0.03
 const subtotal = computed(() => items.value.reduce((s, it) => s + (parseFloat(it.amount) || 0), 0))
@@ -89,17 +97,16 @@ const sliderStyle = computed(() => ({
 </script>
 
 <template>
-  <!-- Date picker (z-[55] above parent modal) -->
-  <div v-if="calendarOpen" class="relative z-[55]">
-    <DatePickerModal
-      :selected-date="selectedDate"
-      :time-value="timeValue"
-      @select="selectedDate = $event"
-      @time-change="timeValue = $event"
-      @confirm="calendarOpen = false"
-      @close="calendarOpen = false"
-    />
-  </div>
+  <!-- Date picker — self-contained con z=60, teleport propio. Coordina stack con Modal padre. -->
+  <DatePickerModal
+    :is-open="calendarOpen"
+    :selected-date="selectedDate"
+    :time-value="timeValue"
+    @select="selectedDate = $event"
+    @time-change="timeValue = $event"
+    @confirm="calendarOpen = false"
+    @close="calendarOpen = false"
+  />
 
   <Modal
     :title="isEditing ? t('links.editLink') : t('links.createLink')"

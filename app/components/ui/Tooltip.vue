@@ -60,22 +60,29 @@ const hideTooltip = () => {
 
 const onScrollOrResize = () => hideTooltip()
 
+let listenersAttached = false
+const attachListeners = () => {
+  if (listenersAttached || typeof window === 'undefined') return
+  window.addEventListener('resize', onScrollOrResize)
+  window.addEventListener('scroll', onScrollOrResize, true)
+  listenersAttached = true
+}
+const detachListeners = () => {
+  if (!listenersAttached || typeof window === 'undefined') return
+  window.removeEventListener('resize', onScrollOrResize)
+  window.removeEventListener('scroll', onScrollOrResize, true)
+  listenersAttached = false
+}
+
 watch(isVisible, (v) => {
-  if (v) {
-    updatePosition()
-    if (typeof window !== 'undefined') {
-      window.addEventListener('resize', onScrollOrResize)
-      window.addEventListener('scroll', onScrollOrResize, true)
-    }
-  } else {
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('resize', onScrollOrResize)
-      window.removeEventListener('scroll', onScrollOrResize, true)
-    }
-  }
+  if (v) { updatePosition(); attachListeners() }
+  else detachListeners()
 })
 
-onUnmounted(() => clearTimeout(timeoutId))
+onUnmounted(() => {
+  clearTimeout(timeoutId)
+  detachListeners()
+})
 </script>
 
 <template>

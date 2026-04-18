@@ -362,6 +362,19 @@ import { useViewSearchStore } from '~/stores/viewSearch'
 - Sidebar collapse: `localStorage['zwap-sidebar']` (`'collapsed'`/`'expanded'`).
 - Performance tier: `localStorage['zwap-perf']` — auto-detected or user override via Settings.
 
+**localStorage — patrón try/catch obligatorio:**
+
+Safari private mode, iframes sin permisos y quota-exceeded lanzan. Todo acceso va envuelto:
+
+```js
+let stored = null
+try { stored = localStorage.getItem(KEY) } catch {}
+try { localStorage.setItem(KEY, value) } catch {}
+try { localStorage.removeItem(KEY) } catch {}
+```
+
+Aplica en `theme.js`, `performance.js`, `layouts/default.vue` (sidebar collapse).
+
 ### Performance Tiers (3 niveles)
 
 Ver doc dedicado: **[docs/performance-tiers.md](docs/performance-tiers.md)**.
@@ -425,6 +438,20 @@ else                                → full
 - SegmentControl con 3 opciones: `Prism` / `Normal` / `Lite`
 - Descripción dinámica por tier seleccionado
 - Override manual persiste en `localStorage['zwap-perf']`
+
+**Lite atmósfera pintada** (radial gradients sin blur):
+
+Para reintroducir carácter Prism en Lite sin `backdrop-filter`/`filter:blur`:
+- **Sidebar halo top-left** (`Sidebar.vue`): `radial-gradient(ellipse 120% 70% at 15% 0%, rgba(124,58,237,0.16), transparent 62%)` dark / `0.09` light. Div `absolute z-[-1]` dentro del aside.
+- **Header halo top-right** (`Header.vue`): `radial-gradient(ellipse 60% 180% at 95% 50%, rgba(124,58,237,0.10), transparent 60%)` dark / `0.06` light. Header necesita `position: relative` para stacking context (ya aplicado en desktop; mobile usa `fixed` que también crea context).
+- **Sidebar divider rim** (`layouts/default.vue`): gradient vertical `rgba(124,58,237,X)` con decay (0.5→0.2→white/black) que reemplaza el `bg-white/10` plano.
+- **Page transitions**: desactivadas globalmente vía `html.perf-lite .page-enter-active { transition: none }` en `globals.css`.
+
+Todo consumido via `v-if="perfStore.isLite"` + inline `:style` computed. Cero GPU cost (solo paint).
+
+⚠️ **Inline `background` (shorthand) domina sobre utilities `bg-*`** — no combinar `:style="{ background: gradient }"` con `group-hover:bg-*` (el hover no se aplicará).
+
+⚠️ **Mobile header position** (`Header.vue`): `fixed inset-x-0 top-0` (mobile) y `relative` (desktop) son exclusivos. Nunca emitir `relative` como clase permanente junto con `fixed` condicional — reserva espacio en flow y duplica offset con el `pt-20` de main.
 
 ### Composable `useViewSearch(placeholder)`
 
@@ -691,6 +718,30 @@ Cualquier elemento que requiera atención total del usuario (modales, recibos, l
 
 Componentes que ya cumplen el patrón: `Modal`, `BottomSheet`, `QrLightbox`, `ReceiptModal`, `WithdrawReceiptModal`. Cualquier modal nuevo que use `<Modal>` lo hereda gratis.
 
+### Modal stacking — `z` prop + `modalStack`
+
+Sub-modales (ej. `DatePickerModal` dentro de `NewLinkModal`):
+
+- Default `z: 50`. Sub-modales usan `z: 60+` en saltos de 10.
+- Cada `<Modal>` se registra en `~/utils/modalStack.js` (Symbol único por instancia). **Solo el modal TOP responde a Escape/Tab** — los padres quedan inertes mientras el hijo esté abierto.
+- El sub-modal debe:
+  - aceptar `:is-open="flag"` + `@close` en su API,
+  - envolver su `<Modal v-if="isOpen">` en `<AnimatePresence>` para conservar el exit animation,
+  - teleport propio (via Modal interno), NO anidar en un `<div class="relative z-[X]">` del caller.
+- NO reutilizar el mismo `z` entre modales simultáneos — el focus trap es por stack, pero el paint order sigue la z-index.
+
+### Redirect validation (open-redirect prevention)
+
+Toda URL tomada de `route.query` o `to.fullPath` que se use en `navigateTo()` debe pasar por `isSafeInternalPath` (en `~/utils/routes`):
+
+```js
+import { isSafeInternalPath } from '~/utils/routes'
+const redirect = isSafeInternalPath(route.query.redirect) ? route.query.redirect : ROUTES.DASHBOARD
+navigateTo(redirect)
+```
+
+Rechaza `//host`, `/\path`, URLs absolutas, non-strings. Aplicado en `middleware/auth.js` y `pages/login.vue`.
+
 ## Dashboard — Fused Header
 
 DashboardView no usa `<PageHeader>`. En su lugar header fusionado: título + SegmentControl + botón de acción en flex row:
@@ -769,3 +820,10 @@ Para migraciones, refactors, optimizaciones, o cualquier cambio que toque más d
 - No exports en `<script setup>` — mover a `.js` externo
 - No acceso directo a `window`/`document` sin guard o `onMounted`
 - No `ref` de motion-v components sin `.$el` fallback
+- No acceso directo a `localStorage` sin `try/catch` (Safari private mode lanza)
+- No `navigateTo(query.redirect)` sin pasar por `isSafeInternalPath`
+- No emitir `backdrop-blur-*` incondicionalmente — guardar con `perfStore.useBlur` para inspector honesto
+- No sub-modal sin `<AnimatePresence>` wrapper — pierde exit animation
+- No mezclar `:style="{ background: ... }"` con utility `bg-*` hover — inline shorthand domina, hover nunca aplica
+- No `useMediaQuery()` dentro de un `computed` — usa lifecycle hooks (`onMounted`/`watch`), debe invocarse a top-level del setup
+- No `import { VueDatePicker } from '@vuepic/vue-datepicker'` pasando `locale: string` — v12 espera `Locale` de date-fns; omitir el prop si no se importa el objeto correcto

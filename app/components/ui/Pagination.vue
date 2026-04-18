@@ -67,6 +67,7 @@ const pageBtnClass = (p) => {
         >...</span>
         <button
           v-else
+          :aria-current="currentPage === p ? 'page' : undefined"
           :class="['h-8 min-w-[32px] px-2 rounded-lg text-xs font-bold transition-colors duration-300 flex items-center justify-center', pageBtnClass(p)]"
           @click="emit('pageChange', p)"
         >{{ p }}</button>

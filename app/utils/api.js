@@ -3,10 +3,14 @@
 
 const DEFAULT_TIMEOUT = 15000
 
+const tokenCookieOpts = () => ({
+  sameSite: 'lax',
+  secure: !import.meta.dev,
+  path: '/',
+})
+
 function authHeaders() {
-  if (typeof document === 'undefined') return {}
-  const match = document.cookie.match(/(?:^|;\s*)zwap_token=([^;]+)/)
-  const token = match ? decodeURIComponent(match[1]) : null
+  const token = useCookie('zwap_token', tokenCookieOpts()).value
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
@@ -36,10 +40,8 @@ async function request(method, path, body, { timeout = DEFAULT_TIMEOUT, signal: 
     })
 
     if (res.status === 401) {
-      if (typeof document !== 'undefined') {
-        const secure = typeof location !== 'undefined' && location.protocol === 'https:' ? '; Secure' : ''
-        document.cookie = `zwap_token=; Max-Age=0; path=/; SameSite=Lax${secure}`
-      }
+      const token = useCookie('zwap_token', tokenCookieOpts())
+      token.value = null
       await navigateTo('/login')
       throw new Error('Unauthorized')
     }

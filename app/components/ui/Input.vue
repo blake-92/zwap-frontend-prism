@@ -26,9 +26,10 @@ const inputClass = computed(() => {
   const isLite = perfStore.isLite
 
   if (props.error) {
+    const errorGlow = perfStore.useNeon ? ' shadow-[0_0_15px_rgba(244,63,94,0.15)]' : ''
     return d
-      ? 'bg-rose-500/10 border-rose-500/50 text-white focus:border-rose-500/80 shadow-[0_0_15px_rgba(244,63,94,0.15)] placeholder-[#888991]'
-      : 'bg-rose-50 border-rose-400 text-rose-900 focus:border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.15)]'
+      ? `bg-rose-500/10 border-rose-500/50 text-white focus:border-rose-500/80${errorGlow} placeholder-[#888991]`
+      : `bg-rose-50 border-rose-400 text-rose-900 focus:border-rose-500${errorGlow}`
   }
 
   if (isLite) {

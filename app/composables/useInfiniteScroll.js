@@ -39,8 +39,10 @@ export function useInfiniteScroll(data, { batchSize = 10, enabled = true } = {})
     observer.observe(sentinelRef.value)
   }
 
+  // El observer solo depende de sentinel + enabled. Los cambios de length no requieren
+  // re-instanciar: el callback lee getData() en vivo cuando dispara.
   onMounted(setupObserver)
-  watch([sentinelRef, () => getEnabled(), () => getData().length], setupObserver)
+  watch([sentinelRef, () => getEnabled()], setupObserver)
   onUnmounted(() => observer?.disconnect())
 
   const visibleData = computed(() =>

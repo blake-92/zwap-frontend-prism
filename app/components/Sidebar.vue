@@ -69,6 +69,15 @@ const asideClass = computed(() => {
   return `${bgLight} backdrop-blur-2xl border-r border-white/80 shadow-[4px_0_30px_rgba(0,0,0,0.03)]`
 })
 
+// Lite: halo estático top-left (radial-gradient, sin blur) — reintroduce atmósfera Prism sin GPU cost.
+const liteHaloStyle = computed(() => {
+  if (!perfStore.isLite) return null
+  return themeStore.isDarkMode
+    ? { background: 'radial-gradient(ellipse 120% 70% at 15% 0%, rgba(124,58,237,0.16), transparent 62%)' }
+    : { background: 'radial-gradient(ellipse 120% 70% at 15% 0%, rgba(124,58,237,0.09), transparent 62%)' }
+})
+
+
 const walletBtnClass = (collapsed) => {
   if (collapsed) return 'border-transparent bg-transparent shadow-none'
   const neon = perfStore.useNeon
@@ -114,6 +123,14 @@ const glowClass = (collapsed) => {
     :transition="SPRING"
     :class="['relative shrink-0 flex flex-col h-screen z-20 overflow-hidden transition-colors duration-300', asideClass]"
   >
+    <!-- Lite: halo top-left estático. Reintroduce "atmósfera" Prism sin blur. z-[-1] → debajo del contenido del sidebar. -->
+    <div
+      v-if="perfStore.isLite"
+      aria-hidden="true"
+      class="pointer-events-none absolute top-0 left-0 right-0 h-72 z-[-1]"
+      :style="liteHaloStyle"
+    />
+
     <!-- Logo -->
     <div class="h-20 flex items-center shrink-0 overflow-hidden pl-[19px]">
       <ZwapIsotipo wrapper-class="h-7 w-auto shrink-0" />

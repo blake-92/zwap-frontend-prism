@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
+import { AnimatePresence } from 'motion-v'
 import { CalendarDays, Clock } from 'lucide-vue-next'
 import { VueDatePicker } from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
@@ -9,14 +10,17 @@ import Modal from './Modal.vue'
 import Button from './Button.vue'
 
 const props = defineProps({
+  isOpen: { type: Boolean, default: false },
   selectedDate: { type: String, default: null },
   timeValue: { type: String, default: '14:00' },
 })
 const emit = defineEmits(['select', 'timeChange', 'confirm', 'close'])
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const themeStore = useThemeStore()
-const isMobile = computed(() => !useMediaQuery('(min-width: 640px)').value)
+// useMediaQuery usa onMounted/onUnmounted — debe invocarse a nivel top del setup, no dentro de computed.
+const isDesktopSm = useMediaQuery('(min-width: 640px)')
+const isMobile = computed(() => !isDesktopSm.value)
 
 const monthsShort = computed(() => t('calendar.monthsShort', [], { returnObjects: true }))
 
@@ -120,17 +124,18 @@ const presetGridClass = computed(() =>
   themeStore.isDarkMode ? 'bg-[#252429]/80 border-white/10' : 'bg-gray-50 border-gray-200',
 )
 
-const dpLocale = computed(() => locale.value)
-const dpDarkMode = computed(() => themeStore.isDarkMode ? 'dark' : 'light')
 </script>
 
 <template>
-  <Modal
-    :title="t('calendar.selectDateTime')"
-    :icon="CalendarDays"
-    max-width="380px"
-    @close="emit('close')"
-  >
+  <AnimatePresence>
+    <Modal
+      v-if="isOpen"
+      :title="t('calendar.selectDateTime')"
+      :icon="CalendarDays"
+      max-width="380px"
+      :z="60"
+      @close="emit('close')"
+    >
     <div class="p-5 sm:p-6">
       <!-- Mobile: native inputs -->
       <div v-if="isMobile" class="space-y-5">
@@ -158,8 +163,7 @@ const dpDarkMode = computed(() => themeStore.isDarkMode ? 'dark' : 'light')
           auto-apply
           :enable-time-picker="false"
           :week-start="1"
-          :format="'dd MMM yyyy'"
-          :locale="dpLocale"
+          format="dd MMM yyyy"
           :dark="themeStore.isDarkMode"
         />
 
@@ -218,10 +222,11 @@ const dpDarkMode = computed(() => themeStore.isDarkMode ? 'dark' : 'light')
       </div>
     </div>
 
-    <template #footer>
-      <Button class="w-full !py-3.5" :disabled="!selectedDate" @click="emit('confirm')">
-        <CalendarDays :size="16" /> {{ t('calendar.confirmDate') }}
-      </Button>
-    </template>
-  </Modal>
+      <template #footer>
+        <Button class="w-full !py-3.5" :disabled="!selectedDate" @click="emit('confirm')">
+          <CalendarDays :size="16" /> {{ t('calendar.confirmDate') }}
+        </Button>
+      </template>
+    </Modal>
+  </AnimatePresence>
 </template>

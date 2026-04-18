@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { motion, AnimatePresence } from 'motion-v'
 import { Mail, Lock, Sun, Moon, ArrowLeft } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
-import { ROUTES } from '~/utils/routes'
+import { ROUTES, isSafeInternalPath } from '~/utils/routes'
 import { useMotionVariants } from '~/composables/useMotionVariants'
 import { SPRING } from '~/utils/springs'
 import Card from '~/components/ui/Card.vue'
@@ -30,7 +30,8 @@ const token = useCookie('zwap_token', {
 
 const handleLogin = () => {
   token.value = 'mock-token'
-  const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : ROUTES.DASHBOARD
+  const q = route.query.redirect
+  const redirect = isSafeInternalPath(q) ? q : ROUTES.DASHBOARD
   navigateTo(redirect)
 }
 
