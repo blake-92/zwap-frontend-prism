@@ -7,7 +7,18 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed --project=desktop-chromium",
+    "test:a11y": "playwright test tests/e2e/a11y.spec.ts",
+    "test:ssr": "playwright test tests/e2e/ssr.spec.ts",
+    "test:lhci": "lhci autorun",
+    "test:security": "npm audit --production --audit-level=high",
+    "test:all": "npm run test && npm run test:e2e"
   },
   "dependencies": {
     "@nuxt/fonts": "^0.14.0",
@@ -25,6 +36,17 @@
     "vue-router": "^5.0.4"
   },
   "devDependencies": {
-    "tailwindcss": "^4.2.2"
+    "@axe-core/playwright": "^4.11.2",
+    "@faker-js/faker": "^10.4.0",
+    "@lhci/cli": "^0.15.1",
+    "@mswjs/data": "^0.16.2",
+    "@nuxt/test-utils": "^4.0.2",
+    "@playwright/test": "^1.59.1",
+    "@vitest/coverage-v8": "^4.1.4",
+    "@vue/test-utils": "^2.4.6",
+    "happy-dom": "^20.9.0",
+    "msw": "^2.13.4",
+    "tailwindcss": "^4.2.2",
+    "vitest": "^4.1.4"
   }
 }
