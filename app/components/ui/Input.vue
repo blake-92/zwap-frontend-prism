@@ -40,8 +40,9 @@ const inputClass = computed(() => {
   }
 
   // Prism/Normal — glass (transparency suficiente para distinguir del card)
+  const focusGlow = perfStore.useNeon ? ' focus:shadow-[0_0_15px_rgba(124,58,237,0.15)]' : ''
   return d
-    ? 'bg-[#111113]/50 border-white/10 text-white focus:border-[#7C3AED]/50 focus:shadow-[0_0_15px_rgba(124,58,237,0.15)] placeholder-[#888991]'
+    ? `bg-[#111113]/50 border-white/10 text-white focus:border-[#7C3AED]/50${focusGlow} placeholder-[#888991]`
     : 'bg-white/60 border-white text-[#111113] focus:border-[#7C3AED]/40 shadow-xs placeholder-[#B0AFB4]'
 })
 </script>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onUnmounted } from 'vue'
+import { ref, computed, onUnmounted, watch } from 'vue'
 import { motion, AnimatePresence } from 'motion-v'
 import {
   Plus, Trash2, Mail, User, ListTree,
@@ -44,6 +44,11 @@ const timeValue = ref('14:00')
 const calendarOpen = ref(false)
 const showConfirmClose = ref(false)
 const isGenerating = ref(false)
+
+watch(() => props.link, () => {
+  items.value = buildInitialItems()
+  nextItemId.value = (props.link?.items || 1) + 1
+})
 
 const hasData = computed(() => {
   const hasItems = items.value.some(it => it.desc.trim() !== '' || it.amount.trim() !== '')

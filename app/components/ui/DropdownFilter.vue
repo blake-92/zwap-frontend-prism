@@ -81,8 +81,9 @@ const closeSheet = () => { isOpen.value = false }
 
 const openedButtonClass = computed(() => {
   if (!isOpen.value) return ''
+  const neonGlow = perfStore.useNeon ? ' shadow-[0_0_15px_rgba(124,58,237,0.15)]' : ''
   return themeStore.isDarkMode
-    ? 'bg-[#111113]/80 border-[#7C3AED]/50 text-white shadow-[0_0_15px_rgba(124,58,237,0.15)]'
+    ? `bg-[#111113]/80 border-[#7C3AED]/50 text-white${neonGlow}`
     : 'bg-white border-[#7C3AED]/40 text-[#111113]'
 })
 

@@ -21,7 +21,7 @@ const SIZES = {
   default: 'px-5 py-2.5 text-sm',
   sm: 'px-4 py-2 text-xs',
   lg: 'px-6 py-3 text-base',
-  icon: 'p-2 w-9 h-9',
+  icon: 'p-2 w-10 h-10',
 }
 
 const variantClass = computed(() => {

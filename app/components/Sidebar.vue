@@ -8,6 +8,7 @@ import {
 import { useThemeStore } from '~/stores/theme'
 import { usePerformanceStore } from '~/stores/performance'
 import { ROUTES } from '~/utils/routes'
+import { logout as apiLogout } from '~/utils/api'
 import { CURRENT_USER, WALLET_BALANCE } from '~/utils/mockData'
 import { SPRING_SIDEBAR as SPRING } from '~/utils/springs'
 import ZwapIsotipo from '~/components/brand/ZwapIsotipo.vue'
@@ -22,11 +23,6 @@ const { t } = useI18n()
 const themeStore = useThemeStore()
 const perfStore = usePerformanceStore()
 const route = useRoute()
-const token = useCookie('zwap_token', {
-  sameSite: 'lax',
-  secure: !import.meta.dev,
-  path: '/',
-})
 
 const NAV_ITEMS = [
   { id: 'dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard, route: ROUTES.DASHBOARD },
@@ -54,8 +50,8 @@ const walletHover = ref(false)
 
 const goTo = (r) => navigateTo(r)
 
-const logout = () => {
-  token.value = null
+const logout = async () => {
+  await apiLogout()
   navigateTo(ROUTES.LOGIN)
 }
 

@@ -3,6 +3,7 @@ import { ref, computed, onUnmounted, watch, nextTick, useId } from 'vue'
 import { motion, AnimatePresence } from 'motion-v'
 import { useThemeStore } from '~/stores/theme'
 import { usePerformanceStore } from '~/stores/performance'
+import { getEl } from '~/utils/motionRef'
 
 const props = defineProps({
   content: { type: String, required: true },
@@ -23,7 +24,6 @@ const tooltipRef = ref(null)
 let timeoutId = null
 const tooltipId = `tooltip-${useId()}`
 
-const getEl = (r) => r?.$el ?? r
 const updatePosition = async () => {
   await nextTick()
   const triggerEl = getEl(triggerRef.value)

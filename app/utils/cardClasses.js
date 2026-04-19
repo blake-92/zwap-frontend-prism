@@ -14,6 +14,15 @@
  */
 
 /**
+ * Clase para table row — compartida entre 4 vistas (transactions, wallet, settlements, users).
+ */
+export function getTableRowClass(isDarkMode) {
+  return isDarkMode
+    ? 'border-b border-white/5 hover:bg-[#7C3AED]/5 last:border-0'
+    : 'border-b border-black/5 hover:bg-[#DBD3FB]/20 last:border-0'
+}
+
+/**
  * Clase para table thead — compartida entre 6 vistas con tablas.
  * En Lite light el `bg-white/50` desaparece sobre cards blancas — usamos tinte lavanda.
  */

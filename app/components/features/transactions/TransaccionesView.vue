@@ -12,10 +12,12 @@ import { useDebouncedSearch } from '~/composables/useDebouncedSearch'
 import { useMediaQuery } from '~/composables/useMediaQuery'
 import { useInfiniteScroll } from '~/composables/useInfiniteScroll'
 import { useMotionVariants } from '~/composables/useMotionVariants'
+import { useFilterSlot } from '~/composables/useFilterSlot'
+import { useDateRangeMatcher } from '~/composables/useDateRangeMatcher'
 import { TRANSACTIONS } from '~/utils/mockData'
 import { ROUTES } from '~/utils/routes'
-import { formatDate, parseIsoDate } from '~/utils/formatDate'
-import { getTheadClass } from '~/utils/cardClasses'
+import { formatDate } from '~/utils/formatDate'
+import { getTheadClass, getTableRowClass } from '~/utils/cardClasses'
 import { usePerformanceStore } from '~/stores/performance'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
@@ -40,12 +42,15 @@ const viewSearch = useViewSearch(computed(() => t('transactions.searchPlaceholde
 const receiptTrx = ref(null)
 const refundTrx = ref(null)
 
-const defaultStatus = computed(() => t('filters.all'))
-const defaultDate = computed(() => t('filters.anyDate'))
-const statusFilter = ref('')
-const dateFilter = ref('')
-watch(defaultStatus, (v) => { if (!statusFilter.value) statusFilter.value = v }, { immediate: true })
-watch(defaultDate, (v) => { if (!dateFilter.value) dateFilter.value = v }, { immediate: true })
+const {
+  current: statusFilter, defaultValue: defaultStatus,
+  isDirty: statusDirty, reset: resetStatus,
+} = useFilterSlot(() => t('filters.all'))
+const {
+  current: dateFilter, defaultValue: defaultDate,
+  isDirty: dateDirty, reset: resetDate,
+} = useFilterSlot(() => t('filters.anyDate'))
+const { match: matchDate } = useDateRangeMatcher(t)
 
 const currentPage = ref(1)
 const ITEMS_PER_PAGE = 7
@@ -57,51 +62,24 @@ const debouncedQuery = useDebouncedSearch(
   { onInput: () => { currentPage.value = 1 } },
 )
 
-const filtersActive = computed(() =>
-  (statusFilter.value !== defaultStatus.value ? 1 : 0) +
-  (dateFilter.value !== defaultDate.value ? 1 : 0),
-)
+const filtersActive = computed(() => (statusDirty.value ? 1 : 0) + (dateDirty.value ? 1 : 0))
 watch(filtersActive, (v) => viewSearch.setActiveFilterCount(v), { immediate: true })
 
 const resetFilters = () => {
-  statusFilter.value = defaultStatus.value
-  dateFilter.value = defaultDate.value
+  resetStatus()
+  resetDate()
   currentPage.value = 1
 }
 
 const filtered = computed(() => {
   const q = debouncedQuery.value?.toLowerCase() || ''
-  const tToday = t('filters.today')
-  const tLast7 = t('filters.last7days')
-  const tThisMonth = t('filters.thisMonth')
   return TRANSACTIONS.filter(trx => {
     const matchSearch = !q ||
       (trx.client?.toLowerCase().includes(q)) ||
       (trx.email?.toLowerCase().includes(q)) ||
       trx.id.toLowerCase().includes(q)
-    const matchStatus = statusFilter.value === defaultStatus.value
-      || t(`status.${trx.status}`) === statusFilter.value
-    let matchDate = true
-    if (dateFilter.value !== defaultDate.value) {
-      const today = new Date()
-      const trxDate = parseIsoDate(trx.date)
-
-      if (dateFilter.value === tToday) {
-        matchDate = !!trxDate
-          && trxDate.getFullYear() === today.getFullYear()
-          && trxDate.getMonth() === today.getMonth()
-          && trxDate.getDate() === today.getDate()
-      } else if (dateFilter.value === tLast7) {
-        const weekAgo = new Date(today)
-        weekAgo.setDate(today.getDate() - 7)
-        matchDate = !!trxDate && trxDate >= weekAgo && trxDate <= today
-      } else if (dateFilter.value === tThisMonth) {
-        matchDate = !!trxDate
-          && trxDate.getFullYear() === today.getFullYear()
-          && trxDate.getMonth() === today.getMonth()
-      }
-    }
-    return matchSearch && matchStatus && matchDate
+    const matchStatus = !statusDirty.value || t(`status.${trx.status}`) === statusFilter.value
+    return matchSearch && matchStatus && matchDate(trx.date, dateFilter.value, defaultDate.value)
   })
 })
 
@@ -123,11 +101,7 @@ const amountClass = (trx) => {
 const formatTrxDate = (iso) => formatDate(iso, locale.value)
 
 const theadClass = computed(() => getTheadClass(themeStore.isDarkMode, perfStore.isLite))
-const trClass = computed(() =>
-  themeStore.isDarkMode
-    ? 'border-b border-white/5 hover:bg-[#7C3AED]/5 last:border-0'
-    : 'border-b border-black/5 hover:bg-[#DBD3FB]/20 last:border-0',
-)
+const trClass = computed(() => getTableRowClass(themeStore.isDarkMode))
 
 const mobileActions = (trx) => [
   { label: t('transactions.viewReceipt'), icon: FileText, onClick: () => { receiptTrx.value = trx } },
@@ -319,7 +293,8 @@ const goLinks = () => navigateTo(ROUTES.LINKS)
         </Button>
       </Card>
       <div ref="sentinelRef" class="flex justify-center py-4">
-        <Loader2 v-if="hasMore" :size="20" class="animate-spin text-[#7C3AED]" />
+        <Loader2 v-if="hasMore && perfStore.useContinuousAnim" :size="20" class="animate-spin text-[#7C3AED]" />
+        <div v-else-if="hasMore" class="w-5 h-5 rounded-full border-2 border-[#7C3AED]/60" />
       </div>
     </div>
 

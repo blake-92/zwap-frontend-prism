@@ -12,9 +12,11 @@ import { useDebouncedSearch } from '~/composables/useDebouncedSearch'
 import { useMediaQuery } from '~/composables/useMediaQuery'
 import { useInfiniteScroll } from '~/composables/useInfiniteScroll'
 import { useMotionVariants } from '~/composables/useMotionVariants'
+import { useFilterSlot } from '~/composables/useFilterSlot'
+import { useDateRangeMatcher } from '~/composables/useDateRangeMatcher'
 import { WITHDRAWALS, WALLET_BALANCE, WALLET_STEPS, BANK_ACCOUNT } from '~/utils/mockData'
-import { formatDate, parseIsoDate } from '~/utils/formatDate'
-import { getTheadClass } from '~/utils/cardClasses'
+import { formatDate } from '~/utils/formatDate'
+import { getTheadClass, getTableRowClass } from '~/utils/cardClasses'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
 import Badge from '~/components/ui/Badge.vue'
@@ -40,17 +42,17 @@ const modalOpen = ref(false)
 const receiptTrx = ref(null)
 const currentPage = ref(1)
 
-const defaultStatus = computed(() => t('filters.all'))
-const defaultDate = computed(() => t('filters.anyDate'))
-const statusFilter = ref('')
-const dateFilter = ref('')
-watch(defaultStatus, (v) => { if (!statusFilter.value) statusFilter.value = v }, { immediate: true })
-watch(defaultDate, (v) => { if (!dateFilter.value) dateFilter.value = v }, { immediate: true })
+const {
+  current: statusFilter, defaultValue: defaultStatus,
+  isDirty: statusDirty, reset: resetStatus,
+} = useFilterSlot(() => t('filters.all'))
+const {
+  current: dateFilter, defaultValue: defaultDate,
+  isDirty: dateDirty, reset: resetDate,
+} = useFilterSlot(() => t('filters.anyDate'))
+const { match: matchDate } = useDateRangeMatcher(t)
 
-const filtersActive = computed(() =>
-  (statusFilter.value !== defaultStatus.value ? 1 : 0) +
-  (dateFilter.value !== defaultDate.value ? 1 : 0),
-)
+const filtersActive = computed(() => (statusDirty.value ? 1 : 0) + (dateDirty.value ? 1 : 0))
 watch(filtersActive, (v) => viewSearch.setActiveFilterCount(v), { immediate: true })
 
 // Debounce solo en Lite + reset page inmediato
@@ -60,8 +62,8 @@ const debouncedQuery = useDebouncedSearch(
 )
 
 const resetFilters = () => {
-  statusFilter.value = defaultStatus.value
-  dateFilter.value = defaultDate.value
+  resetStatus()
+  resetDate()
   currentPage.value = 1
 }
 
@@ -69,36 +71,14 @@ const ITEMS_PER_PAGE = 5
 
 const filtered = computed(() => {
   const q = debouncedQuery.value?.toLowerCase() || ''
-  const tToday = t('filters.today')
-  const tLast7 = t('filters.last7days')
-  const tThisMonth = t('filters.thisMonth')
   return WITHDRAWALS.filter(w => {
     if (q) {
       const amountNormalized = w.amount.replace(/,/g, '')
       const matchSearch = w.id.toLowerCase().includes(q) || w.amount.includes(q) || amountNormalized.includes(q)
       if (!matchSearch) return false
     }
-    if (statusFilter.value !== defaultStatus.value) {
-      if (t(`status.${w.status}`) !== statusFilter.value) return false
-    }
-    if (dateFilter.value !== defaultDate.value) {
-      const today = new Date()
-      const wDate = parseIsoDate(w.date)
-      if (!wDate) return false
-      if (dateFilter.value === tToday) {
-        if (wDate.getFullYear() !== today.getFullYear() ||
-            wDate.getMonth() !== today.getMonth() ||
-            wDate.getDate() !== today.getDate()) return false
-      } else if (dateFilter.value === tLast7) {
-        const weekAgo = new Date(today)
-        weekAgo.setDate(today.getDate() - 7)
-        if (wDate < weekAgo || wDate > today) return false
-      } else if (dateFilter.value === tThisMonth) {
-        if (wDate.getFullYear() !== today.getFullYear() ||
-            wDate.getMonth() !== today.getMonth()) return false
-      }
-    }
-    return true
+    if (statusDirty.value && t(`status.${w.status}`) !== statusFilter.value) return false
+    return matchDate(w.date, dateFilter.value, defaultDate.value)
   })
 })
 
@@ -113,11 +93,7 @@ const { visibleData, hasMore, sentinelRef } = useInfiniteScroll(filtered, {
 })
 
 const theadClass = computed(() => getTheadClass(themeStore.isDarkMode, perfStore.isLite))
-const trClass = computed(() =>
-  themeStore.isDarkMode
-    ? 'border-b border-white/5 hover:bg-[#7C3AED]/5 last:border-0'
-    : 'border-b border-black/5 hover:bg-[#DBD3FB]/20 last:border-0',
-)
+const trClass = computed(() => getTableRowClass(themeStore.isDarkMode))
 </script>
 
 <template>
@@ -169,7 +145,7 @@ const trClass = computed(() =>
         <Card class="p-6 flex flex-col gap-5 flex-1">
           <div class="flex justify-between items-center">
             <div class="flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.8)]" />
+              <span :class="['w-2 h-2 rounded-full bg-amber-400', perfStore.useNeon ? 'shadow-[0_0_6px_rgba(251,191,36,0.8)]' : '']" />
               <p :class="['text-sm font-bold', themeStore.isDarkMode ? 'text-white' : 'text-[#111113]']">
                 {{ t('wallet.withdrawalInProgress') }}
               </p>
@@ -333,7 +309,8 @@ const trClass = computed(() =>
         </Button>
       </Card>
       <div ref="sentinelRef" class="flex justify-center py-4">
-        <Loader2 v-if="hasMore" :size="20" class="animate-spin text-[#7C3AED]" />
+        <Loader2 v-if="hasMore && perfStore.useContinuousAnim" :size="20" class="animate-spin text-[#7C3AED]" />
+        <div v-else-if="hasMore" class="w-5 h-5 rounded-full border-2 border-[#7C3AED]/60" />
       </div>
     </div>
 

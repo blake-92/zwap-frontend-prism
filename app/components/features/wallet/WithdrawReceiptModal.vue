@@ -40,11 +40,12 @@ const cardClass = computed(() =>
     : 'bg-white/90 border-white shadow-[0_30px_80px_rgba(124,58,237,0.15)]',
 )
 
-const iconBubbleClass = computed(() =>
-  themeStore.isDarkMode
-    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.3)]'
-    : 'bg-gradient-to-tr from-emerald-400 to-emerald-600 text-white shadow-[0_10px_20px_rgba(16,185,129,0.3)]',
-)
+const iconBubbleClass = computed(() => {
+  const neonGlow = perfStore.useNeon ? ' shadow-[0_0_20px_rgba(16,185,129,0.3)]' : ''
+  return themeStore.isDarkMode
+    ? `bg-emerald-500/20 text-emerald-400 border border-emerald-500/30${neonGlow}`
+    : 'bg-gradient-to-tr from-emerald-400 to-emerald-600 text-white shadow-[0_10px_20px_rgba(16,185,129,0.3)]'
+})
 const actionBtnClass = computed(() =>
   themeStore.isDarkMode
     ? 'bg-[#252429]/80 border border-white/10 text-white hover:bg-white/10'

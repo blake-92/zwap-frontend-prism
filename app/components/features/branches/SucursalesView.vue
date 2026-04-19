@@ -6,6 +6,7 @@ import {
   PlusCircle, Star,
 } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
+import { usePerformanceStore } from '~/stores/performance'
 import { useViewSearch } from '~/composables/useViewSearch'
 import { useMotionVariants } from '~/composables/useMotionVariants'
 import { BRANCH_LIST } from '~/utils/mockData'
@@ -19,6 +20,7 @@ import NewBranchModal from './NewBranchModal.vue'
 const mv = useMotionVariants()
 const { t } = useI18n()
 const themeStore = useThemeStore()
+const perfStore = usePerformanceStore()
 const viewSearch = useViewSearch(computed(() => t('branches.searchPlaceholder')))
 const newBranchOpen = ref(false)
 
@@ -30,11 +32,12 @@ const filtered = computed(() => {
   )
 })
 
-const iconBubbleClass = computed(() =>
-  themeStore.isDarkMode
-    ? 'bg-[#7C3AED]/15 text-[#7C3AED] group-hover:shadow-[0_0_20px_rgba(124,58,237,0.4)]'
-    : 'bg-[#DBD3FB]/60 text-[#561BAF] shadow-xs',
-)
+const iconBubbleClass = computed(() => {
+  const neonGlow = perfStore.useNeon ? ' group-hover:shadow-[0_0_20px_rgba(124,58,237,0.4)]' : ''
+  return themeStore.isDarkMode
+    ? `bg-[#7C3AED]/15 text-[#7C3AED]${neonGlow}`
+    : 'bg-[#DBD3FB]/60 text-[#561BAF] shadow-xs'
+})
 const descTextClass = computed(() => themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]')
 </script>
 
@@ -67,10 +70,10 @@ const descTextClass = computed(() => themeStore.isDarkMode ? 'text-[#888991]' : 
             </div>
             <div class="flex items-center gap-2">
               <Tooltip :content="t('branches.editBranch')" position="top">
-                <Button variant="action" size="sm" class="!px-2.5 !py-2"><Pencil :size="13" /></Button>
+                <Button :aria-label="t('branches.editBranch')" variant="action" size="sm" class="!px-2.5 !py-2"><Pencil :size="13" /></Button>
               </Tooltip>
               <Tooltip v-if="!b.isMain" :content="t('branches.deleteBranch')" position="top">
-                <Button variant="danger" size="sm" class="!px-2.5 !py-2"><Trash2 :size="13" /></Button>
+                <Button :aria-label="t('branches.deleteBranch')" variant="danger" size="sm" class="!px-2.5 !py-2"><Trash2 :size="13" /></Button>
               </Tooltip>
             </div>
           </div>

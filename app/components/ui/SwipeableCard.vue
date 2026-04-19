@@ -105,6 +105,7 @@ const chevronBg = computed(() =>
       :drag-constraints="{ left: -maxDrag, right: 0 }"
       :drag-elastic="0.1"
       :animate="controls"
+      :style="maxDrag > 0 ? { touchAction: 'pan-y' } : undefined"
       :class="['relative z-10 w-full rounded-[24px] border overflow-hidden', cardClasses.base]"
       @drag-start="onDragStart"
       @drag-end="onDragEnd"

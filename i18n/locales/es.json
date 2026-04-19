@@ -443,7 +443,8 @@
     "somethingWrong": "Algo salió mal",
     "retry": "Reintentar",
     "noResults": "No se encontraron resultados",
-    "noResultsFor": "No hay resultados que coincidan con \"{term}\""
+    "noResultsFor": "No hay resultados que coincidan con \"{term}\"",
+    "sessionExpired": "Tu sesión expiró. Inicia sesión de nuevo."
   },
   "calendar": {
     "months": [

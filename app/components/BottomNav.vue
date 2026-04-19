@@ -235,8 +235,8 @@ const moreIconBubbleClass = (active) => {
                 <span :class="[
                   'absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full border-[2px]',
                   themeStore.isDarkMode
-                    ? 'bg-[#7C3AED] border-[#1A1A1D] shadow-[0_0_10px_rgba(124,58,237,0.9)]'
-                    : 'bg-red-500 border-white shadow-[0_0_10px_rgba(239,68,68,0.6)]'
+                    ? `bg-[#7C3AED] border-[#1A1A1D]${perfStore.useNeon ? ' shadow-[0_0_10px_rgba(124,58,237,0.9)]' : ''}`
+                    : `bg-red-500 border-white${perfStore.useNeon ? ' shadow-[0_0_10px_rgba(239,68,68,0.6)]' : ''}`
                 ]" />
               </div>
               <span class="text-[11px] leading-none font-medium">{{ t('nav.notifications') }}</span>

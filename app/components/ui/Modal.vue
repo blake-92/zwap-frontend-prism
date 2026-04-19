@@ -9,6 +9,7 @@ import { useChromeBlur } from '~/composables/useChromeBlur'
 import { usePerformanceStore } from '~/stores/performance'
 import { getModalGlass } from '~/utils/cardClasses'
 import { pushModal, popModal, isTopModal } from '~/utils/modalStack'
+import { getEl } from '~/utils/motionRef'
 import Button from './Button.vue'
 
 const props = defineProps({
@@ -25,6 +26,7 @@ const emit = defineEmits(['close'])
 // ID único por instancia — coordina stack global para focus trap / Escape.
 const modalId = Symbol('modal')
 
+const { t } = useI18n()
 const themeStore = useThemeStore()
 const isDesktopSm = useMediaQuery('(min-width: 640px)')
 const isMobile = computed(() => !isDesktopSm.value)
@@ -51,7 +53,7 @@ const desktopAnimate = {
 }
 const desktopExit = { opacity: 0, scale: 0.95, y: 10 }
 
-const getContainerEl = () => containerRef.value?.$el ?? containerRef.value
+const getContainerEl = () => getEl(containerRef.value)
 
 const onKey = (e) => {
   // Solo el modal top responde — evita que modal padre intercepte Escape/Tab cuando hay hijo.
@@ -95,7 +97,9 @@ onUnmounted(() => {
 
 const onDragEnd = (_e, info) => {
   if (!isMobile.value) return
-  if (info.offset.y > 100 || info.velocity.y > 500) {
+  // 150px ≈ 35% del modal típico: reduce dismiss accidental por scroll/fling corto
+  // sin sacrificar velocity (fling rápido sigue disparando el close).
+  if (info.offset.y > 150 || info.velocity.y > 800) {
     if (typeof document !== 'undefined') document.activeElement?.blur()
     emit('close')
   }
@@ -156,7 +160,7 @@ const backdropFilterClass = computed(() => perfStore.modalBackdropFilter)
                 {{ description }}
               </p>
             </div>
-            <Button variant="ghost" size="icon" class="!w-11 !h-11 sm:!w-10 sm:!h-10" @click="emit('close')">
+            <Button :aria-label="t('common.close')" variant="ghost" size="icon" class="!w-11 !h-11 sm:!w-10 sm:!h-10" @click="emit('close')">
               <X :size="20" />
             </Button>
           </div>

@@ -64,9 +64,11 @@ onUnmounted(() => {
 watch(searchExpanded, (v) => {
   if (focusTid) { clearTimeout(focusTid); focusTid = null }
   if (!v) return
-  focusTid = setTimeout(() => {
+  focusTid = setTimeout(async () => {
     focusTid = null
-    nextTick().then(() => searchInputRef.value?.focus?.())
+    await nextTick()
+    // Guard: el usuario pudo haber colapsado la búsqueda durante los 80ms.
+    if (searchExpanded.value) searchInputRef.value?.focus?.()
   }, 80)
 })
 
@@ -198,19 +200,19 @@ const goSettings = () => navigateTo(ROUTES.SETTINGS)
 
       <div class="flex items-center gap-4">
         <Tooltip :content="t('header.themeToggle')" position="bottom">
-          <Button variant="ghost" size="icon" @click="themeStore.toggleTheme()">
+          <Button :aria-label="t('header.themeToggle')" variant="ghost" size="icon" @click="themeStore.toggleTheme()">
             <component :is="themeStore.isDarkMode ? Sun : Moon" :size="20" />
           </Button>
         </Tooltip>
 
         <Tooltip :content="t('header.settings')" position="bottom">
-          <Button variant="ghost" size="icon" @click="goSettings">
+          <Button :aria-label="t('header.settings')" variant="ghost" size="icon" @click="goSettings">
             <Settings :size="20" />
           </Button>
         </Tooltip>
 
         <Tooltip :content="t('header.notifications')" position="bottom">
-          <Button variant="ghost" size="icon" class="relative">
+          <Button :aria-label="t('header.notifications')" variant="ghost" size="icon" class="relative">
             <motion.span
               :while-hover="perfStore.useContinuousAnim ? { rotate: [0, -18, 14, -10, 6, 0] } : undefined"
               :transition="{ duration: 0.6, ease: 'easeInOut' }"
@@ -221,8 +223,8 @@ const goSettings = () => navigateTo(ROUTES.SETTINGS)
             <span :class="[
               'absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full border-[2px]',
               themeStore.isDarkMode
-                ? 'bg-[#7C3AED] border-[#111113] shadow-[0_0_10px_rgba(124,58,237,0.9)]'
-                : 'bg-red-500 border-white shadow-[0_0_10px_rgba(239,68,68,0.6)]'
+                ? `bg-[#7C3AED] border-[#111113]${perfStore.useNeon ? ' shadow-[0_0_10px_rgba(124,58,237,0.9)]' : ''}`
+                : `bg-red-500 border-white${perfStore.useNeon ? ' shadow-[0_0_10px_rgba(239,68,68,0.6)]' : ''}`
             ]" />
           </Button>
         </Tooltip>
@@ -338,31 +340,32 @@ const goSettings = () => navigateTo(ROUTES.SETTINGS)
         <AnimatePresence>
           <motion.div
             v-if="!searchExpanded"
-            key="search-filter-icons"
+            key="search-icon"
             :initial="{ opacity: 0, x: 10 }"
             :animate="{ opacity: 1, x: 0 }"
             :exit="{ opacity: 0, x: 10 }"
             :transition="{ ...SPRING, stiffness: 500 }"
-            class="flex items-center gap-1"
           >
-            <Button variant="ghost" size="icon" @click="searchExpanded = true">
+            <Button :aria-label="t('header.search')" variant="ghost" size="icon" @click="searchExpanded = true">
               <Search :size="20" />
-            </Button>
-            <Button
-              v-if="viewSearch.hasFilters"
-              variant="ghost"
-              size="icon"
-              class="relative"
-              @click="viewSearch.openFilters()"
-            >
-              <SlidersHorizontal :size="19" />
-              <span
-                v-if="viewSearch.activeFilterCount > 0"
-                :class="['absolute top-1.5 right-1.5 w-2 h-2 rounded-full', themeStore.isDarkMode ? 'bg-[#7C3AED] shadow-[0_0_8px_rgba(124,58,237,0.8)]' : 'bg-[#7C3AED] shadow-[0_0_8px_rgba(124,58,237,0.6)]']"
-              />
             </Button>
           </motion.div>
         </AnimatePresence>
+        <!-- Filter button: visible aunque la búsqueda esté abierta. -->
+        <Button
+          v-if="viewSearch.hasFilters"
+          :aria-label="t('filters.status')"
+          variant="ghost"
+          size="icon"
+          class="relative"
+          @click="viewSearch.openFilters()"
+        >
+          <SlidersHorizontal :size="19" />
+          <span
+            v-if="viewSearch.activeFilterCount > 0"
+            :class="['absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#7C3AED]', perfStore.useNeon ? (themeStore.isDarkMode ? 'shadow-[0_0_8px_rgba(124,58,237,0.8)]' : 'shadow-[0_0_8px_rgba(124,58,237,0.6)]') : '']"
+          />
+        </Button>
         <button
           :aria-label="t('nav.branches')"
           :class="['w-11 h-11 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 transition-colors', branchPillClass]"

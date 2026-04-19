@@ -1,6 +1,8 @@
 // HTTP client wrapper. Currently unused (mockData in place);
 // swap-in when backend is ready without touching views.
 
+import { useToastStore } from '~/stores/toast'
+
 const DEFAULT_TIMEOUT = 15000
 
 const tokenCookieOpts = () => ({
@@ -42,6 +44,12 @@ async function request(method, path, body, { timeout = DEFAULT_TIMEOUT, signal: 
     if (res.status === 401) {
       const token = useCookie('zwap_token', tokenCookieOpts())
       token.value = null
+      // Toast no bloqueante: notifica expiración antes del redirect silencioso.
+      // `$i18n.t` se invoca via nuxtApp porque el wrapper vive fuera de setup.
+      try {
+        const { $i18n } = useNuxtApp()
+        useToastStore().addToast($i18n.t('errors.sessionExpired'), 'error')
+      } catch { /* toast/i18n no inicializado aún */ }
       await navigateTo('/login')
       throw new Error('Unauthorized')
     }
@@ -64,3 +72,12 @@ export const get = (path, opts) => request('GET', path, undefined, opts)
 export const post = (path, body, opts) => request('POST', path, body, opts)
 export const put = (path, body, opts) => request('PUT', path, body, opts)
 export const del = (path, opts) => request('DELETE', path, undefined, opts)
+
+/**
+ * Logout: invalida sesión en backend (si existe) y limpia cookie local.
+ * Resiliente: un error de red NO debe dejar al usuario autenticado en UI.
+ */
+export async function logout() {
+  try { await post('/auth/logout', null, { timeout: 3000 }) } catch { /* best-effort */ }
+  useCookie('zwap_token', tokenCookieOpts()).value = null
+}

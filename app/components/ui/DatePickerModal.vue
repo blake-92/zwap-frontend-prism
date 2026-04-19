@@ -16,13 +16,14 @@ const props = defineProps({
 })
 const emit = defineEmits(['select', 'timeChange', 'confirm', 'close'])
 
-const { t } = useI18n()
+const { t, tm } = useI18n()
 const themeStore = useThemeStore()
 // useMediaQuery usa onMounted/onUnmounted — debe invocarse a nivel top del setup, no dentro de computed.
 const isDesktopSm = useMediaQuery('(min-width: 640px)')
 const isMobile = computed(() => !isDesktopSm.value)
 
-const monthsShort = computed(() => t('calendar.monthsShort', [], { returnObjects: true }))
+// vue-i18n v11 — arrays/listas van por tm(), NO t() con { returnObjects: true } (syntax de react-i18next).
+const monthsShort = computed(() => tm('calendar.monthsShort'))
 
 const selectedDay = computed({
   get() {

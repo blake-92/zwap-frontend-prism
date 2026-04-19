@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import { UserPlus, Shield, Calculator, ConciergeBell, Mail } from 'lucide-vue-next'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
@@ -46,6 +46,7 @@ const handleEmailInput = (v) => {
   if (emailError.value && validateEmail(v)) emailError.value = ''
 }
 
+let submitTimer = null
 const handleSubmit = () => {
   if (!name.value.trim()) return
   if (!email.value.trim() || !validateEmail(email.value)) {
@@ -54,8 +55,15 @@ const handleSubmit = () => {
   }
   if (branches.value.length === 0) return
   isSubmitting.value = true
-  setTimeout(() => { isSubmitting.value = false; emit('close') }, 1500)
+  submitTimer = setTimeout(() => {
+    submitTimer = null
+    isSubmitting.value = false
+    emit('close')
+  }, 1500)
 }
+onUnmounted(() => {
+  if (submitTimer) clearTimeout(submitTimer)
+})
 
 const toggleBranch = (id) => {
   const i = branches.value.indexOf(id)

@@ -6,8 +6,9 @@ import { useThemeStore } from '~/stores/theme'
 import { usePerformanceStore } from '~/stores/performance'
 import { useViewSearch } from '~/composables/useViewSearch'
 import { useMotionVariants } from '~/composables/useMotionVariants'
+import { useFilterSlot } from '~/composables/useFilterSlot'
 import { USERS } from '~/utils/mockData'
-import { getTheadClass } from '~/utils/cardClasses'
+import { getTheadClass, getTableRowClass } from '~/utils/cardClasses'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
 import Badge from '~/components/ui/Badge.vue'
@@ -35,22 +36,21 @@ const ROLE_LABEL = computed(() => ({
   Recepcionista: t('users.roleReceptionist'),
 }))
 
-const defaultRole = computed(() => t('filters.all'))
-const defaultStatus = computed(() => t('filters.all'))
-const roleFilter = ref('')
-const statusFilter = ref('')
-watch(defaultRole, (v) => { if (!roleFilter.value) roleFilter.value = v }, { immediate: true })
-watch(defaultStatus, (v) => { if (!statusFilter.value) statusFilter.value = v }, { immediate: true })
+const {
+  current: roleFilter, defaultValue: defaultRole,
+  isDirty: roleDirty, reset: resetRole,
+} = useFilterSlot(() => t('filters.all'))
+const {
+  current: statusFilter, defaultValue: defaultStatus,
+  isDirty: statusDirty, reset: resetStatus,
+} = useFilterSlot(() => t('filters.all'))
 
-const filtersActive = computed(() =>
-  (roleFilter.value !== defaultRole.value ? 1 : 0) +
-  (statusFilter.value !== defaultStatus.value ? 1 : 0),
-)
+const filtersActive = computed(() => (roleDirty.value ? 1 : 0) + (statusDirty.value ? 1 : 0))
 watch(filtersActive, (v) => viewSearch.setActiveFilterCount(v), { immediate: true })
 
 const resetFilters = () => {
-  roleFilter.value = defaultRole.value
-  statusFilter.value = defaultStatus.value
+  resetRole()
+  resetStatus()
 }
 
 const filtered = computed(() => {
@@ -58,12 +58,12 @@ const filtered = computed(() => {
   return users.value.filter(u => {
     const matchSearch = !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
     let matchRole = true
-    if (roleFilter.value !== defaultRole.value) {
+    if (roleDirty.value) {
       const translatedRole = ROLE_LABEL.value[u.role] || u.role
       matchRole = translatedRole === roleFilter.value || u.role === roleFilter.value
     }
     let matchStatus = true
-    if (statusFilter.value !== defaultStatus.value) {
+    if (statusDirty.value) {
       const isActive = statusFilter.value === t('filters.active')
       matchStatus = u.active === isActive
     }
@@ -77,11 +77,7 @@ const toggleUser = (id) => {
 }
 
 const theadClass = computed(() => getTheadClass(themeStore.isDarkMode, perfStore.isLite))
-const trClass = computed(() =>
-  themeStore.isDarkMode
-    ? 'border-b border-white/5 hover:bg-[#7C3AED]/5 last:border-0'
-    : 'border-b border-black/5 hover:bg-[#DBD3FB]/20 last:border-0',
-)
+const trClass = computed(() => getTableRowClass(themeStore.isDarkMode))
 const branchChipClass = computed(() =>
   themeStore.isDarkMode
     ? 'bg-white/5 border-white/10 text-[#888991]'

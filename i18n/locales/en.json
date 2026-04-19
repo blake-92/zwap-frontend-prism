@@ -443,7 +443,8 @@
     "somethingWrong": "Something went wrong",
     "retry": "Retry",
     "noResults": "No results found",
-    "noResultsFor": "No results matching \"{term}\""
+    "noResultsFor": "No results matching \"{term}\"",
+    "sessionExpired": "Your session expired. Please sign in again."
   },
   "calendar": {
     "months": [
