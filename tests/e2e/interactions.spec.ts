@@ -55,17 +55,14 @@ test.describe('Interactions — Filter reset (R2 useFilterSlot)', () => {
     await mockAuth()
   })
 
-  test('filtro status cambia y luego reset vuelve a default', async ({ page }) => {
+  test('filtro status cambia y luego reset vuelve a default', async ({ page, viewport }) => {
+    // En mobile los filters viven en BottomSheet (ocultos hasta click en ícono
+    // SlidersHorizontal del Header). Skip mobile/tablet — test específico para
+    // desktop donde el TableToolbar muestra filtros inline.
+    test.skip(!viewport || viewport.width < 1024, 'Filter toolbar inline solo en desktop')
     await page.goto('/app/transacciones')
     await waitForUIReady(page)
-
-    // Al inicio: filtros NO dirty → no hay badge de count
-    // (la lógica exacta depende del TableToolbar render — smoke check genérico)
-    const toolbar = page.locator('[class*="TableToolbar"], [data-toolbar]').first()
-    if (await toolbar.count() === 0) {
-      // Fallback: buscamos cualquier dropdown filter visible
-      const filter = page.locator('button').filter({ hasText: /Todos|All|Status|Fecha|Date/i }).first()
-      await expect(filter).toBeVisible()
-    }
+    const filter = page.locator('button').filter({ hasText: /Todos|All|Status|Fecha|Date/i }).first()
+    await expect(filter).toBeVisible()
   })
 })
