@@ -1,4 +1,10 @@
 import { vi, afterEach } from 'vitest'
+import { motionStub } from './motionStub'
+
+// Mock global de motion-v para todos los component tests: reemplaza <motion.*>
+// con wrappers simples que descartan props motion (animate, transition, drag, etc.)
+// y preservan slots/attrs. Neutraliza `repeat: Infinity` y similares.
+vi.mock('motion-v', () => motionStub)
 
 // happy-dom no implementa matchMedia: shim antes de que cualquier código
 // que haga useMediaQuery() corra durante import.
