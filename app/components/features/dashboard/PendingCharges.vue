@@ -218,17 +218,17 @@ const rowBorder = (i, total) => {
             <td class="px-6 py-3.5 text-right">
               <div class="flex items-center justify-end gap-1">
                 <Tooltip :content="t('links.copyLink')" position="top">
-                  <Button variant="ghost" size="sm" class="!px-2" @click="handleCopy(link)">
+                  <Button :aria-label="t('links.copyLink')" variant="ghost" size="sm" class="!px-2" @click="handleCopy(link)">
                     <Copy :size="15" />
                   </Button>
                 </Tooltip>
                 <Tooltip :content="t('links.generateQr')" position="top">
-                  <Button variant="ghost" size="sm" class="!px-2">
+                  <Button :aria-label="t('links.generateQr')" variant="ghost" size="sm" class="!px-2">
                     <QrCode :size="15" />
                   </Button>
                 </Tooltip>
                 <Tooltip :content="t('users.sendByEmail')" position="top">
-                  <Button variant="action" size="sm" class="!px-3 ml-1">
+                  <Button :aria-label="t('users.sendByEmail')" variant="action" size="sm" class="!px-3 ml-1">
                     <Mail :size="15" />
                     <span class="hidden xl:inline text-xs ml-1">{{ t('links.send') }}</span>
                   </Button>

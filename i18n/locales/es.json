@@ -25,7 +25,8 @@
     "free": "Gratis",
     "usd": "USD",
     "receipt": "Recibo",
-    "copyFailed": "No se pudo copiar"
+    "copyFailed": "No se pudo copiar",
+    "toggleFor": "Activar o desactivar {name}"
   },
   "status": {
     "success": "Exitoso",
@@ -489,7 +490,9 @@
     "selectDateTime": "Seleccionar fecha y hora"
   },
   "pagination": {
-    "showingPage": "Mostrando página {current} de {total}"
+    "showingPage": "Mostrando página {current} de {total}",
+    "previous": "Página anterior",
+    "next": "Página siguiente"
   },
   "search": {
     "emptyHint": "Escribe para buscar en transacciones, links de pago y clientes."

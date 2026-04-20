@@ -255,7 +255,7 @@ const trClass = computed(() => getTableRowClass(themeStore.isDarkMode))
               <td class="px-8 py-3.5 text-right">
                 <div class="flex justify-end">
                   <Tooltip :content="t('wallet.viewReceipt')" position="top">
-                    <Button variant="action" size="sm" class="!px-2.5 !py-1.5" :disabled="w.status !== 'completed'" @click="receiptTrx = w">
+                    <Button :aria-label="t('wallet.viewReceipt')" variant="action" size="sm" class="!px-2.5 !py-1.5" :disabled="w.status !== 'completed'" @click="receiptTrx = w">
                       <FileText :size="13" />
                     </Button>
                   </Tooltip>

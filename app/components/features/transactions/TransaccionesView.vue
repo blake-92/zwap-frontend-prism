@@ -220,19 +220,19 @@ const goLinks = () => navigateTo(ROUTES.LINKS)
               <td class="px-8 py-4 text-right">
                 <div class="flex items-center justify-end gap-2">
                   <Tooltip :content="t('transactions.viewReceipt')" position="top">
-                    <Button variant="action" size="sm" class="!px-3 !py-2" @click="receiptTrx = trx">
+                    <Button :aria-label="t('transactions.viewReceipt')" variant="action" size="sm" class="!px-3 !py-2" @click="receiptTrx = trx">
                       <FileText :size="15" />
                       <span class="hidden xl:inline ml-1">{{ t('transactions.receiptShort') }}</span>
                     </Button>
                   </Tooltip>
                   <Tooltip v-if="trx.status === 'refunded'" :content="t('transactions.refundReceipt')" position="top">
-                    <Button variant="outline" size="sm" class="!px-3 !py-2" @click="refundTrx = trx">
+                    <Button :aria-label="t('transactions.refundReceipt')" variant="outline" size="sm" class="!px-3 !py-2" @click="refundTrx = trx">
                       <FileText :size="15" />
                       <span class="hidden xl:inline ml-1">{{ t('transactions.refundReceipt') }}</span>
                     </Button>
                   </Tooltip>
                   <Tooltip v-else :content="t('transactions.refund')" position="top">
-                    <Button variant="danger" size="sm" class="!px-3 !py-2" :disabled="trx.status === 'pending'" @click="refundTrx = trx">
+                    <Button :aria-label="t('transactions.refund')" variant="danger" size="sm" class="!px-3 !py-2" :disabled="trx.status === 'pending'" @click="refundTrx = trx">
                       <RotateCcw :size="15" />
                       <span class="hidden xl:inline ml-1">{{ t('transactions.refund') }}</span>
                     </Button>

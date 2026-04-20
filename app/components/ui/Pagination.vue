@@ -52,6 +52,7 @@ const pageBtnClass = (p) => {
     </span>
     <div class="flex items-center gap-1.5">
       <Button
+        :aria-label="t('pagination.previous')"
         variant="outline"
         size="icon"
         :disabled="currentPage === 1"
@@ -73,6 +74,7 @@ const pageBtnClass = (p) => {
         >{{ p }}</button>
       </template>
       <Button
+        :aria-label="t('pagination.next')"
         variant="outline"
         size="icon"
         :disabled="currentPage === totalPages"

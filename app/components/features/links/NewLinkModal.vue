@@ -192,10 +192,10 @@ const sliderStyle = computed(() => ({
                 @update:model-value="updateItem(idx, 'amount', $event)"
               />
             </div>
-            <Button v-if="items.length > 1" variant="danger" size="icon" class="shrink-0 mt-1" @click="removeItem(idx)">
+            <Button v-if="items.length > 1" :aria-label="t('common.delete')" variant="danger" size="icon" class="shrink-0 mt-1" @click="removeItem(idx)">
               <Trash2 :size="16" />
             </Button>
-            <Button v-else variant="ghost" size="icon" disabled class="shrink-0 mt-1 opacity-20 cursor-not-allowed">
+            <Button v-else :aria-label="t('common.delete')" variant="ghost" size="icon" disabled class="shrink-0 mt-1 opacity-20 cursor-not-allowed">
               <Trash2 :size="16" />
             </Button>
           </div>

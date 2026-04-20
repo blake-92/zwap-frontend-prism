@@ -39,7 +39,7 @@ const sessionDescription = (session) =>
         <Button variant="outline" size="sm">{{ t('common.change') }}</Button>
       </SettingItem>
       <SettingItem :icon="Lock" :title="t('settings.twoFactor')" :description="t('settings.twoFactorDesc')" last>
-        <Toggle :active="twoFactor" @toggle="twoFactor = !twoFactor" />
+        <Toggle :aria-label="t('settings.twoFactor')" :active="twoFactor" @toggle="twoFactor = !twoFactor" />
       </SettingItem>
     </div>
   </Card>

@@ -68,7 +68,7 @@ const titleClass = computed(() => {
       >
         <QrCode :size="22" />
       </motion.div>
-      <Toggle :active="link.active" @toggle="emit('toggle')" />
+      <Toggle :aria-label="t('common.toggleFor', { name: link.name })" :active="link.active" @toggle="emit('toggle')" />
     </div>
 
     <h4 :class="['text-lg font-bold tracking-tight mb-1', titleClass]">{{ link.name }}</h4>
@@ -77,12 +77,12 @@ const titleClass = computed(() => {
     <div :class="['pt-4 border-t flex justify-between items-center', themeStore.isDarkMode ? 'border-white/10' : 'border-black/5']">
       <div class="flex gap-2">
         <Tooltip :content="t('links.viewQr')" position="top">
-          <Button variant="ghost" size="icon" class="!p-1.5" :disabled="!link.active" @click="openQr">
+          <Button :aria-label="t('links.viewQr')" variant="ghost" size="icon" class="!p-1.5" :disabled="!link.active" @click="openQr">
             <QrCode :size="16" />
           </Button>
         </Tooltip>
         <Tooltip :content="t('links.copyLink')" position="top">
-          <Button variant="ghost" size="icon" class="!p-1.5" :disabled="!link.active" @click="handleCopy">
+          <Button :aria-label="t('links.copyLink')" variant="ghost" size="icon" class="!p-1.5" :disabled="!link.active" @click="handleCopy">
             <Copy :size="16" />
           </Button>
         </Tooltip>

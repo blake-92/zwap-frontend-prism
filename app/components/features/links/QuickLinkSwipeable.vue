@@ -140,6 +140,7 @@ const urlTextClass = computed(() => {
 
       <div class="flex flex-col items-center justify-center gap-2.5 px-3 py-4 shrink-0">
         <button
+          :aria-label="t('links.copyLink')"
           :disabled="!selected.active"
           :class="['p-2 rounded-xl transition-colors', actionBtnClass(selected.active)]"
           @click="handleCopy"
@@ -148,6 +149,7 @@ const urlTextClass = computed(() => {
         </button>
         <div :class="['w-5 border-t', themeStore.isDarkMode ? 'border-white/8' : 'border-black/6']" />
         <button
+          :aria-label="t('common.open')"
           :disabled="!selected.active"
           :class="['p-2 rounded-xl transition-colors', actionBtnClass(selected.active)]"
           @click="handleOpen"
@@ -155,7 +157,7 @@ const urlTextClass = computed(() => {
           <ExternalLink :size="16" />
         </button>
         <div :class="['w-5 border-t', themeStore.isDarkMode ? 'border-white/8' : 'border-black/6']" />
-        <Toggle :active="selected.active" @toggle="emit('toggle', selected.id)" />
+        <Toggle :aria-label="t('common.toggleFor', { name: selected.name })" :active="selected.active" @toggle="emit('toggle', selected.id)" />
       </div>
     </div>
   </Card>

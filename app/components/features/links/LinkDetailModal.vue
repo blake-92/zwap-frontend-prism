@@ -74,7 +74,7 @@ const handleEdit = () => {
         <SectionLabel class="mb-3">{{ t('links.linkUrl') }}</SectionLabel>
         <div :class="['flex items-center gap-2 p-3 rounded-xl border', themeStore.isDarkMode ? 'bg-[#111113]/30 border-white/5' : 'bg-gray-50/50 border-black/5']">
           <span :class="['flex-1 text-xs font-mono truncate', themeStore.isDarkMode ? 'text-[#A78BFA]' : 'text-[#7C3AED]']">{{ url }}</span>
-          <Button variant="ghost" size="sm" class="!p-1.5 shrink-0" @click="handleCopy">
+          <Button :aria-label="t('links.copyLink')" variant="ghost" size="sm" class="!p-1.5 shrink-0" @click="handleCopy">
             <Copy :size="14" />
           </Button>
         </div>

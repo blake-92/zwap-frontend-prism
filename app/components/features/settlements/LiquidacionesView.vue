@@ -231,7 +231,7 @@ const netClass = (isDebt) => {
               </td>
               <td class="px-8 py-4 text-right">
                 <Tooltip :content="t('settlements.inspectBatch')" position="top">
-                  <Button variant="action" size="sm" class="!px-3 !py-2">
+                  <Button :aria-label="t('settlements.inspectBatch')" variant="action" size="sm" class="!px-3 !py-2">
                     <Search :size="15" />
                     <span class="hidden xl:inline text-xs ml-1">{{ t('settlements.inspect') }}</span>
                   </Button>

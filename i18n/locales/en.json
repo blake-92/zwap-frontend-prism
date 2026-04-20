@@ -25,7 +25,8 @@
     "free": "Free",
     "usd": "USD",
     "receipt": "Receipt",
-    "copyFailed": "Could not copy"
+    "copyFailed": "Could not copy",
+    "toggleFor": "Toggle {name}"
   },
   "status": {
     "success": "Successful",
@@ -489,7 +490,9 @@
     "selectDateTime": "Select date and time"
   },
   "pagination": {
-    "showingPage": "Showing page {current} of {total}"
+    "showingPage": "Showing page {current} of {total}",
+    "previous": "Previous page",
+    "next": "Next page"
   },
   "search": {
     "emptyHint": "Type to search transactions, payment links, and clients."

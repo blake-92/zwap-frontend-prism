@@ -103,10 +103,10 @@ const avatarClass = computed(() =>
     <h3 :class="['text-sm font-bold tracking-widest uppercase mb-2', sectionLabelClass]">{{ t('settings.notificationPrefs') }}</h3>
     <div class="flex flex-col">
       <SettingItem :icon="Bell" :title="t('settings.paymentAlerts')" :description="t('settings.paymentAlertsDesc')">
-        <Toggle :active="alertEmails" @toggle="alertEmails = !alertEmails" />
+        <Toggle :aria-label="t('settings.paymentAlerts')" :active="alertEmails" @toggle="alertEmails = !alertEmails" />
       </SettingItem>
       <SettingItem :icon="Smartphone" :title="t('settings.pushNotifications')" :description="t('settings.pushNotificationsDesc')" last>
-        <Toggle :active="pushNotifs" @toggle="pushNotifs = !pushNotifs" />
+        <Toggle :aria-label="t('settings.pushNotifications')" :active="pushNotifs" @toggle="pushNotifs = !pushNotifs" />
       </SettingItem>
     </div>
   </Card>

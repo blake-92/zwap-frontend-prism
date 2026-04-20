@@ -16,7 +16,7 @@
     "test:e2e:headed": "playwright test --headed --project=desktop-chromium",
     "test:a11y": "playwright test tests/e2e/a11y.spec.ts",
     "test:ssr": "playwright test tests/e2e/ssr.spec.ts",
-    "test:lhci": "lhci autorun",
+    "test:lhci": "bash -c 'export CHROME_PATH=$(node -p \"require(\\\"playwright\\\").chromium.executablePath()\") && lhci autorun'",
     "test:security": "npm audit --production --audit-level=high",
     "test:all": "npm run test && npm run test:e2e"
   },

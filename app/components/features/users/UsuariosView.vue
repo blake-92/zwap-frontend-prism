@@ -175,15 +175,15 @@ const branchOverflowClass = computed(() =>
                 </div>
               </td>
               <td class="px-6 py-4 text-center">
-                <Toggle :active="user.active" @toggle="toggleUser(user.id)" />
+                <Toggle :aria-label="t('common.toggleFor', { name: user.name })" :active="user.active" @toggle="toggleUser(user.id)" />
               </td>
               <td class="px-8 py-4 text-right">
                 <div class="flex items-center justify-end gap-2">
                   <Tooltip :content="t('users.editUser')" position="top">
-                    <Button variant="action" size="sm" class="!px-3 !py-2"><Pencil :size="14" /></Button>
+                    <Button :aria-label="t('users.editUser')" variant="action" size="sm" class="!px-3 !py-2"><Pencil :size="14" /></Button>
                   </Tooltip>
                   <Tooltip :content="t('users.deleteUser')" position="top">
-                    <Button variant="danger" size="sm" class="!px-3 !py-2"><Trash2 :size="14" /></Button>
+                    <Button :aria-label="t('users.deleteUser')" variant="danger" size="sm" class="!px-3 !py-2"><Trash2 :size="14" /></Button>
                   </Tooltip>
                 </div>
               </td>
@@ -206,7 +206,7 @@ const branchOverflowClass = computed(() =>
           <Card class="p-4">
             <div class="flex items-start justify-between gap-3 mb-3">
               <AvatarInfo :initials="user.initials" :primary="user.name" :secondary="user.email" glow />
-              <Toggle :active="user.active" @toggle="toggleUser(user.id)" />
+              <Toggle :aria-label="t('common.toggleFor', { name: user.name })" :active="user.active" @toggle="toggleUser(user.id)" />
             </div>
             <div class="flex items-center gap-2 flex-wrap mb-3">
               <Badge :variant="ROLE_VARIANT[user.role] || 'default'">{{ ROLE_LABEL[user.role] || user.role }}</Badge>

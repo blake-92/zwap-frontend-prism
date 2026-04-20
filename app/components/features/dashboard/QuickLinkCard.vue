@@ -92,7 +92,7 @@ const urlTextClass = computed(() => {
       >
         <QrCode :size="140" class="text-black" :stroke-width="1.5" />
         <div class="absolute inset-0 flex items-center justify-center bg-black/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button variant="action" size="icon" class="!rounded-full shadow-lg pointer-events-none">
+          <Button :aria-label="t('links.viewQr')" variant="action" size="icon" class="!rounded-full shadow-lg pointer-events-none">
             <Maximize :size="16" />
           </Button>
         </div>

@@ -129,22 +129,22 @@ const mobileActions = (link) => [
             <td class="px-8 py-4 text-right">
               <div class="flex items-center justify-end gap-1">
                 <Tooltip :content="t('common.edit')" position="top">
-                  <Button variant="ghost" size="sm" class="!px-2" :disabled="link.status === 'paid'" @click="emit('edit', link)">
+                  <Button :aria-label="t('common.edit')" variant="ghost" size="sm" class="!px-2" :disabled="link.status === 'paid'" @click="emit('edit', link)">
                     <Edit2 :size="15" />
                   </Button>
                 </Tooltip>
                 <Tooltip :content="t('links.copyLink')" position="top">
-                  <Button variant="ghost" size="sm" class="!px-2" :disabled="link.status === 'expired'" @click="handleCopy(link)">
+                  <Button :aria-label="t('links.copyLink')" variant="ghost" size="sm" class="!px-2" :disabled="link.status === 'expired'" @click="handleCopy(link)">
                     <Copy :size="15" />
                   </Button>
                 </Tooltip>
                 <Tooltip :content="t('links.generateQr')" position="top">
-                  <Button variant="ghost" size="sm" class="!px-2" :disabled="link.status === 'expired'">
+                  <Button :aria-label="t('links.generateQr')" variant="ghost" size="sm" class="!px-2" :disabled="link.status === 'expired'">
                     <QrCode :size="15" />
                   </Button>
                 </Tooltip>
                 <Tooltip :content="t('users.sendByEmail')" position="top">
-                  <Button variant="action" size="sm" class="!px-3 ml-1" :disabled="link.status === 'expired' || link.status === 'paid'">
+                  <Button :aria-label="t('users.sendByEmail')" variant="action" size="sm" class="!px-3 ml-1" :disabled="link.status === 'expired' || link.status === 'paid'">
                     <Mail :size="15" />
                     <span class="hidden xl:inline text-xs ml-1">{{ t('links.send') }}</span>
                   </Button>
@@ -183,13 +183,13 @@ const mobileActions = (link) => [
             </div>
           </div>
           <div :class="['flex items-center gap-1.5 px-4 pb-4', themeStore.isDarkMode ? 'border-white/5' : 'border-black/5']">
-            <Button variant="ghost" size="sm" class="!p-2.5 flex-1 justify-center" :disabled="link.status === 'expired' || link.status === 'paid'" @click.stop>
+            <Button :aria-label="t('users.sendByEmail')" variant="ghost" size="sm" class="!p-2.5 flex-1 justify-center" :disabled="link.status === 'expired' || link.status === 'paid'" @click.stop>
               <Mail :size="16" />
             </Button>
-            <Button variant="ghost" size="sm" class="!p-2.5 flex-1 justify-center" :disabled="link.status === 'expired'" @click.stop="handleCopy(link)">
+            <Button :aria-label="t('links.copyLink')" variant="ghost" size="sm" class="!p-2.5 flex-1 justify-center" :disabled="link.status === 'expired'" @click.stop="handleCopy(link)">
               <Copy :size="16" />
             </Button>
-            <Button variant="ghost" size="sm" class="!p-2.5 flex-1 justify-center" :disabled="link.status === 'expired'" @click.stop>
+            <Button :aria-label="t('links.generateQr')" variant="ghost" size="sm" class="!p-2.5 flex-1 justify-center" :disabled="link.status === 'expired'" @click.stop>
               <QrCode :size="16" />
             </Button>
           </div>
