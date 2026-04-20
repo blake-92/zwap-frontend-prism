@@ -576,18 +576,23 @@ Centralizado en `getDropdownGlass(isDarkMode)` de `app/utils/cardClasses.js`:
 
 ```
 GlassBackground (fixed, z-0)
-└── AppShell (min-h-screen flex)
-    ├── Sidebar (w-64 h-screen z-20) — solo ≥ lg (1024px)
+└── AppShell (min-h-dvh flex)
+    ├── Sidebar (w-64 h-dvh z-20) — solo ≥ lg (1024px)
     ├── BottomNav (fixed bottom z-40) — solo < lg
-    └── Main column (flex-1 flex flex-col h-screen overflow-hidden z-10)
-        ├── Header (h-16 lg:h-20 z-50)
-        │   ├── Desktop: relative — search bar inline + branch dropdown + acciones
-        │   └── Mobile: fixed inset-x-0 top-0 — scroll-aware (y:-64 al bajar, y:0 al subir)
+    └── Main column (flex-1 flex flex-col h-dvh overflow-hidden z-10)
+        ├── Header (z-50)
+        │   ├── Desktop: h-20 relative — search bar inline + branch dropdown + acciones
+        │   └── Mobile: h-[calc(4rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)]
+        │                fixed inset-x-0 top-0 — scroll-aware
+        │                (y:-(64+safeTop) al bajar, y:0 al subir; reset en visualViewport resize)
         └── <main> (flex-1 overflow-auto overscroll-y-contain)
         │       desktop: px/pt responsive + lg:pb-10 xl:pb-12 2xl:pb-16
-        │       mobile:  px-4 sm:px-6 pt-20 + paddingBottom calc(5rem+safe-area) via style
+        │       mobile:  px-4 sm:px-6 pt-[calc(5rem+env(safe-area-inset-top))]
+        │                + paddingBottom calc(5rem+env(safe-area-inset-bottom)) via style
             └── <div> max-w-[1400px] 2xl:max-w-[1600px] mx-auto  ← sin h-full
 ```
+
+**`h-dvh` en lugar de `h-screen`** para que el contenedor siga el viewport visible en iOS Safari (URL bar colapsable). El safe-area top se reserva en Header mobile + main `pt` calc; se expone a JS como CSS var `--sat` en `:root` (globals.css) porque motion-v no evalúa `env()` dentro de animate strings — el Header lee `--sat` en `onMounted` con `getComputedStyle` y lo suma al translate de hide.
 
 **Header mobile:** muestra isotipo Zwap + wordmark animado (blur reveal con `AnimatePresence`). Al expandir búsqueda, el wordmark se reemplaza por la barra de búsqueda con spring. El selector de sucursales es un pill circular que abre un bottom sheet vía `createPortal`. Filtros e íconos de acción se ocultan cuando la búsqueda está expandida.
 

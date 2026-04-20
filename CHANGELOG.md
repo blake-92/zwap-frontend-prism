@@ -7,6 +7,33 @@ Versionamiento según [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
+## [0.17.1] — 2026-04-20
+
+### iOS Safari polish — viewport, safe area y gestos
+
+Round de fixes para que la app se sienta nativa en iOS/iPadOS: la última card ya no queda tapada por el BottomNav, el header mobile respeta el Dynamic Island / notch, el sidebar footer (usuario + logout) queda siempre visible en iPad, y el double-tap ya no activa zoom del browser.
+
+### Fixed
+
+- **`layouts/default.vue` — `min-h-screen` + `h-screen` → `min-h-dvh` + `h-dvh`** en los contenedores de scroll. `100vh` en iOS es el viewport grande (URL bar oculta); cuando el URL bar está visible el contenedor era más alto que el área visible y la última card quedaba detrás del BottomNav. `100dvh` sigue la viewport visible.
+- **`components/Sidebar.vue:120` — `h-screen` → `h-dvh`.** En iPad landscape el Sidebar (≥1024px es `isDesktop`) quedaba más alto que el viewport visible y el footer con wallet + usuario + logout se perdía off-screen.
+- **`components/Header.vue` — mobile ahora reserva `env(safe-area-inset-top)`.** Altura mobile: `h-[calc(4rem+env(safe-area-inset-top))]` + `pt-[env(safe-area-inset-top)]`. Hide translate pasa de `y: -64` a `y: -(64 + safeTop)`, leyendo `--sat` en `onMounted` (motion-v no evalúa `env()` dentro de animate strings).
+- **`layouts/default.vue` — main mobile `pt-20` → `pt-[calc(5rem+env(safe-area-inset-top))]`** para compensar el header más alto, manteniendo el respiro entre header y primera card.
+- **`layouts/default.vue` — scroll-aware robusto:** clamp de `scrollTop` a 0 (iOS rubber-band reportaba negativos), timeout 600ms "quieto cerca del top" que fuerza header visible, y listener de `window.visualViewport.resize` que sincroniza el header cuando iOS colapsa/expande el URL bar sin disparar scroll real en `mainRef`.
+
+### Added
+
+- **`assets/css/globals.css` — `touch-action: manipulation` + `overscroll-behavior: none` en `html, body`.** Desactiva el double-tap-to-zoom del browser (preserva pinch-zoom del OS para a11y, preferible a `user-scalable=no` en viewport meta) y frena el pan multi-finger del documento que en iPad revelaba contenido fuera del viewport visible.
+- **`assets/css/globals.css` — `:root { --sat: env(safe-area-inset-top) }`** para que JS (motion-v Header) pueda leer el inset desde `getComputedStyle` y sumarlo al translate de hide.
+
+### Notes
+
+- **Por qué `h-dvh` y no `100svh`/`@supports`**: Tailwind 4 + browsers target (iOS 15.4+, Chrome 108+) soportan `dvh` nativamente. No se añadió fallback `@supports` porque el floor de soporte del stack ya cubre todos los devices objetivo.
+- **`overscroll-behavior: none` NO bloquea scroll**: solo impide el bounce/chain al parent. `/legal/terminos` y `/login` siguen scrolleando normal, y pull-to-refresh del browser chrome no se ve afectado (es document-level, no overscroll entre contenedores).
+- **Sidebar `h-dvh` y overflow interno**: cuando la viewport es muy corta (iPad portrait + teclado), el `flex-1 overflow-y-auto` ya existente en `<nav>` absorbe overflow sin que el footer desaparezca. Comportamiento deseable.
+
+---
+
 ## [0.17.0] — 2026-04-20
 
 ### Documentos legales oficiales (Terms + Privacy + Copyright)

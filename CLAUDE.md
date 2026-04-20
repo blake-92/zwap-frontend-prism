@@ -467,7 +467,7 @@ Todo consumido via `v-if="perfStore.isLite"` + inline `:style` computed. Cero GP
 
 ⚠️ **Inline `background` (shorthand) domina sobre utilities `bg-*`** — no combinar `:style="{ background: gradient }"` con `group-hover:bg-*` (el hover no se aplicará).
 
-⚠️ **Mobile header position** (`Header.vue`): `fixed inset-x-0 top-0` (mobile) y `relative` (desktop) son exclusivos. Nunca emitir `relative` como clase permanente junto con `fixed` condicional — reserva espacio en flow y duplica offset con el `pt-20` de main.
+⚠️ **Mobile header position** (`Header.vue`): `fixed inset-x-0 top-0` (mobile) y `relative` (desktop) son exclusivos. Nunca emitir `relative` como clase permanente junto con `fixed` condicional — reserva espacio en flow y duplica offset con el `pt-[calc(5rem+env(safe-area-inset-top))]` de main.
 
 ### Composable `useViewSearch(placeholder)`
 
@@ -685,11 +685,13 @@ Vistas con este patrón: TransaccionesView, CustomLinksTable, LiquidacionesView,
 
 ### Convenciones
 
-1. **Padding AppShell:** desktop `px-4 pt-4 sm:px-6 sm:pt-6 lg:px-8 lg:pt-8 xl:px-10 xl:pt-10 2xl:px-12 2xl:pt-12 lg:pb-10 xl:pb-12 2xl:pb-16`; mobile `px-4 sm:px-6 pt-20` + `style="paddingBottom: calc(5rem + env(safe-area-inset-bottom))"` (el shorthand Tailwind sobreescribe pb-*, por eso style prop)
-2. **Header height:** `h-16 lg:h-20`. Mobile: `fixed inset-x-0 top-0` con scroll-aware (se oculta al scrollear abajo). Desktop: `relative`.
-3. **Safe areas:** `env(safe-area-inset-bottom)` en fixed bottom (BottomNav, Modal sheet)
-4. **Touch targets:** mínimo 40px (ideal 44px)
-5. **Scroll locking:** `layouts/default.vue` bloquea `overflow` en `html` + `body` (iOS Safari requiere ambos para contener scroll en main)
+1. **Padding AppShell:** desktop `px-4 pt-4 sm:px-6 sm:pt-6 lg:px-8 lg:pt-8 xl:px-10 xl:pt-10 2xl:px-12 2xl:pt-12 lg:pb-10 xl:pb-12 2xl:pb-16`; mobile `px-4 sm:px-6 pt-[calc(5rem+env(safe-area-inset-top))]` + `style="paddingBottom: calc(5rem + env(safe-area-inset-bottom))"` (el shorthand Tailwind sobreescribe pb-*, por eso style prop). El `pt` calc compensa el notch/Dynamic Island sin hardcodear 64/80px.
+2. **Header height:** desktop `h-20 relative`; mobile `h-[calc(4rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] fixed inset-x-0 top-0`, scroll-aware con hide translate `y: -(64 + safeTop)` leyendo `--sat` en `onMounted` (motion-v no evalúa `env()` en animate strings).
+3. **Safe areas:** `env(safe-area-inset-top)` en header mobile + main `pt` (notch/Dynamic Island); `env(safe-area-inset-bottom)` en fixed bottom (BottomNav, Modal sheet). CSS var `--sat` en `:root` de `globals.css` expone el inset-top a JS.
+4. **Viewport units:** `h-dvh`/`min-h-dvh` en contenedores full-height (Sidebar, Main column, AppShell). `h-screen`/`100vh` en iOS es el viewport grande (URL bar oculta) y deja contenido tapado por el BottomNav cuando el URL bar está visible.
+5. **Touch targets:** mínimo 40px (ideal 44px)
+6. **Scroll locking:** `layouts/default.vue` bloquea `overflow` en `html` + `body` (iOS Safari requiere ambos para contener scroll en main)
+7. **iOS native-feel global** (`globals.css`): `html, body { touch-action: manipulation; overscroll-behavior: none; }`. Desactiva double-tap-to-zoom del browser (preserva pinch-zoom a11y) y frena el pan/rubber-band multi-finger del documento. No usar `user-scalable=no` en viewport meta — rompe a11y.
 
 ## Mock data
 
@@ -956,3 +958,5 @@ Ver `README.md#testing` para comandos completos y triggers para escalar a CI aut
 - No mezclar `:style="{ background: ... }"` con utility `bg-*` hover — inline shorthand domina, hover nunca aplica
 - No `useMediaQuery()` dentro de un `computed` — usa lifecycle hooks (`onMounted`/`watch`), debe invocarse a top-level del setup
 - No `import { VueDatePicker } from '@vuepic/vue-datepicker'` pasando `locale: string` — v12 espera `Locale` de date-fns; omitir el prop si no se importa el objeto correcto
+- No usar `h-screen`/`min-h-screen` como scroll-container full-height — en iOS `100vh` es el viewport grande (URL bar oculta) y deja contenido tapado por el BottomNav cuando el URL bar está visible; usar `h-dvh`/`min-h-dvh`
+- No hardcodear `pt-20`/`-64`/`h-16` en elementos que interactúan con el notch mobile — usar `env(safe-area-inset-top)` en CSS o la var `--sat` en JS (motion-v no evalúa `env()` en animate strings)
