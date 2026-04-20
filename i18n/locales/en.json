@@ -89,7 +89,22 @@
     "backToMethods": "Back to sign-in methods",
     "terms": "Terms of Use",
     "privacy": "Privacy",
+    "copyrightLink": "Copyright",
     "copyright": "© 2026 ZOKORP, LLC"
+  },
+  "legal": {
+    "documentBadge": "Legal Document",
+    "effectiveDate": "Effective date",
+    "lastUpdated": "Last updated",
+    "entityLabel": "<strong>Zwap</strong> — A product of ZOKORP, LLC (Delaware, USA)",
+    "footerEntity": "<strong>Zwap</strong> — A product of <strong>ZOKORP, LLC</strong> · Delaware, USA · EIN 38-4330071",
+    "footerCopyright": "© 2024–2026 ZOKORP, LLC. All rights reserved.",
+    "backToTop": "Back to top",
+    "termsTitle": "Terms and Conditions",
+    "termsTitleLine2": "of Use",
+    "privacyTitle": "Privacy Policy",
+    "copyrightTitle": "Copyright and Intellectual",
+    "copyrightTitleLine2": "Property Notice"
   },
   "dashboard": {
     "volumeToday": "Volume Today",

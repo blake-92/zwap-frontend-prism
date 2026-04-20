@@ -20,6 +20,8 @@ const A11Y_PROJECTS = ['desktop-chromium', 'mobile-pixel7']
 const PUBLIC_ROUTES = [
   { path: '/login', name: 'login' },
   { path: '/legal/terminos', name: 'legal-terminos' },
+  { path: '/legal/privacidad', name: 'legal-privacidad' },
+  { path: '/legal/copyright', name: 'legal-copyright' },
 ]
 const PRIVATE_ROUTES = [
   { path: '/app/dashboard', name: 'dashboard' },

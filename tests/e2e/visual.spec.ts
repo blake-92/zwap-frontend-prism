@@ -65,6 +65,41 @@ test.describe('Visual regression matrix', () => {
   }
 })
 
+const LEGAL_VIEWS = [
+  { path: '/legal/terminos', name: 'legal-terminos' },
+  { path: '/legal/privacidad', name: 'legal-privacidad' },
+  { path: '/legal/copyright', name: 'legal-copyright' },
+]
+
+test.describe('Visual regression — legal pages (públicas)', () => {
+  test.beforeEach(async ({}, testInfo) => {
+    testInfo.skip(
+      !VISUAL_PROJECTS.includes(testInfo.project.name),
+      'Visual baseline solo en desktop-chromium + mobile-pixel7',
+    )
+  })
+
+  for (const view of LEGAL_VIEWS) {
+    for (const theme of THEMES) {
+      const snapshotName = `${view.name}-full-${theme}.png`
+
+      test(`${view.name} · full · ${theme}`, async ({ page, setTier, setTheme }) => {
+        await setTier('full')
+        await setTheme(theme)
+        await page.goto(view.path)
+        await waitForUIReady(page)
+        await page.waitForTimeout(800)
+        await page.evaluate(() => document.fonts.ready)
+        await expect(page).toHaveScreenshot(snapshotName, {
+          fullPage: false,
+          animations: 'disabled',
+          mask: [page.locator('.animate-spin, .animate-pulse, .prism-qr-shimmer')],
+        })
+      })
+    }
+  }
+})
+
 test.describe('Layout assertions cross-engine (todos los projects, sin screenshot)', () => {
   // Estos tests validan contenido/estructura en TODOS los engines — sin screenshot
   // para evitar false-positives de font rendering. Complementan visual.spec.ts

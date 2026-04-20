@@ -79,6 +79,7 @@ definePageMeta({ middleware: 'auth' })
 | `branches` | SucursalesView | NewBranchModal |
 | `users` | UsuariosView | NewUserModal |
 | `settings` | SettingsView (orquestador ~110 líneas) | `SettingsProfileTab`, `SettingsSecurityTab`, `SettingsBillingTab` + `SettingItem.vue` (shared UI row con icon+title+desc+slot) |
+| `legal` | `docs/Terms.vue`, `docs/Privacy.vue`, `docs/Copyright.vue` (renderizados por `pages/legal/[doc].vue`) | `LegalLayout` orquestador + bloques atómicos: `LegalHeader` (bi-tonal + theme toggle), `LegalTocBar` (sticky + IntersectionObserver), `LegalFooter` (back-to-top), `LegalSection`, `LegalIntroBox`, `LegalCallout` (purple/warning/dark), `LegalDefinitionList`, `LegalOrderedList`, `LegalDataTable`, `LegalCardGrid`, `LegalCopyrightNotice`, `LegalLanguageBanner` (EN-only "unofficial translation"). Contenido legal inline en SFCs (no en i18n por `@` reservado + strings largos); chrome vía `t('legal.*')`. |
 
 ### Reglas de features
 
@@ -116,7 +117,7 @@ Al añadir una ruta:
 
 **Notas:**
 - `/app` → redirect a `/app/dashboard` via `app/pages/app/index.vue`
-- `/legal/[doc].vue` — ruta dinámica pública
+- `/legal/[doc].vue` — ruta dinámica pública con whitelist `{ terminos, privacidad, copyright }`. Cada slug mapea a un SFC en `components/features/legal/docs/`. Header bi-tonal (dark/light), theme toggle integrado, TOC sticky, bilingüe (ES oficial + EN con banner "unofficial translation — Spanish prevails")
 - `[...slug].vue` — catch-all → redirect a `/login`
 - `ROUTES.SETTINGS` accesible desde Header (gear icon) + BottomNav "Más", no en Sidebar
 - `ROUTES.WALLET` accesible desde botón wallet del Sidebar + BottomNav "Más"

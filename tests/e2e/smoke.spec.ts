@@ -22,7 +22,7 @@ test.describe('Smoke — rutas públicas', () => {
 
   test('/legal/terminos renderiza título del whitelist', async ({ page }) => {
     await page.goto('/legal/terminos')
-    await expect(page.locator('h1')).toContainText(/Términos/i)
+    await expect(page.locator('h1').first()).toContainText(/Términos|Terms/i)
   })
 
   test('/legal/arbitrary redirige a /login (no está en whitelist)', async ({ page }) => {

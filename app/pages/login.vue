@@ -182,10 +182,12 @@ const linkCls = 'hover:underline transition-colors hover:text-[#7C3AED] cursor-p
         'absolute bottom-8 flex flex-col items-center gap-3 text-xs font-medium z-20',
         themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]'
       ]">
-        <div class="flex gap-4">
-          <span :class="linkCls" @click="goLegal('terminos')">{{ t('auth.terms') }}</span>
-          <span class="opacity-30">•</span>
-          <span :class="linkCls" @click="goLegal('privacidad')">{{ t('auth.privacy') }}</span>
+        <div class="flex gap-4 items-center flex-wrap justify-center">
+          <span :class="linkCls" role="link" tabindex="0" @click="goLegal('terminos')" @keyup.enter="goLegal('terminos')">{{ t('auth.terms') }}</span>
+          <span class="opacity-30" aria-hidden="true">•</span>
+          <span :class="linkCls" role="link" tabindex="0" @click="goLegal('privacidad')" @keyup.enter="goLegal('privacidad')">{{ t('auth.privacy') }}</span>
+          <span class="opacity-30" aria-hidden="true">•</span>
+          <span :class="linkCls" role="link" tabindex="0" @click="goLegal('copyright')" @keyup.enter="goLegal('copyright')">{{ t('auth.copyrightLink') }}</span>
         </div>
         <p class="opacity-50 tracking-wide">{{ t('auth.copyright') }}</p>
       </div>

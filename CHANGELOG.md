@@ -7,6 +7,42 @@ Versionamiento según [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
+## [0.17.0] — 2026-04-20
+
+### Documentos legales oficiales (Terms + Privacy + Copyright)
+
+Publicación de los 3 documentos legales aprobados por abogado (Términos y Condiciones, Política de Privacidad, Aviso de Copyright y Propiedad Intelectual) integrados al stack Prism UI. Antes `/legal/[doc].vue` era un stub "Próximamente." con whitelist de 2 docs (terminos, privacidad) y solo 2 links en el footer del login. Ahora los 3 docs renderizan con TOC sticky, secciones numeradas, tablas, card grids, callouts y footer — adaptados a los 3 performance tiers y a ambos temas.
+
+### Added
+
+- **Feature `legal`** — 16 SFCs nuevos en `app/components/features/legal/`:
+  - Chrome: `LegalLayout` (orquestador header + TOC + slot + footer), `LegalHeader` (hero bi-tonal: dark `#111113` en dark mode, off-white `#F8F7FB` en light mode + border-bottom `#DBD3FB` para separar del TOC sin escalón duro; theme toggle integrado top-right), `LegalTocBar` (sticky con IntersectionObserver active-tracking + `LayoutGroup` + `SPRING_SOFT` morph del underline activo, instant en Lite), `LegalFooter` (pill "↑ Volver al inicio" + `whileTap` spring), `LegalLanguageBanner` (EN-only, "Unofficial translation — Spanish prevails").
+  - Bloques de contenido: `LegalSection` (wrapper `<section id>` + h2 con badge gradient `from-[#7C3AED] to-[#A78BFA]`), `LegalIntroBox` (callout púrpura top), `LegalCallout` (3 variantes purple/warning/dark), `LegalDefinitionList` (dt/dd con bullet cuadrado púrpura), `LegalOrderedList` (counter (a)(b)(c) inline con CSS `String.fromCharCode`), `LegalDataTable` (thead oscuro permanente para identidad legal, striping con `even:bg-white/[0.02]` en dark y `#F8F7FB` en light), `LegalCardGrid` (grid responsive con `getCardClasses` tier-aware), `LegalCopyrightNotice` (hero © bloque con ambient purple glow), todos tier + theme aware.
+  - Docs: `docs/Terms.vue` (17 secciones, definition list completa de 12 términos, cost card grid, warning/purple/dark callouts, ordered list de indemnización), `docs/Privacy.vue` (17 secciones, 7 data tables de KYC/KYB + cookies + retención + bases legales, card grids de métodos/transferencias/derechos), `docs/Copyright.vue` (12 secciones + hero © bloque, brand showcase inline con SVG Z + ZWAP wordmark + palette swatch, 2 ordered lists de restricciones + infracciones).
+- **Ruta `/legal/copyright`** — slug añadido a la whitelist de `pages/legal/[doc].vue`. Patrón alineado con `/legal/terminos` + `/legal/privacidad` (convención `/legal/*` que usan Facebook, Google, Stripe, Shopify).
+- **Theme toggle en páginas legales** (`LegalHeader.vue`) — `Button variant="ghost" size="icon"` con `Sun`/`Moon` según tema, `absolute top-4 right-4 z-20` por encima de los gradients decorativos. Mismo patrón UX que `/login`.
+- **Bilingüe provisional** — ES oficial + EN con banner "Unofficial English translation — the Spanish version prevails for legal purposes". El contenido legal queda en ES en ambos locales (no se traduce con LLM por riesgo legal); solo el chrome (TOC labels, "Volver al inicio", banner, meta dates) se traduce vía `t('legal.*')`.
+- **Keys i18n nuevas**: `auth.copyrightLink` ("Copyright") + namespace completo `legal`: `documentBadge`, `effectiveDate`, `lastUpdated`, `entityLabel`, `footerEntity`, `footerCopyright`, `backToTop`, `termsTitle` + `termsTitleLine2`, `privacyTitle`, `copyrightTitle` + `copyrightTitleLine2`. Espejados en `es.json` + `en.json`.
+- **Link "Copyright" en footer de `/login`** — 3er link clickable (`Términos · Privacidad · Copyright`) con `role="link"` + `tabindex="0"` + `@keyup.enter` para a11y. El caption `© 2026 ZOKORP, LLC` se mantiene abajo como texto estático.
+- **Tests E2E `tests/e2e/legal.spec.ts`** — 5 specs: 3 smoke (renderiza h1 + TOC + secciones + footer + 0 console errors para los 3 docs, regex bilingüe `/Términos|Terms/i`), 1 navegación (los 3 links del footer de login navegan a sus rutas), 1 TOC interaction (click en item scrollea a la sección).
+- **A11y** — `/legal/privacidad` y `/legal/copyright` agregados al array de rutas públicas de `tests/e2e/a11y.spec.ts`. Política vigente: `critical` → FAIL, resto → WARN. 0 critical violations en las 3 rutas.
+- **Visual regression** — `tests/e2e/visual.spec.ts` extendido con 3 docs × 2 temas × 2 projects (desktop-chromium + mobile-pixel7) = **12 baselines nuevos**. Masks de animaciones continuas ya aplicados. Serial mode preserva estabilidad.
+
+### Changed
+
+- **`pages/legal/[doc].vue`** — stub "Próximamente." (22 líneas) → router que mapea slug a componente SFC (Terms/Privacy/Copyright) con whitelist de 3 docs + redirect a `/login` si slug inválido.
+- **`pages/login.vue:186-190`** — 2 links (terminos, privacidad) → 3 links (+ copyright) con keyboard accessibility (`role="link"` + `@keyup.enter`) y `flex-wrap` para mobile.
+- **`tests/e2e/smoke.spec.ts`** — regex `/Términos/i` ampliado a `/Términos|Terms/i` (el default Playwright browser locale es `en-US`, detecta EN y muestra EN title con `@nuxtjs/i18n`).
+
+### Notes
+
+- **Bilingüe solo EN chrome**: el contenido legal queda en español oficial incluso en locale EN. Terms §16.6 ya estipula "en caso de discrepancia, prevalece la versión en español". Cuando el abogado entregue la traducción EN oficial, se intercambia con `v-if="locale === 'es'"` sin tocar componentes.
+- **Emails en contenido legal**: `privacy@zwap.dev`, `legal@zwap.dev`, `dmca@zwap.dev` van inline en los SFC (no en i18n JSON) porque `@` es sintaxis reservada vue-i18n v11 (linked-messages). Regla ya documentada en CLAUDE.md.
+- **Paleta normalizada**: el HTML entregado por el abogado usaba `#6C3AFB`/`#8A7CFF`/`#C3B1F7`/Manrope font. Normalizado a Prism (`#7C3AED`/`#A78BFA`/`#DBD3FB`/Inter) para coherencia sistémica. Sin cambios legales (solo branding).
+- **Header bi-tonal (decisión post-review)**: primera iteración forzaba `bg-[#111113]` en ambos temas, causando logo ZwapLogo invisible en light mode (text fill `#170339` sobre bg oscuro) + contraste visual jarring con body claro. Opción A elegida: header respeta `themeStore.isDarkMode`, con atmósfera branded adaptada (halos `/0.04-0.08` en light vs `/0.14-0.22` en dark). Alternativas evaluadas y descartadas: B) dark permanente + fade gradient (conserva "documento formal" pero mantiene contrast harsh), C) paper wireframe puro con border `#DBD3FB` + shadow branded (muy diferente del resto del sistema).
+
+---
+
 ## [0.16.0] — 2026-04-19
 
 ### Infraestructura de testing profesional
