@@ -35,6 +35,9 @@ const searchExpanded = ref(false)
 const menuRef = ref(null)
 const searchInputRef = ref(null)
 const pillId = useId()
+// iOS notch height. motion-v no evalúa env() dentro de animate strings —
+// leemos el CSS var --sat una vez en mount para sumarlo al translate de hide.
+const safeTop = ref(0)
 
 const WORDMARK_VARIANTS = {
   hidden: { opacity: 0, filter: 'blur(4px)', x: -8 },
@@ -55,6 +58,11 @@ let focusTid = null
 
 onMounted(() => {
   if (typeof document !== 'undefined') document.addEventListener('mousedown', handler)
+  if (typeof window !== 'undefined') {
+    const v = getComputedStyle(document.documentElement).getPropertyValue('--sat').trim()
+    const n = parseFloat(v)
+    if (Number.isFinite(n)) safeTop.value = n
+  }
 })
 onUnmounted(() => {
   if (typeof document !== 'undefined') document.removeEventListener('mousedown', handler)
@@ -87,9 +95,15 @@ const headerClass = computed(() => {
   const blur = useBlur ? ' backdrop-blur-2xl' : ''
   const borderDark = isLite ? 'border-[#7C3AED]/20' : 'border-white/10'
   const borderLight = isLite ? 'border-[#DBD3FB]' : 'border-white/80'
+  // Mobile: altura = 4rem contenido + env(safe-area-inset-top) para cubrir
+  // el Dynamic Island / status bar con la misma surface (evita flash del
+  // body debajo del notch). pt reserva el espacio del inset.
+  const base = props.isDesktop
+    ? 'h-20 relative'
+    : 'h-[calc(4rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] fixed inset-x-0 top-0'
   return [
-    'z-50 h-16 lg:h-20 flex items-center justify-between px-4 sm:px-6 lg:px-10 shrink-0 transition-colors duration-300',
-    props.isDesktop ? 'relative' : 'fixed inset-x-0 top-0',
+    'z-50 flex items-center justify-between px-4 sm:px-6 lg:px-10 shrink-0 transition-colors duration-300',
+    base,
     themeStore.isDarkMode
       ? `${bgDark}${blur} border-b ${borderDark}`
       : `${bgLight}${blur} border-b ${borderLight}`,
@@ -166,7 +180,7 @@ const goSettings = () => navigateTo(ROUTES.SETTINGS)
 
 <template>
   <motion.header
-    :animate="{ y: !isDesktop && !headerVisible ? -64 : 0 }"
+    :animate="{ y: !isDesktop && !headerVisible ? -(64 + safeTop) : 0 }"
     :transition="SPRING_SIDEBAR"
     :class="headerClass"
   >

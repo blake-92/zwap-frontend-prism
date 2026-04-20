@@ -8,6 +8,8 @@
 :root {
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  /* Exposure del safe-area-inset-top para JS (motion-v no evalúa env() en animate). */
+  --sat: env(safe-area-inset-top);
 }
 
 * {

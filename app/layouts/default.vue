@@ -28,28 +28,47 @@ const readSidebarCollapsed = () => {
 const isCollapsed = ref(readSidebarCollapsed())
 const mainRef = ref(null)
 let lastScrollY = 0
+let quietTid = null
 const headerVisible = ref(true)
 
 // Scroll-aware mobile header
 const onScroll = () => {
   if (!mainRef.value) return
-  const y = mainRef.value.scrollTop
+  // iOS rubber-band puede reportar scrollTop negativo; clamp a 0 para que
+  // el delta no se invierta al volver de un overscroll.
+  const y = Math.max(0, mainRef.value.scrollTop)
   const delta = y - lastScrollY
   if (y <= 4) headerVisible.value = true
   else if (delta > 8) headerVisible.value = false
   else if (delta < -8) headerVisible.value = true
-  lastScrollY = Math.max(0, y)
+  lastScrollY = y
+  if (quietTid) clearTimeout(quietTid)
+  // Si el usuario se detiene cerca del top sin seguir scrolleando, garantiza
+  // header visible (evita quedar "atascado" oculto por el último delta).
+  quietTid = setTimeout(() => { if (y < 120) headerVisible.value = true }, 600)
 }
+
+// iOS Safari colapsa/expande el URL bar con gestos del sistema; el scroll
+// real en mainRef no cambia pero visualViewport sí. Al detectar ese resize
+// reseteamos headerVisible para que siempre quede sincronizado con el chrome.
+const onViewportResize = () => { headerVisible.value = true }
 
 let scrollListenerAttached = false
 const attachScroll = () => {
   if (scrollListenerAttached || !mainRef.value) return
   mainRef.value.addEventListener('scroll', onScroll, { passive: true })
+  if (typeof window !== 'undefined' && window.visualViewport) {
+    window.visualViewport.addEventListener('resize', onViewportResize)
+  }
   scrollListenerAttached = true
 }
 const detachScroll = () => {
   if (!scrollListenerAttached || !mainRef.value) return
   mainRef.value.removeEventListener('scroll', onScroll)
+  if (typeof window !== 'undefined' && window.visualViewport) {
+    window.visualViewport.removeEventListener('resize', onViewportResize)
+  }
+  if (quietTid) { clearTimeout(quietTid); quietTid = null }
   scrollListenerAttached = false
 }
 
@@ -88,7 +107,7 @@ const mainClass = computed(() => [
   'flex-1 overflow-auto overscroll-y-contain',
   isDesktop.value
     ? 'px-4 pt-4 sm:px-6 sm:pt-6 lg:px-8 lg:pt-8 xl:px-10 xl:pt-10 2xl:px-12 2xl:pt-12 lg:pb-10 xl:pb-12 2xl:pb-16'
-    : 'px-4 sm:px-6 pt-20',
+    : 'px-4 sm:px-6 pt-[calc(5rem+env(safe-area-inset-top))]',
 ])
 
 // Modal backdrop aplica el blur — aquí solo desaturate + pointer-events-none para "receded" sin doble blur.
@@ -105,7 +124,7 @@ const toggleBtnClass = computed(() =>
 </script>
 
 <template>
-  <div :class="['min-h-screen flex font-sans transition-colors duration-300 relative overflow-hidden', themeStore.isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]']">
+  <div :class="['min-h-dvh flex font-sans transition-colors duration-300 relative overflow-hidden', themeStore.isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]']">
     <GlassBackground />
 
     <!-- Desktop sidebar + toggle -->
@@ -151,7 +170,7 @@ const toggleBtnClass = computed(() =>
     </div>
 
     <!-- Main -->
-    <div class="flex-1 flex flex-col h-screen overflow-hidden z-10 relative">
+    <div class="flex-1 flex flex-col h-dvh overflow-hidden z-10 relative">
       <Header
         :selected-branch="branch"
         :is-desktop="isDesktop"
