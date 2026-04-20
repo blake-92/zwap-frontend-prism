@@ -1,6 +1,6 @@
 # Zwap Frontend — Prism (Nuxt)
 
-> **v0.13.0** · [Changelog](./CHANGELOG.md) · Deploy en Cloudflare Pages
+> **v0.16.0** · [Changelog](./CHANGELOG.md) · Deploy en Cloudflare Pages
 
 Panel de administración para la plataforma de pagos Zwap. Migrado de React+Vite a **Nuxt 4 + Vue 3**, diseño Glassmorphism, arquitectura por feature slices.
 
@@ -12,19 +12,20 @@ Panel de administración para la plataforma de pagos Zwap. Migrado de React+Vite
 | Bundler | Vite (integrado en Nuxt) |
 | Routing | File-based (`app/pages/`) |
 | Render mode | SPA (`ssr: false`) |
-| Estilos | Tailwind CSS 3 |
+| Estilos | Tailwind CSS 4 (@tailwindcss/vite) |
 | Estado | Pinia |
 | Gráficas | SVG nativo (antes Recharts) |
 | Animaciones | motion-v (port de Framer Motion) |
 | Íconos | lucide-vue-next |
 | Date picker | @vuepic/vue-datepicker |
-| i18n | @nuxtjs/i18n (vue-i18n v9) |
+| i18n | @nuxtjs/i18n v10 (vue-i18n v11) |
 | Fonts | @nuxt/fonts (Inter + JetBrains Mono self-hosted) |
 
 ## Requisitos
 
 - Node.js 18+
 - npm 9+
+- Para testing E2E: `npx playwright install chromium webkit firefox` (~200MB primera vez) y `sudo npx playwright install-deps` para libs del sistema. En WSL, WebKit requiere libs adicionales — ver CLAUDE.md sección Testing.
 
 ## Configuración inicial
 
@@ -36,11 +37,29 @@ npm run dev             # http://localhost:3000
 
 ## Scripts
 
+### Desarrollo
+
 ```bash
 npm run dev       # Dev server con HMR en :3000
 npm run build     # Build de producción → dist/ (preset Cloudflare Pages)
 npm run generate  # Prerender estático
 npm run preview   # Preview del build
+```
+
+### Testing
+
+```bash
+npm test                 # 431 unit tests (Vitest, ~3s)
+npm run test:watch       # Watch mode
+npm run test:coverage    # Coverage con thresholds (utils/composables ≥80%, stores ≥75%)
+npm run test:e2e         # 358 E2E cross-browser (7 projects, ~5min)
+npm run test:e2e:ui      # Playwright UI Mode (visible en Windows vía WSLg)
+npm run test:e2e:headed  # E2E desktop-chromium con ventana visible
+npm run test:a11y        # axe a11y scans (22 tests)
+npm run test:ssr         # Placeholder para Phase 7 (SSR híbrido)
+npm run test:lhci        # Lighthouse CI (budgets LCP/CLS/TBT)
+npm run test:security    # npm audit (production, high+)
+npm run test:all         # Unit + E2E completo
 ```
 
 ## Variables de entorno
@@ -183,6 +202,43 @@ La barra del Header se conecta a la vista activa via `useViewSearchStore` (Pinia
 - **Toasts responsivos:** centrados abajo en mobile, esquina inferior derecha en desktop; versiones cortas para mobile.
 - **PageHeader oculto en mobile:** BottomNav provee contexto; botón de acción full-width separado.
 
+## Testing
+
+Stack de QA automatizado: **Vitest** (unit/component) + **Playwright** (E2E cross-browser) + **@axe-core/playwright** (a11y) + **@lhci/cli** (Lighthouse) + **MSW** (API mocking).
+
+- **431 unit tests** (`tests/unit/`) — utils puros, composables (incluidos DOM-dependent con happy-dom stubs), stores Pinia, y 27 componentes UI con `@vue/test-utils`. Coverage global: 94.45% statements / 98.36% lines.
+- **358 E2E tests** (`tests/e2e/`) — 7 projects en matriz: `desktop-chromium`, `desktop-firefox`, `desktop-webkit`, `tablet-ipad-chromium`, `tablet-ipad-webkit`, `mobile-pixel7`, `mobile-iphone14`. Smoke, interacciones, error states, visual regression, a11y, cross-engine parity.
+- **48 visual baselines** — selectivos en `desktop-chromium` + `mobile-pixel7` (4 vistas × 3 tiers × 2 themes × 2 projects). Tolerance 3%. Otros projects validan layout sin screenshots.
+- **59 i18n parity tests** — shape es↔en, sintaxis vue-i18n v11, coverage de keys críticas.
+- **22 a11y scans** — axe en 10 rutas × 2 projects con política `critical` → FAIL, `serious` → WARN.
+
+### Flujo de validación manual (etapa actual, solo-dev)
+
+Cloudflare Pages está conectado al repo y despliega automáticamente cada push a `main` (y preview en `concepts`). El flujo recomendado:
+
+1. **Cambios locales** en rama `concepts`.
+2. **`npm test`** (siempre, ~3s) — bloquea regresiones unit.
+3. **`npm run test:e2e`** (antes de merge a `main`, ~5min) — cross-browser smoke + interactions.
+4. **Análisis** de resultados — logs, screenshots de failure en `test-results/`, trace viewer (`npx playwright show-trace <zip>`).
+5. **`git commit`** — si todo verde.
+6. **`git push origin concepts`** — Cloudflare genera preview deploy.
+7. **Merge a `main`** → Cloudflare promueve a producción.
+
+> **Opcional** — `npm run test:coverage` antes de merges grandes, `npm run test:a11y` si tocaste markup/componentes, `npm run test:lhci` si el bundle cambió significativamente.
+
+### Cuándo escalar a CI automatizado
+
+El flujo manual es suficiente mientras:
+- Seas el único dev (no hay disciplina compartida que falle)
+- La app esté en desarrollo temprano (bugs en producción son tolerables)
+- Tengas <5 deploys/semana
+
+**Disparadores para activar GitHub Actions** (Phase 6 del [Roadmap QA](#roadmap-qa)):
+- Sumás un segundo dev (pair / freelancer)
+- La app tiene usuarios reales con expectativa de uptime
+- Frecuencia de deploys ≥5/semana
+- Querés reports públicos de coverage/a11y/perf en cada PR
+
 ## Deploy
 
 Build configurado para **Cloudflare Pages** via `nitro.preset: 'cloudflare-pages'`. Output en `dist/`:
@@ -196,6 +252,27 @@ Si alguna lib requiere Node compat, agregar en `wrangler.toml`:
 ```toml
 compatibility_flags = ["nodejs_compat"]
 ```
+
+## Roadmap QA
+
+Fases diferidas — se activan cuando los [triggers](#cuándo-escalar-a-ci-automatizado) aparezcan.
+
+### Phase 6 — GitHub Actions CI + deploy automatizado
+
+Matrix paralelo: lint → typecheck → unit → E2E (× 5 projects sharded) → a11y → Lighthouse → build → security (`npm audit` + Snyk + gitleaks). Si todo verde, deploy automático a Cloudflare Pages via `cloudflare/wrangler-action`. Gate de calidad real: PR con test rojo no mergea. ~8min por PR con sharding + cache.
+
+### Phase 7 — SSR híbrido
+
+`nuxt.config.ts` → `ssr: true` + `routeRules`:
+- `/login` → SSR runtime (HTML server-rendered, mejor FCP/SEO)
+- `/legal/**` → prerender estático (CDN, zero server cost)
+- `/app/**` → SPA (actual, hidratación client)
+
+Requiere auditoría de guards SSR (mayoría ya en place: stores con `typeof window`, plugins `.client`).
+
+### Phase 8 — Observability + incident response
+
+**Sentry** (`@sentry/vue` + `@sentry/nuxt`) para runtime errors en prod con filtro de fields sensibles. **Post-deploy smoke** (curl /login, /legal/terminos, /app/dashboard redirect → login) tras `wrangler pages deploy`. **Rollback script** (`scripts/rollback.sh` usando `wrangler pages deployment rollback`). **Testing playbook** en CLAUDE.md con convenciones + templates por capa.
 
 ## Versionamiento
 

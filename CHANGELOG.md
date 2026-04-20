@@ -7,6 +7,106 @@ Versionamiento según [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
+## [0.16.0] — 2026-04-19
+
+### Infraestructura de testing profesional
+
+Nueva capa QA automatizada: Vitest + Playwright + axe + Lighthouse CI + MSW. Red de seguridad para los 3 performance tiers × 2 themes × responsive desktop/tablet/mobile. **789 tests verdes** (431 unit + 358 E2E cross-browser).
+
+### Added
+
+- **Vitest** unit/component runner con `happy-dom` — 431 tests en ~3s, coverage v8 con thresholds por capa (`utils` ≥80%, `composables` ≥80%, `stores` ≥75%).
+- **Playwright E2E cross-browser** — 358 tests en 7 projects (Chromium + Firefox + WebKit × desktop + tablet iPad + mobile Pixel7/iPhone14). Neutraliza motion loops con `reducedMotion: 'reduce'` global.
+- **Visual regression selectivo** — 48 baselines en `desktop-chromium` + `mobile-pixel7` (4 vistas × 3 tiers × 2 themes × 2 projects). Mask de animaciones continuas (`.animate-spin`, `.animate-pulse`, `.prism-qr-shimmer`). Tolerance 3%. Otros 5 projects validan layout sin screenshots (evita flakiness cross-engine).
+- **A11y con `@axe-core/playwright`** — 22 scans (10 rutas × 2 baseline projects) con política: `critical` → FAIL, `serious/moderate/minor` → WARN. Cubre rutas públicas, privadas con `mockAuth`, y estado con modal abierto.
+- **Lighthouse CI** — `lighthouserc.cjs` con budgets: `accessibility ≥0.85` (error), `best-practices/seo ≥0.85` (warn), `LCP ≤10s`, `CLS ≤0.1` (error), `TBT ≤1.5s`. Corre contra `npm run preview` (build prod).
+- **MSW (Mock Service Worker)** + factories con `@faker-js/faker` — handlers de `/api/*` listos para swap cuando backend esté conectado. Error handlers (500/401/timeout/network) preparados.
+- **i18n parity spec** — 59 tests: shape es↔en, no `{{var}}` (react-i18next inválido), no `@` suelto (reservado vue-i18n), no sufijos `_one`/`_other`, coverage de 24 keys críticas (incluido `calendar.monthsShort` del R3 #9).
+- **Cross-engine interactions spec** — validation en los 7 projects: breakpoint lg:1024 (Sidebar↔BottomNav), iPad 834px (BottomNav), DatePickerModal `tm()`, ToastContainer teleport, `useChromeBlur` lifecycle, tier switcher html class.
+- **Testing helpers** (nuevos):
+  - `tests/unit/helpers/setup.ts` — stubs globales (matchMedia, IntersectionObserver, ResizeObserver), mock global de `motion-v` con Proxy para neutralizar `repeat: Infinity`.
+  - `tests/unit/helpers/withSetup.ts` — corre composables dentro de componente Vue (lifecycle hooks + Pinia fresh por call).
+  - `tests/unit/helpers/mountComponent.ts` — mount base con Pinia + vue-i18n + stubs de auto-imports Nuxt (`useI18n`, `useRoute`, `useCookie`, `navigateTo`, `useId`). `setup` callback entre `setActivePinia` y mount para setear store state antes del render.
+  - `tests/unit/helpers/motionStub.ts` — stub Proxy que reemplaza `<motion.X>` con wrappers simples, filtra props motion (animate, transition, drag, whileHover, layout-id, etc.) y preserva slots/attrs.
+- **Fixtures Playwright** en `tests/e2e/fixtures.ts`:
+  - `setTier(tier)` / `setTheme(mode)` — `localStorage` via `addInitScript` pre-navigate.
+  - `mockAuth()` — inyecta cookie `zwap_token` dummy para saltar middleware auth.
+  - `consoleErrors` — array acumulado de `console.error` + `pageerror`.
+  - `waitForUIReady(page)` — `networkidle` + `document.fonts.ready` para estabilidad visual.
+- **Factories** (`tests/factories/index.ts`) — `buildTransaction`, `buildUser`, `buildLink`, `buildPayout` con faker + `seedFaker(42)` para reproducibilidad.
+- **Scripts npm nuevos** (11): `test`, `test:watch`, `test:coverage`, `test:e2e`, `test:e2e:ui`, `test:e2e:headed`, `test:a11y`, `test:ssr`, `test:lhci`, `test:security`, `test:all`.
+- **Dev dependencies** (13): `@playwright/test`, `vitest`, `@vitest/coverage-v8`, `@vue/test-utils`, `@nuxt/test-utils`, `happy-dom`, `@vitejs/plugin-vue`, `@axe-core/playwright`, `@lhci/cli`, `msw`, `@mswjs/data`, `@faker-js/faker`.
+
+### Fixed
+
+- **aria-labels regression masivo** — axe detectó 15 archivos con botones icon-only sin accessible name. Fixeado en: Pagination prev/next (+ keys `pagination.previous`/`next`), Toggle en 7 consumers (con `common.toggleFor: "Activar o desactivar {name}"`), action buttons en tablas (transactions receipt/refund, links edit/copy/qr/send, dashboard PendingCharges, wallet viewReceipt, settlements inspectBatch, users edit/delete, LinkDetailModal copy, NewLinkModal Trash disabled, QuickLinkCard Maximize, QuickLinkSwipeable copy/open).
+
+### Notes
+
+- **Lighthouse `categories.performance`** temporalmente desactivado (`'off'`) por NaN en runner headless WSL (bug conocido del chrome-launcher). Audits individuales (LCP, CLS, TBT) sí reportan valores correctos.
+- **Baseline LCP /login**: ~10.3s en preview — apenas sobre threshold. Candidatos optimización: `@vuepic/vue-datepicker` lazy-load, `motion-v` code-split, icons tree-shake.
+- **WebKit en WSL**: requiere libs adicionales del sistema (`libnspr4`, `libnss3`, `libasound2t64`, `libcups2`, `libxss1`, + WebKit-specific libs). Documentado en helpers; `sudo npx playwright install-deps` una vez.
+- **Visual regression** solo en 2 projects baseline para evitar flakiness cross-engine por font rendering. Firefox/WebKit corren los mismos specs con layout assertions (no screenshot compare).
+- **Copy-link toast test** Chromium-only — `grantPermissions(['clipboard-*'])` es API solo-Chromium en Playwright.
+
+---
+
+## [0.15.0] — 2026-04-19
+
+### QA hardening en 3 rondas (R1 critical fixes · R2 refactors · R3 safety/a11y)
+
+Auditoría exhaustiva en 2 fases + 3 rondas de ejecución validadas round-trip. **-100 líneas netas** a pesar de crear 9 archivos nuevos (encapsulación > repetición). 15 bugs críticos corregidos, 12 medios, 5 nits. 4 falsos positivos descartados con análisis explícito.
+
+### Added
+
+- **`useFilterSlot(defaultValueSource)`** (`app/composables/useFilterSlot.js`) — encapsula el patrón duplicado `ref + watch(immediate) + isDirty + reset` en vistas con filtros. Retorna `{ current, defaultValue, isDirty, reset }` destructurable (patrón idiomático Vue: los refs destructurados mantienen auto-unwrap en templates).
+- **`useDateRangeMatcher(t)`** (`app/composables/useDateRangeMatcher.js`) — matcher compartido `today`/`last7`/`thisWeek`/`thisMonth` para las 3 vistas con filtros de fecha (TransaccionesView, WalletView, LiquidacionesView).
+- **`getTableRowClass(isDarkMode)`** en `app/utils/cardClasses.js` — helper para filas de tabla compartido entre 4 vistas (Transacciones/Wallet/Liquidaciones/Usuarios).
+- **`getEl(ref)`** en `app/utils/motionRef.js` — helper centralizado para resolver `ref.$el ?? ref` (antes duplicado inline en Tooltip y Modal).
+- **Sub-componentes Settings** — `SettingItem.vue` (shared UI para filas config), `SettingsProfileTab.vue`, `SettingsSecurityTab.vue`, `SettingsBillingTab.vue`. SettingsView pasa de 360 líneas a 112 (orquestador: tabs + search + `showSection`).
+- **Keys i18n nuevas**: `common.toggleFor` (Toggle aria-label dinámico), `pagination.previous`/`pagination.next` (Pagination aria-labels), `errors.sessionExpired` (toast 401 desde `api.js`).
+
+### Changed
+
+- **SettingsView refactor** — 360 → 112 líneas. Split en 3 tabs + `SettingItem` shared. Cada tab es self-contained (estado local, renders sus secciones condicionalmente vía prop `show-section`).
+- **Button `size="icon"`** — `w-9 h-9` (36px) → `w-10 h-10` (40px). WCAG mínimo 40px documentado en CLAUDE.md (touch targets).
+- **Modal drag-to-dismiss threshold** — `offset.y > 100` → `> 150` (35% del modal típico), velocity `500` → `800`. Reduce dismiss accidental por scroll/fling corto sin sacrificar fling rápido.
+- **DatePickerModal** — `t('calendar.monthsShort', [], { returnObjects: true })` (sintaxis react-i18next inválida, retornaba la key literal) → `tm('calendar.monthsShort')` (vue-i18n v11 correcto). El bug rompía silenciosamente `monthsShort.indexOf(...)` en `selectedDay` computed.
+- **4 vistas con tablas refactorizadas** (Transacciones, Wallet, Liquidaciones, Usuarios) — filter boilerplate de 70-111 líneas c/u → ~15 líneas con `useFilterSlot` + `useDateRangeMatcher`.
+- **`isDirty` pattern** en filtros — reemplaza la comparación inline `filter.value !== default.value` en `filtersActive` computeds.
+
+### Fixed
+
+- **NewLinkModal reactividad de props** (R1 #1) — `const items = ref(buildInitialItems())` no se resincronizaba cuando `props.link` cambiaba (reusar modal para editar link A → B dejaba datos de A). Agregado `watch(() => props.link, () => { items.value = buildInitialItems(); nextItemId.value = ... })`.
+- **10 neon glows sin `perfStore.useNeon` guard** (R1 #2) — rompían la promesa de Lite (A15) de no tener box-shadows caros. Fixeado en: `Header.vue` (notification dot ×2 + mobile filter dot), `BottomNav.vue` (notification badge), `ui/Input.vue` (focus:shadow dark), `ui/DropdownFilter.vue` (active option), `features/branches/SucursalesView.vue` (icon bubble hover), `features/settings/SettingsView.vue` (avatar hover — irónicamente rompía Lite), `features/wallet/WalletView.vue` (amber status dot), `features/transactions/ReceiptModal.vue` (icon bubble), `features/wallet/WithdrawReceiptModal.vue` (icon bubble emerald).
+- **`animate-spin` sin `useContinuousAnim` guard** (R1 #3) — `PageLoader.vue` + 3 sentinels de infinite-scroll (TransaccionesView/LiquidacionesView/WalletView). En Lite ahora fallback a círculo estático con borde `/60`.
+- **NewUserModal `setTimeout` sin cleanup** (R1 #7) — si modal se desmonta antes de 1500ms, mutaba `isSubmitting.value` en instancia muerta. Guardado en variable `submitTimer` + `clearTimeout` en `onUnmounted`.
+- **Logout sin llamada al backend** (R3 #11) — `api.js` export `logout()` helper que intenta `POST /auth/logout` best-effort (3s timeout) y SIEMPRE limpia cookie local (resiliente a backend caído). Sidebar migrado a usar el helper.
+- **401 silencioso sin feedback** (R3 #12) — `api.js` ahora dispara toast `errors.sessionExpired` via `useNuxtApp().$i18n.t` antes del redirect a `/login`.
+- **`/legal/[doc].vue` sin whitelist** (R3 #13) — renderizaba `route.params.doc` directamente como título. Agregada whitelist `{ terminos: 'Términos y Condiciones', privacidad: 'Aviso de Privacidad' }` con redirect a `/login` si param inválido.
+- **Focus-race en Header search** (R3 #16) — `setTimeout(80)` + `nextTick` podía disparar `focus()` en input ya desmontado si usuario colapsaba rápido. Agregado guard `if (searchExpanded.value)` post-nextTick.
+- **`getEl` duplicado** (R3 #22) — función inline en `Tooltip.vue` y `Modal.vue` centralizada en `utils/motionRef.js`.
+- **`SwipeableCard` sin `touch-action`** (R3 #21) — scroll vertical nativo podía conflictuar con drag gesture motion-v. Agregado `style="touch-action: pan-y"` al foreground card cuando hay actions.
+
+### Refactor
+
+- **Patrón filter + pagination consolidado** — las 4 vistas que repetían `defaultStatus` / `statusFilter` / `watch(immediate)` / `filtersActive` / `resetFilters` / `debouncedQuery` ahora usan `useFilterSlot` + `useDateRangeMatcher`. Cambio en un lugar se propaga automáticamente.
+- **Helpers `getTableRowClass` + `getEl`** — código duplicado en 4-5 lugares centralizado.
+
+### Skipped con justificación (documentado)
+
+- **Migración de Receipt modals a `<Modal>` base** — son receipt cards (action buttons externos, gradiente decorativo top, sin title/footer), no dialogs estándar. Ya tienen `role="dialog"` + `aria-modal` + `useScrollLock` + `useChromeBlur` + Escape handler. Migrar requería slots custom que romperían el API sin ganancia real.
+- **Icon sizes enum global** — `size="10/11/12/13/14/15/16/18/20/22"` diseminados. 100+ sites con beneficio marginal vs churn. Mejor oportunísticamente al tocar cada componente.
+
+### Falsos positivos descartados en la auditoría
+
+- `Stepper.vue:25` reportado como neon sin guard → línea 24 tiene `neon ?` ternario. OK.
+- `useMediaQuery()` en `computed` → está al top-level del setup. OK.
+- Destructuración de `defineProps` sin `toRefs` / stores sin `storeToRefs` → 0 ocurrencias. OK.
+- `animate-spin-slow` en submit buttons reportado como "no loading feedback" → `NewUserModal:182` y `NewLinkModal:284` ya tienen `Loader2` + texto "Creating.../Generating...". OK.
+
+---
+
 ## [0.14.0] — 2026-04-17
 
 ### Auditoría profunda + sistema de performance tiers refinado

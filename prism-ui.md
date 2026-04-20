@@ -398,11 +398,14 @@ Centralizado en `getDropdownGlass(isDarkMode)` de `app/utils/cardClasses.js`:
 
 #### 6.5 `<Modal>`
 
-**Props:** `onClose`, `title`, `description`, `icon`, `maxWidth`, `footer`, `className`, `children`
+**Props:** `onClose`, `title`, `description`, `icon`, `maxWidth`, `footer`, `z`, `wrapperClass`, `children`
 
 - Glass con `backdrop-blur-3xl` (ver sección 3.4)
 - Entrada con spring (ver sección 11.3)
 - Anchos estándar: `max-w-[480px]` simple · `max-w-[540px]` mediano · `max-w-[600px]` ancho · `max-w-[1000px]` wizard
+- **Drag-to-dismiss mobile** (bottom-sheet): threshold `info.offset.y > 150` o `info.velocity.y > 800`. Valores calibrados tras auditoría — `100/500` eran demasiado sensibles y causaban dismiss accidental por scroll/fling corto.
+- **Modal stack** — sub-modales (ej. `DatePickerModal` dentro de `NewLinkModal`) con `z` prop en saltos de 10 (60, 70). Solo el modal TOP responde a Escape/Tab — los padres quedan inertes vía `modalStack` global.
+- **Accesibilidad**: `role="dialog"`, `aria-modal="true"`, close button con `aria-label={t('common.close')}`.
 
 ### Entradas de Usuario
 
@@ -450,10 +453,11 @@ Centralizado en `getDropdownGlass(isDarkMode)` de `app/utils/cardClasses.js`:
 
 #### 6.9 `<Toggle>`
 
-**Props:** `active`, `onToggle`, `disabled`
+**Props:** `active`, `onToggle`, `disabled`, `aria-label` (**requerido** para a11y)
 
 - Knob anima con spring `x: active ? 20 : 0` (ver sección 11.6)
-- Encendido: `bg-[#7C3AED] shadow-[0_0_12px_rgba(124,58,237,0.4)]`
+- Encendido: `bg-[#7C3AED] shadow-[0_0_12px_rgba(124,58,237,0.4)]` (glow solo con `perfStore.useNeon`)
+- **Accesibilidad**: `role="switch"` + `aria-checked` vienen gratis, pero un switch necesita un label asociado. Siempre pasar `aria-label`. Para toggles con contexto dinámico usar `t('common.toggleFor', { name })` → "Activar o desactivar {name}".
 
 #### 6.10 `<DropdownFilter>`
 
@@ -679,27 +683,45 @@ GlassBackground (fixed, z-0)
 
 ### 8.2 Cabecera
 
-```jsx
-<thead>
-  <tr className={`text-[10px] uppercase font-bold tracking-widest ${
-    isDarkMode
-      ? 'text-[#888991] border-b border-white/10 bg-[#111113]/40'
-      : 'text-[#67656E] border-b border-black/5 bg-white/50'
-  }`}>
-    <th className="px-8 py-4">Columna</th>
-  </tr>
-</thead>
+Usar helper `getTheadClass(isDarkMode, isLite)` de `app/utils/cardClasses.js`:
+
+```vue
+<script setup>
+import { getTheadClass } from '~/utils/cardClasses'
+const theadClass = computed(() => getTheadClass(themeStore.isDarkMode, perfStore.isLite))
+</script>
+
+<template>
+  <thead>
+    <tr :class="['text-[10px] uppercase font-bold tracking-widest', theadClass]">
+      <th class="px-8 py-4">Columna</th>
+    </tr>
+  </thead>
+</template>
 ```
+
+El helper contempla el caso Lite light (bg `bg-white/50` se vuelve invisible sobre cards blancas — usamos tinte lavanda `bg-[#F8F7FB]` con borde `border-[#DBD3FB]`).
 
 ### 8.3 Fila
 
-```jsx
-<tr className={`group transition-colors duration-200 ${
-  isDarkMode
-    ? 'border-b border-white/5 hover:bg-[#7C3AED]/5 last:border-0'
-    : 'border-b border-black/5 hover:bg-[#DBD3FB]/20 last:border-0'
-}`}>
+Usar helper `getTableRowClass(isDarkMode)` de `app/utils/cardClasses.js` (compartido entre 4 vistas: Transacciones, Wallet, Liquidaciones, Usuarios):
+
+```vue
+<script setup>
+import { getTableRowClass } from '~/utils/cardClasses'
+const trClass = computed(() => getTableRowClass(themeStore.isDarkMode))
+</script>
+
+<template>
+  <tr :class="['group transition-colors duration-200', trClass]">
+    <!-- ... -->
+  </tr>
+</template>
 ```
+
+Clases resultantes:
+- Dark: `border-b border-white/5 hover:bg-[#7C3AED]/5 last:border-0`
+- Light: `border-b border-black/5 hover:bg-[#DBD3FB]/20 last:border-0`
 
 ### 8.4 Acciones en fila (visibles solo en hover)
 
@@ -1165,10 +1187,26 @@ Reservadas para casos donde Framer Motion no aplica:
 |---|---|---|---|
 | `animate-slide-up` | `opacity 0→1 + translateY 12px→0` | 0.4s ease | Formularios de email en login |
 | `animate-pulse-glow` | box-shadow pulsante morado | 2s ease-in-out ∞ | Elementos que requieren atención |
-| `animate-spin-slow` | `rotate 0→360deg` | 2s linear ∞ | Íconos de carga |
-| `animate-pulse` (Tailwind) | opacidad pulsante | built-in | Live dot del feed |
+| `animate-spin-slow` | `rotate 0→360deg` | 2s linear ∞ | Íconos de carga secundarios (bajo impacto) |
+| `animate-spin` (Tailwind) | `rotate 0→360deg` | 1s linear ∞ | Loaders primarios |
+| `animate-pulse` (Tailwind) | opacidad pulsante | built-in | Live dot del feed, Skeleton Lite |
 
 > `animate-scale-in` y `animate-fade-in` fueron reemplazados por Framer Motion (spring). No usar en componentes nuevos.
+
+**Gated por tier**: loaders continuos (`animate-spin` en PageLoader, sentinels de infinite-scroll, etc.) deben renderizarse condicionalmente con `v-if="perfStore.useContinuousAnim"`. En Lite ofrecer fallback estático (círculo con borde `/60`). Ejemplo:
+
+```vue
+<div
+  v-if="perfStore.useContinuousAnim"
+  class="w-8 h-8 border-2 border-[#7C3AED]/30 border-t-[#7C3AED] rounded-full animate-spin"
+/>
+<div
+  v-else
+  class="w-8 h-8 border-2 border-[#7C3AED]/60 rounded-full"
+/>
+```
+
+Esto respeta `prefers-reduced-motion: reduce` (mapeado automáticamente a tier Lite) y reduce carga CPU en dispositivos de gama baja.
 
 ---
 
