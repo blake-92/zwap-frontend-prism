@@ -6,6 +6,9 @@
 .cache
 dist
 
+# Cloudflare Wrangler scratch (generado por nitro.preset 'cloudflare-pages' durante build)
+.wrangler/
+
 # Node dependencies
 node_modules
 
