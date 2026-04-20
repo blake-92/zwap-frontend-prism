@@ -117,7 +117,7 @@ const glowClass = (collapsed) => {
   <motion.aside
     :animate="{ width: isCollapsed ? 72 : 256 }"
     :transition="SPRING"
-    :class="['relative shrink-0 flex flex-col h-screen z-20 overflow-hidden transition-colors duration-300', asideClass]"
+    :class="['relative shrink-0 flex flex-col h-dvh z-20 overflow-hidden transition-colors duration-300', asideClass]"
   >
     <!-- Lite: halo top-left estático. Reintroduce "atmósfera" Prism sin blur. z-[-1] → debajo del contenido del sidebar. -->
     <div
