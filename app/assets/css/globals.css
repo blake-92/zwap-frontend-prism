@@ -31,6 +31,17 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* iOS/iPadOS native-feel:
+   - touch-action: manipulation desactiva el double-tap-to-zoom del browser y
+     remueve el delay de 300ms en taps. Preserva pinch-zoom del OS (a11y).
+   - overscroll-behavior: none frena el bounce/rubber-band del documento cuando
+     un gesto multi-finger llega al edge del webview — evita que la app se
+     "panee" en iPad revelando contenido fuera del viewport visible. */
+html, body {
+  touch-action: manipulation;
+  overscroll-behavior: none;
+}
+
 /* Allow text selection on data & input elements */
 input, textarea, [contenteditable],
 td, .selectable, pre, code {
