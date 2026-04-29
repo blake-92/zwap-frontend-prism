@@ -393,81 +393,39 @@ Aplica en `theme.js`, `performance.js`, `layouts/default.vue` (sidebar collapse)
 
 ### Performance Tiers (3 niveles)
 
-Ver doc dedicado: **[docs/performance-tiers.md](docs/performance-tiers.md)**.
+Detalle completo: **[docs/performance-tiers.md](docs/performance-tiers.md)**.
 
-El store `usePerformanceStore` expone 3 tiers con detección automática + override manual en Settings:
+`usePerformanceStore` expone 3 tiers con detección automática + override manual en Settings (`localStorage['zwap-perf']`):
 
-| Tier | Target device | Identidad | Efectos removidos |
+| Tier | Target | Identidad | Efectos removidos |
 |---|---|---|---|
-| **`full` (Prism)** | Desktop, flagships (MacBook, iPhone 13+, S23+) | Liquid glass, neon, morphs, continuous anims | — |
-| **`normal`** | Mid-range (iPhone XR-14, Galaxy A5x, Pixel 5-6) | Glass base, morphs, hover-lift, continuous anims | Neon glows, glass elevation, chrome saturate, button shimmer, blob parallax |
-| **`lite`** | Low-end (Samsung A15, 4GB RAM) + `prefers-reduced-motion` | Surfaces sólidas, morphs OFF | backdrop-filter, filter:blur, hover-lift, nav morphs, continuous anims |
+| `full` (Prism) | Desktop, flagships | Liquid glass, neon, morphs, continuous anims | — |
+| `normal` | Mid-range (iPhone XR-14, A5x, Pixel 5-6) | Glass base, morphs, hover-lift | Neon, glass elevation, chrome saturate, button shimmer, blob parallax |
+| `lite` | Low-end + `prefers-reduced-motion` | Surfaces sólidas | backdrop-filter, filter:blur, hover-lift, nav morphs, continuous anims |
 
-**Detección** (`detectTier()`):
-```
-prefers-reduced-motion              → lite
-cores < 4 || memory < 4GB           → lite
-cores < 8 || memory < 6GB           → normal
-isMobile UA || (touch && !memory)   → normal
-else                                → full
-```
+**Detección**: reduced-motion → lite; cores<4 || mem<4GB → lite; cores<8 || mem<6GB → normal; mobile UA → normal; else → full.
 
-**Getters granulares** (consumir `perfStore.X` en componentes):
+**Getters granulares** (consumir como `perfStore.X`):
 - GPU: `useBlur`, `useReducedBlur`, `useNeon`, `useInnerHighlight`, `useWalletGlowBubble`, `useGlassElevation`, `useActiveHalo`, `chromeSaturate`
 - Animación: `useSpring`, `useLayoutMorphs`, `useNavMorphs`, `useContinuousAnim`
 - Interacción: `useHoverLift`, `useDecorGradients`
-- Composite: `modalShadow` (string `'deep'|'medium'|'compact'`), `modalBackdropFilter` (string de Tailwind classes)
+- Composite: `modalShadow` (`'deep'|'medium'|'compact'`), `modalBackdropFilter`
 
-**Nuevos helpers clave**:
-- `cardClasses.js`: `getCardClasses(isDarkMode, hoverEffect, useBlur, useNeon, useGlassElevation)` — 5to param activa liquid glass.
-- `getModalGlass(isDarkMode, useBlur, shadowLevel, useGlassElevation)` — `shadowLevel` es 3-way (`deep`/`medium`/`compact`).
-- `getDropdownGlass(...)` — mismo patrón.
-- `getTheadClass(isDarkMode, isLite)` — table thead Lite-aware (ver sección 1.6 de prism-ui.md).
-- `useDebouncedSearch(getter, { liteDelay, onInput })` — debounce de búsquedas activado solo en Lite.
+**Helpers principales**:
+- `getCardClasses(isDarkMode, hoverEffect, useBlur, useNeon, useGlassElevation)` — 5to param activa liquid glass
+- `getModalGlass(isDarkMode, useBlur, shadowLevel, useGlassElevation)` — `shadowLevel` 3-way
+- `getDropdownGlass(...)`, `getTheadClass(isDarkMode, isLite)` — Lite-aware
+- `useDebouncedSearch(getter, { liteDelay, onInput })` — debounce solo en Lite
 
-**Liquid glass Prism — fórmula validada:**
-- Opacidad baja en bg (`/20-30` cards, `/65-85` modales según densidad texto)
-- `backdrop-blur-2xl` (cards) / `3xl` (modales) + `backdrop-saturate-150`
-- Rim borders (`border-t-white/25` + `border-l-white/10`)
-- Inset 1px highlight top (catch de luz en edge, NO overlay)
-- Dual-source drop shadow
-- ❌ NO specular white gradient (`from-white/[X] to-transparent`) — ensucia el vidrio
+**Reglas críticas de identidad**:
+- **Liquid glass Prism**: opacidad baja (cards `/20-30`, modales `/65-85`) + `backdrop-blur-2xl/3xl` + `backdrop-saturate-150` + rim borders + inset 1px highlight + dual drop shadow. ❌ NO specular white gradient (ensucia el vidrio).
+- **Lite wireframe**: surfaces sólidas (`#F8F7FB` light, `#0F0F11`→`#1A1A1D` dark layering), `border-[#DBD3FB]`, branded shadows púrpura, `active:scale-[0.98]` reemplaza hover-lift, radial-gradient bg sustituye blobs blur.
+- **Lite atmósfera pintada** (cero GPU): Sidebar halo top-left, Header halo top-right, sidebar divider rim púrpura, page transitions OFF (`html.perf-lite .page-enter-active`). Todo via `v-if="perfStore.isLite"` + inline `:style`.
+- **Navigation morphs** (Sidebar/BottomNav/SegmentControl pill) — OFF en Lite. **Action morphs** (QR expand) — siempre ON.
+- **CSS global**: `html.perf-normal` reduce blur ~50%; `html.perf-lite` quita `backdrop-filter`/`filter:blur`/hover-lift; `@media (prefers-reduced-motion)` overrides WCAG 2.1.
 
-**Lite wireframe aesthetic — para surfaces en light mode:**
-- Bg `#F8F7FB` (off-white tintado lavanda) para inputs, Toolbar, search bars, Button outline/successExport, thead
-- Bg `bg-white` para Cards (paper feel) con borde `border-[#DBD3FB]` (brand-light)
-- Dark mode Lite: layering `#111113` (app) → `#1A1A1D` (chrome/cards) → `#0F0F11` (inputs)
-- Shadows branded: `shadow-[0_1px_2px_rgba(124,58,237,0.05),0_4px_12px_rgba(124,58,237,0.06)]`
-- Active state (reemplaza hover-lift): `active:scale-[0.98] active:bg-[#7C3AED]/20` dark / `/10` light
-- Radial-gradient bg (sustituye blobs blur): `ellipse_at_top_left, rgba(124,58,237,0.22) 0%, transparent 55%`
-
-**CSS global**:
-- `html.perf-normal .backdrop-blur-*` → radios reducidos a ~50%
-- `html.perf-lite *` → `backdrop-filter: none`, `filter: none` en `.blur-*`, sin hover-lift
-- `@media (prefers-reduced-motion: reduce)` → overrides globales WCAG 2.1
-
-**Navigation morphs vs Action morphs**:
-- `useNavMorphs` (pill Sidebar/BottomNav/SegmentControl/dropdown) — OFF en Lite (instant toggle)
-- `useLayoutMorphs` (QR expand, etc.) — siempre ON (moment de identidad one-shot)
-
-**Settings UI** (`SettingsView.vue` → pestaña Mi Perfil → sección Performance):
-- SegmentControl con 3 opciones: `Prism` / `Normal` / `Lite`
-- Descripción dinámica por tier seleccionado
-- Override manual persiste en `localStorage['zwap-perf']`
-
-**Lite atmósfera pintada** (radial gradients sin blur):
-
-Para reintroducir carácter Prism en Lite sin `backdrop-filter`/`filter:blur`:
-- **Sidebar halo top-left** (`Sidebar.vue`): `radial-gradient(ellipse 120% 70% at 15% 0%, rgba(124,58,237,0.16), transparent 62%)` dark / `0.09` light. Div `absolute z-[-1]` dentro del aside.
-- **Header halo top-right** (`Header.vue`): `radial-gradient(ellipse 60% 180% at 95% 50%, rgba(124,58,237,0.10), transparent 60%)` dark / `0.06` light. Header necesita `position: relative` para stacking context (ya aplicado en desktop; mobile usa `fixed` que también crea context).
-- **Sidebar divider rim** (`layouts/default.vue`): gradient vertical `rgba(124,58,237,X)` con decay (0.5→0.2→white/black) que reemplaza el `bg-white/10` plano.
-- **Page transitions**: desactivadas globalmente vía `html.perf-lite .page-enter-active { transition: none }` en `globals.css`.
-
-Todo consumido via `v-if="perfStore.isLite"` + inline `:style` computed. Cero GPU cost (solo paint).
-
-⚠️ **Inline `background` (shorthand) domina sobre utilities `bg-*`** — no combinar `:style="{ background: gradient }"` con `group-hover:bg-*` (el hover no se aplicará).
-
-⚠️ **Mobile header position** (`Header.vue`): `fixed inset-x-0 top-0` (mobile) y `relative` (desktop) son exclusivos. Nunca emitir `relative` como clase permanente junto con `fixed` condicional — reserva espacio en flow y duplica offset con el `pt-[calc(5rem+env(safe-area-inset-top))]` de main.
+⚠️ **Inline `background` shorthand domina sobre utilities `bg-*`** — no combinar `:style="{ background: gradient }"` con `group-hover:bg-*`.
+⚠️ **Mobile header**: `fixed inset-x-0 top-0` (mobile) y `relative` (desktop) son exclusivos — nunca emitir `relative` permanente junto con `fixed` condicional.
 
 ### Composable `useViewSearch(placeholder)`
 
@@ -814,149 +772,33 @@ Semantic Versioning. Historial en `CHANGELOG.md` (formato [Keep a Changelog](htt
 
 ## Protocolo de cambios significativos
 
-Para migraciones, refactors, optimizaciones, o cualquier cambio que toque más de 5 archivos:
+Para migraciones, refactors o cambios que toquen >5 archivos. Detalle: **[docs/change-protocol.md](docs/change-protocol.md)**.
 
-### Fase de análisis (NO tocar código)
-
-1. **Investigar** — documentación oficial, breaking changes, evaluar consejos externos contra nuestro stack. Descartar lo que no aplica con justificación.
-2. **Auditar impacto** — búsqueda exhaustiva en el codebase: qué archivos, qué líneas, cuántas ocurrencias. Generar tabla de impacto con conteos exactos.
-3. **Anticipar efectos** — para cada cambio planificado, responder:
-   - ¿Qué valor/comportamiento tiene HOY?
-   - ¿Qué valor/comportamiento tendrá DESPUÉS?
-   - ¿Son idénticos? Si no, ¿qué se rompe visualmente o funcionalmente?
-   - ¿Hay efectos colaterales en otros componentes que consumen esto?
-4. **Verificar con prueba aislada** — si hay duda sobre un valor (CSS, API, output), crear un componente/archivo temporal de prueba para confirmar ANTES de modificar el código real.
-
-### Fase de planificación (NO tocar código)
-
-5. **Planificar por fases** — ordenar de menor a mayor riesgo. Cada fase incluye:
-   - Archivos a modificar con cambios concretos
-   - Efecto esperado (qué cambia, qué se mantiene igual)
-   - Criterio de verificación (cómo confirmar que funcionó)
-   - Rollback: qué revertir si falla
-6. **Presentar plan para aprobación** — el usuario revisa y aprueba antes de ejecutar.
-
-### Fase de ejecución (ahora sí tocar código)
-
-7. **Ejecutar fase por fase** — entre cada fase verificar:
-   - Servidor arranca sin errores (HTTP 200)
-   - El cambio específico se refleja (CSS generado, HTML, runtime)
-   - Sin regresiones en funcionalidad existente
-8. **Build de producción** — `npm run build` exitoso antes de commitear.
-9. **Documentar** — actualizar CLAUDE.md si cambia stack, APIs, o patrones.
+Resumen: 1) **Análisis** (investigar, auditar impacto, anticipar efectos, prueba aislada si hay duda) → 2) **Plan por fases** (riesgo creciente, criterios de verificación, rollback) → 3) **Aprobación del usuario** → 4) **Ejecución fase por fase** verificando entre cada una → 5) **Build + actualizar CLAUDE.md** si cambia stack/API/patrón.
 
 ## Testing
 
-Stack: **Vitest** (unit/component) + **Playwright** (E2E cross-browser) + **@axe-core/playwright** (a11y) + **@lhci/cli** (Lighthouse) + **MSW** (mocking API). **789 tests verdes** (431 unit + 358 E2E).
+Stack: **Vitest** (unit/component) + **Playwright** (E2E, 7 projects: chromium/firefox/webkit × desktop/iPad/mobile) + **axe-core** (a11y) + **LHCI** (Lighthouse) + **MSW**. **789 tests verdes** (431 unit + 358 E2E).
 
-### Estructura
+Detalle completo: **[docs/testing.md](docs/testing.md)** — estructura `tests/`, convenciones por capa, política a11y (`critical` FAIL / `serious-minor` WARN), visual regression selectivo (2 projects baseline), mock motion-v global, scripts npm, caveat LHCI en WSL.
 
-```
-tests/
-├── unit/
-│   ├── utils/            # specs de app/utils/*.js
-│   ├── composables/      # specs de app/composables/*.js (con happy-dom stubs)
-│   ├── stores/           # specs de app/stores/*.js (Pinia)
-│   ├── i18n/parity.spec.ts   # shape es↔en + sintaxis vue-i18n
-│   └── helpers/
-│       ├── setup.ts          # matchMedia/IO/RO stubs + mock motion-v global
-│       ├── withSetup.ts      # ejecuta composable dentro de componente Vue
-│       ├── mountComponent.ts # mount con Pinia + i18n + Nuxt auto-import stubs
-│       └── motionStub.ts     # Proxy que reemplaza <motion.X> con wrappers
-│
-├── component/
-│   └── ui/               # specs de app/components/ui/*.vue (27 componentes)
-│
-├── e2e/
-│   ├── fixtures.ts       # test extendido con setTier/setTheme/mockAuth/consoleErrors
-│   ├── smoke.spec.ts
-│   ├── interactions.spec.ts
-│   ├── console.spec.ts
-│   ├── error-states.spec.ts  # auth resilience + MSW route interceptors
-│   ├── visual.spec.ts    # 48 baselines en 2 projects selectivos
-│   ├── a11y.spec.ts      # axe en 10 rutas × 2 projects
-│   ├── cross-engine.spec.ts  # validation en los 7 projects sin screenshot
-│   └── visual.spec.ts-snapshots/   # PNGs baseline (commiteados)
-│
-├── mocks/
-│   ├── handlers.ts       # MSW handlers /api/*
-│   ├── node.ts           # setup para Vitest
-│   └── browser.ts        # setup para Playwright (si usa SW)
-│
-└── factories/index.ts    # buildTransaction/User/Link/Payout + faker seeded
-```
-
-### Convenciones
-
-1. **Unit** (Vitest + happy-dom): `tests/unit/<layer>/<name>.spec.ts`. Lógica pura (utils, composables, stores, funciones). Sin DOM real salvo que el composable lo requiera — en ese caso usar `withSetup(fn)` helper.
-2. **Component** (Vitest + @vue/test-utils + `mountComponent`): `tests/component/ui/<Name>.spec.ts`. Props/events/slots + branches por tier. Mock global de motion-v ya aplicado.
-3. **E2E** (Playwright): `tests/e2e/<name>.spec.ts`. Usar fixtures (`setTier`, `setTheme`, `mockAuth`, `consoleErrors`, `waitForUIReady`). `reducedMotion: 'reduce'` global anula loops `repeat: Infinity`.
-
-### Matriz Playwright (7 projects)
-
-`desktop-chromium` (1440×900), `desktop-firefox`, `desktop-webkit` (Safari desktop proxy), `tablet-ipad-chromium`, `tablet-ipad-webkit` (Safari iPad), `mobile-pixel7` (Android Chromium), `mobile-iphone14` (Safari mobile).
-
-### Política A11y
-
-`critical` (button-name, aria-valid, label, etc.) → **FAIL**. `serious/moderate/minor` (color-contrast en UX secondary, etc.) → **WARN logueado**. El contraste de texto deshabilitado/secundario es decisión UX documentada en Prism; fallar en cada corrida rompería DX.
-
-### Visual regression selectivo
-
-Solo 2 projects baseline: `desktop-chromium` + `mobile-pixel7`. Los otros 5 projects corren los mismos specs pero sin screenshot compare (validan layout con `expect(locator).toBeVisible()` + `toHaveCSS`). Tolerance 3%. Masked: `.animate-spin, .animate-pulse, .prism-qr-shimmer`.
-
-### Mock motion-v
-
-`tests/unit/helpers/setup.ts` registra `vi.mock('motion-v', () => motionStub)` globalmente. El stub usa Proxy para reemplazar cualquier `<motion.X>` con un wrapper simple que:
-- Descarta props motion (`initial`, `animate`, `transition`, `drag`, `whileHover`, `layout-id`, etc.)
-- Preserva slots, `$attrs` no-motion (incluido `aria-label`), y event listeners.
-- Neutraliza `repeat: Infinity` (evita timers colgados en tests).
-
-`AnimatePresence`, `LayoutGroup`, y `useAnimationControls` también stubbeados.
-
-### Flujo de validación manual
-
-```
-cambios locales
-  → npm test                (siempre, ~3s)
-  → npm run test:e2e        (antes de merge a main, ~5min)
-  → análisis de results
-  → git commit en rama concepts
-  → git push                Cloudflare auto-deploy
-```
-
-Ver `README.md#testing` para comandos completos y triggers para escalar a CI automatizado (Phase 6).
-
-### Scripts relevantes
-
-- `npm test` / `npm run test:watch` / `npm run test:coverage`
-- `npm run test:e2e` / `npm run test:e2e:ui` (UI Mode, visible via WSLg) / `npm run test:e2e:headed`
-- `npm run test:a11y` / `npm run test:lhci`
-
-### Lighthouse CI caveat en WSL
-
-`categories.performance` OFF temporalmente por NaN en runner headless WSL (bug conocido chrome-launcher). Audits individuales (LCP, CLS, TBT) sí reportan correcto. Script `test:lhci` inyecta `CHROME_PATH` resolviendo a `require('playwright').chromium.executablePath()` porque el runner por default buscaba binario en path Windows.
+**Flujo manual**: `npm test` (siempre, ~3s) → `npm run test:e2e` (antes de merge, ~5min) → commit en rama `concepts-dev` → push → Cloudflare auto-deploy.
 
 ## No hacer
 
-- No usar Options API — solo `<script setup>`
+> Reglas adicionales (las base están en "Reglas globales" arriba).
+
 - No crear CSS modules ni archivos `.css` separados — Tailwind inline
-- No usar clases `dark:` de Tailwind — branch JS con `themeStore.isDarkMode`
 - No pasar callbacks de modales desde el layout a features
 - No añadir dependencias sin consultar
 - No crear helpers o abstracciones especulativos
-- No usar `ease`/`tween` en animaciones de UI — spring siempre
-- No hardcodear datos — usar `mockData.js`
-- No hardcodear strings — usar `t('key')`
-- No usar `{{var}}` en locales — vue-i18n usa `{var}`
-- No exports en `<script setup>` — mover a `.js` externo
-- No acceso directo a `window`/`document` sin guard o `onMounted`
 - No `ref` de motion-v components sin `.$el` fallback
 - No acceso directo a `localStorage` sin `try/catch` (Safari private mode lanza)
 - No `navigateTo(query.redirect)` sin pasar por `isSafeInternalPath`
-- No emitir `backdrop-blur-*` incondicionalmente — guardar con `perfStore.useBlur` para inspector honesto
+- No emitir `backdrop-blur-*` incondicionalmente — guardar con `perfStore.useBlur`
 - No sub-modal sin `<AnimatePresence>` wrapper — pierde exit animation
-- No mezclar `:style="{ background: ... }"` con utility `bg-*` hover — inline shorthand domina, hover nunca aplica
-- No `useMediaQuery()` dentro de un `computed` — usa lifecycle hooks (`onMounted`/`watch`), debe invocarse a top-level del setup
-- No `import { VueDatePicker } from '@vuepic/vue-datepicker'` pasando `locale: string` — v12 espera `Locale` de date-fns; omitir el prop si no se importa el objeto correcto
-- No usar `h-screen`/`min-h-screen` como scroll-container full-height — en iOS `100vh` es el viewport grande (URL bar oculta) y deja contenido tapado por el BottomNav cuando el URL bar está visible; usar `h-dvh`/`min-h-dvh`
-- No hardcodear `pt-20`/`-64`/`h-16` en elementos que interactúan con el notch mobile — usar `env(safe-area-inset-top)` en CSS o la var `--sat` en JS (motion-v no evalúa `env()` en animate strings)
+- No mezclar `:style="{ background: ... }"` con utility `bg-*` hover — inline shorthand domina
+- No `useMediaQuery()` dentro de un `computed` — invocar a top-level del setup
+- No `import { VueDatePicker }` v12 pasando `locale: string` — v12 espera `Locale` de date-fns; omitir si no se importa el objeto
+- No usar `h-screen`/`min-h-screen` como scroll-container full-height — en iOS `100vh` es el viewport grande y tapa contenido bajo el BottomNav; usar `h-dvh`/`min-h-dvh`
+- No hardcodear `pt-20`/`-64`/`h-16` en elementos que interactúan con el notch mobile — usar `env(safe-area-inset-top)` o la var `--sat` (motion-v no evalúa `env()` en animate strings)
