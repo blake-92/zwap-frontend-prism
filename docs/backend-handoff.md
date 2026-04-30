@@ -1,4 +1,4 @@
-# Backend Handoff — sesión nueva para `zwap-backend-prism`
+# Backend Handoff — sesión nueva para `zwap-backend`
 
 Guía para iniciar la implementación del backend en una sesión Claude separada. Esta sesión (rooted en `zwap-frontend-prism`) hizo la planificación; la sesión nueva ejecuta el código.
 
@@ -7,13 +7,13 @@ Guía para iniciar la implementación del backend en una sesión Claude separada
 ## 1. Setup local (comandos exactos)
 
 ```bash
-mkdir ~/Developer/zwap-backend-prism
-cd ~/Developer/zwap-backend-prism
+mkdir ~/Developer/zwap-backend
+cd ~/Developer/zwap-backend
 git init
 claude
 ```
 
-> Si tu máquina o usuario son distintos a `/home/st-lx/`, ajusta paths en el starter prompt de abajo antes de pegarlo.
+> Los paths del starter prompt usan `~/Developer/...` (expansión de shell), portable entre máquinas. Si tu repo del frontend vive en otra carpeta, ajustar antes de pegar.
 
 ---
 
@@ -29,20 +29,20 @@ Visión: payment orchestrator multi-provider (Stripe + VPay + futuros).
 CONTEXTO Y PLAN YA EXISTENTES (léelos antes de actuar):
 
 1. Visión / arquitectura objetivo:
-   /home/st-lx/Developer/zwap-frontend-prism/docs/backend-architecture.md
+   ~/Developer/zwap-frontend-prism/docs/backend-architecture.md
 
 2. Plan ejecutable de FASE 1 (Identity & Access — login, users,
    branches, roles con branch scoping, multi-tenancy con RLS):
-   /home/st-lx/Developer/zwap-frontend-prism/docs/backend-phase-1-iam.md
+   ~/Developer/zwap-frontend-prism/docs/backend-phase-1-iam.md
 
 3. Frontend que consumirá este backend (para entender shape de auth y
    contratos esperados):
-   /home/st-lx/Developer/zwap-frontend-prism/CLAUDE.md
-   /home/st-lx/Developer/zwap-frontend-prism/app/middleware/auth.js
-   /home/st-lx/Developer/zwap-frontend-prism/app/utils/mockData.js
+   ~/Developer/zwap-frontend-prism/CLAUDE.md
+   ~/Developer/zwap-frontend-prism/app/middleware/auth.js
+   ~/Developer/zwap-frontend-prism/app/utils/mockData.js
 
 DECISIONES YA TOMADAS (no re-debatir):
-- Repo separado (estoy aquí: ~/Developer/zwap-backend-prism)
+- Repo separado (estoy aquí: ~/Developer/zwap-backend)
 - Modular monolith con Spring Modulith → split a microservicios
   más adelante cuando los límites estén probados
 - Stack: Java 21 + Spring Boot 3.3.x + Postgres 16 + Flyway +
@@ -109,7 +109,7 @@ Flujo recomendado:
 Mismo patrón que en este repo:
 - Commits locales sin push hasta que tú lo indiques
 - Cuando llegue el momento del primer push, el Claude del backend debe **preguntar antes** de:
-  - `gh repo create blake-92/zwap-backend-prism --private`
+  - `gh repo create blake-92/zwap-backend --private`
   - `git remote add origin ...`
   - `git push -u origin main`
 - Asumir que el repo en GitHub aún no existe
@@ -128,7 +128,7 @@ Los 2 docs principales (`backend-architecture.md`, `backend-phase-1-iam.md`) viv
 | Copiar al backend repo cuando se "fija" la decisión | Cada repo es self-contained; pero hay 2 versiones que pueden divergir |
 | Submodule del frontend repo en el backend | Overkill para 2 archivos; complica el git workflow |
 
-**Recomendación**: editar en frontend repo mientras los docs son fluidos (semanas iniciales); cuando fase 1 esté implementada y validada, copiar el snapshot final a `zwap-backend-prism/docs/` como referencia histórica y los docs del frontend pasan a ser solo retrospectiva.
+**Recomendación**: editar en frontend repo mientras los docs son fluidos (semanas iniciales); cuando fase 1 esté implementada y validada, copiar el snapshot final a `zwap-backend/docs/` como referencia histórica y los docs del frontend pasan a ser solo retrospectiva.
 
 ---
 

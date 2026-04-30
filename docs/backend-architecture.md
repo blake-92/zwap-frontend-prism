@@ -1,4 +1,4 @@
-# Backend Architecture — `zwap-backend-prism`
+# Backend Architecture — `zwap-backend`
 
 **Documento de visión y arquitectura objetivo** para el backend de Zwap. Cubre el sistema completo en su estado final (payment orchestrator multi-provider con KYB, RBAC, ledger, settlements, etc.), no la ejecución inmediata.
 
@@ -52,7 +52,7 @@ La construcción se hace **por fases**, cada una con su propio doc ejecutable ba
 
 | Decisión | Elección | Justificación |
 |---|---|---|
-| Repo | Separado `zwap-backend-prism` | Ciclos de release independientes; contrato vía OpenAPI |
+| Repo | Separado `zwap-backend` | Ciclos de release independientes; contrato vía OpenAPI |
 | Arquitectura | Modular monolith (Spring Modulith) | Empezar simple; extraer microservicios cuando los límites estén probados |
 | Lenguaje / runtime | Java 21 LTS | LTS actual; virtual threads para concurrencia barata |
 | Framework | Spring Boot 3.3.x | Stack estándar enterprise |
@@ -799,7 +799,7 @@ Para migración futura a Kafka cuando escale: Spring Modulith permite `@External
 ## 15. Estructura del repo
 
 ```
-zwap-backend-prism/
+zwap-backend/
 ├── docker-compose.yml                             # postgres + minio + mailhog
 ├── Dockerfile                                     # multi-stage
 ├── pom.xml
@@ -885,14 +885,14 @@ Tabla aparte para back-office: `V9__zwap_admin.sql` con `zwap_admins`, `zwap_adm
 ### Paso 1 — repo + scaffold
 
 ```bash
-mkdir -p ~/Developer/zwap-backend-prism && cd ~/Developer/zwap-backend-prism
+mkdir -p ~/Developer/zwap-backend && cd ~/Developer/zwap-backend
 git init
 
 # Generar via start.spring.io
 curl https://start.spring.io/starter.zip \
   -d type=maven-project -d language=java -d bootVersion=3.3.5 -d javaVersion=21 \
-  -d groupId=com.zwap -d artifactId=zwap-backend-prism \
-  -d name=zwap-backend-prism -d packageName=com.zwap \
+  -d groupId=com.zwap -d artifactId=zwap-backend \
+  -d name=zwap-backend -d packageName=com.zwap \
   -d dependencies=web,data-jpa,security,validation,postgresql,flyway,actuator,modulith,docker-compose \
   -o starter.zip
 unzip starter.zip && rm starter.zip
@@ -1164,7 +1164,7 @@ Spring Modulith hace el split casi mecánico. Un módulo se extrae cuando:
 
 ### Out of scope para esta sesión
 
-- Crear el repo `zwap-backend-prism` real (otra working directory)
+- Crear el repo `zwap-backend` real (otra working directory)
 - Generar `pom.xml`, `Dockerfile`, migrations SQL completas (ejecución del bootstrap)
 - Modificar `nuxt.config.ts` con `runtimeConfig.apiBase`
 - Crear `app/utils/api/client.js`
