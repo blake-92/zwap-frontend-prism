@@ -66,9 +66,19 @@ PREFERENCIAS DE TRABAJO:
 - No contamines el repo de frontend (~/Developer/zwap-frontend-prism)
   desde aquí — los docs ya están commiteados allá
 
+NOTA SOBRE VERSIONES:
+Las versiones específicas en backend-architecture.md § 4 (Spring Boot
+3.3.x, Postgres 16, Java 21, Flyway 10, Spring Modulith 1.3.x, etc.)
+fueron pinneadas en 2024 y pueden estar desactualizadas. Las
+decisiones de stack (qué frameworks/lenguaje) son firmes; los números
+de versión NO. Antes del bootstrap, verifica las versiones latest
+stable (Java LTS actual, Spring Boot, Spring Modulith, Postgres,
+Flyway, Hibernate) y propónmelas para aprobar.
+
 PRIMERA ACCIÓN:
 Lee los 3 archivos referenciados (architecture + phase-1 + CLAUDE.md
-del frontend), confírmame que entendiste el scope de fase 1, y luego
+del frontend), confírmame que entendiste el scope de fase 1, verifica
+las versiones latest stable de los componentes del stack, y luego
 proponme el orden de los 12 pasos del § 11 del phase-1 doc para que
 los aprobemos antes de ejecutar el bootstrap.
 ```
@@ -81,7 +91,8 @@ Checklist de validación. Si el nuevo Claude se desvía, redirígelo:
 
 - [ ] Lee `backend-architecture.md` y `backend-phase-1-iam.md`
 - [ ] Lee al menos parcialmente `CLAUDE.md` y `app/middleware/auth.js` del frontend
-- [ ] Confirma stack: Java 21 + Spring Boot 3.3.x + Modulith + Postgres 16 + Flyway + Maven
+- [ ] Confirma stack (frameworks/lenguaje firmes; versiones a verificar): Java LTS + Spring Boot + Modulith + Postgres + Flyway + Maven
+- [ ] Verifica versiones latest stable y te las propone antes del bootstrap (los docs tienen versiones de 2024 que pueden estar desactualizadas)
 - [ ] Confirma scope fase 1: solo IAM (auth, users, branches, roles), NO payments
 - [ ] Reproduce los 12 pasos del § 11 del phase 1 doc en orden
 - [ ] **No** ejecuta nada sin tu aprobación
