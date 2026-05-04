@@ -8,8 +8,9 @@ import {
 import { useThemeStore } from '~/stores/theme'
 import { usePerformanceStore } from '~/stores/performance'
 import { useViewSearchStore } from '~/stores/viewSearch'
+import { useSessionStore } from '~/stores/session'
+import { useBranchesStore } from '~/stores/branches'
 import { ROUTES } from '~/utils/routes'
-import { BRANCHES } from '~/utils/mockData'
 import { SPRING, SPRING_SIDEBAR } from '~/utils/springs'
 import { getDropdownGlass } from '~/utils/cardClasses'
 import Button from '~/components/ui/Button.vue'
@@ -19,16 +20,16 @@ import ZwapIsotipo from '~/components/brand/ZwapIsotipo.vue'
 import ZwapWordmark from '~/components/brand/ZwapWordmark.vue'
 
 const props = defineProps({
-  selectedBranch: { type: String, required: true },
   isDesktop: { type: Boolean, default: true },
   headerVisible: { type: Boolean, default: true },
 })
-const emit = defineEmits(['branchChange'])
 
 const { t } = useI18n()
 const themeStore = useThemeStore()
 const perfStore = usePerformanceStore()
 const viewSearch = useViewSearchStore()
+const sessionStore = useSessionStore()
+const branchesStore = useBranchesStore()
 const menuOpen = ref(false)
 const branchSheetOpen = ref(false)
 const searchExpanded = ref(false)
@@ -80,8 +81,22 @@ watch(searchExpanded, (v) => {
   }, 80)
 })
 
-const pickBranch = (b) => {
-  emit('branchChange', b)
+// Lista de branches que se muestran en el picker — solo ACTIVE. Las archivadas viven en
+// SucursalesView como "carpeta especial", no en el picker (cutover doc § 4.1).
+const pickerBranches = computed(() => branchesStore.active)
+const activeBranch = computed(() => branchesStore.activeBranch)
+const merchantName = computed(() => sessionStore.merchant?.businessName ?? '')
+// Display text del pill. Backend devuelve `code` opcional — lo preferimos sobre
+// la inicial del name porque es lo que el merchant configura como "código operativo".
+const branchPillLabel = computed(() => {
+  const b = activeBranch.value
+  if (!b) return '—'
+  return b.code || b.name.charAt(0).toUpperCase()
+})
+const activeBranchName = computed(() => activeBranch.value?.name ?? t('branches.notFound'))
+
+const pickBranch = (id) => {
+  branchesStore.setActive(id)
   menuOpen.value = false
   branchSheetOpen.value = false
 }
@@ -89,15 +104,11 @@ const pickBranch = (b) => {
 const headerClass = computed(() => {
   const useBlur = perfStore.useBlur
   const isLite = perfStore.isLite
-  // Lite mobile sin blur: el header fixed mostraría contenido scrolleando detrás — surface sólida.
   const bgDark = useBlur ? 'bg-[#111113]/20' : 'bg-[#1A1A1D]'
   const bgLight = useBlur ? 'bg-white/30' : 'bg-white'
   const blur = useBlur ? ' backdrop-blur-2xl' : ''
   const borderDark = isLite ? 'border-[#7C3AED]/20' : 'border-white/10'
   const borderLight = isLite ? 'border-[#DBD3FB]' : 'border-white/80'
-  // Mobile: altura = 4rem contenido + env(safe-area-inset-top) para cubrir
-  // el Dynamic Island / status bar con la misma surface (evita flash del
-  // body debajo del notch). pt reserva el espacio del inset.
   const base = props.isDesktop
     ? 'h-20 relative'
     : 'h-[calc(4rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] fixed inset-x-0 top-0'
@@ -175,6 +186,11 @@ const sheetPillBg = computed(() =>
   themeStore.isDarkMode ? 'bg-[#7C3AED]/15' : 'bg-[#DBD3FB]/40',
 )
 
+// Subtle separator + label class for the merchant name shown above the branch list.
+const merchantLabelClass = computed(() =>
+  themeStore.isDarkMode ? 'text-[#888991] border-white/10' : 'text-[#67656E] border-black/5',
+)
+
 const goSettings = () => navigateTo(ROUTES.SETTINGS)
 </script>
 
@@ -243,22 +259,24 @@ const goSettings = () => navigateTo(ROUTES.SETTINGS)
           </Button>
         </Tooltip>
 
-        <!-- Desktop branch dropdown -->
+        <!-- Desktop branch picker -->
         <div ref="menuRef" class="relative">
           <button
             aria-haspopup="listbox"
             :aria-expanded="menuOpen"
-            :class="['flex items-center gap-3 cursor-pointer pl-6 border-l h-10 transition-colors select-none', themeStore.isDarkMode ? 'border-white/10' : 'border-black/5']"
-            @click="menuOpen = !menuOpen"
+            :disabled="!activeBranch"
+            :class="['flex items-center gap-3 cursor-pointer pl-6 border-l h-10 transition-colors select-none disabled:opacity-50 disabled:cursor-default', themeStore.isDarkMode ? 'border-white/10' : 'border-black/5']"
+            @click="activeBranch && (menuOpen = !menuOpen)"
             @keydown.escape="menuOpen = false"
           >
             <div :class="['w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold', branchPillClass]">
-              {{ selectedBranch.charAt(0) }}
+              {{ branchPillLabel }}
             </div>
             <span :class="['text-sm font-semibold', themeStore.isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]']">
-              {{ selectedBranch }}
+              {{ activeBranchName }}
             </span>
             <motion.span
+              v-if="activeBranch"
               :animate="{ rotate: menuOpen ? 180 : 0 }"
               :transition="SPRING"
               :class="['flex items-center', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']"
@@ -277,25 +295,39 @@ const goSettings = () => navigateTo(ROUTES.SETTINGS)
               animate="visible"
               exit="exit"
               :style="{ transformOrigin: 'top right' }"
-              :class="['absolute right-0 mt-4 w-56 rounded-2xl z-50 overflow-hidden', getDropdownGlass(themeStore.isDarkMode, perfStore.useBlur, perfStore.modalShadow, perfStore.useGlassElevation)]"
+              :class="['absolute right-0 mt-4 w-64 rounded-2xl z-50 overflow-hidden', getDropdownGlass(themeStore.isDarkMode, perfStore.useBlur, perfStore.modalShadow, perfStore.useGlassElevation)]"
             >
+              <!-- Merchant header — label estático no clickeable. Cutover doc § 4.1: el negocio
+                   no se cambia desde acá; solo se muestra para que el user sepa en qué hotel está. -->
+              <div
+                v-if="merchantName"
+                :class="['px-5 pt-3 pb-2 text-[10px] font-bold uppercase tracking-widest border-b', merchantLabelClass]"
+              >
+                {{ merchantName }}
+              </div>
               <div class="p-2 flex flex-col gap-0.5">
                 <button
-                  v-for="branch in BRANCHES"
-                  :key="branch"
+                  v-for="branch in pickerBranches"
+                  :key="branch.id"
                   role="option"
-                  :aria-selected="selectedBranch === branch"
-                  :class="['relative w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-3 transition-colors duration-150', optionClass(selectedBranch === branch)]"
-                  @click="pickBranch(branch)"
+                  :aria-selected="activeBranch?.id === branch.id"
+                  :class="['relative w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-3 transition-colors duration-150', optionClass(activeBranch?.id === branch.id)]"
+                  @click="pickBranch(branch.id)"
                 >
                   <motion.div
-                    v-if="selectedBranch === branch"
+                    v-if="activeBranch?.id === branch.id"
                     :layout-id="perfStore.useNavMorphs ? `branch-pill-${pillId}` : undefined"
                     :class="['absolute inset-0 rounded-xl', pillBg]"
                     :transition="SPRING"
                   />
-                  <Building2 :size="16" :class="['relative z-10', selectedBranch === branch ? 'text-[#7C3AED]' : 'opacity-50']" />
-                  <span class="relative z-10">{{ branch }}</span>
+                  <Building2 :size="16" :class="['relative z-10', activeBranch?.id === branch.id ? 'text-[#7C3AED]' : 'opacity-50']" />
+                  <span class="relative z-10 truncate">{{ branch.name }}</span>
+                  <span
+                    v-if="branch.isPrimary"
+                    :class="['relative z-10 ml-auto text-[9px] font-bold uppercase tracking-wider', activeBranch?.id === branch.id ? 'text-[#7C3AED]' : 'text-[#888991]']"
+                  >
+                    {{ t('branches.main') }}
+                  </span>
                 </button>
               </div>
             </motion.div>
@@ -382,33 +414,40 @@ const goSettings = () => navigateTo(ROUTES.SETTINGS)
         </Button>
         <button
           :aria-label="t('nav.branches')"
-          :class="['w-11 h-11 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 transition-colors', branchPillClass]"
-          @click="branchSheetOpen = true"
+          :disabled="!activeBranch"
+          :class="['w-11 h-11 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 transition-colors disabled:opacity-50', branchPillClass]"
+          @click="activeBranch && (branchSheetOpen = true)"
         >
-          {{ selectedBranch.charAt(0) }}
+          {{ branchPillLabel }}
         </button>
       </div>
     </template>
   </motion.header>
 
   <!-- Mobile branch BottomSheet -->
-  <BottomSheet :is-open="branchSheetOpen" :title="t('nav.branches')" @close="branchSheetOpen = false">
+  <BottomSheet :is-open="branchSheetOpen" :title="merchantName || t('nav.branches')" @close="branchSheetOpen = false">
     <div class="px-4 pb-6 flex flex-col gap-1">
       <button
-        v-for="branch in BRANCHES"
-        :key="branch"
-        :class="['relative w-full text-left px-4 py-3.5 rounded-xl text-[15px] font-medium flex items-center gap-3 transition-colors', sheetOptionClass(selectedBranch === branch)]"
-        @click="pickBranch(branch)"
+        v-for="branch in pickerBranches"
+        :key="branch.id"
+        :class="['relative w-full text-left px-4 py-3.5 rounded-xl text-[15px] font-medium flex items-center gap-3 transition-colors', sheetOptionClass(activeBranch?.id === branch.id)]"
+        @click="pickBranch(branch.id)"
       >
         <motion.div
-          v-if="selectedBranch === branch"
+          v-if="activeBranch?.id === branch.id"
           :layout-id="perfStore.useNavMorphs ? 'branch-sheet-pill' : undefined"
           :class="['absolute inset-0 rounded-xl', sheetPillBg]"
           :transition="SPRING"
         />
-        <Building2 :size="18" :class="['relative z-10', selectedBranch === branch ? 'text-[#7C3AED]' : 'opacity-50']" />
-        <span class="relative z-10 flex-1">{{ branch }}</span>
-        <Check v-if="selectedBranch === branch" :size="18" class="relative z-10 text-[#7C3AED]" />
+        <Building2 :size="18" :class="['relative z-10', activeBranch?.id === branch.id ? 'text-[#7C3AED]' : 'opacity-50']" />
+        <span class="relative z-10 flex-1 truncate">{{ branch.name }}</span>
+        <span
+          v-if="branch.isPrimary"
+          :class="['relative z-10 text-[10px] font-bold uppercase tracking-wider', activeBranch?.id === branch.id ? 'text-[#7C3AED]' : 'text-[#888991]']"
+        >
+          {{ t('branches.main') }}
+        </span>
+        <Check v-if="activeBranch?.id === branch.id" :size="18" class="relative z-10 text-[#7C3AED]" />
       </button>
     </div>
   </BottomSheet>
