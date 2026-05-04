@@ -580,5 +580,6 @@
     "completed": "Completed",
     "inProgress": "In progress",
     "pending": "Pending"
-  }
+  },
+  "kyb": {}
 }
