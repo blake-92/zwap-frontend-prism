@@ -4,9 +4,12 @@ import { motion } from 'motion-v'
 import { ChevronRight } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
 import { usePerformanceStore } from '~/stores/performance'
+import { useSessionStore } from '~/stores/session'
+import { useBranchesStore } from '~/stores/branches'
+import { useUsersStore } from '~/stores/users'
 import { useMediaQuery } from '~/composables/useMediaQuery'
 import { useModalOpen } from '~/composables/useModalOpen'
-import { BRANCHES } from '~/utils/mockData'
+import { useSessionRefresh } from '~/composables/useSessionRefresh'
 import { SPRING } from '~/utils/springs'
 import Sidebar from '~/components/Sidebar.vue'
 import Header from '~/components/Header.vue'
@@ -16,9 +19,35 @@ import ToastContainer from '~/components/ToastContainer.vue'
 
 const themeStore = useThemeStore()
 const perfStore = usePerformanceStore()
+const sessionStore = useSessionStore()
+const branchesStore = useBranchesStore()
+const usersStore = useUsersStore()
 const isDesktop = useMediaQuery('(min-width: 1024px)')
 const modalOpen = useModalOpen()
-const branch = ref(BRANCHES[0])
+
+// Refresh proactivo del access token cada 13 min — antes de que venza a los 15.
+// Solo en este layout (autenticado), no global. Spec: docs/frontend-session-refresh.md.
+useSessionRefresh()
+
+// Fetch branches al entrar al layout. Todos los users con sesión válida tienen BRANCHES_VIEW
+// (al menos su propia branch si es scoped, o todas si es global). Single fetch por mount;
+// las vistas que mutan branches (Sucursales) re-llaman fetch tras crear/archive/reactivate.
+//
+// M2: en logout (auth → false), limpiar TODOS los stores de data del merchant. Sin esto,
+// si user A hace logout y user B loguea en la misma tab, ve los items de A por un instante
+// hasta que la próxima vista re-fetchee. Data leakage entre sesiones.
+watch(
+  () => sessionStore.isAuthenticated,
+  (auth) => {
+    if (auth) {
+      branchesStore.fetch().catch(() => { /* error toast lo maneja la vista */ })
+    } else {
+      branchesStore.clear()
+      usersStore.clear()
+    }
+  },
+  { immediate: true },
+)
 
 // Hidratar sincrónicamente para evitar flicker 256px → 72px en mount.
 const readSidebarCollapsed = () => {
@@ -172,10 +201,8 @@ const toggleBtnClass = computed(() =>
     <!-- Main -->
     <div class="flex-1 flex flex-col h-dvh overflow-hidden z-10 relative">
       <Header
-        :selected-branch="branch"
         :is-desktop="isDesktop"
         :header-visible="headerVisible"
-        @branch-change="branch = $event"
       />
 
       <main
