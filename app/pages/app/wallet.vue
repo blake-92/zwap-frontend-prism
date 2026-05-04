@@ -1,6 +1,6 @@
 <script setup>
 import WalletView from '~/components/features/wallet/WalletView.vue'
-definePageMeta({ middleware: 'auth' })
+definePageMeta({ middleware: 'auth', requiresPermission: 'WALLET_VIEW' })
 </script>
 
 <template>

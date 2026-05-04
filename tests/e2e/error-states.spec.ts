@@ -9,20 +9,20 @@ import { test, expect, waitForUIReady } from './fixtures'
  */
 
 test.describe('Auth resilience', () => {
-  test('cookie zwap_token faltante: ruta privada redirige a /login', async ({ page }) => {
+  test('cookie zwap_session faltante: ruta privada redirige a /login', async ({ page }) => {
     // Sin mockAuth → no hay cookie
     await page.goto('/app/dashboard')
     await expect(page).toHaveURL(/\/login/)
   })
 
-  test('cookie zwap_token expirada mid-session: próxima navegación redirige', async ({ page, mockAuth, context }) => {
+  test('cookie zwap_session expirada mid-session: próxima navegación redirige', async ({ page, mockAuth, context }) => {
     await mockAuth()
     await page.goto('/app/dashboard')
     await waitForUIReady(page)
     await expect(page).toHaveURL(/\/app\/dashboard/)
 
     // Simular expiración: borrar cookie
-    await context.clearCookies({ name: 'zwap_token' })
+    await context.clearCookies({ name: 'zwap_session' })
 
     // Navegar a otra ruta privada → middleware auth detecta + redirige
     await page.goto('/app/wallet')
@@ -31,7 +31,7 @@ test.describe('Auth resilience', () => {
 
   test('cookie value inválido (string vacía): tratado como no-auth', async ({ page, context }) => {
     await context.addCookies([{
-      name: 'zwap_token', value: '', domain: 'localhost', path: '/', sameSite: 'Lax',
+      name: 'zwap_session', value: '', domain: 'localhost', path: '/', sameSite: 'Lax',
     }])
     await page.goto('/app/dashboard')
     await expect(page).toHaveURL(/\/login/)

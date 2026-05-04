@@ -7,9 +7,9 @@ import {
 } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
 import { usePerformanceStore } from '~/stores/performance'
+import { useSessionStore } from '~/stores/session'
 import { ROUTES } from '~/utils/routes'
-import { logout as apiLogout } from '~/utils/api'
-import { CURRENT_USER, WALLET_BALANCE } from '~/utils/mockData'
+import { WALLET_BALANCE } from '~/utils/mockData'
 import { SPRING_SIDEBAR as SPRING } from '~/utils/springs'
 import ZwapIsotipo from '~/components/brand/ZwapIsotipo.vue'
 import ZwapWordmark from '~/components/brand/ZwapWordmark.vue'
@@ -22,16 +22,25 @@ defineProps({
 const { t } = useI18n()
 const themeStore = useThemeStore()
 const perfStore = usePerformanceStore()
+const sessionStore = useSessionStore()
 const route = useRoute()
 
+// `permission` debe coincidir con el `requiresPermission` declarado en `definePageMeta` de
+// la page correspondiente (Plan C — single source of truth en page meta, sidebar replica
+// para filtrar visualmente). null = todos los roles autenticados pueden verlo.
 const NAV_ITEMS = [
-  { id: 'dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard, route: ROUTES.DASHBOARD },
-  { id: 'links', labelKey: 'nav.links', icon: LinkIcon, route: ROUTES.LINKS },
-  { id: 'transacciones', labelKey: 'nav.transactions', icon: ArrowRightLeft, route: ROUTES.TRANSACTIONS },
-  { id: 'liquidaciones', labelKey: 'nav.settlements', icon: Landmark, route: ROUTES.SETTLEMENTS },
-  { id: 'usuarios', labelKey: 'nav.users', icon: Users, route: ROUTES.USERS },
-  { id: 'sucursales', labelKey: 'nav.branches', icon: Building2, route: ROUTES.BRANCHES },
+  { id: 'dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard, route: ROUTES.DASHBOARD, permission: null },
+  { id: 'links', labelKey: 'nav.links', icon: LinkIcon, route: ROUTES.LINKS, permission: 'LINKS_VIEW' },
+  { id: 'transacciones', labelKey: 'nav.transactions', icon: ArrowRightLeft, route: ROUTES.TRANSACTIONS, permission: 'TRANSACTIONS_VIEW' },
+  { id: 'liquidaciones', labelKey: 'nav.settlements', icon: Landmark, route: ROUTES.SETTLEMENTS, permission: 'SETTLEMENTS_VIEW' },
+  { id: 'usuarios', labelKey: 'nav.users', icon: Users, route: ROUTES.USERS, permission: 'USERS_VIEW' },
+  { id: 'sucursales', labelKey: 'nav.branches', icon: Building2, route: ROUTES.BRANCHES, permission: 'BRANCHES_MANAGE' },
 ]
+
+const visibleNav = computed(() =>
+  NAV_ITEMS.filter((item) => !item.permission || sessionStore.hasPermission(item.permission)),
+)
+const canViewWallet = computed(() => sessionStore.hasPermission('WALLET_VIEW'))
 
 const LABEL_VARIANTS = {
   hidden: { opacity: 0, filter: 'blur(4px)', x: -8 },
@@ -50,8 +59,28 @@ const walletHover = ref(false)
 
 const goTo = (r) => navigateTo(r)
 
+// Derivar iniciales del fullName ("Juan Pérez" → "JP") o del email ("user@x" → "U") como fallback
+// durante la hidratación (window entre login y /me response). Tope a 2 letras.
+const userInitials = computed(() => {
+  const name = sessionStore.user?.fullName?.trim()
+  if (name) {
+    const parts = name.split(/\s+/).filter(Boolean)
+    if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+    return parts[0].slice(0, 2).toUpperCase()
+  }
+  const email = sessionStore.user?.email
+  return email ? email[0].toUpperCase() : '—'
+})
+
+const userPrimary = computed(() => sessionStore.user?.fullName || sessionStore.user?.email || '')
+const userSecondary = computed(() => {
+  const u = sessionStore.user
+  if (!u) return ''
+  return u.fullName ? u.email : ''
+})
+
 const logout = async () => {
-  await apiLogout()
+  await sessionStore.logout()
   navigateTo(ROUTES.LOGIN)
 }
 
@@ -149,7 +178,7 @@ const glowClass = (collapsed) => {
     <nav class="flex-1 px-2 py-4 space-y-1.5 overflow-y-auto overflow-x-hidden no-scrollbar">
       <LayoutGroup id="sidebar-nav">
         <button
-          v-for="item in NAV_ITEMS"
+          v-for="item in visibleNav"
           :key="item.id"
           :title="isCollapsed ? t(item.labelKey) : undefined"
           :class="['relative w-full h-11 flex items-center gap-3 py-3 pl-[19px] rounded-xl text-sm font-medium transition-colors duration-200', navItemClass(route.path === item.route)]"
@@ -193,8 +222,9 @@ const glowClass = (collapsed) => {
 
     <!-- Footer -->
     <div class="px-2 pb-5 space-y-3 shrink-0">
-      <!-- Wallet -->
+      <!-- Wallet — solo visible para roles con WALLET_VIEW (OWNER/ADMIN/ACCOUNTANT). -->
       <motion.button
+        v-if="canViewWallet"
         :animate="{ y: !isWalletActive && walletHover && !isCollapsed ? -3 : 0 }"
         :transition="SPRING"
         :title="isCollapsed ? t('nav.myWallet') : undefined"
@@ -257,7 +287,7 @@ const glowClass = (collapsed) => {
 
       <!-- User row -->
       <div class="relative h-[52px] flex items-center py-2 pl-[10px] rounded-xl transition-colors duration-200 overflow-hidden">
-        <Avatar initials="A" size="sm" variant="neutral" />
+        <Avatar :initials="userInitials" size="sm" variant="neutral" />
 
         <AnimatePresence :initial="false">
           <motion.div
@@ -271,10 +301,10 @@ const glowClass = (collapsed) => {
           >
             <div class="min-w-0">
               <p :class="['text-sm font-bold truncate leading-tight', themeStore.isDarkMode ? 'text-[#D8D7D9]' : 'text-[#111113]']">
-                {{ CURRENT_USER.displayName }}
+                {{ userPrimary }}
               </p>
-              <p :class="['text-[11px] font-medium whitespace-nowrap', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">
-                {{ t('nav.logout') }}
+              <p :class="['text-[11px] font-medium truncate', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">
+                {{ userSecondary || t('nav.logout') }}
               </p>
             </div>
             <button

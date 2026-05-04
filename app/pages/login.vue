@@ -3,6 +3,8 @@ import { ref } from 'vue'
 import { motion, AnimatePresence } from 'motion-v'
 import { Mail, Lock, Sun, Moon, ArrowLeft } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
+import { useSessionStore } from '~/stores/session'
+import { useToastStore } from '~/stores/toast'
 import { ROUTES, isSafeInternalPath } from '~/utils/routes'
 import { useMotionVariants } from '~/composables/useMotionVariants'
 import { SPRING } from '~/utils/springs'
@@ -17,22 +19,54 @@ definePageMeta({ layout: false })
 const mv = useMotionVariants()
 const { t } = useI18n()
 const themeStore = useThemeStore()
+const sessionStore = useSessionStore()
+const toastStore = useToastStore()
 const route = useRoute()
 const showEmail = ref(false)
 const email = ref('')
 const password = ref('')
-const token = useCookie('zwap_token', {
-  maxAge: 60 * 60 * 24 * 7,
-  sameSite: 'lax',
-  secure: !import.meta.dev,
-  path: '/',
-})
+const submitting = ref(false)
+const errorMessage = ref('')
 
-const handleLogin = () => {
-  token.value = 'mock-token'
+const redirectAfterLogin = () => {
   const q = route.query.redirect
   const redirect = isSafeInternalPath(q) ? q : ROUTES.DASHBOARD
-  navigateTo(redirect)
+  return navigateTo(redirect)
+}
+
+const handleEmailLogin = async () => {
+  if (submitting.value) return
+  errorMessage.value = ''
+
+  if (!email.value || !password.value) {
+    errorMessage.value = t('auth.invalidCredentials')
+    return
+  }
+
+  submitting.value = true
+  try {
+    await sessionStore.login({ email: email.value, password: password.value })
+    await redirectAfterLogin()
+  } catch (err) {
+    // ApiError {status, code, message, requestId}.
+    if (err?.status === 401) {
+      // Backend devuelve {error:'invalid_credentials'} para email-no-existe / pass-incorrecto / suspended (anti-enumeration).
+      errorMessage.value = t('auth.invalidCredentials')
+    } else if (err?.status === 429) {
+      errorMessage.value = t('auth.rateLimited')
+    } else if (!err?.status) {
+      errorMessage.value = t('errors.network')
+    } else {
+      errorMessage.value = t('errors.unexpected')
+    }
+  } finally {
+    submitting.value = false
+  }
+}
+
+// Stub: el backend de fase 1 no expone OAuth Google. Mostramos un toast amigable.
+const handleGoogle = () => {
+  toastStore.addToast(t('auth.googleNotAvailable'), 'error', 4000)
 }
 
 const goLegal = (doc) => navigateTo(`/legal/${doc}`)
@@ -92,7 +126,7 @@ const linkCls = 'hover:underline transition-colors hover:text-[#7C3AED] cursor-p
                   'flex items-center justify-center w-full gap-3 py-3.5 px-4 rounded-xl text-sm font-bold transition-colors duration-200 shadow-md',
                   themeStore.isDarkMode ? 'bg-white hover:bg-gray-100 text-[#111113]' : 'bg-white border border-gray-200 hover:bg-gray-50 text-[#111113]'
                 ]"
-                @click="handleLogin"
+                @click="handleGoogle"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M22.56 12.25C22.56 11.47 22.49 10.72 22.36 10H12V14.26H17.92C17.66 15.72 16.79 16.96 15.53 17.8V20.59H19.1C21.01 18.83 22.56 15.8 22.56 12.25Z" fill="#4285F4"/>
@@ -124,7 +158,7 @@ const linkCls = 'hover:underline transition-colors hover:text-[#7C3AED] cursor-p
               :exit="{ opacity: 0, y: -8 }"
               :transition="SPRING"
             >
-              <form class="space-y-4" @submit.prevent="handleLogin">
+              <form class="space-y-4" @submit.prevent="handleEmailLogin">
                 <div>
                   <label for="login-email" :class="['block text-xs font-bold tracking-wide mb-2', themeStore.isDarkMode ? 'text-[#D8D7D9]' : 'text-[#45434A]']">
                     {{ t('auth.email') }}
@@ -135,6 +169,7 @@ const linkCls = 'hover:underline transition-colors hover:text-[#7C3AED] cursor-p
                     :icon="Mail"
                     type="email"
                     autocomplete="email"
+                    :disabled="submitting"
                     placeholder="admin@hotel.com"
                   />
                 </div>
@@ -156,11 +191,19 @@ const linkCls = 'hover:underline transition-colors hover:text-[#7C3AED] cursor-p
                     :icon="Lock"
                     type="password"
                     autocomplete="current-password"
+                    :disabled="submitting"
                     placeholder="••••••••"
                   />
                 </div>
-                <Button type="submit" class="w-full !py-3.5 !text-base shadow-lg mt-4">
-                  {{ t('auth.login') }}
+                <p
+                  v-if="errorMessage"
+                  role="alert"
+                  :class="['text-xs font-semibold leading-tight px-1', themeStore.isDarkMode ? 'text-rose-400' : 'text-rose-600']"
+                >
+                  {{ errorMessage }}
+                </p>
+                <Button type="submit" :disabled="submitting" class="w-full !py-3.5 !text-base shadow-lg mt-4">
+                  {{ submitting ? t('auth.loggingIn') : t('auth.login') }}
                 </Button>
                 <div class="pt-4 text-center">
                   <button

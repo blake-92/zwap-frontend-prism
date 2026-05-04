@@ -1,120 +1,263 @@
 import { describe, it, expect, beforeEach, afterEach, vi, beforeAll, afterAll } from 'vitest'
 import { setupServer } from 'msw/node'
 import { http, HttpResponse } from 'msw'
-import { setActivePinia, createPinia } from 'pinia'
+import { ofetch } from 'ofetch'
 
-// Stubs de auto-imports Nuxt — deben existir ANTES de importar api.js
-const tokenRef = { value: 'test-token' as string | null }
-vi.stubGlobal('useCookie', vi.fn(() => tokenRef))
-vi.stubGlobal('useRuntimeConfig', vi.fn(() => ({ public: { apiUrl: 'http://api.test' } })))
+// ── Stubs de auto-imports Nuxt — antes de importar api.js ──────────────────────────────────────
+//
+// Cookie store: el wrapper usa useCookie('zwap_session') para limpiar el flag tras 401 fatal.
+const cookieStore = new Map<string, { value: unknown }>()
+const useCookieMock = vi.fn((name: string) => {
+  if (!cookieStore.has(name)) cookieStore.set(name, { value: null })
+  return cookieStore.get(name)!
+})
+vi.stubGlobal('useCookie', useCookieMock)
+
+vi.stubGlobal('useRuntimeConfig', vi.fn(() => ({ public: { apiBase: 'http://api.test' } })))
 vi.stubGlobal('useNuxtApp', vi.fn(() => ({ $i18n: { t: (k: string) => k } })))
-const navigateTo = vi.fn()
+
+// $fetch (auto-import Nuxt) → ofetch real, así MSW intercepta las requests via fetch nativo.
+vi.stubGlobal('$fetch', ofetch)
+
+const navigateTo = vi.fn().mockResolvedValue(undefined)
 vi.stubGlobal('navigateTo', navigateTo)
 
-// Import tras stubs
-const { get, post, logout } = await import('~/utils/api.js')
+// handleAuthFailure dynamic-importa el sessionStore + lee toast — mockeamos para no requerir Pinia.
+vi.mock('~/stores/session', () => ({
+  useSessionStore: () => ({ clear: vi.fn() }),
+}))
+vi.mock('~/stores/toast', () => ({
+  useToastStore: () => ({ addToast: vi.fn() }),
+}))
 
-// MSW server para interceptar fetch
-const server = setupServer(
-  http.get('http://api.test/ok', () => HttpResponse.json({ hello: 'world' })),
-  http.get('http://api.test/protected', () => HttpResponse.json({ error: 'no auth' }, { status: 401 })),
-  http.get('http://api.test/server-error', () => HttpResponse.json({ error: 'boom' }, { status: 500 })),
-  http.get('http://api.test/no-content', () => new HttpResponse(null, { status: 204 })),
-  http.post('http://api.test/auth/logout', () => HttpResponse.json({ ok: true })),
-  http.post('http://api.test/echo', async ({ request }) => {
-    const body = await request.json()
-    return HttpResponse.json({ echoed: body })
-  }),
-)
+// Import tras stubs.
+const { get, post, ApiError } = await import('~/utils/api.js')
 
+// ── MSW setup ──────────────────────────────────────────────────────────────────────────────────
+const server = setupServer()
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
 afterAll(() => server.close())
 afterEach(() => server.resetHandlers())
 
 beforeEach(() => {
-  setActivePinia(createPinia())
-  tokenRef.value = 'test-token'
+  cookieStore.clear()
   navigateTo.mockClear()
+  // H1: lastRefreshAt vive en localStorage. Limpiar entre tests para que el dedup window
+  // no contamine specs distintos.
+  try { localStorage.removeItem('zwap-last-refresh-at') } catch { /* jsdom edge */ }
 })
 
-describe('api.request — GET success', () => {
-  it('200 OK: devuelve body JSON', async () => {
-    const res = await get('/ok')
-    expect(res).toEqual({ hello: 'world' })
+// ── Happy path ─────────────────────────────────────────────────────────────────────────────────
+describe('api wrapper — happy path', () => {
+  it('GET 200 → devuelve body JSON parseado', async () => {
+    server.use(http.get('http://api.test/api/ping', () => HttpResponse.json({ ok: true })))
+    expect(await get('/api/ping')).toEqual({ ok: true })
   })
 
-  it('204 No Content: devuelve null', async () => {
-    const res = await get('/no-content')
-    expect(res).toBeNull()
+  it('POST → serializa body JSON', async () => {
+    server.use(http.post('http://api.test/api/echo', async ({ request }) =>
+      HttpResponse.json({ echoed: await request.json() }),
+    ))
+    const res = await post('/api/echo', { hello: 'world' })
+    expect(res).toEqual({ echoed: { hello: 'world' } })
   })
 
-  it('incluye Authorization header cuando hay token', async () => {
-    let capturedHeaders: Headers | null = null
-    server.use(
-      http.get('http://api.test/echo-headers', ({ request }) => {
-        capturedHeaders = request.headers
-        return HttpResponse.json({ ok: true })
-      }),
-    )
-    await get('/echo-headers')
-    expect(capturedHeaders?.get('authorization')).toBe('Bearer test-token')
-  })
-
-  it('sin token: NO incluye Authorization', async () => {
-    tokenRef.value = null
-    let capturedHeaders: Headers | null = null
-    server.use(
-      http.get('http://api.test/echo-headers', ({ request }) => {
-        capturedHeaders = request.headers
-        return HttpResponse.json({ ok: true })
-      }),
-    )
-    await get('/echo-headers')
-    expect(capturedHeaders?.get('authorization')).toBeNull()
+  it('204 No Content → resuelve sin throw (body null/undefined)', async () => {
+    server.use(http.post('http://api.test/api/auth/logout', () => new HttpResponse(null, { status: 204 })))
+    await expect(post('/api/auth/logout')).resolves.not.toThrow()
   })
 })
 
-describe('api.request — POST', () => {
-  it('body se serializa como JSON', async () => {
-    const res = await post('/echo', { name: 'Ana', age: 30 })
-    expect(res).toEqual({ echoed: { name: 'Ana', age: 30 } })
+// ── Error mapping ──────────────────────────────────────────────────────────────────────────────
+describe('api wrapper — error mapping (ApiError shape)', () => {
+  it('500 → ApiError con status', async () => {
+    server.use(http.get('http://api.test/api/boom', () =>
+      HttpResponse.json({ error: 'oops' }, { status: 500 }),
+    ))
+    await expect(get('/api/boom')).rejects.toMatchObject({
+      name: 'ApiError',
+      status: 500,
+      code: 'oops',
+    })
   })
-})
 
-describe('api.request — 401 handling (R3 #12)', () => {
-  it('401: limpia cookie + toast + redirige a /login + throw', async () => {
-    tokenRef.value = 'expired-token'
-    await expect(get('/protected')).rejects.toThrow('Unauthorized')
-    expect(tokenRef.value).toBeNull()
-    expect(navigateTo).toHaveBeenCalledWith('/login')
-  })
-})
-
-describe('api.request — non-OK responses', () => {
-  it('500: throw con status attached al error', async () => {
+  it('409 conflict → ApiError preserva code + message del backend', async () => {
+    server.use(http.post('http://api.test/api/users', () =>
+      HttpResponse.json({ error: 'conflict', message: 'email_already_in_use' }, { status: 409 }),
+    ))
     try {
-      await get('/server-error')
-      expect.fail('should have thrown')
-    } catch (err: unknown) {
-      const e = err as Error & { status?: number }
-      expect(e.status).toBe(500)
-      expect(e.message).toContain('500')
+      await post('/api/users', {})
+      expect.fail('should throw')
+    } catch (err) {
+      expect(err).toBeInstanceOf(ApiError)
+      const e = err as ApiError
+      expect(e.status).toBe(409)
+      expect(e.code).toBe('conflict')
+      expect(e.message).toBe('email_already_in_use')
     }
   })
 })
 
-describe('api.logout', () => {
-  it('POST /auth/logout + limpia cookie', async () => {
-    await logout()
-    expect(tokenRef.value).toBeNull()
+// ── Refresh interceptor ────────────────────────────────────────────────────────────────────────
+describe('api wrapper — auth bypass (no refresh on /api/auth/*)', () => {
+  it('401 en /api/auth/login NO dispara refresh ni redirect', async () => {
+    let refreshCalled = 0
+    server.use(
+      http.post('http://api.test/api/auth/login', () =>
+        HttpResponse.json({ error: 'invalid_credentials' }, { status: 401 }),
+      ),
+      http.post('http://api.test/api/auth/refresh', () => {
+        refreshCalled++
+        return HttpResponse.json({})
+      }),
+    )
+    await expect(post('/api/auth/login', {})).rejects.toMatchObject({
+      status: 401,
+      code: 'invalid_credentials',
+    })
+    expect(refreshCalled).toBe(0)
+    expect(navigateTo).not.toHaveBeenCalled()
+  })
+})
+
+describe('api wrapper — refresh interceptor', () => {
+  it('401 + refresh OK → reintenta y devuelve OK del retry', async () => {
+    let attempts = 0
+    server.use(
+      http.get('http://api.test/api/me', () => {
+        attempts++
+        return attempts === 1
+          ? HttpResponse.json({ error: 'unauthorized' }, { status: 401 })
+          : HttpResponse.json({ user: 'ana' })
+      }),
+      http.post('http://api.test/api/auth/refresh', () => HttpResponse.json({})),
+    )
+    expect(await get('/api/me')).toEqual({ user: 'ana' })
+    expect(attempts).toBe(2)
   })
 
-  it('backend caído: cookie se limpia igual (best-effort)', async () => {
+  it('401 + refresh FAIL → ApiError(401) + clear zwap_session + navigateTo /login', async () => {
     server.use(
-      http.post('http://api.test/auth/logout', () => HttpResponse.error()),
+      http.get('http://api.test/api/me', () => HttpResponse.json({ error: 'unauthorized' }, { status: 401 })),
+      http.post('http://api.test/api/auth/refresh', () => HttpResponse.json({}, { status: 401 })),
     )
-    tokenRef.value = 'still-here'
-    await logout()
-    expect(tokenRef.value).toBeNull()
+    cookieStore.set('zwap_session', { value: '1' })
+    await expect(get('/api/me')).rejects.toMatchObject({ status: 401 })
+    expect(cookieStore.get('zwap_session')?.value).toBeNull()
+    expect(navigateTo).toHaveBeenCalled()
+    expect(navigateTo.mock.calls[0][0]).toMatchObject({ path: '/login' })
+  })
+
+  it('401 + refresh network-error (5xx) → NO limpia sesión, NO redirect', async () => {
+    server.use(
+      http.get('http://api.test/api/me', () => HttpResponse.json({ error: 'unauthorized' }, { status: 401 })),
+      http.post('http://api.test/api/auth/refresh', () => HttpResponse.json({ error: 'boom' }, { status: 503 })),
+    )
+    cookieStore.set('zwap_session', { value: '1' })
+    await expect(get('/api/me')).rejects.toMatchObject({ status: 401 })
+    // Cookie sigue presente — el refresh falló por red, no por sesión muerta.
+    expect(cookieStore.get('zwap_session')?.value).toBe('1')
+    expect(navigateTo).not.toHaveBeenCalled()
+  })
+
+  it('refresh single-flight: 2 requests 401 concurrentes → 1 solo POST /refresh', async () => {
+    let refreshCount = 0
+    let meAttempt = 0
+    server.use(
+      http.get('http://api.test/api/me', () => {
+        meAttempt++
+        return meAttempt <= 2
+          ? HttpResponse.json({ error: 'unauthorized' }, { status: 401 })
+          : HttpResponse.json({ ok: true })
+      }),
+      http.post('http://api.test/api/auth/refresh', async () => {
+        refreshCount++
+        await new Promise((r) => setTimeout(r, 15))
+        return HttpResponse.json({})
+      }),
+    )
+    await Promise.all([get('/api/me'), get('/api/me')])
+    expect(refreshCount).toBe(1)
+  })
+})
+
+// ── H1: dedup window cross-tab vía localStorage ────────────────────────────────────────────────
+describe('api wrapper — refresh dedup window (H1)', () => {
+  it('refresh exitoso escribe lastRefreshAt en localStorage', async () => {
+    const { refreshSession } = await import('~/utils/api.js')
+    server.use(http.post('http://api.test/api/auth/refresh', () => HttpResponse.json({})))
+    expect(localStorage.getItem('zwap-last-refresh-at')).toBeNull()
+    expect(await refreshSession()).toBe('ok')
+    const ts = Number.parseInt(localStorage.getItem('zwap-last-refresh-at') ?? '0', 10)
+    expect(ts).toBeGreaterThan(Date.now() - 5000)
+  })
+
+  it('si lastRefreshAt < 60s atrás → skip fetch, devuelve "ok" sin llamar /refresh', async () => {
+    const { refreshSession } = await import('~/utils/api.js')
+    let calls = 0
+    server.use(http.post('http://api.test/api/auth/refresh', () => {
+      calls++
+      return HttpResponse.json({})
+    }))
+    // Simulamos que otra tab refrescó hace 5s.
+    localStorage.setItem('zwap-last-refresh-at', String(Date.now() - 5000))
+    expect(await refreshSession()).toBe('ok')
+    expect(calls).toBe(0)
+  })
+
+  it('si lastRefreshAt > 60s atrás → SÍ refresca', async () => {
+    const { refreshSession } = await import('~/utils/api.js')
+    let calls = 0
+    server.use(http.post('http://api.test/api/auth/refresh', () => {
+      calls++
+      return HttpResponse.json({})
+    }))
+    localStorage.setItem('zwap-last-refresh-at', String(Date.now() - 90 * 1000))
+    expect(await refreshSession()).toBe('ok')
+    expect(calls).toBe(1)
+  })
+
+  it('refresh fatal NO escribe lastRefreshAt (no engaña a otras tabs)', async () => {
+    const { refreshSession } = await import('~/utils/api.js')
+    server.use(http.post('http://api.test/api/auth/refresh', () =>
+      HttpResponse.json({ error: 'invalid_credentials' }, { status: 401 })))
+    expect(await refreshSession()).toBe('fatal')
+    expect(localStorage.getItem('zwap-last-refresh-at')).toBeNull()
+  })
+})
+
+// ── H2: timeout dedicado al refresh ────────────────────────────────────────────────────────────
+describe('api wrapper — refresh timeout (H2)', () => {
+  it('si /api/auth/refresh nunca responde → resuelve "network-error" (no cuelga refreshPromise)', async () => {
+    const { refreshSession } = await import('~/utils/api.js')
+    // MSW handler que nunca resuelve. Confiamos en que el AbortController dispare a los 10s.
+    // Para no bloquear el test 10s, usamos vi.useFakeTimers + advanceTimersByTime.
+    vi.useFakeTimers()
+    let resolved: string | undefined
+    server.use(http.post('http://api.test/api/auth/refresh', () => new Promise(() => {})))
+    const promise = refreshSession().then((r) => { resolved = r })
+    // Avanzar virtualmente 10s + 100ms para disparar el setTimeout del timeout.
+    await vi.advanceTimersByTimeAsync(10_100)
+    await promise
+    vi.useRealTimers()
+    expect(resolved).toBe('network-error')
+  })
+})
+
+// ── M1: handleAuthFailure single-flight ────────────────────────────────────────────────────────
+describe('api wrapper — handleAuthFailure single-flight (M1)', () => {
+  it('N requests con fatal-401 simultáneo → 1 solo navigateTo (no N toasts/redirects)', async () => {
+    cookieStore.set('zwap_session', { value: '1' })
+    server.use(
+      http.get('http://api.test/api/a', () => HttpResponse.json({}, { status: 401 })),
+      http.get('http://api.test/api/b', () => HttpResponse.json({}, { status: 401 })),
+      http.get('http://api.test/api/c', () => HttpResponse.json({}, { status: 401 })),
+      http.post('http://api.test/api/auth/refresh', () => HttpResponse.json({}, { status: 401 })),
+    )
+    // 3 requests concurrentes que todas terminan en fatal-401 → handleAuthFailure se llama
+    // 3 veces conceptualmente, pero el single-flight debe colapsarlas en 1 navigateTo.
+    await Promise.allSettled([get('/api/a'), get('/api/b'), get('/api/c')])
+    expect(navigateTo).toHaveBeenCalledTimes(1)
+    expect(navigateTo.mock.calls[0][0]).toMatchObject({ path: '/login' })
   })
 })

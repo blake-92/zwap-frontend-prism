@@ -8,6 +8,7 @@ import {
 } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
 import { usePerformanceStore } from '~/stores/performance'
+import { useSessionStore } from '~/stores/session'
 import { useModalOpen } from '~/composables/useModalOpen'
 import { useScrollLock } from '~/composables/useScrollLock'
 import { ROUTES } from '~/utils/routes'
@@ -16,6 +17,7 @@ import { SPRING } from '~/utils/springs'
 const { t } = useI18n()
 const themeStore = useThemeStore()
 const perfStore = usePerformanceStore()
+const sessionStore = useSessionStore()
 const route = useRoute()
 const modalOpen = useModalOpen()
 const sheetOpen = ref(false)
@@ -33,21 +35,29 @@ const sheetVariants = {
   exit: { y: '100%', transition: { type: 'spring', stiffness: 400, damping: 36 } },
 }
 
+// `permission` debe coincidir con `requiresPermission` de la page (Plan C). null = todos.
 const TABS = [
-  { id: 'dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard, route: ROUTES.DASHBOARD },
-  { id: 'transacciones', labelKey: 'nav.transactions', icon: ArrowRightLeft, route: ROUTES.TRANSACTIONS },
-  { id: 'links', labelKey: 'nav.linksShort', icon: LinkIcon, route: ROUTES.LINKS },
-  { id: 'liquidaciones', labelKey: 'nav.settlements', icon: Landmark, route: ROUTES.SETTLEMENTS },
+  { id: 'dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard, route: ROUTES.DASHBOARD, permission: null },
+  { id: 'transacciones', labelKey: 'nav.transactions', icon: ArrowRightLeft, route: ROUTES.TRANSACTIONS, permission: 'TRANSACTIONS_VIEW' },
+  { id: 'links', labelKey: 'nav.linksShort', icon: LinkIcon, route: ROUTES.LINKS, permission: 'LINKS_VIEW' },
+  { id: 'liquidaciones', labelKey: 'nav.settlements', icon: Landmark, route: ROUTES.SETTLEMENTS, permission: 'SETTLEMENTS_VIEW' },
 ]
 
 const MORE_ITEMS = [
-  { id: 'sucursales', labelKey: 'nav.branches', icon: Building2, route: ROUTES.BRANCHES },
-  { id: 'usuarios', labelKey: 'nav.users', icon: Users, route: ROUTES.USERS },
-  { id: 'wallet', labelKey: 'nav.wallet', icon: Wallet, route: ROUTES.WALLET },
-  { id: 'settings', labelKey: 'nav.settings', icon: Settings, route: ROUTES.SETTINGS },
+  { id: 'sucursales', labelKey: 'nav.branches', icon: Building2, route: ROUTES.BRANCHES, permission: 'BRANCHES_MANAGE' },
+  { id: 'usuarios', labelKey: 'nav.users', icon: Users, route: ROUTES.USERS, permission: 'USERS_VIEW' },
+  { id: 'wallet', labelKey: 'nav.wallet', icon: Wallet, route: ROUTES.WALLET, permission: 'WALLET_VIEW' },
+  { id: 'settings', labelKey: 'nav.settings', icon: Settings, route: ROUTES.SETTINGS, permission: null },
 ]
 
-const isMoreActive = computed(() => MORE_ITEMS.some(i => route.path === i.route))
+const visibleTabs = computed(() =>
+  TABS.filter((t) => !t.permission || sessionStore.hasPermission(t.permission)),
+)
+const visibleMore = computed(() =>
+  MORE_ITEMS.filter((t) => !t.permission || sessionStore.hasPermission(t.permission)),
+)
+
+const isMoreActive = computed(() => visibleMore.value.some(i => route.path === i.route))
 
 const handleNav = (r) => {
   navigateTo(r)
@@ -111,7 +121,7 @@ const moreIconBubbleClass = (active) => {
   <nav :class="navClass">
     <LayoutGroup id="bottomnav">
       <button
-        v-for="tab in TABS"
+        v-for="tab in visibleTabs"
         :key="tab.id"
         :class="['flex-1 flex flex-col items-center justify-center gap-1 py-2.5 pt-3 relative', tabTextClass(route.path === tab.route)]"
         @click="handleNav(tab.route)"
@@ -202,7 +212,7 @@ const moreIconBubbleClass = (active) => {
 
           <div class="px-4 grid grid-cols-4 gap-2">
             <button
-              v-for="item in MORE_ITEMS"
+              v-for="item in visibleMore"
               :key="item.id"
               :class="['flex flex-col items-center gap-2 py-4 rounded-xl transition-colors', moreItemClass(route.path === item.route)]"
               @click="handleNav(item.route)"
