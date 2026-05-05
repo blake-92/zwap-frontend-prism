@@ -195,6 +195,45 @@ test.describe('Visual snapshots — KYB Wizard', () => {
     })
   }
 
+  // Profile FULL — vista post-aprobación. Snapshot del step 1 (KYC) + del banner global de
+   // KYB cuando merchant.kybState=IN_REVIEW (renderea ReviewBanner en el layout).
+  for (const theme of ['dark', 'light'] as const) {
+    test(`profile-full step1 · ${theme}`, async ({ page, setTheme, mockAuth }) => {
+      await setTheme(theme)
+      await mockAuth({ role: 'OWNER', activationLevel: 'BASIC', kybState: 'APPROVED' })
+      const API_BASE = 'http://localhost:8080'
+      await page.route(`${API_BASE}/api/account/profile`, (route) => route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({
+          person: { id: 'p1', givenName: 'Mock', familyName: 'User', dateOfBirth: '1990-01-01', nationality: 'BO' },
+          legalEntities: [{ id: 'e1', legalName: 'Hotel Test SRL', jurisdiction: 'BO', primary: true }],
+        }),
+      }))
+      await page.route(`${API_BASE}/api/account/profile/business-profile`, (route) => route.fulfill({
+        status: 404, contentType: 'application/json', body: JSON.stringify({ error: 'NOT_FOUND' }),
+      }))
+      await page.goto('/app/profile-full')
+      await waitForUIReady(page)
+      await page.waitForTimeout(500)
+      await expect(page).toHaveScreenshot(`profile-full-step1-${theme}.png`, {
+        fullPage: true,
+        animations: 'disabled',
+      })
+    })
+  }
+
+  test('global review banner · dashboard · IN_REVIEW · dark', async ({ page, setTheme, mockAuth }) => {
+    await setTheme('dark')
+    await mockAuth({ role: 'OWNER', activationLevel: 'BASIC', kybState: 'IN_REVIEW' })
+    await page.goto('/app/dashboard')
+    await waitForUIReady(page)
+    await page.waitForTimeout(500)
+    await expect(page).toHaveScreenshot('global-review-banner-in-review-dark.png', {
+      fullPage: false,
+      animations: 'disabled',
+    })
+  })
+
   test('onboarding-review · dark · banner SUBMITTED', async ({ page, setTheme }) => {
     await setTheme('dark')
     const API_BASE = 'http://localhost:8080'

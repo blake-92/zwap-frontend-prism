@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { motion, AnimatePresence, LayoutGroup } from 'motion-v'
 import {
   LayoutDashboard, Link as LinkIcon, ArrowRightLeft,
-  Landmark, Users, Building2, LogOut, Wallet, ArrowRight,
+  Landmark, Users, Building2, LogOut, Wallet, ArrowRight, Lock,
 } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
 import { usePerformanceStore } from '~/stores/performance'
@@ -28,19 +28,27 @@ const route = useRoute()
 // `permission` debe coincidir con el `requiresPermission` declarado en `definePageMeta` de
 // la page correspondiente (Plan C — single source of truth en page meta, sidebar replica
 // para filtrar visualmente). null = todos los roles autenticados pueden verlo.
+//
+// `lockedByActivation` marca items de cobros (links/transacciones/liquidaciones/wallet) que
+// requieren activationLevel === 'FULL'. En BASIC los renderizamos con candado y redirigimos
+// a /app/profile-full al click. NO los ocultamos — el user debe entender qué desbloquea con FULL.
 const NAV_ITEMS = [
-  { id: 'dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard, route: ROUTES.DASHBOARD, permission: null },
-  { id: 'links', labelKey: 'nav.links', icon: LinkIcon, route: ROUTES.LINKS, permission: 'LINKS_VIEW' },
-  { id: 'transacciones', labelKey: 'nav.transactions', icon: ArrowRightLeft, route: ROUTES.TRANSACTIONS, permission: 'TRANSACTIONS_VIEW' },
-  { id: 'liquidaciones', labelKey: 'nav.settlements', icon: Landmark, route: ROUTES.SETTLEMENTS, permission: 'SETTLEMENTS_VIEW' },
-  { id: 'usuarios', labelKey: 'nav.users', icon: Users, route: ROUTES.USERS, permission: 'USERS_VIEW' },
-  { id: 'sucursales', labelKey: 'nav.branches', icon: Building2, route: ROUTES.BRANCHES, permission: 'BRANCHES_MANAGE' },
+  { id: 'dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard, route: ROUTES.DASHBOARD, permission: null, lockedByActivation: false },
+  { id: 'links', labelKey: 'nav.links', icon: LinkIcon, route: ROUTES.LINKS, permission: 'LINKS_VIEW', lockedByActivation: true, lockTooltipKey: 'kyb.lockedFeature.linksTooltip' },
+  { id: 'transacciones', labelKey: 'nav.transactions', icon: ArrowRightLeft, route: ROUTES.TRANSACTIONS, permission: 'TRANSACTIONS_VIEW', lockedByActivation: true, lockTooltipKey: 'kyb.lockedFeature.transactionsTooltip' },
+  { id: 'liquidaciones', labelKey: 'nav.settlements', icon: Landmark, route: ROUTES.SETTLEMENTS, permission: 'SETTLEMENTS_VIEW', lockedByActivation: true, lockTooltipKey: 'kyb.lockedFeature.settlementsTooltip' },
+  { id: 'usuarios', labelKey: 'nav.users', icon: Users, route: ROUTES.USERS, permission: 'USERS_VIEW', lockedByActivation: false },
+  { id: 'sucursales', labelKey: 'nav.branches', icon: Building2, route: ROUTES.BRANCHES, permission: 'BRANCHES_MANAGE', lockedByActivation: false },
 ]
 
 const visibleNav = computed(() =>
   NAV_ITEMS.filter((item) => !item.permission || sessionStore.hasPermission(item.permission)),
 )
 const canViewWallet = computed(() => sessionStore.hasPermission('WALLET_VIEW'))
+// activationLevel === 'FULL' habilita cobros. NONE/BASIC los lockea.
+const isFullActivated = computed(() => sessionStore.activationLevel === 'FULL')
+const isItemLocked = (item) => item.lockedByActivation && !isFullActivated.value
+const isWalletLocked = computed(() => !isFullActivated.value)
 
 const LABEL_VARIANTS = {
   hidden: { opacity: 0, filter: 'blur(4px)', x: -8 },
@@ -57,7 +65,17 @@ const CONTENT_VARIANTS = {
 const isWalletActive = computed(() => route.path === ROUTES.WALLET)
 const walletHover = ref(false)
 
+// Intercepta nav: si es item lockeado por activation, redirige a profile-full en lugar
+// del destino real. Mantiene la simplicidad del template (un solo handler).
+const goToItem = (item) => {
+  if (isItemLocked(item)) return navigateTo(ROUTES.PROFILE_FULL)
+  return navigateTo(item.route)
+}
 const goTo = (r) => navigateTo(r)
+const goToWallet = () => {
+  if (isWalletLocked.value) return navigateTo(ROUTES.PROFILE_FULL)
+  return navigateTo(ROUTES.WALLET)
+}
 
 // Derivar iniciales del fullName ("Juan Pérez" → "JP") o del email ("user@x" → "U") como fallback
 // durante la hidratación (window entre login y /me response). Tope a 2 letras.
@@ -180,9 +198,11 @@ const glowClass = (collapsed) => {
         <button
           v-for="item in visibleNav"
           :key="item.id"
-          :title="isCollapsed ? t(item.labelKey) : undefined"
-          :class="['relative w-full h-11 flex items-center gap-3 py-3 pl-[19px] rounded-xl text-sm font-medium transition-colors duration-200', navItemClass(route.path === item.route)]"
-          @click="goTo(item.route)"
+          :title="isItemLocked(item) ? t(item.lockTooltipKey) : (isCollapsed ? t(item.labelKey) : undefined)"
+          :aria-label="isItemLocked(item) ? `${t(item.labelKey)} ${t('kyb.lockedFeature.lockedAriaSuffix')}` : undefined"
+          :aria-disabled="isItemLocked(item) ? 'true' : undefined"
+          :class="['relative w-full h-11 flex items-center gap-3 py-3 pl-[19px] rounded-xl text-sm font-medium transition-colors duration-200', navItemClass(route.path === item.route), isItemLocked(item) ? 'opacity-60' : '']"
+          @click="goToItem(item)"
         >
           <!-- Ambient halo (solo Prism) — blob púrpura blurreado DETRÁS del pill -->
           <motion.div
@@ -211,11 +231,17 @@ const glowClass = (collapsed) => {
               initial="hidden"
               animate="show"
               exit="exit"
-              class="relative z-10 whitespace-nowrap overflow-hidden"
+              class="relative z-10 whitespace-nowrap overflow-hidden flex-1"
             >
               {{ t(item.labelKey) }}
             </motion.span>
           </AnimatePresence>
+          <Lock
+            v-if="isItemLocked(item)"
+            :size="12"
+            :class="['relative z-10 shrink-0 mr-3', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']"
+            aria-hidden="true"
+          />
         </button>
       </LayoutGroup>
     </nav>
@@ -227,9 +253,11 @@ const glowClass = (collapsed) => {
         v-if="canViewWallet"
         :animate="{ y: !isWalletActive && walletHover && !isCollapsed ? -3 : 0 }"
         :transition="SPRING"
-        :title="isCollapsed ? t('nav.myWallet') : undefined"
-        :class="['relative w-full h-14 flex items-center pl-[19px] pr-3 py-3 mb-1 rounded-xl border overflow-hidden transition-[border-color,background-color,box-shadow] duration-200', walletBtnClass(isCollapsed)]"
-        @click="goTo(ROUTES.WALLET)"
+        :title="isWalletLocked ? t('kyb.lockedFeature.walletTooltip') : (isCollapsed ? t('nav.myWallet') : undefined)"
+        :aria-label="isWalletLocked ? `${t('nav.myWallet')} ${t('kyb.lockedFeature.lockedAriaSuffix')}` : undefined"
+        :aria-disabled="isWalletLocked ? 'true' : undefined"
+        :class="['relative w-full h-14 flex items-center pl-[19px] pr-3 py-3 mb-1 rounded-xl border overflow-hidden transition-[border-color,background-color,box-shadow] duration-200', walletBtnClass(isCollapsed), isWalletLocked ? 'opacity-60' : '']"
+        @click="goToWallet"
         @mouseenter="walletHover = true"
         @mouseleave="walletHover = false"
       >

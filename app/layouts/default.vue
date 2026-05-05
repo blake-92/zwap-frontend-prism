@@ -16,6 +16,8 @@ import Header from '~/components/Header.vue'
 import BottomNav from '~/components/BottomNav.vue'
 import GlassBackground from '~/components/GlassBackground.vue'
 import ToastContainer from '~/components/ToastContainer.vue'
+import ReviewBanner from '~/components/features/kyb/ReviewBanner.vue'
+import { ROUTES } from '~/utils/routes'
 
 const themeStore = useThemeStore()
 const perfStore = usePerformanceStore()
@@ -48,6 +50,17 @@ watch(
   },
   { immediate: true },
 )
+
+// Banner global del KYB. Se muestra cuando el merchant está esperando review o pidiendo más info.
+// NO se muestra en /app/profile-full porque la propia vista renderea su propio banner con CTA
+// específico — duplicarlo distrae. Tampoco aplica a APPROVED/GRANDFATHERED/DRAFT/NONE (no necesitan
+// llamar la atención del usuario en el chrome global).
+const route = useRoute()
+const KYB_BANNER_STATES = new Set(['SUBMITTED', 'IN_REVIEW', 'MORE_INFO_REQUIRED', 'REJECTED'])
+const showGlobalKybBanner = computed(() => {
+  if (route.path === ROUTES.PROFILE_FULL) return false
+  return KYB_BANNER_STATES.has(sessionStore.kybState)
+})
 
 // Hidratar sincrónicamente para evitar flicker 256px → 72px en mount.
 const readSidebarCollapsed = () => {
@@ -211,6 +224,22 @@ const toggleBtnClass = computed(() =>
         :style="mainPaddingStyle"
       >
         <div class="max-w-[1400px] 2xl:max-w-[1600px] mx-auto">
+          <!-- Banner global del estado del KYB. Visible cuando merchant.kybState requiere atención.
+               No se muestra en /app/profile-full porque la propia vista ya lo renderea con más detalle. -->
+          <ReviewBanner
+            v-if="showGlobalKybBanner"
+            :kyb-state="sessionStore.kybState"
+            class="mb-6"
+          >
+            <template v-if="sessionStore.kybState === 'MORE_INFO_REQUIRED' || sessionStore.kybState === 'REJECTED'" #cta>
+              <NuxtLink
+                :to="ROUTES.PROFILE_FULL"
+                class="inline-block mt-3 text-xs font-bold underline opacity-90 hover:opacity-100"
+              >
+                {{ $t('kyb.lockedFeature.completeProfileCta') }} →
+              </NuxtLink>
+            </template>
+          </ReviewBanner>
           <slot />
         </div>
       </main>

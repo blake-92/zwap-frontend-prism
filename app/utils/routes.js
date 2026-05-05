@@ -14,6 +14,7 @@ export const ROUTES = {
   BRANCHES: '/app/sucursales',
   USERS: '/app/usuarios',
   SETTINGS: '/app/configuracion',
+  PROFILE_FULL: '/app/profile-full',
 }
 
 // Rechaza URLs absolutas, protocol-relative (`//host`) y backslash-escape (`/\path`). Evita open-redirect.

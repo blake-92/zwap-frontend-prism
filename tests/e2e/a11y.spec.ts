@@ -163,6 +163,44 @@ test.describe('A11y — KYB wizard (con draft seedeado)', () => {
   }
 })
 
+test.describe('A11y — profile-full (post-aprobación BASIC)', () => {
+  test.beforeEach(async ({ mockAuth, page }, testInfo) => {
+    testInfo.skip(!A11Y_PROJECTS.includes(testInfo.project.name), 'Axe solo en 2 projects baseline')
+    await mockAuth({ role: 'OWNER', activationLevel: 'BASIC', kybState: 'APPROVED' })
+
+    const API = 'http://localhost:8080'
+    await page.route(`${API}/api/account/profile`, (route) => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({
+        person: { id: 'p1', givenName: 'Mock', familyName: 'User', dateOfBirth: '1990-01-01', nationality: 'BO' },
+        legalEntities: [{ id: 'e1', legalName: 'Hotel Test SRL', jurisdiction: 'BO', primary: true }],
+      }),
+    }))
+    await page.route(`${API}/api/account/profile/business-profile`, (route) => route.fulfill({
+      status: 404, contentType: 'application/json', body: JSON.stringify({ error: 'NOT_FOUND' }),
+    }))
+  })
+
+  test('profile-full step 1 (KYC): sin violations critical', async ({ page }) => {
+    await page.goto('/app/profile-full')
+    await waitForUIReady(page)
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze()
+    const critical = results.violations.filter(v => v.impact && FAIL_IMPACTS.includes(v.impact))
+    if (critical.length > 0) {
+      for (const v of critical) {
+        console.error(`[${v.impact}] ${v.id}: ${v.description}`)
+        for (const node of v.nodes.slice(0, 3)) {
+          console.error('  target:', node.target.join(' '))
+          console.error('  html:', node.html.slice(0, 120))
+        }
+      }
+    }
+    expect(critical).toEqual([])
+  })
+})
+
 test.describe('A11y — estados con overlay abierto', () => {
   test.beforeEach(async ({ mockAuth }, testInfo) => {
     testInfo.skip(!A11Y_PROJECTS.includes(testInfo.project.name), 'Axe solo en 2 projects baseline')

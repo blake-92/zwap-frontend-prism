@@ -4,7 +4,7 @@ import { motion, AnimatePresence, LayoutGroup } from 'motion-v'
 import {
   LayoutDashboard, ArrowRightLeft, Link as LinkIcon, Landmark,
   MoreHorizontal, Building2, Users, Wallet, Settings,
-  Sun, Moon, Bell,
+  Sun, Moon, Bell, Lock,
 } from 'lucide-vue-next'
 import { useThemeStore } from '~/stores/theme'
 import { usePerformanceStore } from '~/stores/performance'
@@ -36,18 +36,21 @@ const sheetVariants = {
 }
 
 // `permission` debe coincidir con `requiresPermission` de la page (Plan C). null = todos.
+// `lockedByActivation` marca cobros (transacciones/links/liquidaciones/wallet) que requieren
+// activationLevel === 'FULL'. En BASIC se renderean con candado y redirigen a profile-full.
+// Mismo patrón que Sidebar.vue — fuente única en page meta, nav replica para gating visual.
 const TABS = [
-  { id: 'dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard, route: ROUTES.DASHBOARD, permission: null },
-  { id: 'transacciones', labelKey: 'nav.transactions', icon: ArrowRightLeft, route: ROUTES.TRANSACTIONS, permission: 'TRANSACTIONS_VIEW' },
-  { id: 'links', labelKey: 'nav.linksShort', icon: LinkIcon, route: ROUTES.LINKS, permission: 'LINKS_VIEW' },
-  { id: 'liquidaciones', labelKey: 'nav.settlements', icon: Landmark, route: ROUTES.SETTLEMENTS, permission: 'SETTLEMENTS_VIEW' },
+  { id: 'dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard, route: ROUTES.DASHBOARD, permission: null, lockedByActivation: false },
+  { id: 'transacciones', labelKey: 'nav.transactions', icon: ArrowRightLeft, route: ROUTES.TRANSACTIONS, permission: 'TRANSACTIONS_VIEW', lockedByActivation: true, lockTooltipKey: 'kyb.lockedFeature.transactionsTooltip' },
+  { id: 'links', labelKey: 'nav.linksShort', icon: LinkIcon, route: ROUTES.LINKS, permission: 'LINKS_VIEW', lockedByActivation: true, lockTooltipKey: 'kyb.lockedFeature.linksTooltip' },
+  { id: 'liquidaciones', labelKey: 'nav.settlements', icon: Landmark, route: ROUTES.SETTLEMENTS, permission: 'SETTLEMENTS_VIEW', lockedByActivation: true, lockTooltipKey: 'kyb.lockedFeature.settlementsTooltip' },
 ]
 
 const MORE_ITEMS = [
-  { id: 'sucursales', labelKey: 'nav.branches', icon: Building2, route: ROUTES.BRANCHES, permission: 'BRANCHES_MANAGE' },
-  { id: 'usuarios', labelKey: 'nav.users', icon: Users, route: ROUTES.USERS, permission: 'USERS_VIEW' },
-  { id: 'wallet', labelKey: 'nav.wallet', icon: Wallet, route: ROUTES.WALLET, permission: 'WALLET_VIEW' },
-  { id: 'settings', labelKey: 'nav.settings', icon: Settings, route: ROUTES.SETTINGS, permission: null },
+  { id: 'sucursales', labelKey: 'nav.branches', icon: Building2, route: ROUTES.BRANCHES, permission: 'BRANCHES_MANAGE', lockedByActivation: false },
+  { id: 'usuarios', labelKey: 'nav.users', icon: Users, route: ROUTES.USERS, permission: 'USERS_VIEW', lockedByActivation: false },
+  { id: 'wallet', labelKey: 'nav.wallet', icon: Wallet, route: ROUTES.WALLET, permission: 'WALLET_VIEW', lockedByActivation: true, lockTooltipKey: 'kyb.lockedFeature.walletTooltip' },
+  { id: 'settings', labelKey: 'nav.settings', icon: Settings, route: ROUTES.SETTINGS, permission: null, lockedByActivation: false },
 ]
 
 const visibleTabs = computed(() =>
@@ -59,9 +62,19 @@ const visibleMore = computed(() =>
 
 const isMoreActive = computed(() => visibleMore.value.some(i => route.path === i.route))
 
+// activationLevel === 'FULL' habilita cobros. NONE/BASIC los lockea — el item se ve pero
+// click redirige a profile-full en lugar del destino real.
+const isFullActivated = computed(() => sessionStore.activationLevel === 'FULL')
+const isItemLocked = (item) => item.lockedByActivation && !isFullActivated.value
+
 const handleNav = (r) => {
   navigateTo(r)
   sheetOpen.value = false
+}
+
+const handleNavItem = (item) => {
+  if (isItemLocked(item)) return handleNav(ROUTES.PROFILE_FULL)
+  return handleNav(item.route)
 }
 
 const handleDragEnd = (_e, info) => {
@@ -123,8 +136,11 @@ const moreIconBubbleClass = (active) => {
       <button
         v-for="tab in visibleTabs"
         :key="tab.id"
-        :class="['flex-1 flex flex-col items-center justify-center gap-1 py-2.5 pt-3 relative', tabTextClass(route.path === tab.route)]"
-        @click="handleNav(tab.route)"
+        :title="isItemLocked(tab) ? t(tab.lockTooltipKey) : undefined"
+        :aria-label="isItemLocked(tab) ? `${t(tab.labelKey)} ${t('kyb.lockedFeature.lockedAriaSuffix')}` : undefined"
+        :aria-disabled="isItemLocked(tab) ? 'true' : undefined"
+        :class="['flex-1 flex flex-col items-center justify-center gap-1 py-2.5 pt-3 relative', tabTextClass(route.path === tab.route), isItemLocked(tab) ? 'opacity-60' : '']"
+        @click="handleNavItem(tab)"
       >
         <!-- Ambient halo (solo Prism) -->
         <motion.div
@@ -144,6 +160,13 @@ const moreIconBubbleClass = (active) => {
         <span :class="['text-[10px] leading-none relative z-10', route.path === tab.route ? 'font-bold' : 'font-medium']">
           {{ t(tab.labelKey) }}
         </span>
+        <!-- Lock badge sobre el ícono — visible solo en BASIC. Pequeño para no romper la layout. -->
+        <Lock
+          v-if="isItemLocked(tab)"
+          :size="9"
+          :class="['absolute top-1 right-1/2 translate-x-[14px] z-10', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']"
+          aria-hidden="true"
+        />
       </button>
 
       <!-- More tab -->
@@ -214,8 +237,11 @@ const moreIconBubbleClass = (active) => {
             <button
               v-for="item in visibleMore"
               :key="item.id"
-              :class="['flex flex-col items-center gap-2 py-4 rounded-xl transition-colors', moreItemClass(route.path === item.route)]"
-              @click="handleNav(item.route)"
+              :title="isItemLocked(item) ? t(item.lockTooltipKey) : undefined"
+              :aria-label="isItemLocked(item) ? `${t(item.labelKey)} ${t('kyb.lockedFeature.lockedAriaSuffix')}` : undefined"
+              :aria-disabled="isItemLocked(item) ? 'true' : undefined"
+              :class="['relative flex flex-col items-center gap-2 py-4 rounded-xl transition-colors', moreItemClass(route.path === item.route), isItemLocked(item) ? 'opacity-60' : '']"
+              @click="handleNavItem(item)"
             >
               <div :class="['w-10 h-10 rounded-xl flex items-center justify-center', moreIconBubbleClass(route.path === item.route)]">
                 <component :is="item.icon" :size="20" :stroke-width="route.path === item.route ? 2.5 : 2" />
@@ -223,6 +249,12 @@ const moreIconBubbleClass = (active) => {
               <span :class="['text-[11px] leading-none', route.path === item.route ? 'font-bold' : 'font-medium']">
                 {{ t(item.labelKey) }}
               </span>
+              <Lock
+                v-if="isItemLocked(item)"
+                :size="10"
+                :class="['absolute top-2 right-2', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']"
+                aria-hidden="true"
+              />
             </button>
           </div>
 
