@@ -62,14 +62,18 @@ function withTimeout(userSignal, ms) {
   return { signal: controller.signal, cancel: () => clearTimeout(tid) }
 }
 
-async function rawRequest(method, path, body, { timeout, signal: userSignal } = {}) {
+async function rawRequest(method, path, body, { timeout, signal: userSignal, headers } = {}) {
   const { signal, cancel } = withTimeout(userSignal, timeout ?? DEFAULT_TIMEOUT)
   try {
+    // ofetch detecta FormData y omite el JSON-serialize + Content-Type — el browser pone el
+    // boundary multipart correcto. NO setear Content-Type a mano cuando body es FormData,
+    // o Spring rechaza con 400 "missing boundary".
     return await $fetch(`${apiBase()}${path}`, {
       method,
       body,
       credentials: 'include',
       signal,
+      headers,
     })
   } finally {
     cancel()
@@ -205,10 +209,13 @@ function toApiError(err) {
   const status = err?.response?.status ?? err?.status ?? 0
   const data = err?.data ?? err?.response?._data ?? null
   const requestId = err?.response?.headers?.get?.('X-Request-Id') ?? null
+  // Backend usa `detail` en errores custom (`{error, detail}` p.ej. KYB). Fallback a `message`
+  // por si algún endpoint legacy responde con shape distinto, y a `err.message` para casos sin
+  // body (timeout, network error). El consumer lee `error.message` agnóstico al shape exacto.
   return new ApiError({
     status,
     code: data?.error,
-    message: data?.message ?? err?.message,
+    message: data?.detail ?? data?.message ?? err?.message,
     requestId,
     data,
   })
@@ -220,7 +227,11 @@ async function request(method, path, body, opts = {}) {
   } catch (err) {
     const status = err?.response?.status ?? err?.status
 
-    if (status === 401 && !AUTH_BYPASS.has(path)) {
+    // `noAuth: true` aplica a endpoints que NO usan JWT (capability-token KYB anónimo, p.ej.).
+    // Estos no deben disparar el refresh interceptor — un 401/404 ahí significa "token de
+    // capability inválido", no "sesión expirada". Refrescar el JWT del usuario logueado es
+    // ortogonal y desperdicia rate-limit.
+    if (status === 401 && !AUTH_BYPASS.has(path) && !opts.noAuth) {
       const result = await refreshSession()
       if (result === 'ok') {
         try {
@@ -250,3 +261,7 @@ export const post = (path, body, opts) => request('POST', path, body, opts)
 export const patch = (path, body, opts) => request('PATCH', path, body, opts)
 export const put = (path, body, opts) => request('PUT', path, body, opts)
 export const del = (path, opts) => request('DELETE', path, undefined, opts)
+// Multipart upload. Pasar un FormData como body — ofetch detecta el tipo y deja que el browser
+// arme el boundary. Para endpoints públicos del wizard KYB pasar `{ noAuth: true }` para que
+// un 404/401 no dispare el refresh interceptor del JWT.
+export const postMultipart = (path, formData, opts) => request('POST', path, formData, opts)

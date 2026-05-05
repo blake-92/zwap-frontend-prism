@@ -31,7 +31,7 @@ vi.mock('~/stores/toast', () => ({
 }))
 
 // Import tras stubs.
-const { get, post, ApiError } = await import('~/utils/api.js')
+const { get, post, postMultipart, ApiError } = await import('~/utils/api.js')
 
 // ── MSW setup ──────────────────────────────────────────────────────────────────────────────────
 const server = setupServer()
@@ -241,6 +241,76 @@ describe('api wrapper — refresh timeout (H2)', () => {
     await promise
     vi.useRealTimers()
     expect(resolved).toBe('network-error')
+  })
+})
+
+// ── F1.1: postMultipart + headers + noAuth + error.detail ─────────────────────────────────────
+describe('api wrapper — F1.1 KYB foundation extensions', () => {
+  it('error con shape backend KYB ({error, detail}) → ApiError.message lee detail', async () => {
+    server.use(http.get('http://api.test/api/kyb/abc', () =>
+      HttpResponse.json({ error: 'kyb_application_not_found', detail: 'applicationId o token inválido' }, { status: 404 }),
+    ))
+    try {
+      await get('/api/kyb/abc')
+      expect.fail('should throw')
+    } catch (err) {
+      const e = err as InstanceType<typeof ApiError>
+      expect(e.status).toBe(404)
+      expect(e.code).toBe('kyb_application_not_found')
+      expect(e.message).toBe('applicationId o token inválido')
+    }
+  })
+
+  it('opts.headers se propagan al backend (X-KYB-Application-Token)', async () => {
+    let receivedToken: string | null = null
+    server.use(http.get('http://api.test/api/kyb/xyz', ({ request }) => {
+      receivedToken = request.headers.get('X-KYB-Application-Token')
+      return HttpResponse.json({ applicationId: 'xyz', state: 'DRAFT' })
+    }))
+    await get('/api/kyb/xyz', { headers: { 'X-KYB-Application-Token': 'tok-123' } })
+    expect(receivedToken).toBe('tok-123')
+  })
+
+  it('opts.noAuth: 401 NO dispara refresh ni navigateTo (capability-token endpoints)', async () => {
+    let refreshCount = 0
+    server.use(
+      http.get('http://api.test/api/kyb/secret', () =>
+        HttpResponse.json({ error: 'kyb_application_not_found', detail: 'token inválido' }, { status: 401 }),
+      ),
+      http.post('http://api.test/api/auth/refresh', () => {
+        refreshCount++
+        return HttpResponse.json({})
+      }),
+    )
+    await expect(get('/api/kyb/secret', { noAuth: true })).rejects.toMatchObject({ status: 401 })
+    expect(refreshCount).toBe(0)
+    expect(navigateTo).not.toHaveBeenCalled()
+  })
+
+  it('postMultipart: FormData se manda sin JSON serialize, browser pone Content-Type multipart', async () => {
+    let contentType: string | null = null
+    let bodyKind: string | null = null
+    server.use(http.post('http://api.test/api/kyb/abc/documents/person', async ({ request }) => {
+      contentType = request.headers.get('content-type')
+      // request.formData() resuelve solo si ofetch realmente mandó FormData (no string JSON).
+      try {
+        const fd = await request.formData()
+        bodyKind = fd.get('documentType') as string
+      } catch {
+        bodyKind = 'NOT_FORMDATA'
+      }
+      return HttpResponse.json({ documentId: 'doc-1', documentType: 'CI_BO', uploadedAt: '2026-05-04T00:00:00Z' })
+    }))
+    const fd = new FormData()
+    fd.append('file', new Blob(['x'], { type: 'image/png' }), 'ci.png')
+    fd.append('documentType', 'CI_BO')
+    const result = await postMultipart('/api/kyb/abc/documents/person', fd, {
+      headers: { 'X-KYB-Application-Token': 'tok-456' },
+      noAuth: true,
+    })
+    expect(result).toMatchObject({ documentId: 'doc-1' })
+    expect(contentType).toMatch(/^multipart\/form-data; boundary=/)
+    expect(bodyKind).toBe('CI_BO')
   })
 })
 
