@@ -80,6 +80,7 @@ definePageMeta({ middleware: 'auth' })
 | `users` | UsuariosView | NewUserModal |
 | `settings` | SettingsView (orquestador ~110 líneas) | `SettingsProfileTab`, `SettingsSecurityTab`, `SettingsBillingTab` + `SettingItem.vue` (shared UI row con icon+title+desc+slot) |
 | `legal` | `docs/Terms.vue`, `docs/Privacy.vue`, `docs/Copyright.vue` (renderizados por `pages/legal/[doc].vue`) | `LegalLayout` orquestador + bloques atómicos: `LegalHeader` (bi-tonal + theme toggle), `LegalTocBar` (sticky + IntersectionObserver), `LegalFooter` (back-to-top), `LegalSection`, `LegalIntroBox`, `LegalCallout` (purple/warning/dark), `LegalDefinitionList`, `LegalOrderedList`, `LegalDataTable`, `LegalCardGrid`, `LegalCopyrightNotice`, `LegalLanguageBanner` (EN-only "unofficial translation"). Contenido legal inline en SFCs (no en i18n por `@` reservado + strings largos); chrome vía `t('legal.*')`. |
+| `kyb` | **Wizard anónimo** (`WizardView` orquestador en `pages/onboarding/[step].vue`): `Step1PersonForm`...`Step5MerchantForm`, `DocumentUploadStep`. **Profile FULL** post-aprobación BASIC (`ProfileFullView` en `pages/app/profile-full.vue`): `KycFullForm`, `KybFullForm`, `BusinessProfileForm` (`ProfileFullSteps/`), `MoreInfoRequestedAlert`, `ReviewBanner` (también usada por `layouts/default.vue`). Shared: `KybStepHeader`, `EconomicActivitySearch`, `KybDocumentUploader`. Composables aislados en `composables/kyb/`: `useKybDraft` (singleton + localStorage 30d), `useKybApi` (capability token), `useProfileFullApi` (JWT cookie), `useEntityDocRequirements`, `types.js` (JSDoc del OpenAPI). Módulo extractable: solo importa `~/components/ui/*`, `~/composables/kyb/*`, `~/utils/*`, `~/stores/{theme,toast,session,profileFull}` — sin cross-feature deps. |
 
 ### Reglas de features
 
@@ -96,16 +97,21 @@ File-based en `app/pages/`. Constantes en `app/utils/routes.js`:
 
 ```js
 ROUTES = {
-  LOGIN:        '/login',
-  APP:          '/app',
-  DASHBOARD:    '/app/dashboard',
-  TRANSACTIONS: '/app/transacciones',
-  LINKS:        '/app/links',
-  SETTLEMENTS:  '/app/liquidaciones',
-  WALLET:       '/app/wallet',
-  BRANCHES:     '/app/sucursales',
-  USERS:        '/app/usuarios',
-  SETTINGS:     '/app/configuracion',
+  LOGIN:             '/login',
+  SIGNUP:            '/signup',                 // → redirect a /onboarding/start
+  ONBOARDING_START:  '/onboarding/start',
+  ONBOARDING_REVIEW: '/onboarding/review',
+  ONBOARDING_STEP:   (n) => `/onboarding/step-${n}`,  // builder dinámico
+  APP:               '/app',
+  DASHBOARD:         '/app/dashboard',
+  TRANSACTIONS:      '/app/transacciones',
+  LINKS:             '/app/links',
+  SETTLEMENTS:       '/app/liquidaciones',
+  WALLET:            '/app/wallet',
+  BRANCHES:          '/app/sucursales',
+  USERS:             '/app/usuarios',
+  SETTINGS:          '/app/configuracion',
+  PROFILE_FULL:      '/app/profile-full',       // post-aprobación BASIC
 }
 ```
 
@@ -121,6 +127,8 @@ Al añadir una ruta:
 - `[...slug].vue` — catch-all → redirect a `/login`
 - `ROUTES.SETTINGS` accesible desde Header (gear icon) + BottomNav "Más", no en Sidebar
 - `ROUTES.WALLET` accesible desde botón wallet del Sidebar + BottomNav "Más"
+- `ROUTES.PROFILE_FULL` NO declara `requiresPermission` — RECEPTIONIST puede VER su progreso aunque no edite (backend impone PATCH/PUT/submit con 403). Sidebar/BottomNav redirigen acá cuando se clickea un item lockeado por `activationLevel === 'BASIC'`.
+- Lock-by-activation pattern (Sidebar/BottomNav): items de cobros (`links`/`transacciones`/`liquidaciones`/`wallet`) llevan flag `lockedByActivation: true` + `lockTooltipKey`. Computed `isItemLocked(item) = item.lockedByActivation && activationLevel !== 'FULL'`. NO se ocultan — se renderean con `aria-disabled`, `Lock` icon, `opacity-60`, y handler intercept que redirige a `PROFILE_FULL`. El usuario debe entender qué desbloquea con FULL.
 
 **Middleware:** `app/middleware/auth.js` chequea `useCookie('zwap_token').value` y redirige a `/login` si falta.
 
@@ -371,6 +379,15 @@ import { useViewSearchStore } from '~/stores/viewSearch'
 | `performance` | `tier` (`full`/`normal`/`lite`) | `hydrate()`, `setTier(tier)`, `apply()` | `localStorage['zwap-perf']` |
 | `toast` | `toasts[]` | `addToast(msg, type?, duration?)`, `removeToast(id)` | — |
 | `viewSearch` | `query`, `placeholder`, `hasFilters`, `activeFilterCount` | `setQuery()`, `registerView()`, `unregisterView()`, `setFilterOpener()`, `openFilters()` | — |
+| `session` | `user`, `merchant`, `permissions[]`, `expiresAt` | `login()`, `fetchMe()`, `logout()`, `clear()` | cookie `zwap_session` (no httpOnly, fuente de verdad para `isAuthenticated`); `zwap_token` httpOnly |
+| `branches` | `items[]`, `loading`, `error` | `fetch()`, `create()`, `archive()` (optimistic), `reactivate()`, `clear()` | — (re-fetch al login, clear al logout) |
+| `users` | `items[]`, `loading`, `error` | `fetch()`, `invite()`, `archive()`, `reactivate()`, `clear()` | — |
+| `profileFull` | `person`, `legalEntities[]`, `businessProfile`, `loading`, `bpLoading`, `saving`, `lastSavedAt`, `error` | `fetch()`, `patchPerson()`, `patchEntity()`, `putBusinessProfile()`, `submitForFull()`, `clear()` | — (data del flow profile FULL post-aprobación BASIC) |
+
+**Getters críticos:**
+- `session.activationLevel` (`'NONE'`/`'BASIC'`/`'FULL'`) y `session.kybState` (`'DRAFT'`/`'SUBMITTED'`/`'IN_REVIEW'`/`'APPROVED'`/`'REJECTED'`/`'MORE_INFO_REQUIRED'`/`'GRANDFATHERED'`) — único punto de lectura, default `'NONE'`/`'DRAFT'`. Banners y lock indicators dependen de estos.
+- `session.hasPermission(code)` — check contra `permissions[]` para gating UI (Plan C). El backend impone real (403).
+- `profileFull.canSubmit` — pre-checks server-side: `residentialAddress` + `registeredAddress` + `businessProfile != null` + status editable.
 
 **Notas:**
 - `viewSearch.filterOpener` se mantiene como `shallowRef` fuera del state (evita reactividad innecesaria).
@@ -802,3 +819,6 @@ Detalle completo: **[docs/testing.md](docs/testing.md)** — estructura `tests/`
 - No `import { VueDatePicker }` v12 pasando `locale: string` — v12 espera `Locale` de date-fns; omitir si no se importa el objeto
 - No usar `h-screen`/`min-h-screen` como scroll-container full-height — en iOS `100vh` es el viewport grande y tapa contenido bajo el BottomNav; usar `h-dvh`/`min-h-dvh`
 - No hardcodear `pt-20`/`-64`/`h-16` en elementos que interactúan con el notch mobile — usar `env(safe-area-inset-top)` o la var `--sat` (motion-v no evalúa `env()` en animate strings)
+- No usar `if`/statements inline en handlers de eventos: `@toggle="if (cond) x = !x"` parsea OK en Vite runtime pero `@vue/compiler-dom` (vitest jsdom) lo rechaza con `Unexpected token`. Extraer a handler nombrado: `function onToggle() { if (cond) x.value = !x.value }` + `@toggle="onToggle"`. Aplica a cualquier event handler con statements (`if`, `for`, etc.) — solo expresiones puras son seguras inline
+- No leer `activationLevel`/`kybState` directo de `merchant` — usar los getters `sessionStore.activationLevel` / `sessionStore.kybState` (defaults seguros para `merchant=null` cuando scope es zwap_admin o aún sin hidratar)
+- No mostrar el `ReviewBanner` global del KYB en `/app/profile-full` — la propia `ProfileFullView` lo renderea internamente con CTA específico; duplicarlo distrae
