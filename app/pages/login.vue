@@ -148,6 +148,17 @@ const linkCls = 'hover:underline transition-colors hover:text-[#7C3AED] cursor-p
                 <Mail :size="18" class="mr-2" />
                 {{ t('auth.continueWithEmail') }}
               </Button>
+
+              <!-- Crear cuenta — entry-point al wizard KYB -->
+              <p :class="['text-center text-xs font-medium pt-2', themeStore.isDarkMode ? 'text-[#888991]' : 'text-[#67656E]']">
+                {{ t('auth.noAccountQ') }}
+                <NuxtLink
+                  :to="ROUTES.SIGNUP"
+                  :class="['font-bold ml-1 transition-colors hover:underline', themeStore.isDarkMode ? 'text-[#A78BFA] hover:text-white' : 'text-[#7C3AED] hover:text-[#561BAF]']"
+                >
+                  {{ t('auth.createAccountCta') }}
+                </NuxtLink>
+              </p>
             </motion.div>
 
             <motion.div

@@ -171,3 +171,50 @@ test.describe('Layout assertions cross-engine (todos los projects, sin screensho
     }
   })
 })
+
+// ── KYB Wizard snapshots ───────────────────────────────────────────────────────────────────────
+// Snapshots clave del wizard. Los step-N internos dependen de hidratación + JS y son frágiles
+// para snapshot pixel-perfect; los dejamos para validación visual manual o E2E layout-based.
+test.describe('Visual snapshots — KYB Wizard', () => {
+  test.beforeEach(async ({}, testInfo) => {
+    testInfo.skip(
+      !VISUAL_PROJECTS.includes(testInfo.project.name),
+      'KYB visual baseline solo en desktop-chromium + mobile-pixel7',
+    )
+  })
+
+  for (const theme of ['dark', 'light'] as const) {
+    test(`onboarding-start · ${theme}`, async ({ page, setTheme }) => {
+      await setTheme(theme)
+      await page.goto('/onboarding/start')
+      await waitForUIReady(page)
+      await expect(page).toHaveScreenshot(`onboarding-start-${theme}.png`, {
+        fullPage: true,
+        animations: 'disabled',
+      })
+    })
+  }
+
+  test('onboarding-review · dark · banner SUBMITTED', async ({ page, setTheme }) => {
+    await setTheme('dark')
+    const API_BASE = 'http://localhost:8080'
+    await page.addInitScript(() => {
+      try {
+        localStorage.setItem('zwap-kyb-application-id', 'app-vis')
+        localStorage.setItem('zwap-kyb-application-token', 'tok-vis')
+        localStorage.setItem('zwap-kyb-started-at', String(Date.now()))
+      } catch {}
+    })
+    await page.route(`${API_BASE}/api/kyb/*`, (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ applicationId: 'app-vis', state: 'SUBMITTED', ownerEmail: 'visual@test.bo' }),
+    }))
+    await page.goto('/onboarding/review')
+    await waitForUIReady(page)
+    await expect(page).toHaveScreenshot('onboarding-review-submitted-dark.png', {
+      fullPage: true,
+      animations: 'disabled',
+    })
+  })
+})

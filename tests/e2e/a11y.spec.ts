@@ -22,6 +22,7 @@ const PUBLIC_ROUTES = [
   { path: '/legal/terminos', name: 'legal-terminos' },
   { path: '/legal/privacidad', name: 'legal-privacidad' },
   { path: '/legal/copyright', name: 'legal-copyright' },
+  { path: '/onboarding/start', name: 'onboarding-start' },
 ]
 const PRIVATE_ROUTES = [
   { path: '/app/dashboard', name: 'dashboard' },
@@ -109,6 +110,54 @@ test.describe('A11y — rutas privadas (con auth mock)', () => {
         console.log(`  ${route.name}: ${minor.length} minor/moderate violations (no-fail)`)
       }
 
+      expect(critical).toEqual([])
+    })
+  }
+})
+
+test.describe('A11y — KYB wizard (con draft seedeado)', () => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    testInfo.skip(!A11Y_PROJECTS.includes(testInfo.project.name), 'Axe solo en 2 projects baseline')
+    // Seed: applicationId/Token + startedAt para que useKybDraft.recover() lo levante.
+    await page.addInitScript(() => {
+      try {
+        localStorage.setItem('zwap-kyb-application-id', 'app-axe')
+        localStorage.setItem('zwap-kyb-application-token', 'tok-axe')
+        localStorage.setItem('zwap-kyb-started-at', String(Date.now()))
+      } catch {}
+    })
+    // Stubs API para que step y review no queden colgados
+    const API_BASE = 'http://localhost:8080'
+    await page.route(`${API_BASE}/api/kyb/*`, (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ applicationId: 'app-axe', state: 'SUBMITTED', ownerEmail: 'a11y@axe.test' }),
+    }))
+  })
+
+  for (const route of [
+    { path: '/onboarding/step-1', name: 'onboarding-step-1' },
+    { path: '/onboarding/review', name: 'onboarding-review' },
+  ]) {
+    test(`${route.name}: sin violations critical/serious`, async ({ page }) => {
+      await page.goto(route.path)
+      await waitForUIReady(page)
+      const results = await new (await import('@axe-core/playwright')).default({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+        .analyze()
+
+      const critical = results.violations.filter(v => v.impact && FAIL_IMPACTS.includes(v.impact))
+      if (critical.length > 0) {
+        for (const v of critical) {
+          console.error(`[${v.impact}] ${v.id}: ${v.description}`)
+          for (const node of v.nodes.slice(0, 3)) {
+            console.error('  target:', node.target.join(' '))
+            console.error('  html:', node.html.slice(0, 120))
+          }
+        }
+      }
+      const minor = results.violations.filter(v => v.impact && WARN_IMPACTS.includes(v.impact))
+      if (minor.length > 0) console.log(`  ${route.name}: ${minor.length} minor/moderate violations (no-fail)`)
       expect(critical).toEqual([])
     })
   }

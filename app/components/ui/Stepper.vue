@@ -4,9 +4,22 @@ import { usePerformanceStore } from '~/stores/performance'
 
 const props = defineProps({
   steps: { type: Array, required: true },
+  // A11y opcional — cuando se pasa, el Stepper se anuncia como `role="list"` con cada step
+  // como `<li>` y aria-current="step" en el activo. Para wizards multistep (KYB, etc.) es
+  // requisito WCAG. Default false mantiene compat con WalletView que solo usa el Stepper
+  // como decoración visual y ya tiene el a11y resuelto en su propio header.
+  ariaList: { type: Boolean, default: false },
+  // Opcional — i18n key con `{n}` y `{label}` para construir aria-label de cada step.
+  // Ej: `"Paso {n}: {label}"`. Si no se pasa usa el step.label como aria-label.
+  stepLabelTemplate: { type: String, default: null },
 })
 const themeStore = useThemeStore()
 const perfStore = usePerformanceStore()
+
+function ariaLabelFor(step, i) {
+  if (!props.stepLabelTemplate) return step.label
+  return props.stepLabelTemplate.replace('{n}', String(i + 1)).replace('{label}', step.label)
+}
 
 const connectorColor = (i) => {
   if (props.steps[i].done) return 'bg-emerald-500/70'
@@ -44,15 +57,26 @@ const subClass = (step) => {
 </script>
 
 <template>
-  <div class="flex items-start w-full">
-    <div v-for="(step, i) in steps" :key="step.label" class="flex items-start flex-1 min-w-0">
+  <component
+    :is="ariaList ? 'ol' : 'div'"
+    class="flex items-start w-full"
+    :role="ariaList ? 'list' : undefined"
+  >
+    <component
+      :is="ariaList ? 'li' : 'div'"
+      v-for="(step, i) in steps"
+      :key="step.label"
+      class="flex items-start flex-1 min-w-0"
+      :aria-current="ariaList && step.active ? 'step' : undefined"
+      :aria-label="ariaList ? ariaLabelFor(step, i) : undefined"
+    >
       <div class="flex flex-col items-center flex-1 min-w-0">
         <div class="flex items-center w-full mb-3">
-          <div v-if="i > 0" :class="['flex-1 h-0.5 transition-colors', connectorColor(i - 1)]" />
+          <div v-if="i > 0" :class="['flex-1 h-0.5 transition-colors', connectorColor(i - 1)]" :aria-hidden="ariaList ? 'true' : undefined" />
           <div :class="['w-8 h-8 shrink-0 flex items-center justify-center rounded-full transition-colors duration-300', circleClass(step)]">
             <component :is="step.icon" :size="14" :class="step.active && perfStore.useContinuousAnim ? 'animate-spin-slow' : ''" />
           </div>
-          <div v-if="i !== steps.length - 1" :class="['flex-1 h-0.5 transition-colors', connectorColor(i)]" />
+          <div v-if="i !== steps.length - 1" :class="['flex-1 h-0.5 transition-colors', connectorColor(i)]" :aria-hidden="ariaList ? 'true' : undefined" />
         </div>
         <div class="text-center px-0.5">
           <p :class="['text-[10px] font-bold leading-tight uppercase tracking-wide', labelClass(step)]">
@@ -63,6 +87,6 @@ const subClass = (step) => {
           </p>
         </div>
       </div>
-    </div>
-  </div>
+    </component>
+  </component>
 </template>
