@@ -3,6 +3,8 @@ import { test as base, expect, type Page } from '@playwright/test'
 type PerfTier = 'full' | 'normal' | 'lite'
 type ThemeMode = 'dark' | 'light'
 type RoleCode = 'OWNER' | 'ADMIN' | 'ACCOUNTANT' | 'RECEPTIONIST'
+type ActivationLevel = 'NONE' | 'BASIC' | 'FULL'
+type KybState = 'DRAFT' | 'SUBMITTED' | 'IN_REVIEW' | 'APPROVED' | 'REJECTED' | 'MORE_INFO_REQUIRED' | 'GRANDFATHERED'
 
 // Permisos por rol — espejo del catálogo del backend (`GET /api/iam/roles`). Si el backend cambia
 // los permisos de un rol, hay que actualizar este map. Mantenerlo acá evita un round-trip al
@@ -51,6 +53,13 @@ interface MockAuthOptions {
   /** Rol simulado — determina los `permissions[]` inyectados en el stub de /api/account/me.
    *  Default: `OWNER` (compat con tests existentes que llamaban `mockAuth()` sin args). */
   role?: RoleCode
+  /** Nivel de activación del merchant (post fase 2). Default: `BASIC` para espejar el seed
+   *  del backend (3 hoteles seedeados arrancan en BASIC + GRANDFATHERED). Tests del wizard
+   *  KYB usan `NONE`; tests del flow FULL post-aprobación usan `FULL`. */
+  activationLevel?: ActivationLevel
+  /** Estado del KYB del merchant. Default: `GRANDFATHERED` (seed). Tests del banner "en review"
+   *  usan `SUBMITTED|IN_REVIEW`; del MoreInfoRequestedAlert usan `MORE_INFO_REQUIRED`. */
+  kybState?: KybState
 }
 
 interface ZwapFixtures {
@@ -100,6 +109,8 @@ export const test = base.extend<ZwapFixtures>({
     const setter = async (opts: MockAuthOptions = {}) => {
       const role: RoleCode = opts.role ?? 'OWNER'
       const permissions = PERMISSIONS_BY_ROLE[role]
+      const activationLevel: ActivationLevel = opts.activationLevel ?? 'BASIC'
+      const kybState: KybState = opts.kybState ?? 'GRANDFATHERED'
 
       // Cookie zwap_session — flag no-httpOnly que el middleware auth lee para gating.
       await context.addCookies([{
@@ -120,7 +131,7 @@ export const test = base.extend<ZwapFixtures>({
         contentType: 'application/json',
         body: JSON.stringify({
           user: { id: 'mock-user', email: 'mock@hoteldesal.bo', fullName: 'Mock User' },
-          merchant: { id: 'mock-merchant', businessName: 'Hotel de Sal' },
+          merchant: { id: 'mock-merchant', businessName: 'Hotel de Sal', activationLevel, kybState },
           permissions,
         }),
       }))

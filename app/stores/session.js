@@ -8,7 +8,7 @@ import { get, post } from '~/utils/api'
 export const useSessionStore = defineStore('session', {
   state: () => ({
     user: null,         // { id, email, fullName }
-    merchant: null,     // { id, businessName }
+    merchant: null,     // { id, businessName, activationLevel, kybState } — null cuando scope=zwap_admin
     permissions: [],    // catálogo de 23 permisos (códigos string)
     expiresAt: null,    // epoch ms — calculado desde expiresIn del login
   }),
@@ -25,6 +25,13 @@ export const useSessionStore = defineStore('session', {
     },
     displayName: (state) => state.user?.fullName ?? state.user?.email ?? '',
     hasPermission: (state) => (code) => state.permissions.includes(code),
+    // Único punto de lectura del nivel de activación. Default 'NONE' cubre 2 casos:
+    //   - scope=zwap_admin (cross-tenant, sin merchant)
+    //   - merchant cargado pero campo aún no propagado (defensivo)
+    activationLevel: (state) => state.merchant?.activationLevel ?? 'NONE',
+    // Estado del KYB del merchant. Único punto de lectura para banners ("en review", MORE_INFO),
+    // routing post-login y copy condicional. Default 'DRAFT' cuando no hay merchant.
+    kybState: (state) => state.merchant?.kybState ?? 'DRAFT',
   },
 
   actions: {
